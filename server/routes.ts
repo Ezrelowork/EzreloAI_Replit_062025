@@ -62,60 +62,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`📍 Resolved address: ${formattedAddress} (${city}, ${state} ${zip})`);
 
-      // Use OpenAI to find service providers
+      // Use OpenAI to find service providers with enhanced accuracy
       // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
       const completion = await openai.chat.completions.create({
         model: "gpt-4o",
         messages: [
           {
             role: "system",
-            content: "You are a helpful assistant that finds local utility and service providers. Respond only with valid JSON in the exact format requested."
+            content: "You are an expert utility service territory researcher. You have access to comprehensive databases of municipal utilities, rural electric cooperatives, and exclusive service territories. Always provide the actual monopoly provider that serves each specific address, not general options. If multiple providers exist, specify which one serves this exact location."
           },
           {
             role: "user",
-            content: `Find the actual utility and service providers for ZIP code ${zip} in ${city}, ${state}. 
+            content: `Find the EXACT utility and service providers that serve the specific address: ${formattedAddress} in ${city}, ${state} ${zip}.
+
+IMPORTANT: This must be the actual monopoly or specific providers for this exact location, not general options. Some areas have only ONE provider option (like municipal utilities). Research the specific service territory for this address.
+
+For areas like Argyle, TX or other small municipalities, check if they have:
+- Municipal utility services (like Denton Municipal Electric, Denton Water)
+- Specific regional providers that have exclusive service territories
+- Rural electric cooperatives
+- Municipal waste services
 
 Respond ONLY with valid JSON in this exact format (no markdown, no explanation, no additional text):
 
 {
   "Electricity": {
-    "provider": "Actual Provider Name",
-    "phone": "Actual Phone Number",
-    "description": "Brief description of service",
-    "website": "www.provider.com",
-    "hours": "Service hours"
+    "provider": "Exact Provider Name (e.g., Denton Municipal Electric if in their service area)",
+    "phone": "Actual customer service phone",
+    "description": "Service territory and connection info",
+    "website": "actual website URL",
+    "hours": "Customer service hours"
   },
   "Gas": {
-    "provider": "Actual Provider Name", 
-    "phone": "Actual Phone Number",
-    "description": "Brief description of service",
-    "website": "www.provider.com",
-    "hours": "Service hours"
+    "provider": "Exact Provider Name (e.g., Atmos Energy if they serve this area)",
+    "phone": "Actual customer service phone",
+    "description": "Service territory and connection info",
+    "website": "actual website URL",
+    "hours": "Customer service hours"
   },
   "Water": {
-    "provider": "Actual Provider Name",
-    "phone": "Actual Phone Number", 
-    "description": "Brief description of service",
-    "website": "www.provider.com",
-    "hours": "Service hours"
+    "provider": "Exact Provider Name (municipal or private utility that serves this address)",
+    "phone": "Actual customer service phone",
+    "description": "Service territory and connection info",
+    "website": "actual website URL",
+    "hours": "Customer service hours"
   },
   "Internet": {
-    "provider": "Actual Provider Name",
-    "phone": "Actual Phone Number",
-    "description": "Brief description of service", 
-    "website": "www.provider.com",
-    "hours": "Service hours"
+    "provider": "Primary high-speed provider available at this address",
+    "phone": "Actual customer service phone",
+    "description": "Available plans and speeds for this location",
+    "website": "actual website URL",
+    "hours": "Customer service hours"
   },
   "Trash": {
-    "provider": "Actual Provider Name",
-    "phone": "Actual Phone Number",
-    "description": "Brief description of service",
-    "website": "www.provider.com", 
-    "hours": "Service hours"
+    "provider": "Exact waste management provider (municipal or contracted service)",
+    "phone": "Actual customer service phone",
+    "description": "Collection schedule and service details",
+    "website": "actual website URL",
+    "hours": "Customer service hours"
   }
 }
 
-Use real, actual service providers that serve this specific location. Include real phone numbers and websites where possible.`
+Be specific to the exact service territories. If uncertain about a provider, indicate "Contact city hall for verification" in the description.`
           }
         ],
         response_format: { type: "json_object" },
