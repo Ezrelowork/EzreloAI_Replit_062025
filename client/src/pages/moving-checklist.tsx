@@ -235,7 +235,7 @@ export default function MovingChecklist() {
                   <CardContent>
                     <div className="space-y-4">
                       {items.map(item => (
-                        <div key={item.id} className="flex items-start space-x-3 p-4 border rounded-lg" id={item.hasProviders ? "moving-companies-task" : undefined}>
+                        <div key={item.id} className="flex items-start space-x-3 p-4 border rounded-lg" id={item.id === "1" ? "moving-companies-task" : undefined}>
                           <Checkbox
                             checked={item.completed}
                             onCheckedChange={() => toggleItem(item.id)}
