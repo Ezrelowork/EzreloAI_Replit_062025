@@ -505,8 +505,21 @@ Return JSON with ONLY the actual providers that serve this exact address. If mul
             const yelpData = await yelpResponse.json();
             console.log(`📊 Yelp returned ${yelpData.businesses?.length || 0} businesses`);
             
+            // Filter businesses by minimum review count (e.g., at least 5 reviews)
+            const minReviews = 5;
+            const qualifiedBusinesses = (yelpData.businesses || []).filter((business: any) => {
+              const reviewCount = business.review_count || 0;
+              const hasMinReviews = reviewCount >= minReviews;
+              if (!hasMinReviews) {
+                console.log(`⚠️ Filtered out ${business.name}: only ${reviewCount} reviews (min: ${minReviews})`);
+              }
+              return hasMinReviews;
+            });
+            
+            console.log(`✅ ${qualifiedBusinesses.length} businesses meet review threshold (${minReviews}+ reviews)`);
+            
             const yelpMovers = await Promise.all(
-              (yelpData.businesses || []).map(async (business: any, index: number) => {
+              qualifiedBusinesses.map(async (business: any, index: number) => {
                 let companyWebsite = business.url; // Default to Yelp page
                 
                 // Try to find actual company website using Google Places API
