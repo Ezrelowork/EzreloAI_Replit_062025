@@ -99,6 +99,60 @@ export default function Home() {
     return colors[category as keyof typeof colors] || "bg-gray-100 text-gray-600";
   };
 
+  const handleSignUp = (category: string, provider: any) => {
+    // If provider has a website, try to navigate to their signup page
+    if (provider.website) {
+      const website = provider.website.startsWith('http') ? provider.website : `https://${provider.website}`;
+      window.open(website, '_blank', 'noopener,noreferrer');
+    } else {
+      // Show contact information for manual signup
+      toast({
+        title: `Contact ${provider.provider}`,
+        description: `Call ${provider.phone} to sign up for ${category.toLowerCase()} service.`,
+      });
+    }
+  };
+
+  const handleGetQuote = (category: string, provider: any) => {
+    // For quote requests, show contact information
+    const message = provider.website 
+      ? `Visit ${provider.website} or call ${provider.phone} for a quote on ${category.toLowerCase()} service.`
+      : `Call ${provider.phone} for a quote on ${category.toLowerCase()} service.`;
+    
+    toast({
+      title: `Get Quote from ${provider.provider}`,
+      description: message,
+    });
+
+    // If there's a website, also open it
+    if (provider.website) {
+      const website = provider.website.startsWith('http') ? provider.website : `https://${provider.website}`;
+      window.open(website, '_blank', 'noopener,noreferrer');
+    }
+  };
+
+  const handleLearnMore = (category: string, provider: any) => {
+    // Show detailed information about the provider
+    const details = [
+      `Provider: ${provider.provider}`,
+      `Phone: ${provider.phone}`,
+      provider.website ? `Website: ${provider.website}` : null,
+      provider.hours ? `Hours: ${provider.hours}` : null,
+      `Service: ${provider.description}`
+    ].filter(Boolean).join('\n');
+
+    toast({
+      title: `${category} Service Details`,
+      description: details,
+    });
+
+    // If there's a website, also open it
+    if (provider.website) {
+      const website = provider.website.startsWith('http') ? provider.website : `https://${provider.website}`;
+      window.open(website, '_blank', 'noopener,noreferrer');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50" id="top">
       {/* Header */}
@@ -249,7 +303,11 @@ export default function Home() {
                       <p className="text-gray-600 text-sm mb-3">{provider.description}</p>
                       <div className="flex items-center justify-between">
                         <span className="text-sm text-gray-500">{category}</span>
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleLearnMore(category, provider)}
+                        >
                           Learn More <i className="fas fa-arrow-right ml-1"></i>
                         </Button>
                       </div>
@@ -287,12 +345,24 @@ export default function Home() {
                             <div className="space-y-1 mb-3">
                               <div className="flex items-center text-sm text-gray-600">
                                 <i className="fas fa-phone mr-2 text-gray-400"></i>
-                                <span>{provider.phone}</span>
+                                <a 
+                                  href={`tel:${provider.phone}`}
+                                  className="text-primary hover:underline"
+                                >
+                                  {provider.phone}
+                                </a>
                               </div>
                               {provider.website && (
                                 <div className="flex items-center text-sm text-gray-600">
                                   <i className="fas fa-globe mr-2 text-gray-400"></i>
-                                  <span>{provider.website}</span>
+                                  <a 
+                                    href={provider.website.startsWith('http') ? provider.website : `https://${provider.website}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-primary hover:underline"
+                                  >
+                                    {provider.website}
+                                  </a>
                                 </div>
                               )}
                               {provider.hours && (
@@ -303,10 +373,16 @@ export default function Home() {
                               )}
                             </div>
                             <div className="flex gap-2">
-                              <Button className="flex-1">
+                              <Button 
+                                className="flex-1"
+                                onClick={() => handleSignUp(category, provider)}
+                              >
                                 Sign Up
                               </Button>
-                              <Button variant="outline">
+                              <Button 
+                                variant="outline"
+                                onClick={() => handleGetQuote(category, provider)}
+                              >
                                 Get Quote
                               </Button>
                             </div>
