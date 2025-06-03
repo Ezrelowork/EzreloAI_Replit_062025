@@ -1,8 +1,10 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { z } from "zod";
-import { addressSearchSchema, type ServiceProvidersData } from "@shared/schema";
+import { addressSearchSchema, referralClickSchema, type ServiceProvidersData } from "@shared/schema";
 import OpenAI from "openai";
+import { db } from "./db";
+import { referralClicks } from "@shared/schema";
 
 // Known service territory database for verified locations
 function getKnownServiceTerritories(city: string, state: string, zip: string): Partial<ServiceProvidersData> | null {
@@ -42,6 +44,8 @@ function getKnownServiceTerritories(city: string, state: string, zip: string): P
           phone: "1-800-921-8101",
           description: "Fiber and DSL internet service provider serving North Texas including Argyle.",
           website: "www.frontier.com",
+          referralUrl: "www.frontier.com?referrer=ezrelo",
+          affiliateCode: "EZRELO_FRONTIER",
           hours: "24/7 Customer Support"
         },
         {
@@ -50,6 +54,8 @@ function getKnownServiceTerritories(city: string, state: string, zip: string): P
           phone: "1-855-243-8892",
           description: "High-speed cable internet service available in Argyle area.",
           website: "www.spectrum.com",
+          referralUrl: "www.spectrum.com?partner=ezrelo",
+          affiliateCode: "EZRELO_SPECTRUM",
           hours: "24/7 Customer Support"
         },
         {
@@ -58,6 +64,8 @@ function getKnownServiceTerritories(city: string, state: string, zip: string): P
           phone: "1-800-288-2020",
           description: "Fiber and DSL internet options for residential customers in Argyle.",
           website: "www.att.com",
+          referralUrl: "www.att.com/referral?code=EZRELO",
+          affiliateCode: "EZRELO_ATT",
           hours: "24/7 Customer Support"
         },
         {
@@ -66,6 +74,8 @@ function getKnownServiceTerritories(city: string, state: string, zip: string): P
           phone: "1-855-810-1308",
           description: "Satellite internet service available throughout North Texas including rural areas.",
           website: "www.viasat.com",
+          referralUrl: "www.viasat.com?affiliate=ezrelo",
+          affiliateCode: "EZRELO_VIASAT",
           hours: "24/7 Customer Support"
         }
       ],
@@ -278,6 +288,44 @@ Return JSON with ONLY the actual providers that serve this exact address. If mul
 
       const errorMessage = error instanceof Error ? error.message : "Internal server error";
       return res.status(500).json({ error: errorMessage });
+    }
+  });
+
+  // Track referral clicks for monetization
+  app.post("/api/referral-click", async (req, res) => {
+    try {
+      const { provider, category, action, userAddress } = referralClickSchema.parse(req.body);
+      
+      // Log the referral click to database
+      const timestamp = new Date().toISOString();
+      const ipAddress = req.ip || req.connection.remoteAddress || 'unknown';
+      const userAgent = req.get('User-Agent') || 'unknown';
+
+      await db.insert(referralClicks).values({
+        provider,
+        category,
+        action,
+        userAddress,
+        timestamp,
+        ipAddress,
+        userAgent
+      });
+
+      console.log(`💰 Referral click tracked: ${provider} - ${action} for ${userAddress}`);
+      
+      return res.json({ success: true, message: "Referral tracked successfully" });
+
+    } catch (error) {
+      console.error("Referral tracking error:", error);
+      
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          error: "Invalid referral data",
+          details: error.errors 
+        });
+      }
+
+      return res.status(500).json({ error: "Failed to track referral" });
     }
   });
 

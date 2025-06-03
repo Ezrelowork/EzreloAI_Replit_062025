@@ -116,10 +116,34 @@ export default function Home() {
     return null;
   };
 
+  const trackReferralClick = async (provider: any, category: string, action: string) => {
+    try {
+      const userAddress = searchResult?.address || '';
+      await fetch('/api/referral-click', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          provider: provider.provider,
+          category,
+          action,
+          userAddress,
+          timestamp: new Date().toISOString()
+        })
+      });
+    } catch (error) {
+      console.error('Failed to track referral:', error);
+    }
+  };
+
   const handleSignUp = (category: string, provider: any) => {
-    // If provider has a website, try to navigate to their signup page
-    if (provider.website) {
-      const website = normalizeWebsiteUrl(provider.website);
+    // Track the referral click for monetization
+    trackReferralClick(provider, category, 'signup');
+
+    // Use referral URL if available, otherwise fall back to regular website
+    const targetUrl = provider.referralUrl || provider.website;
+    
+    if (targetUrl) {
+      const website = normalizeWebsiteUrl(targetUrl);
       if (website) {
         window.open(website, '_blank', 'noopener,noreferrer');
       } else {

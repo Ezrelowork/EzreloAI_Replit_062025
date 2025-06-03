@@ -17,6 +17,17 @@ export const serviceProviders = pgTable("service_providers", {
   providers: json("providers").notNull(),
 });
 
+export const referralClicks = pgTable("referral_clicks", {
+  id: serial("id").primaryKey(),
+  provider: text("provider").notNull(),
+  category: text("category").notNull(),
+  action: text("action").notNull(),
+  userAddress: text("user_address").notNull(),
+  timestamp: text("timestamp").notNull(),
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+});
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
@@ -33,6 +44,16 @@ export const serviceProviderSchema = z.object({
   description: z.string().optional(),
   website: z.string().optional(),
   hours: z.string().optional(),
+  referralUrl: z.string().optional(),
+  affiliateCode: z.string().optional(),
+});
+
+export const referralClickSchema = z.object({
+  provider: z.string(),
+  category: z.string(),
+  action: z.enum(['signup', 'quote', 'learn_more']),
+  userAddress: z.string(),
+  timestamp: z.string(),
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
