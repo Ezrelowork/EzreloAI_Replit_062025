@@ -523,9 +523,9 @@ Return JSON with ONLY the actual providers that serve this exact address. If mul
         // First search Google Places for comprehensive moving company coverage
         if (process.env.GOOGLE_API_KEY) {
           try {
-            console.log(`🔍 Searching Google Places for moving companies in ${toCity}, ${toState}`);
+            console.log(`🔍 Searching Google Places for moving companies near ${fromCity}, ${fromState}`);
             const googleSearchParams = new URLSearchParams({
-              query: `moving companies in ${toCity}, ${toState}`,
+              query: `moving companies near ${fromCity}, ${fromState}`,
               key: process.env.GOOGLE_API_KEY
             });
 
@@ -603,13 +603,13 @@ Return JSON with ONLY the actual providers that serve this exact address. If mul
           try {
           const searchParams = new URLSearchParams({
             term: 'moving companies',
-            location: `${toCity}, ${toState}`,
+            location: `${fromCity}, ${fromState}`,
             categories: 'movers',
             limit: '5',
             sort_by: 'rating'
           });
           
-          console.log(`🔍 Searching Yelp for movers in ${toCity}, ${toState}`);
+          console.log(`🔍 Searching Yelp for movers near ${fromCity}, ${fromState}`);
           const yelpResponse = await fetch(`https://api.yelp.com/v3/businesses/search?${searchParams}`, {
             method: 'GET',
             headers: {
