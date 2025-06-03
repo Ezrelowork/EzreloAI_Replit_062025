@@ -26,7 +26,7 @@ function getKnownServiceTerritories(city: string, state: string, zip: string): P
         provider: "Denton Water Utilities", 
         phone: "(940) 349-8700",
         description: "Municipal water service for Argyle area. Contact for new service connections.",
-        website: "www.cityofdenton.com/departments-services/departments-a-f/denton-municipal-electric/water",
+        website: "https://www.cityofdenton.com/departments-services/departments-a-f/denton-municipal-electric/water",
         hours: "Monday-Friday 8:00 AM - 5:00 PM"
       },
       Trash: {
@@ -34,7 +34,7 @@ function getKnownServiceTerritories(city: string, state: string, zip: string): P
         provider: "City of Denton Solid Waste",
         phone: "(940) 349-8700", 
         description: "Municipal waste collection service. Weekly curbside pickup.",
-        website: "www.cityofdenton.com/departments-services/departments-g-p/public-works/solid-waste",
+        website: "https://www.cityofdenton.com/departments-services/departments-g-p/public-works/solid-waste",
         hours: "Monday-Friday 8:00 AM - 5:00 PM"
       },
       Internet: [

@@ -105,11 +105,16 @@ export default function Home() {
     // Clean up the website string - take only the first valid URL if multiple exist
     const cleanWebsite = website.split(',')[0].split(' ')[0].trim();
     
+    // If it already has https://, return as is
+    if (cleanWebsite.startsWith('https://')) {
+      return cleanWebsite;
+    }
+    
     // Remove any protocol prefix and add https
     const cleanUrl = cleanWebsite.replace(/^https?:\/\//, '');
     
     // Validate it's a reasonable URL format
-    if (cleanUrl.includes('.') && !cleanUrl.includes(' ')) {
+    if (cleanUrl.includes('.') && !cleanUrl.includes(' ') && !cleanUrl.includes('[') && !cleanUrl.includes(']')) {
       return `https://${cleanUrl}`;
     }
     
@@ -422,6 +427,16 @@ export default function Home() {
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="text-primary hover:underline"
+                                    onClick={(e) => {
+                                      if (!normalizeWebsiteUrl(provider.website)) {
+                                        e.preventDefault();
+                                        toast({
+                                          title: "Website unavailable",
+                                          description: "This provider's website is not available. Please call them directly.",
+                                          variant: "destructive",
+                                        });
+                                      }
+                                    }}
                                   >
                                     {provider.website.split(',')[0].trim()}
                                   </a>
