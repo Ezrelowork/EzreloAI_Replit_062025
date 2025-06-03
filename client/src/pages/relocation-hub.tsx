@@ -206,26 +206,164 @@ export default function RelocationHub() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Relocation Hub</h1>
-              <p className="text-gray-600 mt-1">Your complete moving and settling-in command center</p>
+      {/* Hero Section */}
+      <section className="bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 text-white py-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h1 className="text-4xl font-extrabold sm:text-5xl md:text-6xl mb-6">
+              Relocate <span className="text-blue-200">Intelligently</span>
+            </h1>
+            <p className="text-xl mb-8 max-w-3xl mx-auto text-blue-100">
+              Your complete relocation command center. From finding movers to setting up utilities, 
+              we guide you through every step of your move with personalized timelines and verified providers.
+            </p>
+            <div className="flex justify-center items-center gap-6 mb-8">
+              <div className="text-center">
+                <div className="text-3xl font-bold text-blue-200">{overallProgress}%</div>
+                <div className="text-sm text-blue-100">Complete</div>
+              </div>
+              <Progress value={overallProgress} className="w-48 h-3" />
+              <div className="text-center">
+                <div className="text-3xl font-bold text-blue-200">3</div>
+                <div className="text-sm text-blue-100">Phases</div>
+              </div>
             </div>
-            <div className="text-right">
-              <div className="text-sm text-gray-500 mb-1">Overall Progress</div>
-              <div className="flex items-center gap-3">
-                <Progress value={overallProgress} className="w-32" />
-                <span className="text-2xl font-bold text-blue-600">{overallProgress}%</span>
+            <div className="flex flex-wrap justify-center gap-4 text-sm text-blue-100">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="w-4 h-4" />
+                Verified Moving Companies
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="w-4 h-4" />
+                Utility Provider Matching
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="w-4 h-4" />
+                Timeline-Based Guidance
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="w-4 h-4" />
+                Referral Rewards Program
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </section>
+
+      {/* How It Works Section */}
+      <section className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">How It Works</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              Follow our proven 3-phase system to ensure nothing falls through the cracks during your move.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {relocationPhases.map((phase, index) => (
+              <div key={phase.id} className="text-center">
+                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center text-2xl font-bold text-blue-600 mx-auto mb-4">
+                  {index + 1}
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">{phase.title}</h3>
+                <p className="text-gray-600 mb-3">{phase.description}</p>
+                <div className="text-sm text-blue-600 font-medium">{phase.timeframe}</div>
+                <div className="mt-3">
+                  <Progress value={phase.progress} className="w-full h-2" />
+                  <div className="text-xs text-gray-500 mt-1">{phase.progress}% Complete</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Get Started Section */}
+      <section className="py-16 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Ready to Get Started?</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto mb-8">
+              Begin your relocation journey with our most popular services, or dive into your personalized dashboard below.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 max-w-4xl mx-auto">
+              <Link href="/moving-checklist">
+                <Button className="w-full h-20 flex flex-col items-center justify-center space-y-2 bg-blue-600 hover:bg-blue-700">
+                  <Truck className="w-6 h-6" />
+                  <span className="text-sm font-medium">Find Movers</span>
+                </Button>
+              </Link>
+              <Link href="/utilities?type=electricity">
+                <Button variant="outline" className="w-full h-20 flex flex-col items-center justify-center space-y-2">
+                  <Zap className="w-6 h-6" />
+                  <span className="text-sm font-medium">Setup Power</span>
+                </Button>
+              </Link>
+              <Link href="/utilities?type=internet">
+                <Button variant="outline" className="w-full h-20 flex flex-col items-center justify-center space-y-2">
+                  <Wifi className="w-6 h-6" />
+                  <span className="text-sm font-medium">Get Internet</span>
+                </Button>
+              </Link>
+              <Button variant="outline" className="w-full h-20 flex flex-col items-center justify-center space-y-2">
+                <Stethoscope className="w-6 h-6" />
+                <span className="text-sm font-medium">Find Doctors</span>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Benefits Section */}
+      <section className="py-16 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">Why Choose Ezrelo?</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              Save time, reduce stress, and never miss important deadlines with our comprehensive relocation platform.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <CheckCircle className="w-8 h-8 text-green-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Verified Providers</h3>
+              <p className="text-gray-600 text-sm">All moving companies and service providers are pre-screened and verified for quality and reliability.</p>
+            </div>
+            <div className="text-center">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Clock className="w-8 h-8 text-blue-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Timeline Guidance</h3>
+              <p className="text-gray-600 text-sm">Never miss deadlines with our detailed timeline showing exactly when to complete each task.</p>
+            </div>
+            <div className="text-center">
+              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <MapPin className="w-8 h-8 text-purple-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Local Expertise</h3>
+              <p className="text-gray-600 text-sm">Get personalized recommendations based on your specific location and requirements.</p>
+            </div>
+            <div className="text-center">
+              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Building className="w-8 h-8 text-orange-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">One Platform</h3>
+              <p className="text-gray-600 text-sm">Manage your entire relocation from one dashboard instead of juggling multiple websites and lists.</p>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">Your Relocation Dashboard</h2>
+          <p className="text-gray-600 max-w-2xl mx-auto">
+            Track your progress and manage all relocation tasks in one organized dashboard. Click on any phase to get started.
+          </p>
+        </div>
+
         {/* Phase Navigation */}
         <Tabs value={selectedPhase} onValueChange={setSelectedPhase} className="space-y-8">
           <TabsList className="grid w-full grid-cols-3 h-auto p-1">
