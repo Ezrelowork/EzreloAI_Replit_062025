@@ -54,7 +54,8 @@ export default function MovingChecklist() {
 
   const searchMutation = useMutation({
     mutationFn: async (addresses: typeof moveAddresses) => {
-      return await apiRequest("POST", "/api/moving-companies", addresses);
+      const response = await apiRequest("POST", "/api/moving-companies", addresses);
+      return await response.json();
     },
     onSuccess: (data) => {
       const companies = data?.companies || [];
