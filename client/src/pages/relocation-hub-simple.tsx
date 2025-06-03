@@ -132,7 +132,7 @@ export default function RelocationHub() {
               <div className="text-sm text-gray-500 mb-4">Or jump to a specific service:</div>
               
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto">
-                <Link href="/moving-checklist#timeframe-8-weeks">
+                <Link href="/moving-checklist#moving-companies-task">
                   <Button variant="outline" className="w-full h-16 flex flex-col items-center justify-center space-y-1">
                     <Truck className="w-5 h-5" />
                     <span className="text-xs">Find Movers</span>

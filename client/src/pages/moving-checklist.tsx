@@ -226,7 +226,7 @@ export default function MovingChecklist() {
                 <Card key={timeframe} id={`timeframe-${timeframe.replace(/\s+/g, '-')}`}>
                   <CardHeader>
                     <div className="flex justify-between items-center">
-                      <CardTitle className="capitalize">{timeframe} {/* Debug: timeframe-${timeframe.replace(/\s+/g, '-')} */}</CardTitle>
+                      <CardTitle className="capitalize">{timeframe}</CardTitle>
                       <Badge variant="outline">
                         {completedInTimeframe}/{items.length} Complete
                       </Badge>
@@ -235,7 +235,7 @@ export default function MovingChecklist() {
                   <CardContent>
                     <div className="space-y-4">
                       {items.map(item => (
-                        <div key={item.id} className="flex items-start space-x-3 p-4 border rounded-lg">
+                        <div key={item.id} className="flex items-start space-x-3 p-4 border rounded-lg" id={item.hasProviders ? "moving-companies-task" : undefined}>
                           <Checkbox
                             checked={item.completed}
                             onCheckedChange={() => toggleItem(item.id)}
