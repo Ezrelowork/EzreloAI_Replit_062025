@@ -162,6 +162,9 @@ export default function Home() {
   };
 
   const handleGetQuote = (category: string, provider: any) => {
+    // Track the referral click for monetization
+    trackReferralClick(provider, category, 'quote');
+
     // For quote requests, show contact information
     const cleanWebsite = provider.website ? provider.website.split(',')[0].trim() : null;
     const message = cleanWebsite
@@ -173,9 +176,10 @@ export default function Home() {
       description: message,
     });
 
-    // If there's a website, also open it
-    if (provider.website) {
-      const website = normalizeWebsiteUrl(provider.website);
+    // Use referral URL if available, otherwise fall back to regular website
+    const targetUrl = provider.referralUrl || provider.website;
+    if (targetUrl) {
+      const website = normalizeWebsiteUrl(targetUrl);
       if (website) {
         window.open(website, '_blank', 'noopener,noreferrer');
       }
@@ -183,6 +187,9 @@ export default function Home() {
   };
 
   const handleLearnMore = (category: string, provider: any) => {
+    // Track the referral click for monetization
+    trackReferralClick(provider, category, 'learn_more');
+
     // Show detailed information about the provider
     const cleanWebsite = provider.website ? provider.website.split(',')[0].trim() : null;
     const details = [
@@ -198,9 +205,10 @@ export default function Home() {
       description: details,
     });
 
-    // If there's a website, also open it
-    if (provider.website) {
-      const website = normalizeWebsiteUrl(provider.website);
+    // Use referral URL if available, otherwise fall back to regular website
+    const targetUrl = provider.referralUrl || provider.website;
+    if (targetUrl) {
+      const website = normalizeWebsiteUrl(targetUrl);
       if (website) {
         window.open(website, '_blank', 'noopener,noreferrer');
       }
