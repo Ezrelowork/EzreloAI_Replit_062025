@@ -18,7 +18,8 @@ import {
   ChevronRight,
   CheckCircle,
   Clock,
-  Calendar
+  Calendar,
+  ArrowRight
 } from "lucide-react";
 import { Link } from "wouter";
 
@@ -286,29 +287,40 @@ export default function RelocationHub() {
             <p className="text-gray-600 max-w-2xl mx-auto mb-8">
               Begin your relocation journey with our most popular services, or dive into your personalized dashboard below.
             </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 max-w-4xl mx-auto">
-              <Link href="/moving-checklist">
-                <Button className="w-full h-20 flex flex-col items-center justify-center space-y-2 bg-blue-600 hover:bg-blue-700">
-                  <Truck className="w-6 h-6" />
-                  <span className="text-sm font-medium">Find Movers</span>
+            <div className="flex flex-col items-center space-y-6">
+              <Link href="/dashboard">
+                <Button size="lg" className="px-8 py-4 text-lg bg-blue-600 hover:bg-blue-700">
+                  Start Your Move
+                  <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
               </Link>
-              <Link href="/utilities?type=electricity">
-                <Button variant="outline" className="w-full h-20 flex flex-col items-center justify-center space-y-2">
-                  <Zap className="w-6 h-6" />
-                  <span className="text-sm font-medium">Setup Power</span>
+              
+              <div className="text-sm text-gray-500 mb-4">Or jump to a specific service:</div>
+              
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto">
+                <Link href="/moving-checklist">
+                  <Button variant="outline" className="w-full h-16 flex flex-col items-center justify-center space-y-1">
+                    <Truck className="w-5 h-5" />
+                    <span className="text-xs">Find Movers</span>
+                  </Button>
+                </Link>
+                <Link href="/utilities?type=electricity">
+                  <Button variant="outline" className="w-full h-16 flex flex-col items-center justify-center space-y-1">
+                    <Zap className="w-5 h-5" />
+                    <span className="text-xs">Setup Power</span>
+                  </Button>
+                </Link>
+                <Link href="/utilities?type=internet">
+                  <Button variant="outline" className="w-full h-16 flex flex-col items-center justify-center space-y-1">
+                    <Wifi className="w-5 h-5" />
+                    <span className="text-xs">Get Internet</span>
+                  </Button>
+                </Link>
+                <Button variant="outline" className="w-full h-16 flex flex-col items-center justify-center space-y-1">
+                  <Stethoscope className="w-5 h-5" />
+                  <span className="text-xs">Find Doctors</span>
                 </Button>
-              </Link>
-              <Link href="/utilities?type=internet">
-                <Button variant="outline" className="w-full h-20 flex flex-col items-center justify-center space-y-2">
-                  <Wifi className="w-6 h-6" />
-                  <span className="text-sm font-medium">Get Internet</span>
-                </Button>
-              </Link>
-              <Button variant="outline" className="w-full h-20 flex flex-col items-center justify-center space-y-2">
-                <Stethoscope className="w-6 h-6" />
-                <span className="text-sm font-medium">Find Doctors</span>
-              </Button>
+              </div>
             </div>
           </div>
         </div>

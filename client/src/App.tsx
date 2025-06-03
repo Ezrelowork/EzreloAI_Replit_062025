@@ -8,6 +8,7 @@ import Home from "@/pages/home";
 import Analytics from "@/pages/analytics";
 import MovingChecklist from "@/pages/moving-checklist";
 import RelocationHub from "@/pages/relocation-hub";
+import Dashboard from "@/pages/dashboard";
 import NotFound from "@/pages/not-found";
 
 function Navigation() {
@@ -54,6 +55,7 @@ function Router() {
       <Navigation />
       <Switch>
         <Route path="/" component={RelocationHub} />
+        <Route path="/dashboard" component={Dashboard} />
         <Route path="/utilities" component={Home} />
         <Route path="/moving-checklist" component={MovingChecklist} />
         <Route path="/analytics" component={Analytics} />
