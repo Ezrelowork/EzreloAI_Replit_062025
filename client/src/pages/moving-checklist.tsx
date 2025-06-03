@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -180,6 +180,22 @@ export default function MovingChecklist() {
   const getItemsByTimeframe = (timeframe: string) => {
     return checklist.filter(item => item.timeframe === timeframe);
   };
+
+  // Handle smooth scrolling to anchor on page load
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash === '#moving-companies-task') {
+      setTimeout(() => {
+        const element = document.getElementById('moving-companies-task');
+        if (element) {
+          element.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center' 
+          });
+        }
+      }, 100);
+    }
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
