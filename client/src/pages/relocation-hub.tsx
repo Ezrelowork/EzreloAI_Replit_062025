@@ -243,7 +243,7 @@ export default function RelocationHub() {
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle className="w-4 h-4" />
-                Referral Rewards Program
+                Exclusive Discounts & Cashback
               </div>
             </div>
           </div>
@@ -349,8 +349,8 @@ export default function RelocationHub() {
               <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Building className="w-8 h-8 text-orange-600" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">One Platform</h3>
-              <p className="text-gray-600 text-sm">Manage your entire relocation from one dashboard instead of juggling multiple websites and lists.</p>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Save Money</h3>
+              <p className="text-gray-600 text-sm">Get exclusive discounts, cashback offers, and negotiated rates through our verified provider partnerships.</p>
             </div>
           </div>
         </div>
