@@ -38,7 +38,6 @@ export default function Home() {
     },
     onSuccess: (data: SearchResult) => {
       setSearchResult(data);
-      // Scroll to results section
       setTimeout(() => {
         const resultsSection = document.getElementById("results-section");
         if (resultsSection) {
@@ -59,7 +58,6 @@ export default function Home() {
   const onSubmit = (data: AddressSearch) => {
     const address = data.address.trim();
     
-    // Basic validation for ZIP-only addresses
     const isZipOnly = /^\d{5}(-\d{4})?$/.test(address);
     if (isZipOnly) {
       toast({
@@ -102,7 +100,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50" id="top">
       {/* Header */}
       <header className="bg-white shadow-sm sticky top-0 z-30 border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -358,7 +356,7 @@ export default function Home() {
                 <div className="bg-primary text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold mb-4 mx-auto">2</div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-3">Compare Providers</h3>
                 <p className="text-gray-600">
-                  Review AI-curated recommendations and compare all available service providers with pricing, features, and customer ratings clearly displayed.
+                  Review and compare service providers available in your area, with pricing and features clearly displayed.
                 </p>
               </CardContent>
             </Card>
@@ -371,7 +369,7 @@ export default function Home() {
                 <div className="bg-primary text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold mb-4 mx-auto">3</div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-3">Set Up Services</h3>
                 <p className="text-gray-600">
-                  Choose the services you want and get connected directly with providers. Track your setup progress all in one convenient dashboard.
+                  Choose the services you want and sign up directly through our platform. We'll handle the rest.
                 </p>
               </CardContent>
             </Card>
@@ -380,34 +378,73 @@ export default function Home() {
       </section>
 
       {/* Services Section */}
-      <section id="services" className="py-16 bg-white">
+      <section id="services" className="py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
               Services We Help You Set Up
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              From essential utilities to lifestyle services, we've got everything covered to make your new house feel like home.
+            <p className="mt-4 text-xl text-gray-600 max-w-3xl mx-auto">
+              Everything you need to make your new house feel like home.
             </p>
           </div>
           
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8">
-            {[
-              { icon: "fas fa-wifi", name: "Internet", desc: "High-speed broadband", color: "bg-blue-100 text-blue-600" },
-              { icon: "fas fa-bolt", name: "Electricity", desc: "Power utilities", color: "bg-yellow-100 text-yellow-600" },
-              { icon: "fas fa-tint", name: "Water", desc: "Water & sewer", color: "bg-blue-100 text-blue-600" },
-              { icon: "fas fa-fire", name: "Gas", desc: "Natural gas service", color: "bg-orange-100 text-orange-600" },
-              { icon: "fas fa-trash-alt", name: "Waste", desc: "Trash & recycling", color: "bg-green-100 text-green-600" },
-              { icon: "fas fa-tv", name: "Cable/TV", desc: "Entertainment services", color: "bg-purple-100 text-purple-600" },
-            ].map((service) => (
-              <div key={service.name} className="text-center group">
-                <div className={`inline-flex items-center justify-center h-16 w-16 rounded-xl ${service.color} mb-4 group-hover:scale-110 transition-transform duration-200`}>
-                  <i className={`${service.icon} text-2xl`}></i>
-                </div>
-                <h3 className="text-lg font-medium text-gray-900">{service.name}</h3>
-                <p className="text-sm text-gray-600 mt-1">{service.desc}</p>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            <div className="text-center">
+              <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 text-blue-600 mb-4">
+                <i className="fas fa-wifi text-2xl"></i>
               </div>
-            ))}
+              <h3 className="text-lg font-medium text-gray-900">Internet</h3>
+            </div>
+            
+            <div className="text-center">
+              <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 text-blue-600 mb-4">
+                <i className="fas fa-bolt text-2xl"></i>
+              </div>
+              <h3 className="text-lg font-medium text-gray-900">Electricity</h3>
+            </div>
+            
+            <div className="text-center">
+              <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 text-blue-600 mb-4">
+                <i className="fas fa-tint text-2xl"></i>
+              </div>
+              <h3 className="text-lg font-medium text-gray-900">Water</h3>
+            </div>
+            
+            <div className="text-center">
+              <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 text-blue-600 mb-4">
+                <i className="fas fa-mobile-alt text-2xl"></i>
+              </div>
+              <h3 className="text-lg font-medium text-gray-900">Phone</h3>
+            </div>
+            
+            <div className="text-center">
+              <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 text-blue-600 mb-4">
+                <i className="fas fa-heartbeat text-2xl"></i>
+              </div>
+              <h3 className="text-lg font-medium text-gray-900">Healthcare</h3>
+            </div>
+            
+            <div className="text-center">
+              <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 text-blue-600 mb-4">
+                <i className="fas fa-home text-2xl"></i>
+              </div>
+              <h3 className="text-lg font-medium text-gray-900">Home Services</h3>
+            </div>
+            
+            <div className="text-center">
+              <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 text-blue-600 mb-4">
+                <i className="fas fa-paw text-2xl"></i>
+              </div>
+              <h3 className="text-lg font-medium text-gray-900">Veterinarians</h3>
+            </div>
+            
+            <div className="text-center">
+              <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 text-blue-600 mb-4">
+                <i className="fas fa-plus text-2xl"></i>
+              </div>
+              <h3 className="text-lg font-medium text-gray-900">And More</h3>
+            </div>
           </div>
         </div>
       </section>
@@ -415,35 +452,114 @@ export default function Home() {
       {/* Features Section */}
       <section id="features" className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Why Choose Ezrelo?
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
+              Additional Features
             </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Our AI-powered platform takes the stress out of setting up services in your new home with intelligent recommendations and seamless integration.
+            <p className="mt-4 text-xl text-gray-600 max-w-3xl mx-auto">
+              Ezrelo offers more than just service connections.
             </p>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[
-              { icon: "fas fa-robot", title: "AI-Powered Recommendations", desc: "Our intelligent system analyzes your location, preferences, and local provider ratings to suggest the best services for your needs.", color: "bg-primary/10 text-primary" },
-              { icon: "fas fa-clock", title: "Save Time & Effort", desc: "No more calling multiple providers or researching availability. Get everything you need in one place, saving hours of setup time.", color: "bg-green-100 text-green-600" },
-              { icon: "fas fa-shield-alt", title: "Trusted Providers", desc: "We partner only with verified, reputable service providers to ensure you get reliable service and competitive pricing.", color: "bg-blue-100 text-blue-600" },
-              { icon: "fas fa-chart-line", title: "Real-Time Pricing", desc: "Compare live pricing and promotional offers from multiple providers to ensure you're getting the best deal available.", color: "bg-purple-100 text-purple-600" },
-              { icon: "fas fa-headset", title: "24/7 Support", desc: "Our dedicated support team is available around the clock to help with any questions or issues during your setup process.", color: "bg-orange-100 text-orange-600" },
-              { icon: "fas fa-mobile-alt", title: "Mobile Optimized", desc: "Access Ezrelo from anywhere with our responsive design that works perfectly on desktop, tablet, and mobile devices.", color: "bg-teal-100 text-teal-600" },
-            ].map((feature) => (
-              <Card key={feature.title} className="hover:shadow-md transition-shadow duration-200">
-                <CardContent className="p-8">
-                  <div className={`inline-flex items-center justify-center h-12 w-12 rounded-lg ${feature.color} mb-6`}>
-                    <i className={`${feature.icon} text-xl`}></i>
-                  </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-3">{feature.title}</h3>
-                  <p className="text-gray-600">{feature.desc}</p>
-                </CardContent>
-              </Card>
-            ))}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-0 shadow-md hover:shadow-lg transition-shadow duration-200">
+              <CardContent className="p-8">
+                <div className="text-blue-600 mb-4">
+                  <i className="fas fa-tasks text-4xl"></i>
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">Moving Checklists</h3>
+                <p className="text-gray-600 mb-4">Comprehensive checklists to ensure you don't forget anything during your move.</p>
+                <ul className="text-gray-600 space-y-2">
+                  <li className="flex items-center">
+                    <i className="fas fa-check text-green-500 mr-2"></i>
+                    <span>Pre-move planning</span>
+                  </li>
+                  <li className="flex items-center">
+                    <i className="fas fa-check text-green-500 mr-2"></i>
+                    <span>Moving day tasks</span>
+                  </li>
+                  <li className="flex items-center">
+                    <i className="fas fa-check text-green-500 mr-2"></i>
+                    <span>Post-move setup</span>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-0 shadow-md hover:shadow-lg transition-shadow duration-200">
+              <CardContent className="p-8">
+                <div className="text-blue-600 mb-4">
+                  <i className="fas fa-envelope text-4xl"></i>
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">Change of Address</h3>
+                <p className="text-gray-600 mb-4">Easily update your address with important services and organizations.</p>
+                <ul className="text-gray-600 space-y-2">
+                  <li className="flex items-center">
+                    <i className="fas fa-check text-green-500 mr-2"></i>
+                    <span>Postal service</span>
+                  </li>
+                  <li className="flex items-center">
+                    <i className="fas fa-check text-green-500 mr-2"></i>
+                    <span>Subscription updates</span>
+                  </li>
+                  <li className="flex items-center">
+                    <i className="fas fa-check text-green-500 mr-2"></i>
+                    <span>Account notifications</span>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-0 shadow-md hover:shadow-lg transition-shadow duration-200">
+              <CardContent className="p-8">
+                <div className="text-blue-600 mb-4">
+                  <i className="fas fa-map-marked-alt text-4xl"></i>
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">Neighborhood Information</h3>
+                <p className="text-gray-600 mb-4">Comprehensive details about your new neighborhood to help you feel at home.</p>
+                <ul className="text-gray-600 space-y-2">
+                  <li className="flex items-center">
+                    <i className="fas fa-check text-green-500 mr-2"></i>
+                    <span>Local attractions</span>
+                  </li>
+                  <li className="flex items-center">
+                    <i className="fas fa-check text-green-500 mr-2"></i>
+                    <span>School ratings</span>
+                  </li>
+                  <li className="flex items-center">
+                    <i className="fas fa-check text-green-500 mr-2"></i>
+                    <span>Community resources</span>
+                  </li>
+                </ul>
+              </CardContent>
+            </Card>
           </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="bg-gradient-to-r from-primary to-primary/80 py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl font-extrabold text-white sm:text-4xl mb-6">
+            Ready to simplify your move?
+          </h2>
+          <p className="text-xl text-blue-100 mb-8 max-w-3xl mx-auto">
+            Enter your address and let Ezrelo handle the rest. Setting up your new home has never been easier.
+          </p>
+          <Button 
+            onClick={() => {
+              const topElement = document.getElementById('top');
+              if (topElement) {
+                topElement.scrollIntoView({ behavior: 'smooth' });
+              } else {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }
+            }}
+            className="bg-white text-primary hover:bg-gray-50"
+            size="lg"
+          >
+            Get Started Now
+          </Button>
         </div>
       </section>
 
@@ -451,52 +567,40 @@ export default function Home() {
       <footer className="bg-gray-900 text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div className="md:col-span-2">
-              <div className="flex items-center mb-4">
-                <span className="text-2xl font-bold text-primary">Ezrelo</span>
-              </div>
-              <p className="text-gray-400 mb-6 max-w-md">
-                Making relocation simple with AI-powered service discovery and setup. Your one-stop solution for all essential services in your new home.
-              </p>
-              <div className="flex space-x-4">
-                <a href="#" className="text-gray-400 hover:text-primary transition-colors duration-200">
-                  <i className="fab fa-twitter text-xl"></i>
-                </a>
-                <a href="#" className="text-gray-400 hover:text-primary transition-colors duration-200">
-                  <i className="fab fa-facebook text-xl"></i>
-                </a>
-                <a href="#" className="text-gray-400 hover:text-primary transition-colors duration-200">
-                  <i className="fab fa-linkedin text-xl"></i>
-                </a>
-                <a href="#" className="text-gray-400 hover:text-primary transition-colors duration-200">
-                  <i className="fab fa-instagram text-xl"></i>
-                </a>
-              </div>
-            </div>
-            
             <div>
-              <h4 className="text-lg font-semibold mb-4">Services</h4>
+              <h3 className="text-lg font-semibold mb-4">Ezrelo</h3>
+              <p className="text-gray-400">AI-powered relocation assistance to simplify your move and help you set up essential services.</p>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Services</h3>
               <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-primary transition-colors duration-200">Internet Setup</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors duration-200">Utility Connections</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors duration-200">Home Services</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors duration-200">Healthcare Providers</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Utilities</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Healthcare</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Home Services</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Pet Services</a></li>
               </ul>
             </div>
-            
             <div>
-              <h4 className="text-lg font-semibold mb-4">Company</h4>
+              <h3 className="text-lg font-semibold mb-4">Resources</h3>
               <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-primary transition-colors duration-200">About Us</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors duration-200">Contact</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors duration-200">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-primary transition-colors duration-200">Terms of Service</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Moving Guides</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Checklists</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">FAQs</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Blog</a></li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Contact</h3>
+              <ul className="space-y-2 text-gray-400">
+                <li><a href="#" className="hover:text-white transition-colors">Support</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Partnerships</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Privacy Policy</a></li>
+                <li><a href="#" className="hover:text-white transition-colors">Terms of Service</a></li>
               </ul>
             </div>
           </div>
-          
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
-            <p>&copy; 2024 Ezrelo. All rights reserved. | Making relocation intelligent.</p>
+          <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
+            <p>&copy; 2025 Ezrelo. All rights reserved.</p>
           </div>
         </div>
       </footer>
