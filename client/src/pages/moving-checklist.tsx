@@ -57,10 +57,11 @@ export default function MovingChecklist() {
       return await apiRequest("POST", "/api/moving-companies", addresses);
     },
     onSuccess: (data) => {
-      setMovingCompanies(data.companies);
+      const companies = data?.companies || [];
+      setMovingCompanies(companies);
       toast({
         title: "Success",
-        description: `Found ${data.companies.length} moving companies for your route`,
+        description: `Found ${companies.length} moving companies for your route`,
       });
     },
     onError: (error) => {
@@ -428,43 +429,43 @@ export default function MovingChecklist() {
                       <CardContent className="p-6">
                         <div className="flex justify-between items-start mb-4">
                           <div>
-                            <h4 className="text-xl font-semibold text-gray-900">{company.provider}</h4>
+                            <h4 className="text-xl font-semibold text-gray-900">{company?.provider || 'Moving Company'}</h4>
                             <div className="flex items-center gap-2 mt-1">
                               <div className="flex items-center">
                                 {[...Array(5)].map((_, i) => (
                                   <Star
                                     key={i}
                                     className={`w-4 h-4 ${
-                                      i < Math.floor(company.rating)
+                                      i < Math.floor(company?.rating || 0)
                                         ? "text-yellow-400 fill-current"
                                         : "text-gray-300"
                                     }`}
                                   />
                                 ))}
-                                <span className="ml-1 text-sm text-gray-600">{company.rating}</span>
+                                <span className="ml-1 text-sm text-gray-600">{company?.rating || 'N/A'}</span>
                               </div>
-                              <Badge variant="secondary">{company.estimatedCost}</Badge>
+                              <Badge variant="secondary">{company?.estimatedCost || 'Contact for Quote'}</Badge>
                             </div>
                           </div>
                         </div>
 
-                        <p className="text-gray-600 mb-4">{company.description}</p>
+                        <p className="text-gray-600 mb-4">{company?.description || 'Professional moving services'}</p>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                           <div className="space-y-2">
                             <div className="flex items-center text-sm text-gray-600">
                               <Phone className="w-4 h-4 mr-2" />
-                              {company.phone}
+                              {company?.phone || 'Contact for phone number'}
                             </div>
                             <div className="flex items-center text-sm text-gray-600">
                               <Globe className="w-4 h-4 mr-2" />
-                              {company.hours}
+                              {company?.hours || 'Business hours available upon contact'}
                             </div>
                           </div>
                           <div>
                             <p className="text-sm font-medium text-gray-700 mb-1">Services:</p>
                             <div className="flex flex-wrap gap-1">
-                              {company.services.map((service, serviceIndex) => (
+                              {(company?.services || []).map((service, serviceIndex) => (
                                 <Badge key={serviceIndex} variant="outline" className="text-xs">
                                   {service}
                                 </Badge>
