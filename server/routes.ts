@@ -590,8 +590,27 @@ Return JSON with ONLY the actual providers that serve this exact address. If mul
                         if (detailsResponse.ok) {
                           const detailsData = await detailsResponse.json();
                           if (detailsData.result?.website) {
-                            companyWebsite = detailsData.result.website;
-                            console.log(`✅ Found direct website for ${business.name}: ${companyWebsite}`);
+                            const foundWebsite = detailsData.result.website;
+                            
+                            // Validate website accessibility
+                            try {
+                              const websiteCheck = await fetch(foundWebsite, { 
+                                method: 'HEAD',
+                                timeout: 5000,
+                                headers: { 'User-Agent': 'EzreloBot/1.0' }
+                              });
+                              
+                              if (websiteCheck.ok) {
+                                companyWebsite = foundWebsite;
+                                console.log(`✅ Found and validated website for ${business.name}: ${companyWebsite}`);
+                              } else {
+                                console.log(`⚠️ Website for ${business.name} returned ${websiteCheck.status}: ${foundWebsite}`);
+                                // Keep Yelp URL as fallback for dead websites
+                              }
+                            } catch (websiteError) {
+                              console.log(`⚠️ Website for ${business.name} is unreachable: ${foundWebsite}`);
+                              // Keep Yelp URL as fallback for dead websites
+                            }
                           }
                         }
                       }
