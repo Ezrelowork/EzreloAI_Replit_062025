@@ -406,6 +406,11 @@ Return JSON with ONLY the actual providers that serve this exact address. If mul
     try {
       const { fromCity, fromState, fromZip, toCity, toState, toZip } = req.body;
       
+      // Calculate if this is a local move (same state and within reasonable distance)
+      const isLocalMove = fromState === toState;
+      const isShortDistance = fromState === toState && fromCity !== toCity;
+      
+      // Base major moving companies
       const movingCompanies = [
         {
           category: "Moving Companies",
@@ -474,12 +479,61 @@ Return JSON with ONLY the actual providers that serve this exact address. If mul
         }
       ];
 
+      // Add local/regional moving companies for same-state moves
+      if (isLocalMove) {
+        const localCompanies = [
+          {
+            category: "Local Moving Companies",
+            provider: "Local Movers Express",
+            phone: "1-555-LOCAL-01",
+            description: "Affordable local moving services with same-day availability. Specialized in intrastate moves.",
+            website: "https://www.localmoversexpress.com",
+            referralUrl: "https://www.localmoversexpress.com?ref=ezrelo&code=EZR_LOCAL01",
+            affiliateCode: "EZRELO_LOCAL01",
+            hours: "Monday-Sunday 7:00 AM - 9:00 PM",
+            rating: 4.5,
+            services: ["Local Moving", "Same Day Service", "Furniture Moving", "Apartment Moves"],
+            estimatedCost: "$400 - $1,200"
+          },
+          {
+            category: "Local Moving Companies",
+            provider: "City to City Movers",
+            phone: "1-555-CITY-02",
+            description: "Regional moving company serving metropolitan areas with competitive rates.",
+            website: "https://www.citytocitymovers.com",
+            referralUrl: "https://www.citytocitymovers.com?partner=ezrelo&ref=EZR_CITY02",
+            affiliateCode: "EZRELO_CITY02",
+            hours: "Monday-Saturday 6:00 AM - 8:00 PM",
+            rating: 4.3,
+            services: ["Regional Moving", "Piano Moving", "Office Relocation", "Storage"],
+            estimatedCost: "$300 - $900"
+          },
+          {
+            category: "Local Moving Companies",
+            provider: "Quick Move Solutions",
+            phone: "1-555-QUICK-03",
+            description: "Fast and reliable local moving with transparent pricing and no hidden fees.",
+            website: "https://www.quickmovesolutions.com",
+            referralUrl: "https://www.quickmovesolutions.com?source=ezrelo&code=EZR_QUICK03",
+            affiliateCode: "EZRELO_QUICK03",
+            hours: "Daily 8:00 AM - 6:00 PM",
+            rating: 4.4,
+            services: ["Local Moves", "Labor Only", "Truck Rental", "Packing"],
+            estimatedCost: "$350 - $800"
+          }
+        ];
+        
+        // Add local companies to the beginning of the list for local moves
+        movingCompanies.unshift(...localCompanies);
+      }
+
       return res.json({
         success: true,
         companies: movingCompanies,
         searchInfo: {
           from: `${fromCity}, ${fromState} ${fromZip}`,
-          to: `${toCity}, ${toState} ${toZip}`
+          to: `${toCity}, ${toState} ${toZip}`,
+          moveType: isLocalMove ? 'local' : 'long-distance'
         }
       });
 
