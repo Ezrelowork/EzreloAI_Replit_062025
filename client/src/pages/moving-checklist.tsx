@@ -388,6 +388,8 @@ export default function MovingChecklist() {
                       value={moveAddresses.toCity}
                       onChange={(e) => setMoveAddresses(prev => ({ ...prev, toCity: e.target.value }))}
                       placeholder="Destination city"
+                      autoComplete="off"
+                      data-form-type="other"
                     />
                   </div>
                   <div>
@@ -397,6 +399,8 @@ export default function MovingChecklist() {
                       value={moveAddresses.toState}
                       onChange={(e) => setMoveAddresses(prev => ({ ...prev, toState: e.target.value }))}
                       placeholder="Destination state"
+                      autoComplete="off"
+                      data-form-type="other"
                     />
                   </div>
                   <div>
@@ -406,6 +410,8 @@ export default function MovingChecklist() {
                       value={moveAddresses.toZip}
                       onChange={(e) => setMoveAddresses(prev => ({ ...prev, toZip: e.target.value }))}
                       placeholder="Destination ZIP"
+                      autoComplete="off"
+                      data-form-type="other"
                     />
                   </div>
                 </div>
