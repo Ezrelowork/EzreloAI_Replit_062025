@@ -720,12 +720,19 @@ Return JSON with ONLY the actual providers that serve this exact address. If mul
           } else {
             console.error(`Yelp API response not OK: ${yelpResponse.status} ${yelpResponse.statusText}`);
           }
-        } catch (yelpError) {
-          console.error("Yelp API error:", yelpError);
-          // Continue without Yelp data - user will still get major carriers
+          } catch (yelpError) {
+            console.error("Yelp API error:", yelpError);
+            // Continue without Yelp data - user will still get major carriers
+          }
+        }
+
+        // Merge Google Places and Yelp results, removing duplicates
+        if (allLocalCompanies.length > 0) {
+          movingCompanies.unshift(...allLocalCompanies);
+          console.log(`🏢 Added ${allLocalCompanies.length} total local moving companies`);
         }
       } else {
-        console.log(`Skipping Yelp integration: isLocalMove=${isLocalMove}, hasYelpKey=${!!process.env.YELP_API_KEY}`);
+        console.log(`Skipping local company search: isLocalMove=${isLocalMove}`);
       }
 
       return res.json({
