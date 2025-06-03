@@ -72,62 +72,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
             content: "You are an expert utility service territory researcher. You have access to comprehensive databases of municipal utilities, rural electric cooperatives, and exclusive service territories. Always provide the actual monopoly provider that serves each specific address, not general options. If multiple providers exist, specify which one serves this exact location."
           },
           {
-            role: "user",
-            content: `Find the EXACT utility and service providers that serve the specific address: ${formattedAddress} in ${city}, ${state} ${zip}.
+            role: "user", 
+            content: `You must find the EXACT utility monopoly providers for this specific address: ${formattedAddress}
 
-IMPORTANT: This must be the actual monopoly or specific providers for this exact location, not general options. Some areas have only ONE provider option (like municipal utilities). Research the specific service territory for this address.
+CRITICAL: For ${city}, ${state} ${zip} specifically:
 
-For areas like Argyle, TX or other small municipalities, check if they have:
-- Municipal utility services (like Denton Municipal Electric, Denton Water)
-- Specific regional providers that have exclusive service territories
-- Rural electric cooperatives
-- Municipal waste services
+Step 1: Determine if this address falls within any municipal utility service territories
+Step 2: Check for rural electric cooperative boundaries  
+Step 3: Identify exclusive franchise areas
+Step 4: If uncertain, explicitly state "Verify with local authorities"
 
-Respond ONLY with valid JSON in this exact format (no markdown, no explanation, no additional text):
+Special attention for Texas locations like Argyle:
+- Many Texas municipalities have their own electric/water utilities
+- Denton County area may be served by Denton Municipal Electric
+- Municipal boundaries determine service providers
+- Some areas have NO choice in providers (monopoly service)
+
+Return JSON with ONLY the actual providers that serve this exact address. If multiple options exist, state the primary/required provider. If uncertain about exact boundaries, include verification instructions.
 
 {
   "Electricity": {
-    "provider": "Exact Provider Name (e.g., Denton Municipal Electric if in their service area)",
-    "phone": "Actual customer service phone",
-    "description": "Service territory and connection info",
-    "website": "actual website URL",
-    "hours": "Customer service hours"
-  },
-  "Gas": {
-    "provider": "Exact Provider Name (e.g., Atmos Energy if they serve this area)",
-    "phone": "Actual customer service phone",
-    "description": "Service territory and connection info",
-    "website": "actual website URL",
-    "hours": "Customer service hours"
+    "provider": "[Municipal Electric Company Name OR Rural Coop OR Retail Provider Name - BE SPECIFIC]",
+    "phone": "[Actual service phone]",
+    "description": "Service territory: [specific area served]. Connection process: [how to establish service]",
+    "website": "[actual website]",
+    "hours": "[service hours]"
   },
   "Water": {
-    "provider": "Exact Provider Name (municipal or private utility that serves this address)",
-    "phone": "Actual customer service phone",
-    "description": "Service territory and connection info",
-    "website": "actual website URL",
-    "hours": "Customer service hours"
+    "provider": "[Municipal Water Dept OR Water District OR Private Utility Name]", 
+    "phone": "[Actual service phone]",
+    "description": "Service territory: [specific area]. Setup requirements: [deposit/connection info]",
+    "website": "[actual website]",
+    "hours": "[service hours]"
+  },
+  "Gas": {
+    "provider": "[Distribution Company Name - usually regional monopoly]",
+    "phone": "[Actual service phone]", 
+    "description": "Distribution area: [territory served]. Service availability: [if available at address]",
+    "website": "[actual website]",
+    "hours": "[service hours]"
   },
   "Internet": {
-    "provider": "Primary high-speed provider available at this address",
-    "phone": "Actual customer service phone",
-    "description": "Available plans and speeds for this location",
-    "website": "actual website URL",
-    "hours": "Customer service hours"
+    "provider": "[Primary ISP name OR Multiple available: ISP1, ISP2]",
+    "phone": "[Service phone]",
+    "description": "Available services: [speeds/plans for this location]", 
+    "website": "[actual website]",
+    "hours": "[service hours]"
   },
   "Trash": {
-    "provider": "Exact waste management provider (municipal or contracted service)",
-    "phone": "Actual customer service phone",
-    "description": "Collection schedule and service details",
-    "website": "actual website URL",
-    "hours": "Customer service hours"
+    "provider": "[Municipal Service OR Contracted Company Name]",
+    "phone": "[Service phone]",
+    "description": "Collection area: [territory]. Schedule: [pickup days if known]",
+    "website": "[actual website]", 
+    "hours": "[service hours]"
   }
-}
-
-Be specific to the exact service territories. If uncertain about a provider, indicate "Contact city hall for verification" in the description.`
+}`
           }
         ],
         response_format: { type: "json_object" },
-        temperature: 0.2
+        temperature: 0.1
       });
 
       const gptContent = completion.choices?.[0]?.message?.content;
