@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import Home from "@/pages/home";
 import Analytics from "@/pages/analytics";
+import MovingChecklist from "@/pages/moving-checklist";
 import NotFound from "@/pages/not-found";
 
 function Navigation() {
@@ -22,6 +23,11 @@ function Navigation() {
             <Link href="/">
               <Button variant={location === "/" ? "default" : "ghost"} size="sm">
                 Provider Search
+              </Button>
+            </Link>
+            <Link href="/moving-checklist">
+              <Button variant={location === "/moving-checklist" ? "default" : "ghost"} size="sm">
+                Moving Checklist
               </Button>
             </Link>
             <Link href="/analytics">
@@ -42,6 +48,7 @@ function Router() {
       <Navigation />
       <Switch>
         <Route path="/" component={Home} />
+        <Route path="/moving-checklist" component={MovingChecklist} />
         <Route path="/analytics" component={Analytics} />
         <Route component={NotFound} />
       </Switch>
