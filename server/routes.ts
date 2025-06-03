@@ -512,20 +512,31 @@ Return JSON with ONLY the actual providers that serve this exact address. If mul
                 // Try to find actual company website using Google Places API
                 if (process.env.GOOGLE_API_KEY) {
                   try {
+                    const searchQuery = `${business.name} ${business.location?.city} ${business.location?.state}`;
+                    console.log(`🔍 Searching Google Places for: ${searchQuery}`);
+                    
                     const placesResponse = await fetch(
-                      `https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=${encodeURIComponent(business.name + ' ' + business.location?.city + ' ' + business.location?.state)}&inputtype=textquery&fields=website&key=${process.env.GOOGLE_API_KEY}`
+                      `https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=${encodeURIComponent(searchQuery)}&inputtype=textquery&fields=website&key=${process.env.GOOGLE_API_KEY}`
                     );
                     
                     if (placesResponse.ok) {
                       const placesData = await placesResponse.json();
+                      console.log(`Google Places response for ${business.name}:`, JSON.stringify(placesData, null, 2));
+                      
                       if (placesData.candidates?.[0]?.website) {
                         companyWebsite = placesData.candidates[0].website;
-                        console.log(`Found direct website for ${business.name}: ${companyWebsite}`);
+                        console.log(`✅ Found direct website for ${business.name}: ${companyWebsite}`);
+                      } else {
+                        console.log(`❌ No website found for ${business.name} in Google Places`);
                       }
+                    } else {
+                      console.error(`Google Places API error: ${placesResponse.status} ${placesResponse.statusText}`);
                     }
                   } catch (googleError) {
-                    console.log(`Could not find website for ${business.name} via Google Places`);
+                    console.error(`Google Places API exception for ${business.name}:`, googleError);
                   }
+                } else {
+                  console.log(`No Google API key configured for website lookup`);
                 }
 
                 return {
