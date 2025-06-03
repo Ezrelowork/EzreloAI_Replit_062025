@@ -35,14 +35,40 @@ function getKnownServiceTerritories(city: string, state: string, zip: string): P
         website: "www.cityofdenton.com/departments-services/departments-g-p/public-works/solid-waste",
         hours: "Monday-Friday 8:00 AM - 5:00 PM"
       },
-      Internet: {
-        category: "Internet",
-        provider: "Spectrum",
-        phone: "1-855-243-8892",
-        description: "High-speed cable internet service available in Argyle area.",
-        website: "www.spectrum.com",
-        hours: "24/7 Customer Support"
-      },
+      Internet: [
+        {
+          category: "Internet",
+          provider: "Frontier",
+          phone: "1-800-921-8101",
+          description: "Fiber and DSL internet service provider serving North Texas including Argyle.",
+          website: "www.frontier.com",
+          hours: "24/7 Customer Support"
+        },
+        {
+          category: "Internet",
+          provider: "Spectrum",
+          phone: "1-855-243-8892",
+          description: "High-speed cable internet service available in Argyle area.",
+          website: "www.spectrum.com",
+          hours: "24/7 Customer Support"
+        },
+        {
+          category: "Internet",
+          provider: "AT&T",
+          phone: "1-800-288-2020",
+          description: "Fiber and DSL internet options for residential customers in Argyle.",
+          website: "www.att.com",
+          hours: "24/7 Customer Support"
+        },
+        {
+          category: "Internet",
+          provider: "Viasat",
+          phone: "1-855-810-1308",
+          description: "Satellite internet service available throughout North Texas including rural areas.",
+          website: "www.viasat.com",
+          hours: "24/7 Customer Support"
+        }
+      ],
       Gas: {
         category: "Gas", 
         provider: "Atmos Energy",
@@ -214,7 +240,19 @@ Return JSON with ONLY the actual providers that serve this exact address. If mul
         // Merge known territories with AI results, prioritizing known data
         for (const [category, knownProvider] of Object.entries(knownTerritories)) {
           if (knownProvider) {
-            providersData[category] = knownProvider;
+            if (Array.isArray(knownProvider)) {
+              // For arrays (like multiple Internet providers), add each one with unique keys
+              knownProvider.forEach((provider, index) => {
+                if (index === 0) {
+                  providersData[category] = provider;
+                } else {
+                  providersData[`${category}_${index + 1}`] = provider;
+                }
+              });
+            } else {
+              // For single providers, replace directly
+              providersData[category] = knownProvider;
+            }
           }
         }
       }

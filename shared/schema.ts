@@ -40,5 +40,5 @@ export type User = typeof users.$inferSelect;
 export type AddressSearch = z.infer<typeof addressSearchSchema>;
 export type ServiceProvider = z.infer<typeof serviceProviderSchema>;
 export type ServiceProvidersData = {
-  [key: string]: ServiceProvider;
+  [key: string]: ServiceProvider | ServiceProvider[];
 };
