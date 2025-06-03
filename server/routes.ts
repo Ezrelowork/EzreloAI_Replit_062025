@@ -505,8 +505,8 @@ Return JSON with ONLY the actual providers that serve this exact address. If mul
             const yelpData = await yelpResponse.json();
             console.log(`📊 Yelp returned ${yelpData.businesses?.length || 0} businesses`);
             
-            // Filter businesses by minimum review count (e.g., at least 5 reviews)
-            const minReviews = 5;
+            // Filter businesses by minimum review count (e.g., at least 8 reviews)
+            const minReviews = 8;
             const qualifiedBusinesses = (yelpData.businesses || []).filter((business: any) => {
               const reviewCount = business.review_count || 0;
               const hasMinReviews = reviewCount >= minReviews;
