@@ -410,6 +410,8 @@ Return JSON with ONLY the actual providers that serve this exact address. If mul
       const isLocalMove = fromState === toState;
       const isShortDistance = fromState === toState && fromCity !== toCity;
       
+      console.log(`Move detection: from=${fromState}, to=${toState}, isLocalMove=${isLocalMove}`);
+      
       // Base major moving companies
       const movingCompanies = [
         {
