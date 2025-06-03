@@ -505,28 +505,72 @@ Return JSON with ONLY the actual providers that serve this exact address. If mul
             const yelpData = await yelpResponse.json();
             console.log(`📊 Yelp returned ${yelpData.businesses?.length || 0} businesses`);
             
-            // Filter businesses by minimum review count (e.g., at least 8 reviews)
+            // First get Google review data for all businesses to enable combined filtering
+            const businessesWithGoogleData = await Promise.all(
+              (yelpData.businesses || []).map(async (business: any) => {
+                let googleReviewCount = 0;
+                
+                if (process.env.GOOGLE_API_KEY) {
+                  try {
+                    const searchQuery = `${business.name} ${business.location?.city} ${business.location?.state}`;
+                    const placesResponse = await fetch(
+                      `https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=${encodeURIComponent(searchQuery)}&inputtype=textquery&fields=place_id&key=${process.env.GOOGLE_API_KEY}`
+                    );
+                    
+                    if (placesResponse.ok) {
+                      const placesData = await placesResponse.json();
+                      if (placesData.candidates?.[0]?.place_id) {
+                        const placeId = placesData.candidates[0].place_id;
+                        const detailsResponse = await fetch(
+                          `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=user_ratings_total&key=${process.env.GOOGLE_API_KEY}`
+                        );
+                        
+                        if (detailsResponse.ok) {
+                          const detailsData = await detailsResponse.json();
+                          googleReviewCount = detailsData.result?.user_ratings_total || 0;
+                        }
+                      }
+                    }
+                  } catch (error) {
+                    // Continue with Yelp-only data if Google fails
+                  }
+                }
+                
+                return {
+                  ...business,
+                  googleReviewCount
+                };
+              })
+            );
+
+            // Filter businesses by combined review count (Yelp + Google)
             const minReviews = 8;
-            const qualifiedBusinesses = (yelpData.businesses || []).filter((business: any) => {
-              const reviewCount = business.review_count || 0;
-              const hasMinReviews = reviewCount >= minReviews;
+            const qualifiedBusinesses = businessesWithGoogleData.filter((business: any) => {
+              const yelpReviews = business.review_count || 0;
+              const googleReviews = business.googleReviewCount || 0;
+              const totalReviews = yelpReviews + googleReviews;
+              const hasMinReviews = totalReviews >= minReviews;
+              
               if (!hasMinReviews) {
-                console.log(`⚠️ Filtered out ${business.name}: only ${reviewCount} reviews (min: ${minReviews})`);
+                console.log(`⚠️ Filtered out ${business.name}: ${yelpReviews} Yelp + ${googleReviews} Google = ${totalReviews} total reviews (min: ${minReviews})`);
+              } else {
+                console.log(`✅ ${business.name}: ${yelpReviews} Yelp + ${googleReviews} Google = ${totalReviews} total reviews`);
               }
+              
               return hasMinReviews;
             });
             
-            console.log(`✅ ${qualifiedBusinesses.length} businesses meet review threshold (${minReviews}+ reviews)`);
+            console.log(`✅ ${qualifiedBusinesses.length} businesses meet combined review threshold (${minReviews}+ total reviews)`);
             
             const yelpMovers = await Promise.all(
               qualifiedBusinesses.map(async (business: any, index: number) => {
                 let companyWebsite = business.url; // Default to Yelp page
                 
-                // Try to find actual company website using Google Places API
-                if (process.env.GOOGLE_API_KEY) {
+                // Get website from Google Places if we have Google data
+                if (process.env.GOOGLE_API_KEY && business.googleReviewCount > 0) {
                   try {
                     const searchQuery = `${business.name} ${business.location?.city} ${business.location?.state}`;
-                    console.log(`🔍 Searching Google Places for: ${searchQuery}`);
+                    console.log(`🔍 Getting website for: ${searchQuery}`);
                     
                     const placesResponse = await fetch(
                       `https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=${encodeURIComponent(searchQuery)}&inputtype=textquery&fields=place_id&key=${process.env.GOOGLE_API_KEY}`
@@ -537,7 +581,6 @@ Return JSON with ONLY the actual providers that serve this exact address. If mul
                       
                       if (placesData.candidates?.[0]?.place_id) {
                         const placeId = placesData.candidates[0].place_id;
-                        console.log(`📍 Found place_id for ${business.name}: ${placeId}`);
                         
                         // Get place details to retrieve website
                         const detailsResponse = await fetch(
@@ -549,28 +592,28 @@ Return JSON with ONLY the actual providers that serve this exact address. If mul
                           if (detailsData.result?.website) {
                             companyWebsite = detailsData.result.website;
                             console.log(`✅ Found direct website for ${business.name}: ${companyWebsite}`);
-                          } else {
-                            console.log(`❌ No website in place details for ${business.name}`);
                           }
                         }
-                      } else {
-                        console.log(`❌ No place found for ${business.name} in Google Places`);
                       }
-                    } else {
-                      console.error(`Google Places API error: ${placesResponse.status} ${placesResponse.statusText}`);
                     }
                   } catch (googleError) {
-                    console.error(`Google Places API exception for ${business.name}:`, googleError);
+                    console.log(`Could not get website for ${business.name}`);
                   }
-                } else {
-                  console.log(`No Google API key configured for website lookup`);
                 }
+
+                // Calculate combined review information using pre-fetched data
+                const yelpReviews = business.review_count || 0;
+                const googleReviews = business.googleReviewCount || 0;
+                const totalReviews = yelpReviews + googleReviews;
+                const reviewSummary = googleReviews > 0 
+                  ? `${yelpReviews} Yelp + ${googleReviews} Google reviews (${totalReviews} total)`
+                  : `${yelpReviews} reviews on Yelp`;
 
                 return {
                   category: "Local Moving Companies",
                   provider: business.name,
                   phone: business.display_phone || business.phone || 'Contact via website',
-                  description: `${business.review_count} reviews on Yelp. ${business.location?.address1 || ''} ${business.location?.city || ''}, ${business.location?.state || ''}`,
+                  description: `${reviewSummary}. ${business.location?.address1 || ''} ${business.location?.city || ''}, ${business.location?.state || ''}`,
                   website: companyWebsite,
                   referralUrl: `${companyWebsite}?ref=ezrelo&partner=EZR_YELP${index + 1}`,
                   affiliateCode: `EZRELO_YELP${index + 1}`,
