@@ -329,6 +329,78 @@ Return JSON with ONLY the actual providers that serve this exact address. If mul
     }
   });
 
+  // Analytics endpoint for monetization dashboard
+  app.get("/api/analytics", async (req, res) => {
+    try {
+      // Get all referral clicks
+      const allClicks = await db.select().from(referralClicks);
+      
+      // Calculate analytics
+      const totalClicks = allClicks.length;
+      
+      // Group by provider
+      const providerCounts = allClicks.reduce((acc, click) => {
+        acc[click.provider] = (acc[click.provider] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+      
+      const clicksByProvider = Object.entries(providerCounts)
+        .map(([provider, clicks]) => ({ provider, clicks }))
+        .sort((a, b) => b.clicks - a.clicks);
+      
+      // Group by category
+      const categoryCounts = allClicks.reduce((acc, click) => {
+        acc[click.category] = (acc[click.category] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+      
+      const clicksByCategory = Object.entries(categoryCounts)
+        .map(([category, clicks]) => ({ category, clicks }))
+        .sort((a, b) => b.clicks - a.clicks);
+      
+      // Group by action
+      const actionCounts = allClicks.reduce((acc, click) => {
+        acc[click.action] = (acc[click.action] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+      
+      const clicksByAction = Object.entries(actionCounts)
+        .map(([action, clicks]) => ({ action, clicks }))
+        .sort((a, b) => b.clicks - a.clicks);
+      
+      // Top locations
+      const locationCounts = allClicks.reduce((acc, click) => {
+        // Extract city from address
+        const addressParts = click.userAddress.split(',');
+        const city = addressParts.length >= 2 ? addressParts[1].trim() : click.userAddress;
+        acc[city] = (acc[city] || 0) + 1;
+        return acc;
+      }, {} as Record<string, number>);
+      
+      const topLocations = Object.entries(locationCounts)
+        .map(([location, clicks]) => ({ location, clicks }))
+        .sort((a, b) => b.clicks - a.clicks);
+      
+      // Recent clicks (last 50)
+      const recentClicks = allClicks
+        .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+        .slice(0, 50);
+      
+      return res.json({
+        totalClicks,
+        clicksByProvider,
+        clicksByCategory,
+        clicksByAction,
+        topLocations,
+        recentClicks
+      });
+      
+    } catch (error) {
+      console.error("Analytics error:", error);
+      return res.status(500).json({ error: "Failed to load analytics" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
