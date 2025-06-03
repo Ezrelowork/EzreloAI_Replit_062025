@@ -217,7 +217,7 @@ export default function MovingChecklist() {
               const completedInTimeframe = items.filter(item => item.completed).length;
               
               return (
-                <Card key={timeframe} id={`timeframe-${timeframe.replace(' ', '-')}`}>
+                <Card key={timeframe} id={`timeframe-${timeframe.replace(/\s+/g, '-')}`}>
                   <CardHeader>
                     <div className="flex justify-between items-center">
                       <CardTitle className="capitalize">{timeframe}</CardTitle>
