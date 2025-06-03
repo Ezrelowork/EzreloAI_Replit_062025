@@ -426,7 +426,7 @@ Return JSON with ONLY the actual providers that serve this exact address. If mul
       console.log(`Move detection: from=${fromState}, to=${toState}, isLocalMove=${isLocalMove}`);
       
       // Base major moving companies
-      const movingCompanies = [
+      let movingCompanies = [
         {
           category: "Moving Companies",
           provider: "United Van Lines",
@@ -598,6 +598,7 @@ Return JSON with ONLY the actual providers that serve this exact address. If mul
         }
 
         // Also search Yelp for additional coverage and merge with Google results
+        let yelpMovers = [];
         if (process.env.YELP_API_KEY) {
           try {
           const searchParams = new URLSearchParams({
@@ -678,7 +679,7 @@ Return JSON with ONLY the actual providers that serve this exact address. If mul
             
             console.log(`✅ ${qualifiedBusinesses.length} businesses meet combined review threshold (${minReviews}+ total reviews)`);
             
-            const yelpMovers = await Promise.all(
+            yelpMovers = await Promise.all(
               qualifiedBusinesses.map(async (business: any, index: number) => {
                 let companyWebsite = business.url; // Default to Yelp page
                 
@@ -792,10 +793,19 @@ Return JSON with ONLY the actual providers that serve this exact address. If mul
         }
         
         // Sort local companies by distance from the "from address" (closest first)
-        const localCompaniesCount = allLocalCompanies.length + (yelpMovers?.length || 0);
-        if (localCompaniesCount > 0) {
-          const localCompanies = movingCompanies.slice(0, localCompaniesCount);
-          const nonLocalCompanies = movingCompanies.slice(localCompaniesCount);
+        // Count how many local companies we added from both Google Places and Yelp
+        let totalLocalCompanies = 0;
+        for (let i = 0; i < movingCompanies.length; i++) {
+          if (movingCompanies[i].category === "Local Moving Companies") {
+            totalLocalCompanies++;
+          } else {
+            break; // Stop when we reach non-local companies
+          }
+        }
+        
+        if (totalLocalCompanies > 0) {
+          const localCompanies = movingCompanies.slice(0, totalLocalCompanies);
+          const nonLocalCompanies = movingCompanies.slice(totalLocalCompanies);
           
           // Sort local companies by distance
           localCompanies.sort((a: any, b: any) => {
@@ -806,7 +816,7 @@ Return JSON with ONLY the actual providers that serve this exact address. If mul
           
           // Combine sorted local companies with major carriers
           movingCompanies = [...localCompanies, ...nonLocalCompanies];
-          console.log(`📍 Sorted ${localCompaniesCount} local companies by distance from ${fromCity}, ${fromState}`);
+          console.log(`📍 Sorted ${totalLocalCompanies} local companies by distance from ${fromCity}, ${fromState}`);
         }
       } else {
         console.log(`Skipping local company search: isLocalMove=${isLocalMove}`);
