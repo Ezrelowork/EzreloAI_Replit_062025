@@ -145,7 +145,13 @@ export default function MovingChecklist() {
   };
 
   const getTimeframes = () => {
-    return Array.from(new Set(checklist.map(item => item.timeframe)));
+    const timeframes = Array.from(new Set(checklist.map(item => item.timeframe)));
+    // Sort timeframes in descending order (8 weeks, 6 weeks, 4 weeks, etc.)
+    return timeframes.sort((a, b) => {
+      const aNum = parseInt(a.split(' ')[0]);
+      const bNum = parseInt(b.split(' ')[0]);
+      return bNum - aNum;
+    });
   };
 
   const getCategories = () => {
@@ -220,7 +226,7 @@ export default function MovingChecklist() {
                 <Card key={timeframe} id={`timeframe-${timeframe.replace(/\s+/g, '-')}`}>
                   <CardHeader>
                     <div className="flex justify-between items-center">
-                      <CardTitle className="capitalize">{timeframe}</CardTitle>
+                      <CardTitle className="capitalize">{timeframe} {/* Debug: timeframe-${timeframe.replace(/\s+/g, '-')} */}</CardTitle>
                       <Badge variant="outline">
                         {completedInTimeframe}/{items.length} Complete
                       </Badge>
