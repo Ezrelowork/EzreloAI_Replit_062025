@@ -637,6 +637,13 @@ export default function Home() {
                     <span>Post-move setup</span>
                   </li>
                 </ul>
+                <div className="mt-6">
+                  <Link href="/moving-checklist">
+                    <Button className="w-full">
+                      View Checklist
+                    </Button>
+                  </Link>
+                </div>
               </CardContent>
             </Card>
             
@@ -661,6 +668,18 @@ export default function Home() {
                     <span>Account notifications</span>
                   </li>
                 </ul>
+                <div className="mt-6">
+                  <Button 
+                    className="w-full" 
+                    variant="outline"
+                    onClick={() => toast({
+                      title: "Coming Soon",
+                      description: "Change of address service will be available soon!",
+                    })}
+                  >
+                    Coming Soon
+                  </Button>
+                </div>
               </CardContent>
             </Card>
             
@@ -685,6 +704,18 @@ export default function Home() {
                     <span>Community resources</span>
                   </li>
                 </ul>
+                <div className="mt-6">
+                  <Button 
+                    className="w-full" 
+                    variant="outline"
+                    onClick={() => toast({
+                      title: "Coming Soon",
+                      description: "Neighborhood information service will be available soon!",
+                    })}
+                  >
+                    Coming Soon
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </div>
