@@ -6,6 +6,19 @@ import OpenAI from "openai";
 import { db } from "./db";
 import { referralClicks } from "@shared/schema";
 
+// Calculate distance between two coordinates using Haversine formula
+function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 3959; // Earth's radius in miles
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * 
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c; // Distance in miles
+}
+
 // Known service territory database for verified locations
 function getKnownServiceTerritories(city: string, state: string, zip: string): Partial<ServiceProvidersData> | null {
   const location = `${city.toLowerCase()}, ${state.toLowerCase()}`;
@@ -485,6 +498,28 @@ Return JSON with ONLY the actual providers that serve this exact address. If mul
       if (isLocalMove) {
         const allLocalCompanies = [];
 
+        // Get coordinates for the "from" address to calculate distances
+        let fromCoordinates = null;
+        if (process.env.GOOGLE_API_KEY) {
+          try {
+            const geocodeParams = new URLSearchParams({
+              address: `${fromCity}, ${fromState} ${fromZip}`,
+              key: process.env.GOOGLE_API_KEY
+            });
+            
+            const geocodeResponse = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?${geocodeParams}`);
+            if (geocodeResponse.ok) {
+              const geocodeData = await geocodeResponse.json();
+              if (geocodeData.results && geocodeData.results[0]) {
+                fromCoordinates = geocodeData.results[0].geometry.location;
+                console.log(`📍 From address coordinates: ${fromCoordinates.lat}, ${fromCoordinates.lng}`);
+              }
+            }
+          } catch (error) {
+            console.log('Could not geocode from address for distance calculation');
+          }
+        }
+
         // First search Google Places for comprehensive moving company coverage
         if (process.env.GOOGLE_API_KEY) {
           try {
@@ -526,18 +561,30 @@ Return JSON with ONLY the actual providers that serve this exact address. If mul
                       console.log(`Could not get details for ${place.name}`);
                     }
 
+                    // Calculate distance from the "from" address
+                    let distance = 999; // Default high value for sorting
+                    if (fromCoordinates && place.geometry && place.geometry.location) {
+                      distance = calculateDistance(
+                        fromCoordinates.lat, 
+                        fromCoordinates.lng,
+                        place.geometry.location.lat,
+                        place.geometry.location.lng
+                      );
+                    }
+
                     allLocalCompanies.push({
                       category: "Local Moving Companies",
                       provider: place.name,
                       phone: phone,
-                      description: `${reviewCount} Google reviews (${rating}★). ${place.formatted_address || ''}`,
+                      description: `${reviewCount} Google reviews (${rating}★). ${place.formatted_address || ''}${distance < 999 ? ` • ${distance.toFixed(1)} miles away` : ''}`,
                       website: companyWebsite || `https://www.google.com/maps/place/?q=place_id:${place.place_id}`,
                       referralUrl: companyWebsite ? `${companyWebsite}?ref=ezrelo&source=google` : `https://www.google.com/maps/place/?q=place_id:${place.place_id}`,
                       affiliateCode: `EZRELO_GOOGLE${allLocalCompanies.length + 1}`,
                       hours: "Contact for hours",
                       rating: rating,
                       services: ["Moving Services"],
-                      estimatedCost: "Contact for quote"
+                      estimatedCost: "Contact for quote",
+                      distance: distance
                     });
                   }
                 }
@@ -696,18 +743,30 @@ Return JSON with ONLY the actual providers that serve this exact address. If mul
                   ? `${yelpReviews} Yelp + ${googleReviews} Google reviews (${totalReviews} total)`
                   : `${yelpReviews} reviews on Yelp`;
 
+                // Calculate distance from the "from" address
+                let distance = 999; // Default high value for sorting
+                if (fromCoordinates && business.coordinates) {
+                  distance = calculateDistance(
+                    fromCoordinates.lat, 
+                    fromCoordinates.lng,
+                    business.coordinates.latitude,
+                    business.coordinates.longitude
+                  );
+                }
+
                 return {
                   category: "Local Moving Companies",
                   provider: business.name,
                   phone: business.display_phone || business.phone || 'Contact via website',
-                  description: `${reviewSummary}. ${business.location?.address1 || ''} ${business.location?.city || ''}, ${business.location?.state || ''}`,
+                  description: `${reviewSummary}. ${business.location?.address1 || ''} ${business.location?.city || ''}, ${business.location?.state || ''}${distance < 999 ? ` • ${distance.toFixed(1)} miles away` : ''}`,
                   website: companyWebsite,
                   referralUrl: `${companyWebsite}?ref=ezrelo&partner=EZR_YELP${index + 1}`,
                   affiliateCode: `EZRELO_YELP${index + 1}`,
                   hours: business.hours?.[0]?.is_open_now ? "Currently Open" : "Hours vary",
                   rating: business.rating || 0,
                   services: business.categories?.map((cat: any) => cat.title) || ["Moving Services"],
-                  estimatedCost: business.price ? `${business.price} pricing tier` : "Contact for quote"
+                  estimatedCost: business.price ? `${business.price} pricing tier` : "Contact for quote",
+                  distance: distance
                 };
               })
             );
@@ -730,6 +789,24 @@ Return JSON with ONLY the actual providers that serve this exact address. If mul
         if (allLocalCompanies.length > 0) {
           movingCompanies.unshift(...allLocalCompanies);
           console.log(`🏢 Added ${allLocalCompanies.length} total local moving companies`);
+        }
+        
+        // Sort local companies by distance from the "from address" (closest first)
+        const localCompaniesCount = allLocalCompanies.length + (yelpMovers?.length || 0);
+        if (localCompaniesCount > 0) {
+          const localCompanies = movingCompanies.slice(0, localCompaniesCount);
+          const nonLocalCompanies = movingCompanies.slice(localCompaniesCount);
+          
+          // Sort local companies by distance
+          localCompanies.sort((a: any, b: any) => {
+            const distanceA = a.distance || 999;
+            const distanceB = b.distance || 999;
+            return distanceA - distanceB;
+          });
+          
+          // Combine sorted local companies with major carriers
+          movingCompanies = [...localCompanies, ...nonLocalCompanies];
+          console.log(`📍 Sorted ${localCompaniesCount} local companies by distance from ${fromCity}, ${fromState}`);
         }
       } else {
         console.log(`Skipping local company search: isLocalMove=${isLocalMove}`);
