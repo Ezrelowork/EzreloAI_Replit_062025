@@ -490,6 +490,7 @@ Return JSON with ONLY the actual providers that serve this exact address. If mul
             sort_by: 'rating'
           });
           
+          console.log(`🔍 Searching Yelp for movers in ${toCity}, ${toState}`);
           const yelpResponse = await fetch(`https://api.yelp.com/v3/businesses/search?${searchParams}`, {
             method: 'GET',
             headers: {
@@ -500,59 +501,36 @@ Return JSON with ONLY the actual providers that serve this exact address. If mul
 
           if (yelpResponse.ok) {
             const yelpData = await yelpResponse.json();
-            const yelpMovers = await Promise.all(
-              (yelpData.businesses || []).map(async (business: any, index: number) => {
-                let companyWebsite = business.url; // Default to Yelp page
-                
-                // Try to find actual company website using Google Places API
-                if (process.env.GOOGLE_API_KEY) {
-                  try {
-                    const placesResponse = await fetch(
-                      `https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=${encodeURIComponent(business.name + ' ' + business.location?.city + ' ' + business.location?.state)}&inputtype=textquery&fields=website&key=${process.env.GOOGLE_API_KEY}`
-                    );
-                    
-                    if (placesResponse.ok) {
-                      const placesData = await placesResponse.json();
-                      if (placesData.candidates?.[0]?.website) {
-                        companyWebsite = placesData.candidates[0].website;
-                        console.log(`Found website for ${business.name}: ${companyWebsite}`);
-                      }
-                    } else {
-                      console.log(`Google Places API error for ${business.name}: ${placesResponse.status}`);
-                    }
-                  } catch (googleError) {
-                    console.log(`Could not find website for ${business.name} via Google Places:`, googleError);
-                  }
-                } else {
-                  console.log(`No Google API key available for website lookup`);
-                }
-
-                return {
-                  category: "Local Moving Companies",
-                  provider: business.name,
-                  phone: business.display_phone || business.phone || 'Contact via website',
-                  description: `${business.review_count} reviews on Yelp. ${business.location?.address1 || ''} ${business.location?.city || ''}, ${business.location?.state || ''}`,
-                  website: companyWebsite,
-                  referralUrl: `${companyWebsite}?ref=ezrelo&partner=EZR_YELP${index + 1}`,
-                  affiliateCode: `EZRELO_YELP${index + 1}`,
-                  hours: business.hours?.[0]?.is_open_now ? "Currently Open" : "Hours vary",
-                  rating: business.rating || 0,
-                  services: business.categories?.map((cat: any) => cat.title) || ["Moving Services"],
-                  estimatedCost: business.price ? `${business.price} pricing tier` : "Contact for quote"
-                };
-              })
-            );
+            console.log(`📊 Yelp returned ${yelpData.businesses?.length || 0} businesses`);
+            
+            const yelpMovers = (yelpData.businesses || []).map((business: any, index: number) => ({
+              category: "Local Moving Companies",
+              provider: business.name,
+              phone: business.display_phone || business.phone || 'Contact via website',
+              description: `${business.review_count} reviews on Yelp. ${business.location?.address1 || ''} ${business.location?.city || ''}, ${business.location?.state || ''}`,
+              website: business.url,
+              referralUrl: `${business.url}?ref=ezrelo&partner=EZR_YELP${index + 1}`,
+              affiliateCode: `EZRELO_YELP${index + 1}`,
+              hours: business.hours?.[0]?.is_open_now ? "Currently Open" : "Hours vary",
+              rating: business.rating || 0,
+              services: business.categories?.map((cat: any) => cat.title) || ["Moving Services"],
+              estimatedCost: business.price ? `${business.price} pricing tier` : "Contact for quote"
+            }));
 
             // Add Yelp businesses to the beginning of the list
             if (yelpMovers.length > 0) {
               movingCompanies.unshift(...yelpMovers);
-              console.log(`🏢 Found ${yelpMovers.length} local moving companies via Yelp for ${toCity}, ${toState}`);
+              console.log(`🏢 Added ${yelpMovers.length} local moving companies via Yelp for ${toCity}, ${toState}`);
             }
+          } else {
+            console.error(`Yelp API response not OK: ${yelpResponse.status} ${yelpResponse.statusText}`);
           }
         } catch (yelpError) {
           console.error("Yelp API error:", yelpError);
           // Continue without Yelp data - user will still get major carriers
         }
+      } else {
+        console.log(`Skipping Yelp integration: isLocalMove=${isLocalMove}, hasYelpKey=${!!process.env.YELP_API_KEY}`);
       }
 
       return res.json({
