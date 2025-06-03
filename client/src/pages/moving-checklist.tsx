@@ -247,6 +247,17 @@ export default function MovingChecklist() {
                                 {item.description}
                               </p>
                             )}
+                            {item.hasProviders && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setShowMovingDialog(true)}
+                                className="mt-2"
+                              >
+                                <Truck className="w-4 h-4 mr-2" />
+                                Find Movers
+                              </Button>
+                            )}
                           </div>
                         </div>
                       ))}
@@ -321,6 +332,172 @@ export default function MovingChecklist() {
           </Button>
         </div>
       </div>
+
+      {/* Moving Companies Dialog */}
+      <Dialog open={showMovingDialog} onOpenChange={setShowMovingDialog}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Find Moving Companies</DialogTitle>
+          </DialogHeader>
+          
+          <div className="space-y-6">
+            {/* Address Form */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <h3 className="font-semibold text-lg">From Address</h3>
+                <div className="space-y-3">
+                  <div>
+                    <Label htmlFor="fromCity">City</Label>
+                    <Input
+                      id="fromCity"
+                      value={moveAddresses.fromCity}
+                      onChange={(e) => setMoveAddresses(prev => ({ ...prev, fromCity: e.target.value }))}
+                      placeholder="Current city"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="fromState">State</Label>
+                    <Input
+                      id="fromState"
+                      value={moveAddresses.fromState}
+                      onChange={(e) => setMoveAddresses(prev => ({ ...prev, fromState: e.target.value }))}
+                      placeholder="Current state"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="fromZip">ZIP Code</Label>
+                    <Input
+                      id="fromZip"
+                      value={moveAddresses.fromZip}
+                      onChange={(e) => setMoveAddresses(prev => ({ ...prev, fromZip: e.target.value }))}
+                      placeholder="Current ZIP"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="font-semibold text-lg">To Address</h3>
+                <div className="space-y-3">
+                  <div>
+                    <Label htmlFor="toCity">City</Label>
+                    <Input
+                      id="toCity"
+                      value={moveAddresses.toCity}
+                      onChange={(e) => setMoveAddresses(prev => ({ ...prev, toCity: e.target.value }))}
+                      placeholder="Destination city"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="toState">State</Label>
+                    <Input
+                      id="toState"
+                      value={moveAddresses.toState}
+                      onChange={(e) => setMoveAddresses(prev => ({ ...prev, toState: e.target.value }))}
+                      placeholder="Destination state"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="toZip">ZIP Code</Label>
+                    <Input
+                      id="toZip"
+                      value={moveAddresses.toZip}
+                      onChange={(e) => setMoveAddresses(prev => ({ ...prev, toZip: e.target.value }))}
+                      placeholder="Destination ZIP"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <Button 
+              onClick={() => searchMutation.mutate(moveAddresses)}
+              disabled={searchMutation.isPending || !moveAddresses.fromCity || !moveAddresses.toCity}
+              className="w-full"
+            >
+              {searchMutation.isPending ? "Searching..." : "Find Moving Companies"}
+            </Button>
+
+            {/* Moving Companies Results */}
+            {movingCompanies.length > 0 && (
+              <div className="space-y-4">
+                <h3 className="font-semibold text-lg">Recommended Moving Companies</h3>
+                <div className="grid gap-4">
+                  {movingCompanies.map((company, index) => (
+                    <Card key={index} className="border-l-4 border-l-blue-500">
+                      <CardContent className="p-6">
+                        <div className="flex justify-between items-start mb-4">
+                          <div>
+                            <h4 className="text-xl font-semibold text-gray-900">{company.provider}</h4>
+                            <div className="flex items-center gap-2 mt-1">
+                              <div className="flex items-center">
+                                {[...Array(5)].map((_, i) => (
+                                  <Star
+                                    key={i}
+                                    className={`w-4 h-4 ${
+                                      i < Math.floor(company.rating)
+                                        ? "text-yellow-400 fill-current"
+                                        : "text-gray-300"
+                                    }`}
+                                  />
+                                ))}
+                                <span className="ml-1 text-sm text-gray-600">{company.rating}</span>
+                              </div>
+                              <Badge variant="secondary">{company.estimatedCost}</Badge>
+                            </div>
+                          </div>
+                        </div>
+
+                        <p className="text-gray-600 mb-4">{company.description}</p>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                          <div className="space-y-2">
+                            <div className="flex items-center text-sm text-gray-600">
+                              <Phone className="w-4 h-4 mr-2" />
+                              {company.phone}
+                            </div>
+                            <div className="flex items-center text-sm text-gray-600">
+                              <Globe className="w-4 h-4 mr-2" />
+                              {company.hours}
+                            </div>
+                          </div>
+                          <div>
+                            <p className="text-sm font-medium text-gray-700 mb-1">Services:</p>
+                            <div className="flex flex-wrap gap-1">
+                              {company.services.map((service, serviceIndex) => (
+                                <Badge key={serviceIndex} variant="outline" className="text-xs">
+                                  {service}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex gap-3">
+                          <Button
+                            onClick={() => handleReferralClick(company, "get_quote")}
+                            className="flex-1"
+                          >
+                            <ExternalLink className="w-4 h-4 mr-2" />
+                            Get Quote
+                          </Button>
+                          <Button
+                            variant="outline"
+                            onClick={() => handleReferralClick(company, "view_website")}
+                          >
+                            <Globe className="w-4 h-4 mr-2" />
+                            Website
+                          </Button>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
