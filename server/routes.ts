@@ -481,9 +481,78 @@ Return JSON with ONLY the actual providers that serve this exact address. If mul
         }
       ];
 
-      // Add authentic local moving companies for same-state moves using Yelp API
-      if (isLocalMove && process.env.YELP_API_KEY) {
-        try {
+      // Add authentic local moving companies for same-state moves using both Google Places and Yelp APIs
+      if (isLocalMove) {
+        const allLocalCompanies = [];
+
+        // First search Google Places for comprehensive moving company coverage
+        if (process.env.GOOGLE_API_KEY) {
+          try {
+            console.log(`🔍 Searching Google Places for moving companies in ${toCity}, ${toState}`);
+            const googleSearchParams = new URLSearchParams({
+              query: `moving companies in ${toCity}, ${toState}`,
+              key: process.env.GOOGLE_API_KEY
+            });
+
+            const googleResponse = await fetch(`https://maps.googleapis.com/maps/api/place/textsearch/json?${googleSearchParams}`);
+            
+            if (googleResponse.ok) {
+              const googleData = await googleResponse.json();
+              console.log(`📊 Google Places found ${googleData.results?.length || 0} moving companies`);
+              
+              if (googleData.results && googleData.results.length > 0) {
+                // Process first 10 results for better coverage
+                for (const place of googleData.results.slice(0, 10)) {
+                  const reviewCount = place.user_ratings_total || 0;
+                  const rating = place.rating || 0;
+                  
+                  // Only include companies with minimum review threshold
+                  if (reviewCount >= 8) {
+                    let companyWebsite = '';
+                    let phone = 'Contact via Google';
+                    
+                    // Get detailed place information
+                    try {
+                      const detailsResponse = await fetch(
+                        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${place.place_id}&fields=website,formatted_phone_number&key=${process.env.GOOGLE_API_KEY}`
+                      );
+                      
+                      if (detailsResponse.ok) {
+                        const detailsData = await detailsResponse.json();
+                        companyWebsite = detailsData.result?.website || '';
+                        phone = detailsData.result?.formatted_phone_number || 'Contact via Google';
+                      }
+                    } catch (error) {
+                      console.log(`Could not get details for ${place.name}`);
+                    }
+
+                    allLocalCompanies.push({
+                      category: "Local Moving Companies",
+                      provider: place.name,
+                      phone: phone,
+                      description: `${reviewCount} Google reviews (${rating}★). ${place.formatted_address || ''}`,
+                      website: companyWebsite || `https://www.google.com/maps/place/?q=place_id:${place.place_id}`,
+                      referralUrl: companyWebsite ? `${companyWebsite}?ref=ezrelo&source=google` : `https://www.google.com/maps/place/?q=place_id:${place.place_id}`,
+                      affiliateCode: `EZRELO_GOOGLE${allLocalCompanies.length + 1}`,
+                      hours: "Contact for hours",
+                      rating: rating,
+                      services: ["Moving Services"],
+                      estimatedCost: "Contact for quote"
+                    });
+                  }
+                }
+                
+                console.log(`✅ Added ${allLocalCompanies.length} qualified companies from Google Places`);
+              }
+            }
+          } catch (googleError) {
+            console.error("Google Places API error:", googleError);
+          }
+        }
+
+        // Also search Yelp for additional coverage and merge with Google results
+        if (process.env.YELP_API_KEY) {
+          try {
           const searchParams = new URLSearchParams({
             term: 'moving companies',
             location: `${toCity}, ${toState}`,
@@ -596,7 +665,6 @@ Return JSON with ONLY the actual providers that serve this exact address. If mul
                             try {
                               const websiteCheck = await fetch(foundWebsite, { 
                                 method: 'HEAD',
-                                timeout: 5000,
                                 headers: { 'User-Agent': 'EzreloBot/1.0' }
                               });
                               
