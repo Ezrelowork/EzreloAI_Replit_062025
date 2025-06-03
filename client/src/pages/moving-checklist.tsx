@@ -352,27 +352,33 @@ export default function MovingChecklist() {
                     <Label htmlFor="fromCity">City</Label>
                     <Input
                       id="fromCity"
+                      name="origin-city"
                       value={moveAddresses.fromCity}
                       onChange={(e) => setMoveAddresses(prev => ({ ...prev, fromCity: e.target.value }))}
                       placeholder="Current city"
+                      autoComplete="off"
                     />
                   </div>
                   <div>
                     <Label htmlFor="fromState">State</Label>
                     <Input
                       id="fromState"
+                      name="origin-state"
                       value={moveAddresses.fromState}
                       onChange={(e) => setMoveAddresses(prev => ({ ...prev, fromState: e.target.value }))}
                       placeholder="Current state"
+                      autoComplete="off"
                     />
                   </div>
                   <div>
                     <Label htmlFor="fromZip">ZIP Code</Label>
                     <Input
                       id="fromZip"
+                      name="origin-zip"
                       value={moveAddresses.fromZip}
                       onChange={(e) => setMoveAddresses(prev => ({ ...prev, fromZip: e.target.value }))}
                       placeholder="Current ZIP"
+                      autoComplete="off"
                     />
                   </div>
                 </div>
@@ -385,33 +391,36 @@ export default function MovingChecklist() {
                     <Label htmlFor="toCity">City</Label>
                     <Input
                       id="toCity"
+                      name="destination-city"
                       value={moveAddresses.toCity}
                       onChange={(e) => setMoveAddresses(prev => ({ ...prev, toCity: e.target.value }))}
                       placeholder="Destination city"
-                      autoComplete="off"
-                      data-form-type="other"
+                      autoComplete="new-password"
+                      data-form-type="destination"
                     />
                   </div>
                   <div>
                     <Label htmlFor="toState">State</Label>
                     <Input
                       id="toState"
+                      name="destination-state"
                       value={moveAddresses.toState}
                       onChange={(e) => setMoveAddresses(prev => ({ ...prev, toState: e.target.value }))}
                       placeholder="Destination state"
-                      autoComplete="off"
-                      data-form-type="other"
+                      autoComplete="new-password"
+                      data-form-type="destination"
                     />
                   </div>
                   <div>
                     <Label htmlFor="toZip">ZIP Code</Label>
                     <Input
                       id="toZip"
+                      name="destination-zip"
                       value={moveAddresses.toZip}
                       onChange={(e) => setMoveAddresses(prev => ({ ...prev, toZip: e.target.value }))}
                       placeholder="Destination ZIP"
-                      autoComplete="off"
-                      data-form-type="other"
+                      autoComplete="new-password"
+                      data-form-type="destination"
                     />
                   </div>
                 </div>

@@ -503,10 +503,10 @@ Return JSON with ONLY the actual providers that serve this exact address. If mul
             const yelpMovers = yelpData.businesses?.map((business: any, index: number) => ({
               category: "Local Moving Companies",
               provider: business.name,
-              phone: business.phone || 'Contact via website',
+              phone: business.display_phone || business.phone || 'Contact via website',
               description: `${business.review_count} reviews on Yelp. ${business.location?.address1 || ''} ${business.location?.city || ''}, ${business.location?.state || ''}`,
-              website: business.url,
-              referralUrl: `${business.url}?ref=ezrelo&partner=EZR_YELP${index + 1}`,
+              website: business.website || business.url,
+              referralUrl: business.website ? `${business.website}?ref=ezrelo&partner=EZR_YELP${index + 1}` : `${business.url}?ref=ezrelo&partner=EZR_YELP${index + 1}`,
               affiliateCode: `EZRELO_YELP${index + 1}`,
               hours: business.hours?.[0]?.is_open_now ? "Currently Open" : "Hours vary",
               rating: business.rating || 0,
