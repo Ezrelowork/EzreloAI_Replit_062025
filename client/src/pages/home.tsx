@@ -99,11 +99,35 @@ export default function Home() {
     return colors[category as keyof typeof colors] || "bg-gray-100 text-gray-600";
   };
 
+  const normalizeWebsiteUrl = (website: string): string | null => {
+    if (!website || typeof website !== 'string') return null;
+    
+    // Clean up the website string - take only the first valid URL if multiple exist
+    const cleanWebsite = website.split(',')[0].split(' ')[0].trim();
+    
+    // Remove any protocol prefix and add https
+    const cleanUrl = cleanWebsite.replace(/^https?:\/\//, '');
+    
+    // Validate it's a reasonable URL format
+    if (cleanUrl.includes('.') && !cleanUrl.includes(' ')) {
+      return `https://${cleanUrl}`;
+    }
+    
+    return null;
+  };
+
   const handleSignUp = (category: string, provider: any) => {
     // If provider has a website, try to navigate to their signup page
     if (provider.website) {
-      const website = provider.website.startsWith('http') ? provider.website : `https://${provider.website}`;
-      window.open(website, '_blank', 'noopener,noreferrer');
+      const website = normalizeWebsiteUrl(provider.website);
+      if (website) {
+        window.open(website, '_blank', 'noopener,noreferrer');
+      } else {
+        toast({
+          title: `Contact ${provider.provider}`,
+          description: `Call ${provider.phone} to sign up for ${category.toLowerCase()} service.`,
+        });
+      }
     } else {
       // Show contact information for manual signup
       toast({
@@ -115,8 +139,9 @@ export default function Home() {
 
   const handleGetQuote = (category: string, provider: any) => {
     // For quote requests, show contact information
-    const message = provider.website 
-      ? `Visit ${provider.website} or call ${provider.phone} for a quote on ${category.toLowerCase()} service.`
+    const cleanWebsite = provider.website ? provider.website.split(',')[0].trim() : null;
+    const message = cleanWebsite
+      ? `Visit ${cleanWebsite} or call ${provider.phone} for a quote on ${category.toLowerCase()} service.`
       : `Call ${provider.phone} for a quote on ${category.toLowerCase()} service.`;
     
     toast({
@@ -126,17 +151,20 @@ export default function Home() {
 
     // If there's a website, also open it
     if (provider.website) {
-      const website = provider.website.startsWith('http') ? provider.website : `https://${provider.website}`;
-      window.open(website, '_blank', 'noopener,noreferrer');
+      const website = normalizeWebsiteUrl(provider.website);
+      if (website) {
+        window.open(website, '_blank', 'noopener,noreferrer');
+      }
     }
   };
 
   const handleLearnMore = (category: string, provider: any) => {
     // Show detailed information about the provider
+    const cleanWebsite = provider.website ? provider.website.split(',')[0].trim() : null;
     const details = [
       `Provider: ${provider.provider}`,
       `Phone: ${provider.phone}`,
-      provider.website ? `Website: ${provider.website}` : null,
+      cleanWebsite ? `Website: ${cleanWebsite}` : null,
       provider.hours ? `Hours: ${provider.hours}` : null,
       `Service: ${provider.description}`
     ].filter(Boolean).join('\n');
@@ -148,8 +176,10 @@ export default function Home() {
 
     // If there's a website, also open it
     if (provider.website) {
-      const website = provider.website.startsWith('http') ? provider.website : `https://${provider.website}`;
-      window.open(website, '_blank', 'noopener,noreferrer');
+      const website = normalizeWebsiteUrl(provider.website);
+      if (website) {
+        window.open(website, '_blank', 'noopener,noreferrer');
+      }
     }
   };
 
@@ -356,12 +386,12 @@ export default function Home() {
                                 <div className="flex items-center text-sm text-gray-600">
                                   <i className="fas fa-globe mr-2 text-gray-400"></i>
                                   <a 
-                                    href={provider.website.startsWith('http') ? provider.website : `https://${provider.website}`}
+                                    href={normalizeWebsiteUrl(provider.website) || '#'}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="text-primary hover:underline"
                                   >
-                                    {provider.website}
+                                    {provider.website.split(',')[0].trim()}
                                   </a>
                                 </div>
                               )}

@@ -34,6 +34,22 @@ function getKnownServiceTerritories(city: string, state: string, zip: string): P
         description: "Municipal waste collection service. Weekly curbside pickup.",
         website: "www.cityofdenton.com/departments-services/departments-g-p/public-works/solid-waste",
         hours: "Monday-Friday 8:00 AM - 5:00 PM"
+      },
+      Internet: {
+        category: "Internet",
+        provider: "Spectrum",
+        phone: "1-855-243-8892",
+        description: "High-speed cable internet service available in Argyle area.",
+        website: "www.spectrum.com",
+        hours: "24/7 Customer Support"
+      },
+      Gas: {
+        category: "Gas", 
+        provider: "Atmos Energy",
+        phone: "1-888-286-6700",
+        description: "Natural gas distribution service for North Texas including Argyle area.",
+        website: "www.atmosenergy.com",
+        hours: "24/7 Emergency Service"
       }
     }
   };
