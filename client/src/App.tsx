@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import Home from "@/pages/home";
 import Analytics from "@/pages/analytics";
 import MovingChecklist from "@/pages/moving-checklist";
-import RelocationHub from "@/pages/relocation-hub";
+import RelocationHub from "@/pages/relocation-hub-simple";
 import Dashboard from "@/pages/dashboard";
 import NotFound from "@/pages/not-found";
 
