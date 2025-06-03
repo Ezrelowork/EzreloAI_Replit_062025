@@ -2,6 +2,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { useQuery } from "@tanstack/react-query";
 import { Spinner } from "@/components/ui/spinner";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { AuthGuard } from "@/components/auth-guard";
 
 interface ReferralClick {
   id: number;
@@ -69,8 +70,9 @@ export default function Analytics() {
   }, 0) || 0;
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <AuthGuard>
+      <div className="min-h-screen bg-gray-50 p-6">
+        <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Referral Analytics</h1>
@@ -246,7 +248,8 @@ export default function Analytics() {
             </div>
           </CardContent>
         </Card>
+        </div>
       </div>
-    </div>
+    </AuthGuard>
   );
 }

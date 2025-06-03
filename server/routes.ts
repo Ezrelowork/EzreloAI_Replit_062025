@@ -401,6 +401,26 @@ Return JSON with ONLY the actual providers that serve this exact address. If mul
     }
   });
 
+  // Simple admin authentication endpoint
+  app.post("/api/admin/login", async (req, res) => {
+    try {
+      const { password } = req.body;
+      
+      // Simple password check - in production, use proper authentication
+      const adminPassword = process.env.ADMIN_PASSWORD || "admin123";
+      
+      if (password === adminPassword) {
+        return res.json({ success: true, message: "Authentication successful" });
+      } else {
+        return res.status(401).json({ error: "Invalid password" });
+      }
+      
+    } catch (error) {
+      console.error("Admin login error:", error);
+      return res.status(500).json({ error: "Authentication failed" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
