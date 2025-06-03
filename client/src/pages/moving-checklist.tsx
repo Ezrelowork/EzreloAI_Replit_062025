@@ -5,6 +5,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Truck, Star, Phone, Globe, ExternalLink } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 interface ChecklistItem {
   id: string;
@@ -13,12 +20,86 @@ interface ChecklistItem {
   timeframe: string;
   category: string;
   completed: boolean;
+  hasProviders?: boolean;
+}
+
+interface MovingCompany {
+  category: string;
+  provider: string;
+  phone: string;
+  description: string;
+  website: string;
+  referralUrl: string;
+  affiliateCode: string;
+  hours: string;
+  rating: number;
+  services: string[];
+  estimatedCost: string;
 }
 
 export default function MovingChecklist() {
+  const { toast } = useToast();
+  const [movingCompanies, setMovingCompanies] = useState<MovingCompany[]>([]);
+  const [showMovingDialog, setShowMovingDialog] = useState(false);
+  const [moveAddresses, setMoveAddresses] = useState({
+    fromAddress: "",
+    fromCity: "",
+    fromState: "",
+    fromZip: "",
+    toAddress: "",
+    toCity: "",
+    toState: "",
+    toZip: ""
+  });
+
+  const searchMutation = useMutation({
+    mutationFn: async (addresses: typeof moveAddresses) => {
+      return await apiRequest("POST", "/api/moving-companies", addresses);
+    },
+    onSuccess: (data) => {
+      setMovingCompanies(data.companies);
+      toast({
+        title: "Success",
+        description: `Found ${data.companies.length} moving companies for your route`,
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: "Failed to load moving companies. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleReferralClick = async (company: MovingCompany, action: string) => {
+    try {
+      // Track the referral click
+      await apiRequest("POST", "/api/track-referral", {
+        provider: company.provider,
+        category: "Moving Companies",
+        action: action,
+        userAddress: `${moveAddresses.fromCity}, ${moveAddresses.fromState}`,
+        affiliateCode: company.affiliateCode,
+        referralUrl: company.referralUrl
+      });
+
+      // Open the referral URL
+      window.open(company.referralUrl, '_blank');
+      
+      toast({
+        title: "Referral Tracked",
+        description: `Opening ${company.provider} website`,
+      });
+    } catch (error) {
+      // Fallback to regular website if referral tracking fails
+      window.open(company.website, '_blank');
+    }
+  };
+
   const [checklist, setChecklist] = useState<ChecklistItem[]>([
     // 8 Weeks Before
-    { id: "1", task: "Research moving companies", description: "Get quotes from at least 3 moving companies", timeframe: "8 weeks", category: "planning", completed: false },
+    { id: "1", task: "Research moving companies", description: "Get quotes from at least 3 moving companies", timeframe: "8 weeks", category: "planning", completed: false, hasProviders: true },
     { id: "2", task: "Create moving budget", description: "Include moving costs, deposits, and unexpected expenses", timeframe: "8 weeks", category: "planning", completed: false },
     { id: "3", task: "Start decluttering", description: "Donate or sell items you don't need", timeframe: "8 weeks", category: "organizing", completed: false },
     

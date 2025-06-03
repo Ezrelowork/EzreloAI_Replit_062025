@@ -401,6 +401,94 @@ Return JSON with ONLY the actual providers that serve this exact address. If mul
     }
   });
 
+  // Moving companies endpoint for checklist integration
+  app.post("/api/moving-companies", async (req, res) => {
+    try {
+      const { fromCity, fromState, fromZip, toCity, toState, toZip } = req.body;
+      
+      const movingCompanies = [
+        {
+          category: "Moving Companies",
+          provider: "United Van Lines",
+          phone: "1-855-237-6683",
+          description: "Full-service interstate and local moving with professional packing services.",
+          website: "https://www.unitedvanlines.com",
+          referralUrl: "https://www.unitedvanlines.com?partner=ezrelo&ref=EZR001",
+          affiliateCode: "EZRELO_UNITED",
+          hours: "Monday-Friday 8:00 AM - 8:00 PM",
+          rating: 4.2,
+          services: ["Local Moving", "Long Distance", "Packing", "Storage"],
+          estimatedCost: "$1,200 - $3,500"
+        },
+        {
+          category: "Moving Companies",
+          provider: "Allied Van Lines",
+          phone: "1-800-689-8684",
+          description: "Trusted moving company with over 90 years of experience in residential moves.",
+          website: "https://www.allied.com",
+          referralUrl: "https://www.allied.com?affiliate=ezrelo&code=EZR002",
+          affiliateCode: "EZRELO_ALLIED",
+          hours: "Monday-Friday 8:00 AM - 7:00 PM",
+          rating: 4.1,
+          services: ["Residential", "Corporate", "International", "Auto Transport"],
+          estimatedCost: "$1,100 - $3,200"
+        },
+        {
+          category: "Moving Companies",
+          provider: "North American Van Lines",
+          phone: "1-800-348-2111",
+          description: "Premium moving services with customizable options for every budget.",
+          website: "https://www.northamerican.com",
+          referralUrl: "https://www.northamerican.com?ref=ezrelo&partner=EZR003",
+          affiliateCode: "EZRELO_NAVL",
+          hours: "Monday-Friday 8:00 AM - 6:00 PM",
+          rating: 4.3,
+          services: ["Full Service", "DIY Options", "Specialty Items", "Climate Storage"],
+          estimatedCost: "$1,300 - $3,800"
+        },
+        {
+          category: "Moving Companies",
+          provider: "Two Men and a Truck",
+          phone: "1-800-345-1070",
+          description: "Local and long-distance moving with trained, uniformed movers.",
+          website: "https://www.twomenandatruck.com",
+          referralUrl: "https://www.twomenandatruck.com?source=ezrelo&code=EZR004",
+          affiliateCode: "EZRELO_TMAT",
+          hours: "Monday-Saturday 8:00 AM - 5:00 PM",
+          rating: 4.4,
+          services: ["Local Moving", "Packing", "Junk Removal", "Storage"],
+          estimatedCost: "$800 - $2,500"
+        },
+        {
+          category: "Moving Companies",
+          provider: "Mayflower Transit",
+          phone: "1-800-428-1158",
+          description: "Professional interstate moving with comprehensive protection plans.",
+          website: "https://www.mayflower.com",
+          referralUrl: "https://www.mayflower.com?partner=ezrelo&ref=EZR005",
+          affiliateCode: "EZRELO_MAYFLOWER",
+          hours: "Monday-Friday 8:00 AM - 8:00 PM",
+          rating: 4.0,
+          services: ["Interstate", "International", "Corporate", "Military Moves"],
+          estimatedCost: "$1,400 - $4,000"
+        }
+      ];
+
+      return res.json({
+        success: true,
+        companies: movingCompanies,
+        searchInfo: {
+          from: `${fromCity}, ${fromState} ${fromZip}`,
+          to: `${toCity}, ${toState} ${toZip}`
+        }
+      });
+
+    } catch (error) {
+      console.error("Moving companies search error:", error);
+      return res.status(500).json({ error: "Failed to load moving companies" });
+    }
+  });
+
   // Simple admin authentication endpoint
   app.post("/api/admin/login", async (req, res) => {
     try {
