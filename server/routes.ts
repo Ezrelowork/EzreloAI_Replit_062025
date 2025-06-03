@@ -515,11 +515,16 @@ Return JSON with ONLY the actual providers that serve this exact address. If mul
                       const placesData = await placesResponse.json();
                       if (placesData.candidates?.[0]?.website) {
                         companyWebsite = placesData.candidates[0].website;
+                        console.log(`Found website for ${business.name}: ${companyWebsite}`);
                       }
+                    } else {
+                      console.log(`Google Places API error for ${business.name}: ${placesResponse.status}`);
                     }
                   } catch (googleError) {
-                    console.log(`Could not find website for ${business.name} via Google Places`);
+                    console.log(`Could not find website for ${business.name} via Google Places:`, googleError);
                   }
+                } else {
+                  console.log(`No Google API key available for website lookup`);
                 }
 
                 return {
