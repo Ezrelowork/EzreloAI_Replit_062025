@@ -516,18 +516,32 @@ Return JSON with ONLY the actual providers that serve this exact address. If mul
                     console.log(`🔍 Searching Google Places for: ${searchQuery}`);
                     
                     const placesResponse = await fetch(
-                      `https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=${encodeURIComponent(searchQuery)}&inputtype=textquery&fields=website&key=${process.env.GOOGLE_API_KEY}`
+                      `https://maps.googleapis.com/maps/api/place/findplacefromtext/json?input=${encodeURIComponent(searchQuery)}&inputtype=textquery&fields=place_id&key=${process.env.GOOGLE_API_KEY}`
                     );
                     
                     if (placesResponse.ok) {
                       const placesData = await placesResponse.json();
-                      console.log(`Google Places response for ${business.name}:`, JSON.stringify(placesData, null, 2));
                       
-                      if (placesData.candidates?.[0]?.website) {
-                        companyWebsite = placesData.candidates[0].website;
-                        console.log(`✅ Found direct website for ${business.name}: ${companyWebsite}`);
+                      if (placesData.candidates?.[0]?.place_id) {
+                        const placeId = placesData.candidates[0].place_id;
+                        console.log(`📍 Found place_id for ${business.name}: ${placeId}`);
+                        
+                        // Get place details to retrieve website
+                        const detailsResponse = await fetch(
+                          `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=website&key=${process.env.GOOGLE_API_KEY}`
+                        );
+                        
+                        if (detailsResponse.ok) {
+                          const detailsData = await detailsResponse.json();
+                          if (detailsData.result?.website) {
+                            companyWebsite = detailsData.result.website;
+                            console.log(`✅ Found direct website for ${business.name}: ${companyWebsite}`);
+                          } else {
+                            console.log(`❌ No website in place details for ${business.name}`);
+                          }
+                        }
                       } else {
-                        console.log(`❌ No website found for ${business.name} in Google Places`);
+                        console.log(`❌ No place found for ${business.name} in Google Places`);
                       }
                     } else {
                       console.error(`Google Places API error: ${placesResponse.status} ${placesResponse.statusText}`);
