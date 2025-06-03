@@ -407,8 +407,8 @@ Return JSON with ONLY the actual providers that serve this exact address. If mul
       const { fromCity, fromState, fromZip, toCity, toState, toZip } = req.body;
       
       // Calculate if this is a local move (same state and within reasonable distance)
-      const isLocalMove = fromState === toState;
-      const isShortDistance = fromState === toState && fromCity !== toCity;
+      const isLocalMove = fromState.toUpperCase() === toState.toUpperCase();
+      const isShortDistance = fromState.toUpperCase() === toState.toUpperCase() && fromCity !== toCity;
       
       console.log(`Move detection: from=${fromState}, to=${toState}, isLocalMove=${isLocalMove}`);
       
