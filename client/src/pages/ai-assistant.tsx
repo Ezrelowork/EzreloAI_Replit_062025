@@ -605,7 +605,7 @@ export default function AIAssistant() {
               
               {aiResponse.actionPlan && aiResponse.actionPlan.length > 0 && (
                 <Button
-                  onClick={() => window.location.href = aiResponse.actionPlan[0].route}
+                  onClick={() => window.location.href = aiResponse.actionPlan![0].route}
                   size="lg"
                   className="bg-blue-600 hover:bg-blue-700"
                 >

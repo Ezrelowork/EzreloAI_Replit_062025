@@ -113,52 +113,7 @@ export default function RelocationHub() {
         </div>
       </section>
 
-      {/* Get Started Section */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Ready to Get Started?</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto mb-8">
-              Begin your relocation journey with our comprehensive dashboard, or jump to a specific service.
-            </p>
-            <div className="flex flex-col items-center space-y-6">
-              <Link href="/dashboard">
-                <Button size="lg" className="px-8 py-4 text-lg bg-blue-600 hover:bg-blue-700">
-                  Start Your Move
-                  <ArrowRight className="w-5 h-5 ml-2" />
-                </Button>
-              </Link>
-              
-              <div className="text-sm text-gray-500 mb-4">Or jump to a specific service:</div>
-              
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto">
-                <Link href="/moving-checklist#moving-companies-task">
-                  <Button variant="outline" className="w-full h-16 flex flex-col items-center justify-center space-y-1">
-                    <Truck className="w-5 h-5" />
-                    <span className="text-xs">Find Movers</span>
-                  </Button>
-                </Link>
-                <Link href="/utilities?type=electricity">
-                  <Button variant="outline" className="w-full h-16 flex flex-col items-center justify-center space-y-1">
-                    <Zap className="w-5 h-5" />
-                    <span className="text-xs">Setup Power</span>
-                  </Button>
-                </Link>
-                <Link href="/utilities?type=internet">
-                  <Button variant="outline" className="w-full h-16 flex flex-col items-center justify-center space-y-1">
-                    <Wifi className="w-5 h-5" />
-                    <span className="text-xs">Get Internet</span>
-                  </Button>
-                </Link>
-                <Button variant="outline" className="w-full h-16 flex flex-col items-center justify-center space-y-1" disabled>
-                  <Stethoscope className="w-5 h-5" />
-                  <span className="text-xs">Find Doctors</span>
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+
 
       {/* Benefits Section */}
       <section className="py-16 bg-white">

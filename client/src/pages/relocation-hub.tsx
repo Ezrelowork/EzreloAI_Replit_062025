@@ -288,7 +288,7 @@ export default function RelocationHub() {
               Begin your relocation journey with our most popular services, or dive into your personalized dashboard below.
             </p>
             <div className="flex flex-col items-center space-y-6">
-              <Link href="/dashboard">
+              <Link href="/ai-assistant">
                 <Button size="lg" className="px-8 py-4 text-lg bg-blue-600 hover:bg-blue-700">
                   Start Your Move
                   <ArrowRight className="w-5 h-5 ml-2" />

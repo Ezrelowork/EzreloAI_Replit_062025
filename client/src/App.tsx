@@ -18,39 +18,10 @@ function Navigation() {
   
   return (
     <nav className="bg-white border-b border-gray-200 px-6 py-3">
-      <div className="flex justify-between items-center max-w-7xl mx-auto">
-        <div className="flex items-center space-x-8">
-          <Link href="/">
-            <div className="text-xl font-bold text-blue-600">Ezrelo</div>
-          </Link>
-          <div className="flex space-x-4">
-            <Link href="/">
-              <Button variant={location === "/" ? "default" : "ghost"} size="sm">
-                Relocation Hub
-              </Button>
-            </Link>
-            <Link href="/ai-assistant">
-              <Button variant={location === "/ai-assistant" ? "default" : "ghost"} size="sm">
-                AI Concierge
-              </Button>
-            </Link>
-            <Link href="/utilities">
-              <Button variant={location === "/utilities" ? "default" : "ghost"} size="sm">
-                Utilities
-              </Button>
-            </Link>
-            <Link href="/moving-checklist">
-              <Button variant={location === "/moving-checklist" ? "default" : "ghost"} size="sm">
-                Moving Guide
-              </Button>
-            </Link>
-            <Link href="/analytics">
-              <Button variant={location === "/analytics" ? "default" : "ghost"} size="sm">
-                Analytics
-              </Button>
-            </Link>
-          </div>
-        </div>
+      <div className="flex justify-center items-center max-w-7xl mx-auto">
+        <Link href="/">
+          <div className="text-xl font-bold text-blue-600">Ezrelo</div>
+        </Link>
       </div>
     </nav>
   );
