@@ -266,6 +266,15 @@ export default function MovingJourney() {
                 <p className="text-sm text-gray-600">Your personalized step-by-step relocation roadmap</p>
               </div>
             </div>
+            
+            {/* Progress Tracker in Header */}
+            <div className="flex items-center">
+              <ProgressTracker 
+                totalSteps={journeyData.length}
+                completedSteps={journeyData.filter(step => step.completed).length}
+                className="scale-75"
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -365,19 +374,7 @@ export default function MovingJourney() {
         })}
       </div>
 
-      {/* Fixed Position Progress Tracker */}
-      <div className="fixed top-24 right-6 space-y-4 w-80 z-30">
-        <ProgressTracker 
-          totalSteps={journeyData.length} 
-          completedSteps={journeyData.filter(step => step.completed).length}
-          currentStep={journeyData.findIndex(step => !step.completed) + 1}
-        />
-        <JourneyStats 
-          highPriority={journeyData.filter(step => step.priority === 'high').length}
-          mediumPriority={journeyData.filter(step => step.priority === 'medium').length}
-          lowPriority={journeyData.filter(step => step.priority === 'low').length}
-        />
-      </div>
+
 
       {/* Cinematic Journey Info */}
       <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-30">
