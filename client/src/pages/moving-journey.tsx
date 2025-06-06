@@ -88,9 +88,7 @@ export default function MovingJourney() {
     }
   }, []);
 
-  const handleStepClick = (step: JourneyStep) => {
-    setSelectedStep(step);
-  };
+
 
   const handleStartTask = (step: JourneyStep) => {
     // Pass address data to dashboard route if needed
@@ -238,74 +236,79 @@ export default function MovingJourney() {
         </svg>
       </div>
 
-      {/* Journey Steps - Action Plan as Road Signs */}
+      {/* Highway Signs - Action Plan as Green Road Signs */}
       <div className="absolute inset-0 pt-24">
         {journeyData.map((step, index) => {
           const IconComponent = getTaskIcon(step.title);
-          const signColor = getSignColor(step.signType, step.priority);
+          
+          // Calculate position along the curved road path
+          const roadProgress = index / (journeyData.length - 1 || 1);
+          const roadX = 100 + (roadProgress * 900); // Follow the road path from 100 to 1000
+          
+          // Calculate Y position along the curved road
+          let roadY;
+          if (roadProgress <= 0.33) {
+            // First curve: descending
+            roadY = 400 - (roadProgress * 3) * 100;
+          } else if (roadProgress <= 0.66) {
+            // Second curve: ascending
+            const localProgress = (roadProgress - 0.33) / 0.33;
+            roadY = 300 + localProgress * 160;
+          } else {
+            // Final curve: descending to finish
+            const localProgress = (roadProgress - 0.66) / 0.34;
+            roadY = 460 - localProgress * 110;
+          }
           
           return (
             <div
               key={step.id}
-              className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer group"
+              className="absolute cursor-pointer group transform hover:scale-105 transition-all duration-300"
               style={{
-                left: `${step.position.x}%`,
-                top: `${step.position.y + 35}%`,
+                left: `${(roadX / 1200) * 100}%`,
+                top: `${(roadY / 800) * 100}%`,
+                transform: 'translate(-50%, -50%)'
               }}
               onClick={() => handleStartTask(step)}
             >
               {/* Sign Post */}
               <div className="flex flex-col items-center">
-                <div className="w-3 h-20 bg-gray-700 mb-3 shadow-lg"></div>
+                <div className="w-4 h-24 bg-gray-600 shadow-lg"></div>
                 
-                {/* Road Sign - Different shapes based on type */}
-                <div 
-                  className={`${signColor} text-white px-5 py-4 shadow-2xl transform hover:scale-110 transition-all duration-300 min-w-32 text-center border-4 border-white group-hover:rotate-2`}
-                  style={step.signType === 'stop' ? { 
-                    clipPath: 'polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)',
-                    borderRadius: '0px'
-                  } : step.signType === 'warning' ? {
-                    clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)',
-                    borderRadius: '0px'
-                  } : {
-                    borderRadius: step.signType === 'info' ? '50%' : '12px'
-                  }}
-                >
-                  <div className="flex items-center justify-center gap-2 mb-2">
-                    <IconComponent className="w-6 h-6" />
-                    {step.signType === 'stop' && <div className="text-lg font-black">STOP</div>}
-                    {step.signType === 'warning' && <div className="text-sm font-bold">STEP {index + 1}</div>}
-                    {step.signType === 'highway' && <div className="text-sm font-bold">FINISH</div>}
-                    {step.signType === 'info' && <div className="text-sm font-bold">GO</div>}
+                {/* Green Highway Sign */}
+                <div className="bg-green-700 text-white px-6 py-4 rounded-lg shadow-2xl border-4 border-white transform group-hover:rotate-1 transition-all duration-300 min-w-48 text-center">
+                  <div className="flex items-center justify-center gap-3 mb-2">
+                    <IconComponent className="w-8 h-8" />
                   </div>
-                  <div className="text-xs font-bold uppercase tracking-wider">
-                    {step.title.substring(0, 12)}
-                    {step.title.length > 12 ? '...' : ''}
+                  <div className="text-lg font-black uppercase tracking-wider leading-tight">
+                    {step.title.length > 15 ? 
+                      step.title.substring(0, 15).split(' ').slice(0, -1).join(' ') + '...' : 
+                      step.title
+                    }
+                  </div>
+                  <div className="text-xs font-semibold mt-1 opacity-90">
+                    {step.description.substring(0, 40)}...
                   </div>
                 </div>
 
-                {/* Action Details */}
-                <div className="mt-4 bg-white/95 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-gray-200 max-w-48 text-center group-hover:shadow-xl transition-shadow">
+                {/* Interactive Hover Details */}
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 mt-3 bg-white/95 backdrop-blur-sm rounded-xl p-4 shadow-xl border-2 border-green-200 max-w-56">
                   <div className="text-sm font-bold text-gray-800 mb-2">
                     {step.title}
                   </div>
                   <div className="text-xs text-gray-600 mb-3 leading-relaxed">
-                    {step.description.substring(0, 80)}
-                    {step.description.length > 80 ? '...' : ''}
+                    {step.description}
                   </div>
-                  <div className="flex items-center justify-center gap-2 text-xs">
-                    <div className={`px-2 py-1 rounded-full text-white font-medium ${
+                  <div className="flex items-center justify-between">
+                    <div className={`px-3 py-1 rounded-full text-xs font-bold text-white ${
                       step.priority === 'high' ? 'bg-red-500' : 
                       step.priority === 'medium' ? 'bg-yellow-500' : 'bg-green-500'
                     }`}>
-                      {step.priority} priority
+                      {step.priority.toUpperCase()}
                     </div>
-                  </div>
-                  <div className="text-xs text-gray-500 mt-2">
-                    {step.week}
-                  </div>
-                  <div className="mt-3 text-xs font-semibold text-blue-600 hover:text-blue-800 transition-colors">
-                    Click to Start →
+                    <div className="text-xs font-bold text-green-700 bg-green-100 px-2 py-1 rounded">
+                      CLICK TO START →
+                    </div>
                   </div>
                 </div>
               </div>
