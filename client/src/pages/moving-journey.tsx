@@ -195,178 +195,76 @@ export default function MovingJourney() {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden" style={{
-      background: 'linear-gradient(to bottom, #87ceeb 0%, #98d982 40%, #7cb342 100%)'
-    }}>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
       {/* Header */}
-      <div className="absolute top-0 left-0 right-0 z-20 p-6">
+      <div className="relative z-20 p-6 bg-white/80 backdrop-blur-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <Link href="/ai-assistant">
-            <Button variant="outline" size="sm" className="flex items-center gap-2 bg-white/90 backdrop-blur-sm">
+            <Button variant="outline" size="sm" className="flex items-center gap-2 interactive-element">
               <ArrowLeft className="w-4 h-4" />
               Back to AI Assistant
             </Button>
           </Link>
-          <h1 className="text-4xl font-black text-gray-900 tracking-wide drop-shadow-lg">MOVING JOURNEY</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Interactive Moving Journey</h1>
           <div className="w-32"></div>
         </div>
       </div>
 
-      {/* Rolling Hills Background with Trees */}
-      <div className="absolute inset-0">
-        {/* Background Hills */}
-        <svg className="absolute inset-0 w-full h-full" viewBox="0 0 1200 800" preserveAspectRatio="none">
-          <defs>
-            <radialGradient id="treeGradient" cx="50%" cy="30%">
-              <stop offset="0%" stopColor="#2d5016"/>
-              <stop offset="100%" stopColor="#1a3009"/>
-            </radialGradient>
-          </defs>
-          
-          {/* Rolling hills layers */}
-          <path d="M0,800 Q200,600 400,650 T800,620 T1200,640 L1200,800 Z" fill="#7cb342" opacity="0.9"/>
-          <path d="M0,800 Q300,580 600,610 T1000,590 T1200,605 L1200,800 Z" fill="#689f38" opacity="0.8"/>
-          <path d="M0,800 Q150,620 350,640 T700,630 T1200,650 L1200,800 Z" fill="#558b2f" opacity="0.7"/>
-          
-          {/* Trees scattered on hills */}
-          <ellipse cx="150" cy="620" rx="25" ry="40" fill="url(#treeGradient)" opacity="0.8"/>
-          <ellipse cx="320" cy="640" rx="30" ry="45" fill="url(#treeGradient)" opacity="0.7"/>
-          <ellipse cx="480" cy="610" rx="20" ry="35" fill="url(#treeGradient)" opacity="0.9"/>
-          <ellipse cx="650" cy="630" rx="35" ry="50" fill="url(#treeGradient)" opacity="0.6"/>
-          <ellipse cx="820" cy="620" rx="25" ry="40" fill="url(#treeGradient)" opacity="0.8"/>
-          <ellipse cx="950" cy="640" rx="28" ry="42" fill="url(#treeGradient)" opacity="0.7"/>
-          <ellipse cx="1100" cy="630" rx="22" ry="38" fill="url(#treeGradient)" opacity="0.9"/>
-          
-          {/* Additional tree clusters */}
-          <ellipse cx="90" cy="680" rx="15" ry="25" fill="url(#treeGradient)" opacity="0.6"/>
-          <ellipse cx="250" cy="690" rx="18" ry="30" fill="url(#treeGradient)" opacity="0.8"/>
-          <ellipse cx="420" cy="670" rx="20" ry="35" fill="url(#treeGradient)" opacity="0.7"/>
-          <ellipse cx="580" cy="685" rx="16" ry="28" fill="url(#treeGradient)" opacity="0.9"/>
-          <ellipse cx="750" cy="675" rx="22" ry="36" fill="url(#treeGradient)" opacity="0.6"/>
-          <ellipse cx="890" cy="690" rx="19" ry="32" fill="url(#treeGradient)" opacity="0.8"/>
-          <ellipse cx="1050" cy="680" rx="17" ry="29" fill="url(#treeGradient)" opacity="0.7"/>
-        </svg>
-      </div>
+      {/* Modern Journey Timeline */}
+      <div className="relative max-w-7xl mx-auto p-6">
+        {/* Journey Path Line */}
+        <div className="absolute left-12 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-500 via-purple-500 to-green-500 rounded-full shadow-lg"></div>
 
-      {/* Enhanced Diagonal Highway - Ready for Custom Graphics */}
-      <div className="absolute inset-0 pt-20">
-        <JourneyRoad className="w-full h-full" />
-      </div>
-
-      {/* Compact Highway Signs Following Diagonal Road */}
-      <div className="absolute inset-0 pt-24">
+        {/* Journey Steps */}
         {journeyData.map((step, index) => {
           const IconComponent = getTaskIcon(step.title);
           
-          // Calculate position along the diagonal curved path from top-left to bottom-right
-          const progress = index / (journeyData.length - 1 || 1);
-          
-          // Follow the curved road path: M 100 100 Q 300 200 500 150 Q 700 100 900 250 Q 1000 350 1100 700
-          let xPosition, yPosition;
-          
-          if (progress <= 0.33) {
-            // First curve: Q 300 200 500 150
-            const t = progress / 0.33;
-            xPosition = 100 + t * 400; // 100 to 500
-            yPosition = 100 + t * 50; // 100 to 150
-          } else if (progress <= 0.66) {
-            // Second curve: Q 700 100 900 250
-            const t = (progress - 0.33) / 0.33;
-            xPosition = 500 + t * 400; // 500 to 900
-            yPosition = 150 + t * 100; // 150 to 250
-          } else {
-            // Final curve: Q 1000 350 1100 700
-            const t = (progress - 0.66) / 0.34;
-            xPosition = 900 + t * 200; // 900 to 1100
-            yPosition = 250 + t * 450; // 250 to 700
-          }
-          
-          // Offset signs to alternate sides of the road
-          const signOffset = index % 2 === 0 ? 80 : -80;
-          const finalX = xPosition + signOffset;
-          
           return (
-            <div
-              key={step.id}
-              className="absolute cursor-pointer group transform hover:scale-125 transition-all duration-300"
-              style={{
-                left: `${(finalX / 1200) * 100}%`,
-                top: `${(yPosition / 800) * 100}%`,
-                transform: 'translate(-50%, -50%)'
-              }}
-              onClick={() => handleStartTask(step)}
-            >
-              {/* Compact Sign */}
-              <div className="flex flex-col items-center">
-                {/* Interactive Highway Sign with Dynamic Styling */}
-                <div className={`text-white px-4 py-3 rounded-xl shadow-2xl border-3 border-white transform group-hover:rotate-2 group-hover:scale-110 transition-all duration-300 min-w-24 text-center relative cursor-pointer ${
-                  step.priority === 'high' ? 'bg-red-600 hover:bg-red-500' : 
-                  step.priority === 'medium' ? 'bg-yellow-600 hover:bg-yellow-500' : 
-                  'bg-green-600 hover:bg-green-500'
-                }`}>
-                  {/* Inner border glow effect */}
-                  <div className="absolute inset-1 border border-white/40 rounded-lg"></div>
-                  
-                  <div className="relative z-10">
-                    <div className="flex items-center justify-center mb-2">
-                      <IconComponent className="w-5 h-5 drop-shadow-lg" />
-                    </div>
-                    <div className="text-xs font-black uppercase tracking-wider leading-tight drop-shadow-md">
-                      {step.title.length > 10 ? 
-                        step.title.substring(0, 10).replace(/\s+/g, '').toUpperCase() : 
-                        step.title.replace(/\s+/g, '').toUpperCase()
-                      }
-                    </div>
-                    <div className="text-xs opacity-90 mt-1 font-semibold">
-                      {step.week}
-                    </div>
-                  </div>
-                  
-                  {/* Enhanced priority indicator with animation */}
-                  <div className={`absolute -top-2 -right-2 w-6 h-6 rounded-full flex items-center justify-center text-xs font-black border-2 border-white shadow-lg animate-pulse ${
-                    step.priority === 'high' ? 'bg-red-500' : 
-                    step.priority === 'medium' ? 'bg-yellow-500' : 'bg-blue-500'
+            <div key={step.id} className="relative pl-20 pb-12">
+              {/* Step Node */}
+              <div className={`absolute left-8 w-8 h-8 rounded-full border-4 border-white shadow-lg flex items-center justify-center ${
+                step.priority === 'high' ? 'bg-red-500' : 
+                step.priority === 'medium' ? 'bg-yellow-500' : 'bg-green-500'
+              }`}>
+                <span className="text-white text-sm font-bold">{index + 1}</span>
+              </div>
+
+              {/* Step Card */}
+              <div 
+                className="bg-white rounded-2xl shadow-xl border border-gray-200 p-6 ml-4 cursor-pointer interactive-element group"
+                onClick={() => handleStartTask(step)}
+              >
+                <div className="flex items-start gap-4">
+                  <div className={`p-3 rounded-xl ${
+                    step.priority === 'high' ? 'bg-red-100 text-red-600' : 
+                    step.priority === 'medium' ? 'bg-yellow-100 text-yellow-600' : 'bg-green-100 text-green-600'
                   }`}>
-                    {index + 1}
+                    <IconComponent className="w-6 h-6" />
                   </div>
                   
-                  {/* Click indicator */}
-                  <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <div className="bg-white text-gray-800 text-xs px-2 py-1 rounded font-bold shadow-lg">
-                      CLICK
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="text-xl font-bold text-gray-900">{step.title}</h3>
+                      <div className={`px-3 py-1 rounded-full text-xs font-bold text-white ${
+                        step.priority === 'high' ? 'bg-red-500' : 
+                        step.priority === 'medium' ? 'bg-yellow-500' : 'bg-green-500'
+                      }`}>
+                        {step.priority.toUpperCase()}
+                      </div>
+                    </div>
+                    
+                    <p className="text-gray-600 mb-4 leading-relaxed">{step.description}</p>
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="text-sm text-gray-500 font-medium">
+                        Timeline: {step.week}
+                      </div>
+                      <div className="flex items-center gap-2 text-blue-600 font-semibold group-hover:text-blue-700 transition-colors">
+                        Start Task
+                        <ArrowLeft className="w-4 h-4 rotate-180 group-hover:translate-x-1 transition-transform" />
+                      </div>
                     </div>
                   </div>
-                </div>
-
-                {/* Stylized sign post with shadow */}
-                <div className="w-3 h-12 bg-gradient-to-b from-gray-600 to-gray-800 shadow-lg mt-2 rounded-sm"></div>
-
-                {/* Enhanced hover details popup */}
-                <div className="opacity-0 group-hover:opacity-100 transition-all duration-300 absolute top-16 bg-white/96 backdrop-blur-md rounded-2xl p-4 shadow-2xl border-2 border-blue-200 min-w-64 z-30 transform group-hover:scale-105">
-                  <div className="text-base font-bold text-gray-800 mb-3 flex items-center gap-2">
-                    <IconComponent className="w-5 h-5 text-blue-600" />
-                    {step.title}
-                  </div>
-                  <div className="text-sm text-gray-700 mb-4 leading-relaxed">
-                    {step.description}
-                  </div>
-                  <div className="flex items-center justify-between mb-3">
-                    <div className={`px-3 py-2 rounded-full text-xs font-bold text-white shadow-lg ${
-                      step.priority === 'high' ? 'bg-red-500' : 
-                      step.priority === 'medium' ? 'bg-yellow-500' : 'bg-green-500'
-                    }`}>
-                      {step.priority.toUpperCase()} PRIORITY
-                    </div>
-                    <div className="text-xs font-bold text-blue-700 bg-blue-100 px-3 py-2 rounded-lg">
-                      START TASK →
-                    </div>
-                  </div>
-                  <div className="text-xs text-gray-500 bg-gray-100 px-3 py-2 rounded-lg text-center">
-                    Timeline: {step.week}
-                  </div>
-                  
-                  {/* Arrow pointing to sign */}
-                  <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-white border-l-2 border-t-2 border-blue-200 rotate-45"></div>
                 </div>
               </div>
             </div>
@@ -374,8 +272,8 @@ export default function MovingJourney() {
         })}
       </div>
 
-      {/* Journey Progress Tracking */}
-      <div className="absolute top-24 right-6 space-y-4 w-80">
+      {/* Fixed Position Progress Tracker */}
+      <div className="fixed top-24 right-6 space-y-4 w-80 z-30">
         <ProgressTracker 
           totalSteps={journeyData.length}
           completedSteps={journeyData.filter(step => step.completed).length}
@@ -389,22 +287,11 @@ export default function MovingJourney() {
         />
       </div>
 
-      {/* Start and End Markers */}
-      <div className="absolute top-24 left-20 flex items-center gap-3 bg-white/95 backdrop-blur-sm rounded-2xl px-6 py-3 shadow-xl border-2 border-blue-200">
-        <div className="w-4 h-4 bg-blue-500 rounded-full animate-pulse shadow-lg"></div>
-        <span className="text-base font-bold text-gray-800">START YOUR JOURNEY</span>
-      </div>
-      
-      <div className="absolute bottom-16 right-20 flex items-center gap-3 bg-white/95 backdrop-blur-sm rounded-2xl px-6 py-3 shadow-xl border-2 border-green-200">
-        <div className="w-4 h-4 bg-green-500 rounded-full animate-pulse shadow-lg"></div>
-        <span className="text-base font-bold text-gray-800">NEW HOME AWAITS!</span>
-      </div>
-
       {/* Interactive Instructions */}
-      <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 bg-black/80 backdrop-blur-sm rounded-2xl px-8 py-4 shadow-2xl">
+      <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-black/90 backdrop-blur-sm rounded-2xl px-8 py-4 shadow-2xl z-30">
         <div className="text-white text-center">
-          <div className="text-lg font-bold mb-2">🛣️ Interactive Moving Journey</div>
-          <div className="text-sm opacity-90">Click any highway sign to start that task • Follow the road from start to finish</div>
+          <div className="text-lg font-bold mb-2">Interactive Moving Journey</div>
+          <div className="text-sm opacity-90">Click any task card to start • Follow your personalized timeline</div>
         </div>
       </div>
 
