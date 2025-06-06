@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { JourneyRoad, JourneyLandscape } from "@/components/journey-assets";
 import { 
   ArrowLeft,
   Truck,
@@ -14,7 +15,19 @@ import {
   GraduationCap,
   Building,
   CheckCircle,
-  Clock
+  Clock,
+  FileText,
+  Shield,
+  MapPin,
+  Car,
+  AlertTriangle,
+  Info,
+  Heart,
+  Wrench,
+  Key,
+  Users,
+  CreditCard,
+  Clipboard
 } from "lucide-react";
 
 interface JourneyStep {
@@ -30,18 +43,48 @@ interface JourneyStep {
   priority: "high" | "medium" | "low";
 }
 
-// Enhanced icon mapping for tasks
+// Comprehensive icon mapping for all moving tasks
 const getTaskIcon = (task: string) => {
   const taskLower = task.toLowerCase();
-  if (taskLower.includes('mover') || taskLower.includes('moving') || taskLower.includes('transport')) return Truck;
-  if (taskLower.includes('pack') || taskLower.includes('box') || taskLower.includes('organize')) return Package;
-  if (taskLower.includes('home') || taskLower.includes('house') || taskLower.includes('property')) return Home;
-  if (taskLower.includes('electric') || taskLower.includes('power') || taskLower.includes('utility')) return Zap;
-  if (taskLower.includes('internet') || taskLower.includes('wifi') || taskLower.includes('cable')) return Wifi;
-  if (taskLower.includes('phone') || taskLower.includes('mobile') || taskLower.includes('cellular')) return Phone;
-  if (taskLower.includes('health') || taskLower.includes('medical') || taskLower.includes('doctor')) return Stethoscope;
-  if (taskLower.includes('school') || taskLower.includes('education') || taskLower.includes('enroll')) return GraduationCap;
-  if (taskLower.includes('bank') || taskLower.includes('financial') || taskLower.includes('insurance')) return Building;
+  
+  // Moving & Transport
+  if (taskLower.includes('mover') || taskLower.includes('moving') || taskLower.includes('transport') || taskLower.includes('truck')) return Truck;
+  if (taskLower.includes('pack') || taskLower.includes('box') || taskLower.includes('organize') || taskLower.includes('inventory')) return Package;
+  
+  // Housing & Property
+  if (taskLower.includes('home') || taskLower.includes('house') || taskLower.includes('property') || taskLower.includes('inspection')) return Home;
+  if (taskLower.includes('key') || taskLower.includes('lock') || taskLower.includes('access') || taskLower.includes('security')) return Key;
+  
+  // Utilities & Services
+  if (taskLower.includes('electric') || taskLower.includes('power') || taskLower.includes('utility') || taskLower.includes('gas')) return Zap;
+  if (taskLower.includes('internet') || taskLower.includes('wifi') || taskLower.includes('cable') || taskLower.includes('broadband')) return Wifi;
+  if (taskLower.includes('phone') || taskLower.includes('mobile') || taskLower.includes('cellular') || taskLower.includes('landline')) return Phone;
+  if (taskLower.includes('water') || taskLower.includes('sewer') || taskLower.includes('trash') || taskLower.includes('waste')) return Wrench;
+  
+  // Healthcare & Medical
+  if (taskLower.includes('health') || taskLower.includes('medical') || taskLower.includes('doctor') || taskLower.includes('dentist') || taskLower.includes('prescription')) return Stethoscope;
+  if (taskLower.includes('veterinar') || taskLower.includes('pet') || taskLower.includes('animal')) return Heart;
+  
+  // Education & Family
+  if (taskLower.includes('school') || taskLower.includes('education') || taskLower.includes('enroll') || taskLower.includes('daycare')) return GraduationCap;
+  if (taskLower.includes('family') || taskLower.includes('children') || taskLower.includes('kids') || taskLower.includes('spouse')) return Users;
+  
+  // Financial & Legal
+  if (taskLower.includes('bank') || taskLower.includes('financial') || taskLower.includes('credit') || taskLower.includes('loan')) return CreditCard;
+  if (taskLower.includes('insurance') || taskLower.includes('policy') || taskLower.includes('coverage')) return Shield;
+  if (taskLower.includes('legal') || taskLower.includes('attorney') || taskLower.includes('lawyer') || taskLower.includes('contract')) return FileText;
+  
+  // Address Changes & Registration
+  if (taskLower.includes('address') || taskLower.includes('registration') || taskLower.includes('voter') || taskLower.includes('dmv')) return MapPin;
+  if (taskLower.includes('license') || taskLower.includes('permit') || taskLower.includes('id') || taskLower.includes('vehicle')) return Car;
+  
+  // Documentation & Records
+  if (taskLower.includes('record') || taskLower.includes('document') || taskLower.includes('file') || taskLower.includes('paperwork')) return Clipboard;
+  if (taskLower.includes('notify') || taskLower.includes('inform') || taskLower.includes('update') || taskLower.includes('change')) return Info;
+  
+  // Emergency & Important
+  if (taskLower.includes('urgent') || taskLower.includes('important') || taskLower.includes('critical') || taskLower.includes('deadline')) return AlertTriangle;
+  
   return CheckCircle;
 };
 
@@ -91,16 +134,38 @@ export default function MovingJourney() {
 
 
   const handleStartTask = (step: JourneyStep) => {
-    // Pass address data to dashboard route if needed
-    const urlParams = new URLSearchParams(window.location.search);
+    // Smart routing with address data preservation
     const fromParam = localStorage.getItem('aiFromLocation');
     const toParam = localStorage.getItem('aiToLocation');
     const dateParam = localStorage.getItem('aiMoveDate');
     
-    if (step.route === '/dashboard' && fromParam && toParam) {
-      setLocation(`/dashboard?from=${encodeURIComponent(fromParam)}&to=${encodeURIComponent(toParam)}&date=${dateParam || ''}`);
+    // Intelligent routing based on task content
+    const taskLower = step.title.toLowerCase();
+    const descLower = step.description.toLowerCase();
+    const combined = `${taskLower} ${descLower}`;
+    
+    let targetRoute = step.route;
+    
+    // Override route based on task content for better UX
+    if (combined.includes('mover') || combined.includes('moving') || combined.includes('truck') || combined.includes('quote')) {
+      targetRoute = '/dashboard';
+    } else if (combined.includes('utility') || combined.includes('electric') || combined.includes('internet') || 
+               combined.includes('cable') || combined.includes('phone') || combined.includes('gas') || 
+               combined.includes('water') || combined.includes('wifi')) {
+      targetRoute = '/utilities';
+    } else if (combined.includes('checklist') || combined.includes('organize') || combined.includes('pack') || 
+               combined.includes('inventory') || combined.includes('timeline')) {
+      targetRoute = '/moving-checklist';
+    } else if (combined.includes('research') || combined.includes('compare') || combined.includes('recommend') || 
+               combined.includes('evaluate') || combined.includes('analysis')) {
+      targetRoute = '/ai-assistant';
+    }
+    
+    // Pass location data for relevant routes
+    if ((targetRoute === '/dashboard' || targetRoute === '/utilities') && fromParam && toParam) {
+      setLocation(`${targetRoute}?from=${encodeURIComponent(fromParam)}&to=${encodeURIComponent(toParam)}&date=${dateParam || ''}`);
     } else {
-      setLocation(step.route);
+      setLocation(targetRoute);
     }
   };
 
@@ -281,51 +346,75 @@ export default function MovingJourney() {
             >
               {/* Compact Sign */}
               <div className="flex flex-col items-center">
-                {/* Small cartoon-style green highway sign */}
-                <div className="bg-green-600 text-white px-3 py-2 rounded-lg shadow-xl border-2 border-white transform group-hover:rotate-3 transition-all duration-300 min-w-20 text-center relative">
+                {/* Interactive Highway Sign with Dynamic Styling */}
+                <div className={`text-white px-4 py-3 rounded-xl shadow-2xl border-3 border-white transform group-hover:rotate-2 group-hover:scale-110 transition-all duration-300 min-w-24 text-center relative cursor-pointer ${
+                  step.priority === 'high' ? 'bg-red-600 hover:bg-red-500' : 
+                  step.priority === 'medium' ? 'bg-yellow-600 hover:bg-yellow-500' : 
+                  'bg-green-600 hover:bg-green-500'
+                }`}>
+                  {/* Inner border glow effect */}
+                  <div className="absolute inset-1 border border-white/40 rounded-lg"></div>
+                  
                   <div className="relative z-10">
-                    <div className="flex items-center justify-center mb-1">
-                      <IconComponent className="w-4 h-4 drop-shadow-sm" />
+                    <div className="flex items-center justify-center mb-2">
+                      <IconComponent className="w-5 h-5 drop-shadow-lg" />
                     </div>
-                    <div className="text-xs font-black uppercase tracking-wide leading-tight">
-                      {step.title.length > 8 ? 
-                        step.title.substring(0, 8).replace(/\s+/g, '').toUpperCase() : 
+                    <div className="text-xs font-black uppercase tracking-wider leading-tight drop-shadow-md">
+                      {step.title.length > 10 ? 
+                        step.title.substring(0, 10).replace(/\s+/g, '').toUpperCase() : 
                         step.title.replace(/\s+/g, '').toUpperCase()
                       }
                     </div>
+                    <div className="text-xs opacity-90 mt-1 font-semibold">
+                      {step.week}
+                    </div>
                   </div>
                   
-                  {/* Tiny priority indicator */}
-                  <div className={`absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-xs font-black border border-white shadow ${
+                  {/* Enhanced priority indicator with animation */}
+                  <div className={`absolute -top-2 -right-2 w-6 h-6 rounded-full flex items-center justify-center text-xs font-black border-2 border-white shadow-lg animate-pulse ${
                     step.priority === 'high' ? 'bg-red-500' : 
                     step.priority === 'medium' ? 'bg-yellow-500' : 'bg-blue-500'
                   }`}>
                     {index + 1}
                   </div>
+                  
+                  {/* Click indicator */}
+                  <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="bg-white text-gray-800 text-xs px-2 py-1 rounded font-bold shadow-lg">
+                      CLICK
+                    </div>
+                  </div>
                 </div>
 
-                {/* Small sign post */}
-                <div className="w-2 h-8 bg-gray-600 shadow mt-1"></div>
+                {/* Stylized sign post with shadow */}
+                <div className="w-3 h-12 bg-gradient-to-b from-gray-600 to-gray-800 shadow-lg mt-2 rounded-sm"></div>
 
-                {/* Hover details popup */}
-                <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 absolute top-12 bg-white/95 backdrop-blur-sm rounded-xl p-3 shadow-xl border-2 border-green-200 min-w-48 z-20">
-                  <div className="text-sm font-bold text-gray-800 mb-2">
+                {/* Enhanced hover details popup */}
+                <div className="opacity-0 group-hover:opacity-100 transition-all duration-300 absolute top-16 bg-white/96 backdrop-blur-md rounded-2xl p-4 shadow-2xl border-2 border-blue-200 min-w-64 z-30 transform group-hover:scale-105">
+                  <div className="text-base font-bold text-gray-800 mb-3 flex items-center gap-2">
+                    <IconComponent className="w-5 h-5 text-blue-600" />
                     {step.title}
                   </div>
-                  <div className="text-xs text-gray-600 mb-3 leading-relaxed">
-                    {step.description.substring(0, 60)}...
+                  <div className="text-sm text-gray-700 mb-4 leading-relaxed">
+                    {step.description}
                   </div>
-                  <div className="flex items-center justify-between">
-                    <div className={`px-2 py-1 rounded-full text-xs font-bold text-white ${
+                  <div className="flex items-center justify-between mb-3">
+                    <div className={`px-3 py-2 rounded-full text-xs font-bold text-white shadow-lg ${
                       step.priority === 'high' ? 'bg-red-500' : 
                       step.priority === 'medium' ? 'bg-yellow-500' : 'bg-green-500'
                     }`}>
-                      {step.priority.toUpperCase()}
+                      {step.priority.toUpperCase()} PRIORITY
                     </div>
-                    <div className="text-xs font-bold text-green-700 bg-green-100 px-2 py-1 rounded">
-                      CLICK →
+                    <div className="text-xs font-bold text-blue-700 bg-blue-100 px-3 py-2 rounded-lg">
+                      START TASK →
                     </div>
                   </div>
+                  <div className="text-xs text-gray-500 bg-gray-100 px-3 py-2 rounded-lg text-center">
+                    Timeline: {step.week}
+                  </div>
+                  
+                  {/* Arrow pointing to sign */}
+                  <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-4 h-4 bg-white border-l-2 border-t-2 border-blue-200 rotate-45"></div>
                 </div>
               </div>
             </div>
