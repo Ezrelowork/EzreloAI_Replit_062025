@@ -205,11 +205,15 @@ Focus on accuracy and specificity - include availability percentages, exact spee
       const isLocalMove = fromState.toUpperCase() === toState.toUpperCase();
       const moveType = isLocalMove ? "local" : "long-distance";
       
-      const prompt = `Find comprehensive moving companies for a ${moveType} move from ${fromLocation} to ${toLocation}.
+      const prompt = `Find comprehensive moving options for a ${moveType} move from ${fromLocation} to ${toLocation}.
 
-Provide detailed information including availability, specialties, licensing, and specific service details.
+Include ALL types of moving solutions:
+1. Local/regional moving companies in the ${fromLocation} area that handle long-distance moves
+2. Major national moving companies (United Van Lines, Atlas, Mayflower, North American, etc.)
+3. Alternative moving options (U-Pack, PODS, Budget Truck Rental, etc.)
+4. Hybrid solutions (you pack, they drive)
 
-Return JSON format:
+Return JSON format with detailed information:
 {
   "companies": [
     {
@@ -220,7 +224,7 @@ Return JSON format:
       "estimatedCost": "Realistic cost range for this specific route and distance",
       "availability": "Service area coverage percentage or availability details",
       "services": ["Local Moving", "Long Distance", "Packing", "Storage"],
-      "category": "Local Moving Companies" or "National Moving Companies",
+      "category": "Local Moving Companies" or "National Moving Companies" or "Alternative Moving Solutions",
       "licenseInfo": "DOT number, state licensing, or certification details",
       "specialties": ["Residential", "Commercial", "Piano Moving", "Fragile Items"],
       "insuranceOptions": ["Basic", "Full Value Protection", "Third Party"],
@@ -230,7 +234,13 @@ Return JSON format:
   ]
 }
 
-Focus on companies that actually serve ${fromLocation} with accurate pricing for ${moveType} moves of this distance. Include licensing information, insurance options, and service specialties.`;
+Provide at least 8-12 options covering:
+- Local movers in ${fromLocation} area who do interstate moves
+- Major national carriers with service to this route
+- Alternative solutions like U-Pack, PODS, portable storage
+- DIY options with truck rentals
+
+Focus on companies that actually serve this specific route with accurate pricing estimates.`;
 
       const completion = await openai.chat.completions.create({
         model: "gpt-4o",
