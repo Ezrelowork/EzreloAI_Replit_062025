@@ -20,17 +20,17 @@ export default function RelocationHub() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 text-white py-20">
+      <section className="bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="text-4xl font-extrabold sm:text-5xl md:text-6xl mb-6">
+            <h1 className="text-4xl font-extrabold sm:text-5xl md:text-6xl mb-5">
               Relocate <span className="text-blue-200">Intelligently</span>
             </h1>
-            <p className="text-xl mb-8 max-w-3xl mx-auto text-blue-100">
+            <p className="text-xl mb-6 max-w-3xl mx-auto text-blue-100">
               Your complete relocation command center. From finding movers to setting up utilities, 
               we guide you through every step of your move with personalized timelines and verified providers.
             </p>
-            <div className="flex justify-center items-center gap-6 mb-8">
+            <div className="flex justify-center items-center gap-6 mb-6">
               <div className="text-center">
                 <div className="text-3xl font-bold text-blue-200">{overallProgress}%</div>
                 <div className="text-sm text-blue-100">Complete</div>
@@ -64,10 +64,10 @@ export default function RelocationHub() {
       </section>
 
       {/* How It Works Section */}
-      <section className="py-16 bg-white">
+      <section className="py-12 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">How It Works</h2>
+          <div className="text-center mb-10">
+            <h2 className="text-3xl font-bold text-gray-900 mb-3">How It Works</h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
               Follow our proven 3-phase system to ensure nothing falls through the cracks during your move.
             </p>
@@ -110,10 +110,10 @@ export default function RelocationHub() {
 
 
       {/* Benefits Section */}
-      <section className="py-16 bg-white">
+      <section className="py-12 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Why Choose Ezrelo?</h2>
+          <div className="text-center mb-10">
+            <h2 className="text-3xl font-bold text-gray-900 mb-3">Why Choose Ezrelo?</h2>
             <p className="text-gray-600 max-w-2xl mx-auto">
               Save time, reduce stress, and never miss important deadlines with our comprehensive relocation platform.
             </p>
@@ -152,10 +152,10 @@ export default function RelocationHub() {
       </section>
 
       {/* Get Started Section - At the bottom after all explanations */}
-      <section className="py-16 bg-gradient-to-br from-blue-50 to-indigo-100">
+      <section className="py-12 bg-gradient-to-br from-blue-50 to-indigo-100">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">Ready to Begin Your Relocation Journey?</h2>
-          <p className="text-gray-600 max-w-2xl mx-auto mb-8">
+          <h2 className="text-3xl font-bold text-gray-900 mb-3">Ready to Begin Your Relocation Journey?</h2>
+          <p className="text-gray-600 max-w-2xl mx-auto mb-6">
             Let our AI concierge analyze your move and create a personalized plan that guides you through each step.
           </p>
           <Link href="/ai-assistant">
