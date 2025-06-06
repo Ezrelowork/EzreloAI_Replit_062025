@@ -304,13 +304,13 @@ export default function MovingJourney() {
 
           const customSign = getCustomSign(step.title);
           
-          // Position signs along the winding road path
+          // Position signs along the winding road path - following your road exactly
           const roadPositions = [
-            { left: '15%', top: '80%' },   // Bottom left curve start
-            { left: '25%', top: '65%' },   // Lower curve
-            { left: '45%', top: '50%' },   // Middle section
-            { left: '65%', top: '35%' },   // Upper curve
-            { left: '80%', top: '20%' }    // Top right
+            { left: '20%', top: '75%' },   // Bottom left - where road starts
+            { left: '35%', top: '60%' },   // First curve upward
+            { left: '50%', top: '45%' },   // Middle S-curve
+            { left: '65%', top: '30%' },   // Upper curve continuing
+            { left: '80%', top: '18%' }    // Top right - road destination
           ];
           
           const position = roadPositions[index] || { left: '50%', top: '50%' };
