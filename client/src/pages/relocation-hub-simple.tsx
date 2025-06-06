@@ -173,6 +173,9 @@ export default function RelocationHub() {
           <p className="text-sm text-gray-500 mt-4">
             No signup required • Instant AI analysis • Personalized recommendations
           </p>
+          <p className="text-xs text-blue-500 mt-2">
+            <a href="/logo-showcase" className="underline">View Logo Design Options</a>
+          </p>
         </div>
       </section>
     </div>
