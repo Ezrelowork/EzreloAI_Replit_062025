@@ -14,65 +14,70 @@ export class GraphicsManager {
     return GraphicsManager.instance;
   }
 
-  // Load custom graphics from attached assets
-  async loadCustomGraphics(assetMap: Record<string, string>): Promise<void> {
+  // Load custom graphics from attached assets with @assets prefix
+  async loadCustomGraphics(assetFiles: string[]): Promise<void> {
     const newGraphics: JourneyGraphics = {};
 
-    // Load background graphics
-    if (assetMap.roadBackground) {
-      newGraphics.roadBackground = {
-        src: assetMap.roadBackground,
-        alt: 'Journey Road Background',
-        width: 1200,
-        height: 800
-      };
-    }
-
-    if (assetMap.timelinePath) {
-      newGraphics.timelinePath = {
-        src: assetMap.timelinePath,
-        alt: 'Timeline Path',
-        width: 20,
-        height: 800
-      };
-    }
-
-    // Load task icons
-    const taskIcons: Record<string, GraphicAsset> = {};
-    Object.keys(assetMap).forEach(key => {
-      if (key.startsWith('icon-')) {
-        const taskType = key.replace('icon-', '');
-        taskIcons[taskType] = {
-          src: assetMap[key],
-          alt: `${taskType} icon`,
-          width: 48,
-          height: 48
+    // Process each asset file
+    for (const fileName of assetFiles) {
+      const assetPath = `@assets/${fileName}`;
+      
+      // Background graphics
+      if (fileName.includes('background') || fileName.includes('landscape')) {
+        newGraphics.roadBackground = {
+          src: assetPath,
+          alt: 'Journey Background',
+          width: 1200,
+          height: 800
         };
       }
-    });
+      
+      // Timeline/road path
+      if (fileName.includes('road') || fileName.includes('path') || fileName.includes('timeline')) {
+        newGraphics.timelinePath = {
+          src: assetPath,
+          alt: 'Journey Path',
+          width: 1200,
+          height: 800
+        };
+      }
 
-    if (Object.keys(taskIcons).length > 0) {
-      newGraphics.taskIcons = taskIcons;
-    }
+      // Task category icons
+      if (fileName.includes('icon-') || fileName.includes('task-')) {
+        if (!newGraphics.taskIcons) newGraphics.taskIcons = {};
+        
+        let taskType = 'default';
+        if (fileName.includes('moving') || fileName.includes('truck')) taskType = 'moving';
+        if (fileName.includes('utility') || fileName.includes('electric')) taskType = 'utilities';
+        if (fileName.includes('pack') || fileName.includes('box')) taskType = 'packing';
+        if (fileName.includes('home') || fileName.includes('house')) taskType = 'housing';
+        if (fileName.includes('medical') || fileName.includes('health')) taskType = 'medical';
+        if (fileName.includes('school') || fileName.includes('education')) taskType = 'education';
+        if (fileName.includes('bank') || fileName.includes('finance')) taskType = 'financial';
+        
+        newGraphics.taskIcons[taskType] = {
+          src: assetPath,
+          alt: `${taskType} task icon`,
+          width: 64,
+          height: 64
+        };
+      }
 
-    // Load decorative elements
-    const decorativeElements: GraphicAsset[] = [];
-    Object.keys(assetMap).forEach(key => {
-      if (key.startsWith('decoration-')) {
-        decorativeElements.push({
-          src: assetMap[key],
+      // Decorative elements (trees, signs, landmarks)
+      if (fileName.includes('tree') || fileName.includes('sign') || fileName.includes('landmark') || fileName.includes('decoration')) {
+        if (!newGraphics.decorativeElements) newGraphics.decorativeElements = [];
+        
+        newGraphics.decorativeElements.push({
+          src: assetPath,
           alt: 'Decorative element',
-          width: 100,
-          height: 100
+          width: 120,
+          height: 120
         });
       }
-    });
-
-    if (decorativeElements.length > 0) {
-      newGraphics.decorativeElements = decorativeElements;
     }
 
     this.updateGraphics(newGraphics);
+    console.log('Custom graphics loaded:', newGraphics);
   }
 
   // Update graphics and notify listeners
@@ -118,9 +123,9 @@ export const useCustomGraphics = () => {
     return unsubscribe;
   }, []);
 
-  const loadGraphics = async (assetMap: Record<string, string>) => {
+  const loadGraphics = async (assetFiles: string[]) => {
     const manager = GraphicsManager.getInstance();
-    await manager.loadCustomGraphics(assetMap);
+    await manager.loadCustomGraphics(assetFiles);
   };
 
   return {

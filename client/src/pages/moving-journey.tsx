@@ -2,11 +2,12 @@ import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { JourneyRoad, JourneyLandscape } from "@/components/journey-assets";
+import { JourneyRoad, JourneyLandscape, GraphicsTimeline } from "@/components/journey-assets";
 import { ProgressTracker, JourneyStats } from "@/components/progress-tracker";
 import { TaskModal, useTaskModal } from "@/components/task-modal";
 import { ZoomNavigation, useZoomNavigation } from "@/components/zoom-navigation";
 import { TaskPage } from "@/components/task-page";
+import { useCustomGraphics, GraphicsManager } from "@/components/graphics-integration";
 import { 
   ArrowLeft,
   Truck,
@@ -97,7 +98,30 @@ export default function MovingJourney() {
   const [journeyData, setJourneyData] = useState<JourneyStep[]>([]);
   const { isOpen, currentTask, openModal, closeModal } = useTaskModal();
   const { isZoomed, zoomOrigin, currentTaskData, zoomIntoTask, zoomOut } = useZoomNavigation();
+  const { graphics, isLoaded, loadGraphics } = useCustomGraphics();
   const taskCardRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+
+  // Load any custom graphics when component mounts
+  useEffect(() => {
+    const initializeGraphics = async () => {
+      // Try to load graphics from attached assets
+      const availableAssets = [
+        // Common asset file names that might be attached
+        'highway-road.png', 'timeline-path.png', 'landscape-background.png',
+        'icon-moving.png', 'icon-utilities.png', 'icon-packing.png',
+        'tree-decoration.png', 'sign-decoration.png'
+      ];
+      
+      try {
+        await loadGraphics(availableAssets);
+      } catch (error) {
+        // Gracefully handle missing assets, fall back to current design
+        console.log('Using default graphics design');
+      }
+    };
+    
+    initializeGraphics();
+  }, []);
   useEffect(() => {
     // Get action plan data from localStorage (from AI assistant)
     const savedActionPlan = localStorage.getItem('aiActionPlan');
@@ -244,10 +268,52 @@ export default function MovingJourney() {
         </div>
       </div>
 
-      {/* Modern Journey Timeline */}
+      {/* Enhanced Journey Timeline with Custom Graphics */}
       <div className="relative max-w-7xl mx-auto p-6">
-        {/* Journey Path Line */}
-        <div className="absolute left-12 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-500 via-purple-500 to-green-500 rounded-full shadow-lg"></div>
+        {/* Custom Graphics Background */}
+        {graphics.roadBackground ? (
+          <div className="absolute inset-0 -z-10">
+            <img 
+              src={graphics.roadBackground.src}
+              alt={graphics.roadBackground.alt}
+              className="w-full h-full object-cover opacity-30 rounded-3xl"
+            />
+          </div>
+        ) : (
+          <div className="absolute inset-0 -z-10 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-3xl"></div>
+        )}
+
+        {/* Custom Timeline Path or Default */}
+        {graphics.timelinePath ? (
+          <div className="absolute left-12 top-0 bottom-0 w-8">
+            <img 
+              src={graphics.timelinePath.src}
+              alt={graphics.timelinePath.alt}
+              className="w-full h-full object-cover"
+            />
+          </div>
+        ) : (
+          <div className="absolute left-12 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-500 via-purple-500 to-green-500 rounded-full shadow-lg"></div>
+        )}
+
+        {/* Decorative Elements */}
+        {graphics.decorativeElements?.map((element, index) => (
+          <div
+            key={index}
+            className="absolute pointer-events-none"
+            style={{
+              left: `${10 + (index * 15) % 80}%`,
+              top: `${20 + (index * 25) % 60}%`,
+              transform: 'translate(-50%, -50%)'
+            }}
+          >
+            <img 
+              src={element.src}
+              alt={element.alt}
+              className="w-16 h-16 object-contain opacity-60"
+            />
+          </div>
+        ))}
 
         {/* Journey Steps */}
         {journeyData.map((step, index) => {
