@@ -536,15 +536,18 @@ export default function AIAssistant() {
                         </div>
                         
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-1 text-sm text-gray-500">
-                            <Clock className="w-4 h-4" />
-                            <span>Status: {action.status.replace('_', ' ')}</span>
+                          <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-1 text-sm text-gray-500">
+                              <Clock className="w-4 h-4" />
+                              <span>Status: {action.status.replace('_', ' ')}</span>
+                            </div>
+                            <div className="w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>
                           </div>
                           
                           <Button 
                             size="sm"
                             onClick={() => window.location.href = action.route}
-                            className="flex items-center gap-1"
+                            className="flex items-center gap-1 bg-blue-600 hover:bg-blue-700"
                           >
                             Start Task
                             <ArrowRight className="w-3 h-3" />
@@ -586,8 +589,8 @@ export default function AIAssistant() {
               </Card>
             )}
 
-            {/* New Query Button */}
-            <div className="text-center pt-6">
+            {/* Action Buttons */}
+            <div className="flex items-center justify-center gap-4 pt-6">
               <Button
                 onClick={() => {
                   setAiResponse(null);
@@ -597,8 +600,19 @@ export default function AIAssistant() {
                 variant="outline"
                 size="lg"
               >
-                Ask Another Question
+                Create New Plan
               </Button>
+              
+              {aiResponse.actionPlan && aiResponse.actionPlan.length > 0 && (
+                <Button
+                  onClick={() => window.location.href = aiResponse.actionPlan[0].route}
+                  size="lg"
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  Start First Task
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              )}
             </div>
           </div>
         )}
