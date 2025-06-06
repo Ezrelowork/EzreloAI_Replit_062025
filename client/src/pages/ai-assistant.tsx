@@ -353,9 +353,9 @@ export default function AIAssistant() {
                         // Calculate position along the curved path
                         const leftPosition = 5 + (progress * 90);
                         
-                        // Calculate vertical offset based on road curve - alternating high/low
+                        // Calculate vertical offset - alternating above/below the road
                         const isEven = index % 2 === 0;
-                        const baseTopPosition = isEven ? 0 : 40;
+                        const baseTopPosition = isEven ? -20 : 60;
                         
                         const IconComponent = getTaskIcon(phase.tasks[0] || "");
                         
