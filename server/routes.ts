@@ -858,6 +858,132 @@ Return JSON with ONLY the actual providers that serve this exact address. If mul
     }
   });
 
+  // Utility providers endpoint
+  app.post("/api/utility-providers", async (req, res) => {
+    try {
+      const { city, state, zip, utilityType } = req.body;
+      
+      if (!city || !state) {
+        return res.status(400).json({ error: "City and state are required" });
+      }
+
+      let providers: any[] = [];
+
+      // Use Google Places API to find utility providers
+      if (process.env.GOOGLE_API_KEY) {
+        try {
+          const searchQueries = {
+            electricity: `electricity provider ${city} ${state}`,
+            internet: `internet provider cable ${city} ${state}`,
+            water: `water utility ${city} ${state}`,
+            waste: `waste management trash ${city} ${state}`
+          };
+
+          const query = searchQueries[utilityType as keyof typeof searchQueries] || `${utilityType} provider ${city} ${state}`;
+          
+          const placesUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(query)}&key=${process.env.GOOGLE_API_KEY}`;
+          
+          const placesResponse = await fetch(placesUrl);
+          const placesData = await placesResponse.json();
+
+          if (placesData.results && placesData.results.length > 0) {
+            providers = await Promise.all(
+              placesData.results.slice(0, 8).map(async (place: any) => {
+                let phone = "Contact for details";
+                let website = `https://www.google.com/search?q=${encodeURIComponent(place.name + " " + city + " " + state)}`;
+
+                // Get detailed place information for phone and website
+                try {
+                  const detailsResponse = await fetch(
+                    `https://maps.googleapis.com/maps/api/place/details/json?place_id=${place.place_id}&fields=website,formatted_phone_number&key=${process.env.GOOGLE_API_KEY}`
+                  );
+                  
+                  if (detailsResponse.ok) {
+                    const detailsData = await detailsResponse.json();
+                    phone = detailsData.result?.formatted_phone_number || phone;
+                    website = detailsData.result?.website || website;
+                  }
+                } catch (error) {
+                  console.log(`Could not get details for ${place.name}`);
+                }
+
+                return {
+                  provider: place.name,
+                  phone: phone,
+                  website: website,
+                  referralUrl: website,
+                  affiliateCode: "",
+                  description: `${utilityType} service provider in ${city}, ${state}. ${place.formatted_address || ''}`,
+                  rating: place.rating || 0,
+                  services: [`${utilityType} service`, "Customer support", "Online billing"],
+                  estimatedCost: utilityType === "electricity" ? "$0.08-0.15/kWh" : 
+                               utilityType === "internet" ? "$40-100/month" :
+                               utilityType === "water" ? "$30-80/month" : "$25-50/month",
+                  availability: place.business_status === "OPERATIONAL" ? "Available in your area" : "Contact to verify availability",
+                  setupFee: utilityType === "internet" ? "$50-100" : "Varies by location",
+                  connectionTime: utilityType === "internet" ? "1-2 weeks" : "3-5 business days"
+                };
+              })
+            );
+          }
+        } catch (error) {
+          console.error("Google Places API error:", error);
+        }
+      }
+
+      // Add known major providers as additional options
+      const majorProviders = {
+        electricity: [
+          {
+            provider: "TXU Energy",
+            phone: "1-855-TXU-ENERGY",
+            website: "https://www.txu.com",
+            referralUrl: "https://www.txu.com",
+            affiliateCode: "",
+            description: "Leading electricity provider in Texas with competitive rates",
+            rating: 4.2,
+            services: ["Residential electricity", "Business electricity", "Green energy options"],
+            estimatedCost: "$0.09-0.13/kWh",
+            availability: "Available in Texas",
+            setupFee: "No setup fee",
+            connectionTime: "Same day to 3 business days"
+          }
+        ],
+        internet: [
+          {
+            provider: "Xfinity",
+            phone: "1-800-XFINITY",
+            website: "https://www.xfinity.com",
+            referralUrl: "https://www.xfinity.com",
+            affiliateCode: "",
+            description: "High-speed internet and cable services nationwide",
+            rating: 3.8,
+            services: ["Internet", "Cable TV", "Home phone", "Home security"],
+            estimatedCost: "$30-80/month",
+            availability: "Most urban areas",
+            setupFee: "$89.99",
+            connectionTime: "7-14 days"
+          }
+        ]
+      };
+
+      // Add major providers if available for this utility type
+      if (majorProviders[utilityType as keyof typeof majorProviders]) {
+        providers.push(...majorProviders[utilityType as keyof typeof majorProviders]);
+      }
+
+      res.json({ 
+        providers,
+        location: `${city}, ${state}`,
+        utilityType 
+      });
+
+    } catch (error) {
+      console.error("Error finding utility providers:", error);
+      res.status(500).json({ error: "Failed to find utility providers" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
