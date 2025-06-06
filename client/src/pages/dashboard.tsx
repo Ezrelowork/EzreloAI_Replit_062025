@@ -5,6 +5,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 import { 
   ArrowRight, 
   CheckCircle,
@@ -18,8 +21,13 @@ import {
   GraduationCap,
   Heart,
   Building,
-  Wrench
+  Wrench,
+  Star,
+  ExternalLink
 } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 interface RelocationPhase {
   id: string;
@@ -41,8 +49,100 @@ interface RelocationCategory {
   estimatedTime: string;
 }
 
+interface MoveAddresses {
+  currentAddress: string;
+  currentCity: string;
+  currentState: string;
+  currentZip: string;
+  newAddress: string;
+  newCity: string;
+  newState: string;
+  newZip: string;
+  moveDate: string;
+}
+
+interface MovingCompany {
+  category: string;
+  provider: string;
+  phone: string;
+  description: string;
+  website: string;
+  referralUrl: string;
+  affiliateCode: string;
+  hours: string;
+  rating: number;
+  services: string[];
+  estimatedCost: string;
+}
+
 export default function Dashboard() {
+  const { toast } = useToast();
   const [selectedPhase, setSelectedPhase] = useState("pre-move");
+  const [moveSetupComplete, setMoveSetupComplete] = useState(false);
+  const [movingCompanies, setMovingCompanies] = useState<MovingCompany[]>([]);
+  const [moveAddresses, setMoveAddresses] = useState<MoveAddresses>({
+    currentAddress: "",
+    currentCity: "",
+    currentState: "",
+    currentZip: "",
+    newAddress: "",
+    newCity: "",
+    newState: "",
+    newZip: "",
+    moveDate: ""
+  });
+
+  // Moving company search mutation
+  const movingCompanyMutation = useMutation({
+    mutationFn: async (addresses: MoveAddresses) => {
+      const response = await apiRequest("POST", "/api/moving-companies", {
+        fromCity: addresses.currentCity,
+        fromState: addresses.currentState,
+        fromZip: addresses.currentZip,
+        toCity: addresses.newCity,
+        toState: addresses.newState,
+        toZip: addresses.newZip
+      });
+      return await response.json();
+    },
+    onSuccess: (data) => {
+      const companies = data?.companies || [];
+      setMovingCompanies(companies);
+      toast({
+        title: "Moving Companies Found",
+        description: `Found ${companies.length} qualified moving companies for your route`,
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Search Error",
+        description: "Unable to find moving companies. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleReferralClick = async (company: MovingCompany, action: string) => {
+    try {
+      await apiRequest("POST", "/api/track-referral", {
+        provider: company.provider,
+        category: "Moving Companies",
+        action: action,
+        userAddress: `${moveAddresses.currentCity}, ${moveAddresses.currentState}`,
+        affiliateCode: company.affiliateCode,
+        referralUrl: company.referralUrl
+      });
+
+      window.open(company.referralUrl, '_blank');
+      
+      toast({
+        title: "Opening Provider",
+        description: `Redirecting to ${company.provider}`,
+      });
+    } catch (error) {
+      window.open(company.website, '_blank');
+    }
+  };
 
   const relocationPhases: RelocationPhase[] = [
     {
@@ -195,15 +295,245 @@ export default function Dashboard() {
     }
   };
 
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case "completed": return <CheckCircle className="w-5 h-5 text-green-600" />;
+      case "in_progress": return <Clock className="w-5 h-5 text-yellow-600" />;
+      default: return <div className="w-5 h-5 rounded-full border-2 border-gray-300" />;
+    }
+  };
+
+  const handleMoveSetup = () => {
+    if (moveAddresses.currentCity && moveAddresses.currentState && 
+        moveAddresses.newCity && moveAddresses.newState && moveAddresses.moveDate) {
+      setMoveSetupComplete(true);
+    }
+  };
+
+  const isFormValid = moveAddresses.currentCity && moveAddresses.currentState && 
+                      moveAddresses.newCity && moveAddresses.newState && moveAddresses.moveDate;
+
+  // If move setup is not complete, show the address setup form
+  if (!moveSetupComplete) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-6">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">Start Your Move</h1>
+            <p className="text-gray-600">Let's organize your relocation by setting up your move details</p>
+          </div>
+
+          <Card className="max-w-2xl mx-auto">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MapPin className="w-5 h-5 text-blue-600" />
+                Move Information
+              </CardTitle>
+              <CardDescription>
+                Enter your current address and destination to create a personalized moving plan
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Current Address Section */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                    <span className="text-blue-600 font-semibold text-sm">1</span>
+                  </div>
+                  <h3 className="font-semibold text-gray-900">Current Address</h3>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-10">
+                  <div className="md:col-span-2">
+                    <Label htmlFor="currentAddress">Street Address</Label>
+                    <Input
+                      id="currentAddress"
+                      value={moveAddresses.currentAddress}
+                      onChange={(e) => setMoveAddresses(prev => ({ ...prev, currentAddress: e.target.value }))}
+                      placeholder="123 Main Street"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="currentCity">City *</Label>
+                    <Input
+                      id="currentCity"
+                      value={moveAddresses.currentCity}
+                      onChange={(e) => setMoveAddresses(prev => ({ ...prev, currentCity: e.target.value }))}
+                      placeholder="Current city"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="currentState">State *</Label>
+                    <Input
+                      id="currentState"
+                      value={moveAddresses.currentState}
+                      onChange={(e) => setMoveAddresses(prev => ({ ...prev, currentState: e.target.value }))}
+                      placeholder="TX"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="currentZip">ZIP Code</Label>
+                    <Input
+                      id="currentZip"
+                      value={moveAddresses.currentZip}
+                      onChange={(e) => setMoveAddresses(prev => ({ ...prev, currentZip: e.target.value }))}
+                      placeholder="12345"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* New Address Section */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                    <span className="text-green-600 font-semibold text-sm">2</span>
+                  </div>
+                  <h3 className="font-semibold text-gray-900">New Home Address</h3>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-10">
+                  <div className="md:col-span-2">
+                    <Label htmlFor="newAddress">Street Address</Label>
+                    <Input
+                      id="newAddress"
+                      value={moveAddresses.newAddress}
+                      onChange={(e) => setMoveAddresses(prev => ({ ...prev, newAddress: e.target.value }))}
+                      placeholder="456 Oak Avenue"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="newCity">City *</Label>
+                    <Input
+                      id="newCity"
+                      value={moveAddresses.newCity}
+                      onChange={(e) => setMoveAddresses(prev => ({ ...prev, newCity: e.target.value }))}
+                      placeholder="New city"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="newState">State *</Label>
+                    <Input
+                      id="newState"
+                      value={moveAddresses.newState}
+                      onChange={(e) => setMoveAddresses(prev => ({ ...prev, newState: e.target.value }))}
+                      placeholder="CA"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="newZip">ZIP Code</Label>
+                    <Input
+                      id="newZip"
+                      value={moveAddresses.newZip}
+                      onChange={(e) => setMoveAddresses(prev => ({ ...prev, newZip: e.target.value }))}
+                      placeholder="90210"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Move Date Section */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                    <span className="text-purple-600 font-semibold text-sm">3</span>
+                  </div>
+                  <h3 className="font-semibold text-gray-900">Move Date</h3>
+                </div>
+                
+                <div className="pl-10">
+                  <Label htmlFor="moveDate">Target Move Date *</Label>
+                  <Input
+                    id="moveDate"
+                    type="date"
+                    value={moveAddresses.moveDate}
+                    onChange={(e) => setMoveAddresses(prev => ({ ...prev, moveDate: e.target.value }))}
+                    required
+                    className="max-w-xs"
+                  />
+                </div>
+              </div>
+
+              <div className="pt-6">
+                <Button 
+                  onClick={handleMoveSetup} 
+                  disabled={!isFormValid}
+                  className="w-full"
+                  size="lg"
+                >
+                  Create My Moving Plan
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </Button>
+                {!isFormValid && (
+                  <p className="text-sm text-gray-500 text-center mt-2">
+                    Please fill in the required fields (*)
+                  </p>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Relocation Dashboard</h1>
-              <p className="text-gray-600 mt-1">Track your progress and manage all relocation tasks</p>
+          <div className="flex justify-between items-start">
+            <div className="flex-1">
+              <h1 className="text-3xl font-bold text-gray-900">Move Command Center</h1>
+              <div className="mt-3 space-y-2">
+                <div className="flex items-center gap-4 text-sm">
+                  <div className="flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-blue-600" />
+                    <span className="font-medium">From:</span>
+                    <span className="text-gray-600">
+                      {moveAddresses.currentCity}, {moveAddresses.currentState}
+                      {moveAddresses.currentZip && ` ${moveAddresses.currentZip}`}
+                    </span>
+                  </div>
+                  <ArrowRight className="w-4 h-4 text-gray-400" />
+                  <div className="flex items-center gap-2">
+                    <MapPin className="w-4 h-4 text-green-600" />
+                    <span className="font-medium">To:</span>
+                    <span className="text-gray-600">
+                      {moveAddresses.newCity}, {moveAddresses.newState}
+                      {moveAddresses.newZip && ` ${moveAddresses.newZip}`}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <Clock className="w-4 h-4 text-purple-600" />
+                  <span className="font-medium">Move Date:</span>
+                  <span className="text-gray-600">
+                    {new Date(moveAddresses.moveDate).toLocaleDateString('en-US', {
+                      weekday: 'long',
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })}
+                  </span>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => setMoveSetupComplete(false)}
+                    className="ml-2 text-blue-600 hover:text-blue-700"
+                  >
+                    Edit Details
+                  </Button>
+                </div>
+              </div>
             </div>
             <div className="text-right">
               <div className="text-sm text-gray-500 mb-1">Overall Progress</div>
