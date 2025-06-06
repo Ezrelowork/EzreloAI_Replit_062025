@@ -68,6 +68,9 @@ export default function AIAssistant() {
     },
     onSuccess: (data: AIResponse) => {
       setAiResponse(data);
+      // Save timeline and action plan for the journey page
+      localStorage.setItem('aiTimeline', JSON.stringify(data.timeline));
+      localStorage.setItem('aiActionPlan', JSON.stringify(data.actionPlan));
       toast({
         title: "Plan Generated",
         description: "Your personalized relocation strategy is ready!",
@@ -467,10 +470,17 @@ export default function AIAssistant() {
               </CardContent>
             </Card>
 
-            {/* Reset Button */}
-            <div className="text-center">
+            {/* Action Buttons */}
+            <div className="flex gap-4 justify-center">
+              <Link href="/moving-journey">
+                <Button size="lg" className="flex items-center gap-2">
+                  <MapPin className="w-5 h-5" />
+                  View Interactive Journey
+                </Button>
+              </Link>
               <Button 
                 variant="outline" 
+                size="lg"
                 onClick={() => {
                   setAiResponse(null);
                   setQuery("");
