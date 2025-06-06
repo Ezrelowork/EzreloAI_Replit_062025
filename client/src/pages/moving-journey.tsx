@@ -3,6 +3,7 @@ import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { JourneyRoad, JourneyLandscape } from "@/components/journey-assets";
+import { ProgressTracker, JourneyStats } from "@/components/progress-tracker";
 import { 
   ArrowLeft,
   Truck,
@@ -247,58 +248,9 @@ export default function MovingJourney() {
         </svg>
       </div>
 
-      {/* Diagonal Journey Highway from Top-Left to Bottom-Right */}
+      {/* Enhanced Diagonal Highway - Ready for Custom Graphics */}
       <div className="absolute inset-0 pt-20">
-        <svg className="w-full h-full" viewBox="0 0 1200 800" preserveAspectRatio="none">
-          <defs>
-            <pattern id="roadDashes" patternUnits="userSpaceOnUse" width="30" height="8">
-              <rect width="15" height="8" fill="#fbbf24" />
-            </pattern>
-          </defs>
-          
-          {/* Road shadow/depth */}
-          <path 
-            d="M 100 100 Q 300 200 500 150 Q 700 100 900 250 Q 1000 350 1100 700" 
-            stroke="#2d3748" 
-            strokeWidth="85" 
-            fill="none"
-            opacity="0.3"
-            transform="translate(5, 5)"
-          />
-          
-          {/* Main road surface */}
-          <path 
-            d="M 100 100 Q 300 200 500 150 Q 700 100 900 250 Q 1000 350 1100 700" 
-            stroke="#4a5568" 
-            strokeWidth="80" 
-            fill="none"
-          />
-          
-          {/* Road edge lines */}
-          <path 
-            d="M 100 100 Q 300 200 500 150 Q 700 100 900 250 Q 1000 350 1100 700" 
-            stroke="#2d3748" 
-            strokeWidth="5" 
-            fill="none"
-            transform="translate(-38, 0)"
-          />
-          <path 
-            d="M 100 100 Q 300 200 500 150 Q 700 100 900 250 Q 1000 350 1100 700" 
-            stroke="#2d3748" 
-            strokeWidth="5" 
-            fill="none"
-            transform="translate(38, 0)"
-          />
-          
-          {/* Yellow center dashed line */}
-          <path 
-            d="M 100 100 Q 300 200 500 150 Q 700 100 900 250 Q 1000 350 1100 700" 
-            stroke="url(#roadDashes)" 
-            strokeWidth="6" 
-            fill="none"
-            strokeDasharray="25,15"
-          />
-        </svg>
+        <JourneyRoad className="w-full h-full" />
       </div>
 
       {/* Compact Highway Signs Following Diagonal Road */}
@@ -422,17 +374,39 @@ export default function MovingJourney() {
         })}
       </div>
 
-      {/* Start and End Markers */}
-      <div className="absolute top-24 left-20 flex items-center gap-2 bg-white/90 backdrop-blur-sm rounded-full px-4 py-2 shadow-lg">
-        <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
-        <span className="text-sm font-medium text-gray-700">Start Journey</span>
-      </div>
-      
-      <div className="absolute bottom-16 right-20 flex items-center gap-2 bg-white/90 backdrop-blur-sm rounded-full px-4 py-2 shadow-lg">
-        <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-        <span className="text-sm font-medium text-gray-700">New Home!</span>
+      {/* Journey Progress Tracking */}
+      <div className="absolute top-24 right-6 space-y-4 w-80">
+        <ProgressTracker 
+          totalSteps={journeyData.length}
+          completedSteps={journeyData.filter(step => step.completed).length}
+          currentStep={journeyData.findIndex(step => !step.completed) + 1}
+        />
+        
+        <JourneyStats
+          highPriority={journeyData.filter(step => step.priority === 'high').length}
+          mediumPriority={journeyData.filter(step => step.priority === 'medium').length}
+          lowPriority={journeyData.filter(step => step.priority === 'low').length}
+        />
       </div>
 
+      {/* Start and End Markers */}
+      <div className="absolute top-24 left-20 flex items-center gap-3 bg-white/95 backdrop-blur-sm rounded-2xl px-6 py-3 shadow-xl border-2 border-blue-200">
+        <div className="w-4 h-4 bg-blue-500 rounded-full animate-pulse shadow-lg"></div>
+        <span className="text-base font-bold text-gray-800">START YOUR JOURNEY</span>
+      </div>
+      
+      <div className="absolute bottom-16 right-20 flex items-center gap-3 bg-white/95 backdrop-blur-sm rounded-2xl px-6 py-3 shadow-xl border-2 border-green-200">
+        <div className="w-4 h-4 bg-green-500 rounded-full animate-pulse shadow-lg"></div>
+        <span className="text-base font-bold text-gray-800">NEW HOME AWAITS!</span>
+      </div>
+
+      {/* Interactive Instructions */}
+      <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 bg-black/80 backdrop-blur-sm rounded-2xl px-8 py-4 shadow-2xl">
+        <div className="text-white text-center">
+          <div className="text-lg font-bold mb-2">🛣️ Interactive Moving Journey</div>
+          <div className="text-sm opacity-90">Click any highway sign to start that task • Follow the road from start to finish</div>
+        </div>
+      </div>
 
     </div>
   );
