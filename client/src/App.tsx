@@ -17,10 +17,17 @@ function Navigation() {
   const [location] = useLocation();
   
   return (
-    <nav className="bg-white border-b border-gray-200 px-6 py-3">
+    <nav className="bg-white border-b border-gray-200 px-6 py-4">
       <div className="flex justify-center items-center max-w-7xl mx-auto">
         <Link href="/">
-          <div className="text-xl font-bold text-blue-600">Ezrelo</div>
+          <div className="flex items-center gap-3 hover:opacity-80 transition-opacity">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl flex items-center justify-center">
+              <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+              </svg>
+            </div>
+            <div className="text-3xl font-bold text-blue-600">Ezrelo</div>
+          </div>
         </Link>
       </div>
     </nav>
