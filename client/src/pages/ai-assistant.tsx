@@ -391,7 +391,7 @@ export default function AIAssistant() {
 
                       {rec.providers && rec.providers.length > 0 && (
                         <div>
-                          <h4 className="font-medium text-gray-900 mb-2">Recommended Providers:</h4>
+                          <h4 className="font-medium text-gray-900 mb-2">Additional Resources:</h4>
                           <div className="space-y-3">
                             {rec.providers.map((provider, idx) => (
                               <div key={idx} className="bg-gray-50 p-4 rounded-lg border">

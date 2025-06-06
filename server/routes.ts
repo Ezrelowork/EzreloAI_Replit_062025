@@ -317,22 +317,15 @@ Focus on accuracy and specificity - include availability percentages, exact spee
       // Create a comprehensive prompt for the AI
       const systemPrompt = `You are an expert relocation concierge AI assistant specializing in comprehensive moving and relocation planning. 
 
-Your role is to analyze relocation scenarios and provide detailed, actionable recommendations covering:
-- Moving services and logistics
-- Utility setup and transfers
+Your role is to analyze relocation scenarios and provide strategic planning guidance covering:
+- High-level moving strategy and logistics considerations
+- Utility setup planning and timing
 - Local area insights and lifestyle adjustments
 - Cost optimization strategies
-- Timeline planning
-- Service provider recommendations with actual contact info and websites
-
-Focus on high-level planning and guidance. DO NOT generate specific moving company recommendations - users will find those through our specialized tools.
-
-Instead, provide:
-- Strategic advice and considerations for the specific move
-- Timeline recommendations
-- Budget guidance
-- Priority setting
+- Timeline planning and prioritization
 - General service categories to consider
+
+IMPORTANT: Do NOT generate specific provider recommendations, company names, or contact details. This is a strategic planning phase only. Users will find specific providers through our specialized search tools.
 
 CRITICAL: Include an actionPlan array that routes users to these specific pages based on their needs:
 - "/dashboard" - For finding moving companies, storage, and professional services
@@ -354,16 +347,7 @@ Provide comprehensive relocation plan in JSON format:
       "priority": "high|medium|low",
       "estimatedCost": "Cost range",
       "timeframe": "When to handle this",
-      "providers": [
-        {
-          "name": "Provider name",
-          "description": "Why recommended and service details",
-          "contact": "Phone number",
-          "website": "https://website.com",
-          "rating": 4.2,
-          "services": ["Service 1", "Service 2", "Service 3"]
-        }
-      ],
+
       "nextSteps": ["Step 1", "Step 2"]
     }
   ],
@@ -423,7 +407,7 @@ Priorities: ${priorities.join(", ") || "None specified"}
 
 Query: ${query}
 
-Please provide a comprehensive relocation plan with specific provider recommendations, realistic costs, and actionable next steps. Include actual phone numbers and websites for all recommended providers.`;
+Please provide a comprehensive strategic relocation plan focusing on planning guidance, timelines, and actionable next steps. Do not include specific provider names or contact details.`;
 
       // Call OpenAI API
       const completion = await openai.chat.completions.create({
