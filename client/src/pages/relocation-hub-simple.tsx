@@ -79,8 +79,8 @@ export default function RelocationHub() {
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">Pre-Move Planning</h3>
               <p className="text-gray-600 mb-3 h-[48px] flex items-center justify-center">Essential preparations for your move</p>
-              <div className="text-sm text-blue-600 font-medium mb-3">8-4 weeks before</div>
               <div className="mt-auto">
+                <div className="text-sm text-blue-600 font-medium mb-2">8-4 weeks before</div>
                 <Progress value={0} className="w-full h-2" />
                 <div className="text-xs text-gray-500 mt-1">0% Complete</div>
               </div>
@@ -91,8 +91,8 @@ export default function RelocationHub() {
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">Essential Services Setup</h3>
               <p className="text-gray-600 mb-3 h-[48px] flex items-center justify-center">Set up utilities and essential services</p>
-              <div className="text-sm text-blue-600 font-medium mb-3">2-4 weeks before</div>
               <div className="mt-auto">
+                <div className="text-sm text-blue-600 font-medium mb-2">2-4 weeks before</div>
                 <Progress value={0} className="w-full h-2" />
                 <div className="text-xs text-gray-500 mt-1">0% Complete</div>
               </div>
@@ -103,8 +103,8 @@ export default function RelocationHub() {
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">Settling In</h3>
               <p className="text-gray-600 mb-3 h-[48px] flex items-center justify-center">Complete your relocation and get established</p>
-              <div className="text-sm text-blue-600 font-medium mb-3">Moving week & after</div>
               <div className="mt-auto">
+                <div className="text-sm text-blue-600 font-medium mb-2">Moving week & after</div>
                 <Progress value={0} className="w-full h-2" />
                 <div className="text-xs text-gray-500 mt-1">0% Complete</div>
               </div>
