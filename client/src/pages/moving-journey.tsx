@@ -182,7 +182,7 @@ export default function MovingJourney() {
         </svg>
       </div>
 
-      {/* Vertical Zigzag Highway */}
+      {/* Diagonal Journey Highway from Top-Left to Bottom-Right */}
       <div className="absolute inset-0 pt-20">
         <svg className="w-full h-full" viewBox="0 0 1200 800" preserveAspectRatio="none">
           <defs>
@@ -193,9 +193,9 @@ export default function MovingJourney() {
           
           {/* Road shadow/depth */}
           <path 
-            d="M 200 150 Q 400 250 200 350 Q 0 450 200 550 Q 400 650 200 750" 
+            d="M 100 100 Q 300 200 500 150 Q 700 100 900 250 Q 1000 350 1100 700" 
             stroke="#2d3748" 
-            strokeWidth="120" 
+            strokeWidth="85" 
             fill="none"
             opacity="0.3"
             transform="translate(5, 5)"
@@ -203,69 +203,75 @@ export default function MovingJourney() {
           
           {/* Main road surface */}
           <path 
-            d="M 200 150 Q 400 250 200 350 Q 0 450 200 550 Q 400 650 200 750" 
+            d="M 100 100 Q 300 200 500 150 Q 700 100 900 250 Q 1000 350 1100 700" 
             stroke="#4a5568" 
-            strokeWidth="110" 
+            strokeWidth="80" 
             fill="none"
           />
           
           {/* Road edge lines */}
           <path 
-            d="M 200 150 Q 400 250 200 350 Q 0 450 200 550 Q 400 650 200 750" 
+            d="M 100 100 Q 300 200 500 150 Q 700 100 900 250 Q 1000 350 1100 700" 
             stroke="#2d3748" 
-            strokeWidth="6" 
+            strokeWidth="5" 
             fill="none"
-            transform="translate(-52, 0)"
+            transform="translate(-38, 0)"
           />
           <path 
-            d="M 200 150 Q 400 250 200 350 Q 0 450 200 550 Q 400 650 200 750" 
+            d="M 100 100 Q 300 200 500 150 Q 700 100 900 250 Q 1000 350 1100 700" 
             stroke="#2d3748" 
-            strokeWidth="6" 
+            strokeWidth="5" 
             fill="none"
-            transform="translate(52, 0)"
+            transform="translate(38, 0)"
           />
           
           {/* Yellow center dashed line */}
           <path 
-            d="M 200 150 Q 400 250 200 350 Q 0 450 200 550 Q 400 650 200 750" 
+            d="M 100 100 Q 300 200 500 150 Q 700 100 900 250 Q 1000 350 1100 700" 
             stroke="url(#roadDashes)" 
-            strokeWidth="8" 
+            strokeWidth="6" 
             fill="none"
             strokeDasharray="25,15"
           />
         </svg>
       </div>
 
-      {/* Cartoon Highway Signs Following Zigzag Road */}
+      {/* Compact Highway Signs Following Diagonal Road */}
       <div className="absolute inset-0 pt-24">
         {journeyData.map((step, index) => {
           const IconComponent = getTaskIcon(step.title);
           
-          // Calculate position along the vertical zigzag path
+          // Calculate position along the diagonal curved path from top-left to bottom-right
           const progress = index / (journeyData.length - 1 || 1);
-          const yPosition = 150 + (progress * 600); // Vertical progression from 150 to 750
           
-          // Calculate horizontal zigzag position
-          const segment = Math.floor(progress * 4); // 4 segments in the zigzag
-          const localProgress = (progress * 4) % 1;
+          // Follow the curved road path: M 100 100 Q 300 200 500 150 Q 700 100 900 250 Q 1000 350 1100 700
+          let xPosition, yPosition;
           
-          let xPosition;
-          if (segment % 2 === 0) {
-            // Moving right: from center to right
-            xPosition = 200 + (localProgress * 200);
+          if (progress <= 0.33) {
+            // First curve: Q 300 200 500 150
+            const t = progress / 0.33;
+            xPosition = 100 + t * 400; // 100 to 500
+            yPosition = 100 + t * 50; // 100 to 150
+          } else if (progress <= 0.66) {
+            // Second curve: Q 700 100 900 250
+            const t = (progress - 0.33) / 0.33;
+            xPosition = 500 + t * 400; // 500 to 900
+            yPosition = 150 + t * 100; // 150 to 250
           } else {
-            // Moving left: from right to left
-            xPosition = 400 - (localProgress * 400);
+            // Final curve: Q 1000 350 1100 700
+            const t = (progress - 0.66) / 0.34;
+            xPosition = 900 + t * 200; // 900 to 1100
+            yPosition = 250 + t * 450; // 250 to 700
           }
           
-          // Offset signs to the side of the road
-          const signOffset = index % 2 === 0 ? 150 : -150;
+          // Offset signs to alternate sides of the road
+          const signOffset = index % 2 === 0 ? 80 : -80;
           const finalX = xPosition + signOffset;
           
           return (
             <div
               key={step.id}
-              className="absolute cursor-pointer group transform hover:scale-110 transition-all duration-300"
+              className="absolute cursor-pointer group transform hover:scale-125 transition-all duration-300"
               style={{
                 left: `${(finalX / 1200) * 100}%`,
                 top: `${(yPosition / 800) * 100}%`,
@@ -273,30 +279,24 @@ export default function MovingJourney() {
               }}
               onClick={() => handleStartTask(step)}
             >
-              {/* Sign Post */}
+              {/* Compact Sign */}
               <div className="flex flex-col items-center">
-                {/* Cartoon-style green highway sign */}
-                <div className="bg-green-600 text-white px-8 py-6 rounded-2xl shadow-2xl border-4 border-white transform group-hover:rotate-2 transition-all duration-300 min-w-64 text-center relative">
-                  {/* Sign border effect */}
-                  <div className="absolute inset-2 border-2 border-white/30 rounded-xl"></div>
-                  
+                {/* Small cartoon-style green highway sign */}
+                <div className="bg-green-600 text-white px-3 py-2 rounded-lg shadow-xl border-2 border-white transform group-hover:rotate-3 transition-all duration-300 min-w-20 text-center relative">
                   <div className="relative z-10">
-                    <div className="flex items-center justify-center gap-4 mb-3">
-                      <IconComponent className="w-10 h-10 drop-shadow-lg" />
+                    <div className="flex items-center justify-center mb-1">
+                      <IconComponent className="w-4 h-4 drop-shadow-sm" />
                     </div>
-                    <div className="text-2xl font-black uppercase tracking-wider leading-tight drop-shadow-md">
-                      {step.title.length > 12 ? 
-                        step.title.substring(0, 12).toUpperCase() : 
-                        step.title.toUpperCase()
+                    <div className="text-xs font-black uppercase tracking-wide leading-tight">
+                      {step.title.length > 8 ? 
+                        step.title.substring(0, 8).replace(/\s+/g, '').toUpperCase() : 
+                        step.title.replace(/\s+/g, '').toUpperCase()
                       }
-                    </div>
-                    <div className="text-sm font-bold mt-2 opacity-95 leading-relaxed">
-                      {step.description.substring(0, 50)}...
                     </div>
                   </div>
                   
-                  {/* Priority indicator */}
-                  <div className={`absolute -top-3 -right-3 w-8 h-8 rounded-full flex items-center justify-center text-xs font-black border-2 border-white shadow-lg ${
+                  {/* Tiny priority indicator */}
+                  <div className={`absolute -top-1 -right-1 w-4 h-4 rounded-full flex items-center justify-center text-xs font-black border border-white shadow ${
                     step.priority === 'high' ? 'bg-red-500' : 
                     step.priority === 'medium' ? 'bg-yellow-500' : 'bg-blue-500'
                   }`}>
@@ -304,30 +304,27 @@ export default function MovingJourney() {
                   </div>
                 </div>
 
-                {/* Sign post */}
-                <div className="w-6 h-32 bg-gray-600 shadow-lg mt-2"></div>
+                {/* Small sign post */}
+                <div className="w-2 h-8 bg-gray-600 shadow mt-1"></div>
 
-                {/* Interactive details on hover */}
-                <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 mt-4 bg-white/95 backdrop-blur-sm rounded-2xl p-5 shadow-2xl border-2 border-green-200 max-w-72">
-                  <div className="text-lg font-bold text-gray-800 mb-3">
+                {/* Hover details popup */}
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 absolute top-12 bg-white/95 backdrop-blur-sm rounded-xl p-3 shadow-xl border-2 border-green-200 min-w-48 z-20">
+                  <div className="text-sm font-bold text-gray-800 mb-2">
                     {step.title}
                   </div>
-                  <div className="text-sm text-gray-600 mb-4 leading-relaxed">
-                    {step.description}
+                  <div className="text-xs text-gray-600 mb-3 leading-relaxed">
+                    {step.description.substring(0, 60)}...
                   </div>
                   <div className="flex items-center justify-between">
-                    <div className={`px-4 py-2 rounded-full text-sm font-bold text-white ${
+                    <div className={`px-2 py-1 rounded-full text-xs font-bold text-white ${
                       step.priority === 'high' ? 'bg-red-500' : 
                       step.priority === 'medium' ? 'bg-yellow-500' : 'bg-green-500'
                     }`}>
-                      {step.priority.toUpperCase()} PRIORITY
+                      {step.priority.toUpperCase()}
                     </div>
-                    <div className="text-sm font-bold text-green-700 bg-green-100 px-3 py-2 rounded-lg">
-                      CLICK TO START →
+                    <div className="text-xs font-bold text-green-700 bg-green-100 px-2 py-1 rounded">
+                      CLICK →
                     </div>
-                  </div>
-                  <div className="text-xs text-gray-500 mt-3 text-center">
-                    Timeline: {step.week}
                   </div>
                 </div>
               </div>
@@ -337,12 +334,12 @@ export default function MovingJourney() {
       </div>
 
       {/* Start and End Markers */}
-      <div className="absolute bottom-20 left-10 flex items-center gap-2 bg-white/90 backdrop-blur-sm rounded-full px-4 py-2 shadow-lg">
+      <div className="absolute top-24 left-20 flex items-center gap-2 bg-white/90 backdrop-blur-sm rounded-full px-4 py-2 shadow-lg">
         <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></div>
         <span className="text-sm font-medium text-gray-700">Start Journey</span>
       </div>
       
-      <div className="absolute bottom-20 right-10 flex items-center gap-2 bg-white/90 backdrop-blur-sm rounded-full px-4 py-2 shadow-lg">
+      <div className="absolute bottom-16 right-20 flex items-center gap-2 bg-white/90 backdrop-blur-sm rounded-full px-4 py-2 shadow-lg">
         <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
         <span className="text-sm font-medium text-gray-700">New Home!</span>
       </div>
