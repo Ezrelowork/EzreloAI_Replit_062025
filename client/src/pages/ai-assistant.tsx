@@ -306,41 +306,106 @@ export default function AIAssistant() {
               </CardContent>
             </Card>
 
-            {/* Timeline */}
+            {/* Moving Journey Road Map */}
             {aiResponse.timeline && aiResponse.timeline.length > 0 && (
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Calendar className="w-5 h-5 text-green-600" />
-                    Moving Timeline
+                    <MapPin className="w-5 h-5 text-green-600" />
+                    Your Moving Journey
                   </CardTitle>
                   <CardDescription>
-                    Key milestones and tasks organized by timeframe
+                    Follow the road to your successful relocation
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    {aiResponse.timeline.map((phase, index) => (
-                      <div key={index} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
-                        <h5 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                          <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-sm font-bold text-blue-600">
-                            {index + 1}
-                          </div>
-                          {phase.week}
-                        </h5>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                          {phase.tasks.map((task, taskIndex) => {
-                            const IconComponent = getTaskIcon(task);
-                            return (
-                              <div key={taskIndex} className="text-sm text-gray-700 flex items-center gap-2">
-                                <IconComponent className="w-4 h-4 text-blue-500 flex-shrink-0" />
-                                {task}
+                  <div className="relative">
+                    {/* Road Path */}
+                    <svg className="w-full h-32 mb-8" viewBox="0 0 800 120" preserveAspectRatio="none">
+                      <defs>
+                        <pattern id="roadDashes" patternUnits="userSpaceOnUse" width="20" height="4">
+                          <rect width="10" height="4" fill="#FFC107" />
+                        </pattern>
+                      </defs>
+                      {/* Road Background */}
+                      <path 
+                        d="M 50 60 Q 200 20 350 60 T 750 60" 
+                        stroke="#4B5563" 
+                        strokeWidth="24" 
+                        fill="none"
+                      />
+                      {/* Road Centerline */}
+                      <path 
+                        d="M 50 60 Q 200 20 350 60 T 750 60" 
+                        stroke="url(#roadDashes)" 
+                        strokeWidth="3" 
+                        fill="none"
+                        strokeDasharray="15,10"
+                      />
+                    </svg>
+
+                    {/* Road Signs positioned along the path */}
+                    <div className="absolute inset-0 flex justify-between items-start pt-2">
+                      {aiResponse.timeline.map((phase, index) => {
+                        const totalStops = aiResponse.timeline.length;
+                        const leftPosition = 6 + (index * (88 / (totalStops - 1 || 1)));
+                        const IconComponent = getTaskIcon(phase.tasks[0] || "");
+                        
+                        return (
+                          <div 
+                            key={index} 
+                            className="flex flex-col items-center" 
+                            style={{ 
+                              position: 'absolute', 
+                              left: `${leftPosition}%`,
+                              transform: 'translateX(-50%)'
+                            }}
+                          >
+                            {/* Road Sign Post */}
+                            <div className="w-1 h-8 bg-gray-600 mb-1"></div>
+                            
+                            {/* Road Sign */}
+                            <div className="bg-green-600 text-white px-3 py-2 rounded-lg shadow-lg transform -rotate-3 hover:rotate-0 transition-transform cursor-pointer min-w-20 text-center">
+                              <div className="flex items-center justify-center gap-1 mb-1">
+                                <IconComponent className="w-4 h-4" />
+                                <span className="text-xs font-bold">{index + 1}</span>
                               </div>
-                            );
-                          })}
-                        </div>
+                              <div className="text-xs font-semibold whitespace-nowrap">
+                                {phase.week.replace('Week ', 'Wk ')}
+                              </div>
+                            </div>
+                            
+                            {/* Tasks under the sign */}
+                            <div className="mt-2 bg-white/90 backdrop-blur-sm rounded-lg p-2 shadow-sm max-w-32">
+                              {phase.tasks.slice(0, 3).map((task, taskIndex) => {
+                                const TaskIcon = getTaskIcon(task);
+                                return (
+                                  <div key={taskIndex} className="text-xs text-gray-700 flex items-center gap-1 mb-1">
+                                    <TaskIcon className="w-3 h-3 text-blue-500 flex-shrink-0" />
+                                    <span className="truncate">{task.length > 20 ? task.substring(0, 20) + '...' : task}</span>
+                                  </div>
+                                );
+                              })}
+                              {phase.tasks.length > 3 && (
+                                <div className="text-xs text-gray-500">+{phase.tasks.length - 3} more</div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+
+                    {/* Start and End Markers */}
+                    <div className="flex justify-between mt-4">
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                        Start Journey
                       </div>
-                    ))}
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                        New Home!
+                      </div>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
