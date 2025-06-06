@@ -27,6 +27,7 @@ interface JourneyStep {
   position: { x: number; y: number };
   signType: "stop" | "warning" | "highway" | "info";
   completed: boolean;
+  priority: "high" | "medium" | "low";
 }
 
 // Enhanced icon mapping for tasks
@@ -50,39 +51,38 @@ export default function MovingJourney() {
   const [selectedStep, setSelectedStep] = useState<JourneyStep | null>(null);
 
   useEffect(() => {
-    // Get timeline data from localStorage (from AI assistant)
-    const savedTimeline = localStorage.getItem('aiTimeline');
+    // Get action plan data from localStorage (from AI assistant)
     const savedActionPlan = localStorage.getItem('aiActionPlan');
     
-    if (savedTimeline && savedActionPlan) {
-      const timeline = JSON.parse(savedTimeline);
+    if (savedActionPlan) {
       const actionPlan = JSON.parse(savedActionPlan);
       
-      // Transform timeline into journey steps with road positions
-      const steps: JourneyStep[] = timeline.map((phase: any, index: number) => {
-        const totalSteps = timeline.length;
+      // Transform action plan into journey steps with road positions
+      const steps: JourneyStep[] = actionPlan.map((action: any, index: number) => {
+        const totalSteps = actionPlan.length;
         const progress = index / (totalSteps - 1 || 1);
         
-        // Calculate curved road positions
-        const baseX = 10 + (progress * 80);
-        const curveY = 20 + Math.sin(progress * Math.PI * 2) * 15;
+        // Calculate curved road positions with more spacing
+        const baseX = 8 + (progress * 84);
+        const curveY = 25 + Math.sin(progress * Math.PI * 1.5) * 20;
         
-        // Find matching action from action plan
-        const matchingAction = actionPlan.find((action: any) => 
-          action.title.toLowerCase().includes(phase.week.toLowerCase()) ||
-          phase.tasks.some((task: string) => action.title.toLowerCase().includes(task.toLowerCase()))
-        );
+        // Determine sign type based on priority and position
+        let signType = 'warning';
+        if (action.priority === 'high') signType = 'stop';
+        else if (index === actionPlan.length - 1) signType = 'highway';
+        else if (action.route === '/dashboard') signType = 'info';
         
         return {
-          id: `step-${index}`,
-          title: phase.week,
-          description: phase.tasks.join(', '),
-          week: phase.week,
-          tasks: phase.tasks,
-          route: matchingAction?.route || '/dashboard',
+          id: `action-${index}`,
+          title: action.title,
+          description: action.description,
+          week: action.timeframe,
+          tasks: [action.description],
+          route: action.route,
           position: { x: baseX, y: curveY },
-          signType: index === 0 ? 'stop' : index === timeline.length - 1 ? 'highway' : 'warning',
-          completed: false
+          signType: signType,
+          completed: false,
+          priority: action.priority || 'medium'
         };
       });
       
@@ -94,17 +94,41 @@ export default function MovingJourney() {
     setSelectedStep(step);
   };
 
-  const handleStartTask = (route: string) => {
-    setLocation(route);
+  const handleStartTask = (step: JourneyStep) => {
+    // Pass address data to dashboard route if needed
+    const urlParams = new URLSearchParams(window.location.search);
+    const fromParam = localStorage.getItem('aiFromLocation');
+    const toParam = localStorage.getItem('aiToLocation');
+    const dateParam = localStorage.getItem('aiMoveDate');
+    
+    if (step.route === '/dashboard' && fromParam && toParam) {
+      setLocation(`/dashboard?from=${encodeURIComponent(fromParam)}&to=${encodeURIComponent(toParam)}&date=${dateParam || ''}`);
+    } else {
+      setLocation(step.route);
+    }
   };
 
-  const getSignColor = (signType: string) => {
+  const getSignColor = (signType: string, priority?: string) => {
+    if (priority === 'high') return 'bg-red-600 border-red-800';
+    if (priority === 'medium') return 'bg-yellow-500 border-yellow-700';
+    if (priority === 'low') return 'bg-green-600 border-green-800';
+    
     switch (signType) {
-      case 'stop': return 'bg-red-600';
-      case 'warning': return 'bg-yellow-500';
-      case 'highway': return 'bg-green-600';
-      case 'info': return 'bg-blue-600';
-      default: return 'bg-gray-600';
+      case 'stop': return 'bg-red-600 border-red-800';
+      case 'warning': return 'bg-yellow-500 border-yellow-700';
+      case 'highway': return 'bg-green-600 border-green-800';
+      case 'info': return 'bg-blue-600 border-blue-800';
+      default: return 'bg-gray-600 border-gray-800';
+    }
+  };
+
+  const getSignShape = (signType: string) => {
+    switch (signType) {
+      case 'stop': return 'clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)';
+      case 'warning': return 'clip-path: polygon(50% 0%, 0% 100%, 100% 100%)';
+      case 'highway': return 'border-radius: 8px';
+      case 'info': return 'border-radius: 50%';
+      default: return 'border-radius: 8px';
     }
   };
 
@@ -161,50 +185,75 @@ export default function MovingJourney() {
         </svg>
       </div>
 
-      {/* Journey Steps */}
+      {/* Journey Steps - Action Plan as Road Signs */}
       <div className="absolute inset-0 pt-24">
         {journeyData.map((step, index) => {
-          const IconComponent = getTaskIcon(step.tasks[0] || "");
+          const IconComponent = getTaskIcon(step.title);
+          const signColor = getSignColor(step.signType, step.priority);
+          
           return (
             <div
               key={step.id}
-              className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer"
+              className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer group"
               style={{
                 left: `${step.position.x}%`,
-                top: `${step.position.y + 40}%`,
+                top: `${step.position.y + 35}%`,
               }}
-              onClick={() => handleStepClick(step)}
+              onClick={() => handleStartTask(step)}
             >
               {/* Sign Post */}
               <div className="flex flex-col items-center">
-                <div className="w-2 h-16 bg-gray-700 mb-2"></div>
+                <div className="w-3 h-20 bg-gray-700 mb-3 shadow-lg"></div>
                 
-                {/* Road Sign */}
+                {/* Road Sign - Different shapes based on type */}
                 <div 
-                  className={`${getSignColor(step.signType)} text-white px-4 py-3 rounded-lg shadow-xl transform hover:scale-105 transition-all duration-200 min-w-28 text-center border-2 border-white`}
+                  className={`${signColor} text-white px-5 py-4 shadow-2xl transform hover:scale-110 transition-all duration-300 min-w-32 text-center border-4 border-white group-hover:rotate-2`}
+                  style={step.signType === 'stop' ? { 
+                    clipPath: 'polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)',
+                    borderRadius: '0px'
+                  } : step.signType === 'warning' ? {
+                    clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)',
+                    borderRadius: '0px'
+                  } : {
+                    borderRadius: step.signType === 'info' ? '50%' : '12px'
+                  }}
                 >
-                  <div className="flex items-center justify-center gap-2 mb-1">
-                    <IconComponent className="w-5 h-5" />
-                    <span className="font-bold text-sm">{index + 1}</span>
+                  <div className="flex items-center justify-center gap-2 mb-2">
+                    <IconComponent className="w-6 h-6" />
+                    {step.signType === 'stop' && <div className="text-lg font-black">STOP</div>}
+                    {step.signType === 'warning' && <div className="text-sm font-bold">STEP {index + 1}</div>}
+                    {step.signType === 'highway' && <div className="text-sm font-bold">FINISH</div>}
+                    {step.signType === 'info' && <div className="text-sm font-bold">GO</div>}
                   </div>
-                  <div className="text-xs font-semibold whitespace-nowrap">
-                    {step.week.replace('Week ', 'WK ')}
+                  <div className="text-xs font-bold uppercase tracking-wider">
+                    {step.title.substring(0, 12)}
+                    {step.title.length > 12 ? '...' : ''}
                   </div>
-                  {step.completed && (
-                    <CheckCircle className="w-4 h-4 text-green-300 mx-auto mt-1" />
-                  )}
                 </div>
 
-                {/* Task Preview */}
-                <div className="mt-3 bg-white/95 backdrop-blur-sm rounded-lg p-3 shadow-lg border border-gray-200 max-w-44 text-center">
-                  <div className="text-xs font-semibold text-gray-800 mb-1">
-                    {step.tasks[0]}
+                {/* Action Details */}
+                <div className="mt-4 bg-white/95 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-gray-200 max-w-48 text-center group-hover:shadow-xl transition-shadow">
+                  <div className="text-sm font-bold text-gray-800 mb-2">
+                    {step.title}
                   </div>
-                  {step.tasks.length > 1 && (
-                    <div className="text-xs text-gray-500">
-                      +{step.tasks.length - 1} more
+                  <div className="text-xs text-gray-600 mb-3 leading-relaxed">
+                    {step.description.substring(0, 80)}
+                    {step.description.length > 80 ? '...' : ''}
+                  </div>
+                  <div className="flex items-center justify-center gap-2 text-xs">
+                    <div className={`px-2 py-1 rounded-full text-white font-medium ${
+                      step.priority === 'high' ? 'bg-red-500' : 
+                      step.priority === 'medium' ? 'bg-yellow-500' : 'bg-green-500'
+                    }`}>
+                      {step.priority} priority
                     </div>
-                  )}
+                  </div>
+                  <div className="text-xs text-gray-500 mt-2">
+                    {step.week}
+                  </div>
+                  <div className="mt-3 text-xs font-semibold text-blue-600 hover:text-blue-800 transition-colors">
+                    Click to Start →
+                  </div>
                 </div>
               </div>
             </div>
@@ -223,50 +272,7 @@ export default function MovingJourney() {
         <span className="text-sm font-medium text-gray-700">New Home!</span>
       </div>
 
-      {/* Step Detail Modal */}
-      {selectedStep && (
-        <div className="fixed inset-0 bg-black/50 z-30 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-bold text-gray-900">{selectedStep.title}</h3>
-              <button 
-                onClick={() => setSelectedStep(null)}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                ✕
-              </button>
-            </div>
-            
-            <div className="space-y-3 mb-6">
-              {selectedStep.tasks.map((task, index) => {
-                const IconComponent = getTaskIcon(task);
-                return (
-                  <div key={index} className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
-                    <IconComponent className="w-5 h-5 text-blue-500" />
-                    <span className="text-sm text-gray-700">{task}</span>
-                  </div>
-                );
-              })}
-            </div>
 
-            <div className="flex gap-3">
-              <Button 
-                onClick={() => setSelectedStep(null)}
-                variant="outline" 
-                className="flex-1"
-              >
-                Close
-              </Button>
-              <Button 
-                onClick={() => handleStartTask(selectedStep.route)}
-                className="flex-1"
-              >
-                Start Task
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

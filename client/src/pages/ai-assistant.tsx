@@ -71,6 +71,10 @@ export default function AIAssistant() {
       // Save timeline and action plan for the journey page
       localStorage.setItem('aiTimeline', JSON.stringify(data.timeline));
       localStorage.setItem('aiActionPlan', JSON.stringify(data.actionPlan));
+      // Save move addresses for routing
+      localStorage.setItem('aiFromLocation', relocationDetails.fromLocation);
+      localStorage.setItem('aiToLocation', relocationDetails.toLocation);
+      localStorage.setItem('aiMoveDate', relocationDetails.moveDate);
       toast({
         title: "Plan Generated",
         description: "Your personalized relocation strategy is ready!",
@@ -429,55 +433,37 @@ export default function AIAssistant() {
               </Card>
             )}
 
-            {/* Action Plan */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MapPin className="w-5 h-5 text-purple-600" />
-                  Your Action Plan
-                </CardTitle>
-                <CardDescription>
-                  Execute your move step-by-step with our specialized tools
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid gap-4">
-                  {aiResponse.actionPlan.map((action, index) => (
-                    <div key={index} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex-1">
-                          <h5 className="font-semibold text-gray-900 mb-1 flex items-center gap-2">
-                            {action.title}
-                            <Badge className={getPriorityColor(action.priority)}>
-                              {action.priority} priority
-                            </Badge>
-                          </h5>
-                          <p className="text-sm text-gray-600 mb-2">{action.description}</p>
-                          <p className="text-xs text-gray-500">Best to complete: {action.timeframe}</p>
-                        </div>
-                        <Link href={action.route === "/dashboard" ? 
-                          `/dashboard?from=${encodeURIComponent(relocationDetails.fromLocation)}&to=${encodeURIComponent(relocationDetails.toLocation)}&date=${relocationDetails.moveDate}` 
-                          : action.route}>
-                          <Button size="sm" className="flex items-center gap-1">
-                            Start Task
-                            <ArrowRight className="w-3 h-3" />
-                          </Button>
-                        </Link>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Action Buttons */}
-            <div className="flex gap-4 justify-center">
+            {/* Single Action Button */}
+            <div className="text-center">
               <Link href="/moving-journey">
-                <Button size="lg" className="flex items-center gap-2">
+                <Button size="lg" className="flex items-center gap-2 mx-auto">
                   <MapPin className="w-5 h-5" />
-                  View Interactive Journey
+                  Start Your Moving Journey
                 </Button>
               </Link>
+              <p className="text-sm text-gray-600 mt-3">
+                Navigate your personalized moving roadmap with interactive tasks
+              </p>
+            </div>
+
+            <div className="text-center mt-6">
+              <Link href="/moving-journey">
+                <div className="w-full max-w-md mx-auto p-6 bg-gradient-to-r from-blue-50 to-green-50 rounded-xl border-2 border-dashed border-blue-200 hover:border-blue-400 transition-colors cursor-pointer">
+                  <div className="flex items-center justify-center gap-3 mb-3">
+                    <MapPin className="w-8 h-8 text-blue-600" />
+                    <div className="text-xl font-semibold text-gray-800">Your Moving Journey Awaits</div>
+                  </div>
+                  <p className="text-gray-600 text-sm">
+                    Click any road sign to execute tasks → Find movers → Set up utilities → Complete your move
+                  </p>
+                </div>
+              </Link>
+            </div>
+
+            <div className="text-center mt-8">
+              <div className="w-24 h-24 mx-auto mb-4 bg-gradient-to-b from-blue-100 to-green-100 rounded-full flex items-center justify-center">
+                <ArrowRight className="w-8 h-8 text-blue-600" />
+              </div>
               <Button 
                 variant="outline" 
                 size="lg"
