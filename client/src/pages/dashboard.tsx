@@ -347,8 +347,7 @@ export default function Dashboard() {
     if (moveAddresses.currentCity && moveAddresses.currentState && 
         moveAddresses.newCity && moveAddresses.newState && moveAddresses.moveDate) {
       setMoveSetupComplete(true);
-      // Automatically search for moving companies once setup is complete
-      movingCompanyMutation.mutate(moveAddresses);
+      // Don't automatically search - wait for user to click "Get Started"
     }
   };
 
