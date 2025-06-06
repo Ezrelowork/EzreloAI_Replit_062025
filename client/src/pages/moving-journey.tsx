@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { JourneyRoad, JourneyLandscape } from "@/components/journey-assets";
 import { ProgressTracker, JourneyStats } from "@/components/progress-tracker";
+import { TaskModal, useTaskModal } from "@/components/task-modal";
 import { 
   ArrowLeft,
   Truck,
@@ -92,6 +93,7 @@ const getTaskIcon = (task: string) => {
 export default function MovingJourney() {
   const [, setLocation] = useLocation();
   const [journeyData, setJourneyData] = useState<JourneyStep[]>([]);
+  const { isOpen, currentTask, openModal, closeModal } = useTaskModal();
   useEffect(() => {
     // Get action plan data from localStorage (from AI assistant)
     const savedActionPlan = localStorage.getItem('aiActionPlan');
@@ -134,6 +136,18 @@ export default function MovingJourney() {
 
 
 
+  const handleTaskClick = (step: JourneyStep) => {
+    // Open modal instead of navigating away
+    openModal({
+      id: step.id,
+      title: step.title,
+      description: step.description,
+      priority: step.priority,
+      week: step.week,
+      category: getCategoryFromTask(step.title)
+    });
+  };
+
   const handleStartTask = (step: JourneyStep) => {
     // Smart routing with address data preservation
     const fromParam = localStorage.getItem('aiFromLocation');
@@ -162,12 +176,25 @@ export default function MovingJourney() {
       targetRoute = '/ai-assistant';
     }
     
+    // Close modal and navigate
+    closeModal();
+    
     // Pass location data for relevant routes
     if ((targetRoute === '/dashboard' || targetRoute === '/utilities') && fromParam && toParam) {
       setLocation(`${targetRoute}?from=${encodeURIComponent(fromParam)}&to=${encodeURIComponent(toParam)}&date=${dateParam || ''}`);
     } else {
       setLocation(targetRoute);
     }
+  };
+
+  const getCategoryFromTask = (title: string) => {
+    const taskLower = title.toLowerCase();
+    if (taskLower.includes('mover') || taskLower.includes('moving')) return 'Moving & Transport';
+    if (taskLower.includes('utility') || taskLower.includes('electric') || taskLower.includes('internet')) return 'Utilities & Services';
+    if (taskLower.includes('pack') || taskLower.includes('organize')) return 'Organization & Planning';
+    if (taskLower.includes('address') || taskLower.includes('registration')) return 'Address Changes';
+    if (taskLower.includes('health') || taskLower.includes('medical')) return 'Healthcare & Services';
+    return 'General Tasks';
   };
 
   const getSignColor = (signType: string, priority?: string) => {
@@ -232,7 +259,7 @@ export default function MovingJourney() {
               {/* Step Card */}
               <div 
                 className="bg-white rounded-2xl shadow-xl border border-gray-200 p-6 ml-4 cursor-pointer interactive-element group"
-                onClick={() => handleStartTask(step)}
+                onClick={() => handleTaskClick(step)}
               >
                 <div className="flex items-start gap-4">
                   <div className={`p-3 rounded-xl ${
@@ -260,7 +287,7 @@ export default function MovingJourney() {
                         Timeline: {step.week}
                       </div>
                       <div className="flex items-center gap-2 text-blue-600 font-semibold group-hover:text-blue-700 transition-colors">
-                        Start Task
+                        View Details
                         <ArrowLeft className="w-4 h-4 rotate-180 group-hover:translate-x-1 transition-transform" />
                       </div>
                     </div>
@@ -291,9 +318,19 @@ export default function MovingJourney() {
       <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-black/90 backdrop-blur-sm rounded-2xl px-8 py-4 shadow-2xl z-30">
         <div className="text-white text-center">
           <div className="text-lg font-bold mb-2">Interactive Moving Journey</div>
-          <div className="text-sm opacity-90">Click any task card to start • Follow your personalized timeline</div>
+          <div className="text-sm opacity-90">Click any task card to view details • Follow your personalized timeline</div>
         </div>
       </div>
+
+      {/* Task Modal */}
+      {currentTask && (
+        <TaskModal
+          isOpen={isOpen}
+          onClose={closeModal}
+          task={currentTask}
+          onStartTask={() => handleStartTask(currentTask)}
+        />
+      )}
 
     </div>
   );
