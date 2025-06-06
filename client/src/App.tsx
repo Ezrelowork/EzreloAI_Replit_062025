@@ -12,7 +12,7 @@ import RelocationHub from "@/pages/relocation-hub-simple";
 import Dashboard from "@/pages/dashboard";
 import Utilities from "@/pages/utilities";
 import AIAssistant from "@/pages/ai-assistant";
-import MovingJourney from "@/pages/moving-journey";
+import MovingJourneySimple from "@/pages/moving-journey-simple";
 import LogoShowcase from "@/pages/logo-showcase";
 import NotFound from "@/pages/not-found";
 
@@ -46,7 +46,7 @@ function Router() {
           <Route path="/" component={RelocationHub} />
           <Route path="/dashboard" component={Dashboard} />
           <Route path="/ai-assistant" component={AIAssistant} />
-          <Route path="/moving-journey" component={MovingJourney} />
+          <Route path="/moving-journey" component={MovingJourneySimple} />
           <Route path="/utilities" component={Utilities} />
           <Route path="/moving-checklist" component={MovingChecklist} />
           <Route path="/analytics" component={Analytics} />

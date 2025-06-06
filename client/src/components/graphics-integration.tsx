@@ -18,48 +18,54 @@ export class GraphicsManager {
   async loadCustomGraphics(assetFiles: string[]): Promise<void> {
     const newGraphics: JourneyGraphics = {};
 
-    // Process each asset file
+    // Process each asset file with dynamic imports
     for (const fileName of assetFiles) {
-      const assetPath = `@assets/${fileName}`;
-      
-      // Main background with road
-      if (fileName.toLowerCase().includes('background') || fileName.toLowerCase().includes('road')) {
-        newGraphics.roadBackground = {
-          src: assetPath,
-          alt: 'Highway Journey Background',
-          width: 1200,
-          height: 800
-        };
-      }
+      try {
+        // Use dynamic import to properly load assets
+        const assetModule = await import(`@assets/${fileName}`);
+        const assetPath = assetModule.default;
+        
+        // Main background with road
+        if (fileName.toLowerCase().includes('background') || fileName.toLowerCase().includes('road')) {
+          newGraphics.roadBackground = {
+            src: assetPath,
+            alt: 'Highway Journey Background',
+            width: 1200,
+            height: 800
+          };
+        }
 
-      // Individual road signs (SIgn1.png, Sign2.png, etc.)
-      if (fileName.toLowerCase().includes('sign')) {
-        if (!newGraphics.taskIcons) newGraphics.taskIcons = {};
-        
-        // Map specific signs to task categories based on content
-        let signKey = 'default';
-        
-        // Sign1 = Core Moving Tasks
-        if (fileName.includes('SIgn1') || fileName.includes('Sign1')) signKey = 'moving';
-        
-        // Sign2 = Set Up Utilities  
-        if (fileName.includes('Sign2')) signKey = 'utilities-setup';
-        
-        // Sign3 = Address Changes
-        if (fileName.includes('Sign3')) signKey = 'address-changes';
-        
-        // Sign4 = Utilities & Services
-        if (fileName.includes('Sign4')) signKey = 'utilities-services';
-        
-        // Sign5 = Essential Services
-        if (fileName.includes('Sign5')) signKey = 'essential-services';
-        
-        newGraphics.taskIcons[signKey] = {
-          src: assetPath,
-          alt: `Highway Sign ${signKey}`,
-          width: 120,
-          height: 80
-        };
+        // Individual road signs (SIgn1.png, Sign2.png, etc.)
+        if (fileName.toLowerCase().includes('sign')) {
+          if (!newGraphics.taskIcons) newGraphics.taskIcons = {};
+          
+          // Map specific signs to task categories based on content
+          let signKey = 'default';
+          
+          // Sign1 = Core Moving Tasks
+          if (fileName.includes('SIgn1') || fileName.includes('Sign1')) signKey = 'moving';
+          
+          // Sign2 = Set Up Utilities  
+          if (fileName.includes('Sign2')) signKey = 'utilities-setup';
+          
+          // Sign3 = Address Changes
+          if (fileName.includes('Sign3')) signKey = 'address-changes';
+          
+          // Sign4 = Utilities & Services
+          if (fileName.includes('Sign4')) signKey = 'utilities-services';
+          
+          // Sign5 = Essential Services
+          if (fileName.includes('Sign5')) signKey = 'essential-services';
+          
+          newGraphics.taskIcons[signKey] = {
+            src: assetPath,
+            alt: `Highway Sign ${signKey}`,
+            width: 120,
+            height: 80
+          };
+        }
+      } catch (error) {
+        console.log(`Could not load asset: ${fileName}`, error);
       }
     }
 

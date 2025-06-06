@@ -7,7 +7,14 @@ import { ProgressTracker, JourneyStats } from "@/components/progress-tracker";
 import { TaskModal, useTaskModal } from "@/components/task-modal";
 import { ZoomNavigation, useZoomNavigation } from "@/components/zoom-navigation";
 import { TaskPage } from "@/components/task-page";
-import { useCustomGraphics, GraphicsManager } from "@/components/graphics-integration";
+
+// Direct imports for highway graphics
+import highwayBackground from "@assets/highway-background.png";
+import sign1 from "@assets/SIgn1.png";
+import sign2 from "@assets/Sign2.png";
+import sign3 from "@assets/Sign3.png";
+import sign4 from "@assets/Sign4.png";
+import sign5 from "@assets/Sign5.png";
 import { 
   ArrowLeft,
   Truck,
@@ -98,32 +105,24 @@ export default function MovingJourney() {
   const [journeyData, setJourneyData] = useState<JourneyStep[]>([]);
   const { isOpen, currentTask, openModal, closeModal } = useTaskModal();
   const { isZoomed, zoomOrigin, currentTaskData, zoomIntoTask, zoomOut } = useZoomNavigation();
-  const { graphics, isLoaded, loadGraphics } = useCustomGraphics();
   const taskCardRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
-  // Load custom highway graphics when component mounts
-  useEffect(() => {
-    const initializeGraphics = async () => {
-      // Load the specific highway assets
-      const highwayAssets = [
-        'highway-background.png',
-        'SIgn1.png',  // Note: keeping exact capitalization from your file
-        'Sign2.png',
-        'Sign3.png', 
-        'Sign4.png',
-        'Sign5.png'
-      ];
-      
-      try {
-        await loadGraphics(highwayAssets);
-        console.log('Highway graphics loaded successfully');
-      } catch (error) {
-        console.log('Using default graphics design');
-      }
-    };
-    
-    initializeGraphics();
-  }, []);
+  // Create static graphics object from imports
+  const customGraphics = {
+    roadBackground: {
+      src: highwayBackground,
+      alt: 'Highway Journey Background',
+      width: 1200,
+      height: 800
+    },
+    taskIcons: {
+      'moving': { src: sign1, alt: 'Core Moving Tasks', width: 120, height: 80 },
+      'utilities-setup': { src: sign2, alt: 'Set Up Utilities', width: 120, height: 80 },
+      'address-changes': { src: sign3, alt: 'Address Changes', width: 120, height: 80 },
+      'utilities-services': { src: sign4, alt: 'Utilities & Services', width: 120, height: 80 },
+      'essential-services': { src: sign5, alt: 'Essential Services', width: 120, height: 80 }
+    }
+  };
   useEffect(() => {
     // Get action plan data from localStorage (from AI assistant)
     const savedActionPlan = localStorage.getItem('aiActionPlan');
@@ -272,23 +271,14 @@ export default function MovingJourney() {
 
       {/* Enhanced Journey Timeline with Custom Graphics */}
       <div className="relative max-w-7xl mx-auto p-6">
-        {/* Custom Graphics Background */}
-        {graphics.roadBackground ? (
-          <div className="absolute inset-0 -z-10">
-            <img 
-              src={graphics.roadBackground.src}
-              alt={graphics.roadBackground.alt}
-              className="w-full h-full object-cover opacity-30 rounded-3xl"
-            />
-          </div>
-        ) : (
-          <div className="absolute inset-0 -z-10 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-3xl"></div>
-        )}
-
-        {/* Hide default timeline when using custom background */}
-        {!graphics.roadBackground && (
-          <div className="absolute left-12 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-500 via-purple-500 to-green-500 rounded-full shadow-lg"></div>
-        )}
+        {/* Highway Background */}
+        <div className="absolute inset-0 -z-10">
+          <img 
+            src={customGraphics.roadBackground.src}
+            alt={customGraphics.roadBackground.alt}
+            className="w-full h-full object-cover opacity-80 rounded-3xl"
+          />
+        </div>
 
         {/* Highway Signs Positioned Along Road */}
         {journeyData.map((step, index) => {
@@ -298,12 +288,12 @@ export default function MovingJourney() {
           
           // Get custom sign for this task category
           const getCustomSign = (stepTitle: string) => {
-            if (stepTitle.includes('Moving') || stepTitle.includes('Truck')) return graphics.taskIcons?.['moving'];
-            if (stepTitle.includes('Utility') && stepTitle.includes('Setup')) return graphics.taskIcons?.['utilities-setup'];
-            if (stepTitle.includes('Address')) return graphics.taskIcons?.['address-changes'];
-            if (stepTitle.includes('Utility') || stepTitle.includes('Service')) return graphics.taskIcons?.['utilities-services'];
-            if (stepTitle.includes('Essential') || stepTitle.includes('Medical')) return graphics.taskIcons?.['essential-services'];
-            return null;
+            if (stepTitle.includes('Moving') || stepTitle.includes('Truck')) return customGraphics.taskIcons['moving'];
+            if (stepTitle.includes('Utility') && stepTitle.includes('Setup')) return customGraphics.taskIcons['utilities-setup'];
+            if (stepTitle.includes('Address')) return customGraphics.taskIcons['address-changes'];
+            if (stepTitle.includes('Utility') || stepTitle.includes('Service')) return customGraphics.taskIcons['utilities-services'];
+            if (stepTitle.includes('Essential') || stepTitle.includes('Medical')) return customGraphics.taskIcons['essential-services'];
+            return customGraphics.taskIcons['moving']; // Default to first sign
           };
 
           const customSign = getCustomSign(step.title);
