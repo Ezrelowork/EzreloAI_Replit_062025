@@ -155,11 +155,13 @@ export default function Dashboard() {
         {
           id: "moving-services",
           title: "Moving Services",
-          description: "Find and book professional movers",
+          description: movingCompanies.length > 0 
+            ? `${movingCompanies.length} verified movers found for your route`
+            : "Find and book professional movers",
           icon: Truck,
-          status: "in_progress",
+          status: movingCompanies.length > 0 ? "completed" : "not_started",
           urgency: "high",
-          route: "/moving-checklist",
+          route: "#moving-services",
           estimatedTime: "30-45 min"
         },
         {
@@ -307,6 +309,8 @@ export default function Dashboard() {
     if (moveAddresses.currentCity && moveAddresses.currentState && 
         moveAddresses.newCity && moveAddresses.newState && moveAddresses.moveDate) {
       setMoveSetupComplete(true);
+      // Automatically search for moving companies once setup is complete
+      movingCompanyMutation.mutate(moveAddresses);
     }
   };
 
@@ -618,6 +622,23 @@ export default function Dashboard() {
                                 <ArrowRight className="w-4 h-4" />
                               </Button>
                             </Link>
+                          ) : category.id === "moving-services" ? (
+                            <Button 
+                              size="sm" 
+                              onClick={() => {
+                                if (movingCompanies.length === 0) {
+                                  movingCompanyMutation.mutate(moveAddresses);
+                                } else {
+                                  document.getElementById('moving-companies-section')?.scrollIntoView({ behavior: 'smooth' });
+                                }
+                              }}
+                              disabled={movingCompanyMutation.isPending}
+                              className="flex items-center gap-2"
+                            >
+                              {movingCompanyMutation.isPending ? "Searching..." : 
+                               movingCompanies.length > 0 ? "View Companies" : "Find Movers"}
+                              <ArrowRight className="w-4 h-4" />
+                            </Button>
                           ) : (
                             <Button size="sm" variant="outline" disabled className="flex items-center gap-2">
                               Coming Soon
@@ -632,6 +653,115 @@ export default function Dashboard() {
             </TabsContent>
           ))}
         </Tabs>
+
+        {/* Moving Companies Section */}
+        {movingCompanies.length > 0 && (
+          <div id="moving-companies-section" className="mt-12">
+            <div className="bg-white rounded-lg border p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">Recommended Moving Companies</h2>
+                  <p className="text-gray-600 mt-1">
+                    {movingCompanies.length} verified movers for {moveAddresses.currentCity}, {moveAddresses.currentState} → {moveAddresses.newCity}, {moveAddresses.newState}
+                  </p>
+                </div>
+                <Button 
+                  variant="outline" 
+                  onClick={() => movingCompanyMutation.mutate(moveAddresses)}
+                  disabled={movingCompanyMutation.isPending}
+                >
+                  Refresh Search
+                </Button>
+              </div>
+
+              <div className="grid gap-4">
+                {movingCompanies.map((company, index) => (
+                  <Card key={index} className="hover:shadow-md transition-shadow">
+                    <CardHeader className="pb-3">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <CardTitle className="text-lg flex items-center gap-2">
+                            {company.provider}
+                            {company.rating > 0 && (
+                              <div className="flex items-center gap-1">
+                                <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                                <span className="text-sm font-normal text-gray-600">{company.rating.toFixed(1)}</span>
+                              </div>
+                            )}
+                          </CardTitle>
+                          <CardDescription className="mt-1">
+                            {company.description}
+                          </CardDescription>
+                        </div>
+                        <Badge variant="outline" className="ml-4">
+                          {company.estimatedCost}
+                        </Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      <div className="space-y-3">
+                        {company.services && company.services.length > 0 && (
+                          <div>
+                            <p className="text-sm font-medium text-gray-700 mb-2">Services:</p>
+                            <div className="flex flex-wrap gap-1">
+                              {company.services.slice(0, 4).map((service, idx) => (
+                                <Badge key={idx} variant="secondary" className="text-xs">
+                                  {service}
+                                </Badge>
+                              ))}
+                              {company.services.length > 4 && (
+                                <Badge variant="secondary" className="text-xs">
+                                  +{company.services.length - 4} more
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                        
+                        <div className="flex items-center justify-between pt-2">
+                          <div className="flex items-center gap-4 text-sm text-gray-600">
+                            {company.phone && (
+                              <div className="flex items-center gap-1">
+                                <Phone className="w-4 h-4" />
+                                <span>{company.phone}</span>
+                              </div>
+                            )}
+                            {company.hours && (
+                              <div className="flex items-center gap-1">
+                                <Clock className="w-4 h-4" />
+                                <span>{company.hours}</span>
+                              </div>
+                            )}
+                          </div>
+                          
+                          <div className="flex gap-2">
+                            {company.phone && (
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => window.open(`tel:${company.phone}`, '_self')}
+                              >
+                                Call Now
+                              </Button>
+                            )}
+                            <Button 
+                              size="sm"
+                              onClick={() => handleReferralClick(company, "Get Quote")}
+                              className="flex items-center gap-1"
+                            >
+                              Get Quote
+                              <ExternalLink className="w-3 h-3" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
