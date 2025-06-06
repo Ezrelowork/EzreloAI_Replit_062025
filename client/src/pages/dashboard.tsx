@@ -133,6 +133,7 @@ export default function Dashboard() {
   const movingCompanyMutation = useMutation({
     mutationFn: async (addresses: MoveAddresses) => {
       const response = await apiRequest("POST", "/api/moving-companies", {
+        fromAddress: addresses.currentAddress,
         fromCity: addresses.currentCity,
         fromState: addresses.currentState,
         fromZip: addresses.currentZip,

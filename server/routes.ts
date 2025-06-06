@@ -184,7 +184,7 @@ Focus on accuracy and specificity - include availability percentages, exact spee
   // Moving companies endpoint using ChatGPT with Google Business enhancement
   app.post("/api/moving-companies", async (req, res) => {
     try {
-      const { fromCity, fromState, fromZip, toCity, toState, toZip } = req.body;
+      const { fromCity, fromState, fromZip, toCity, toState, toZip, fromAddress } = req.body;
       
       if (!fromCity || !fromState || !toCity || !toState) {
         return res.status(400).json({ error: "Origin and destination are required" });
@@ -200,10 +200,14 @@ Focus on accuracy and specificity - include availability percentages, exact spee
       const OpenAI = (await import('openai')).default;
       const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-      const fromLocation = fromZip ? `${fromCity}, ${fromState} ${fromZip}` : `${fromCity}, ${fromState}`;
+      const fromLocation = fromAddress ? 
+        `${fromAddress}, ${fromCity}, ${fromState} ${fromZip || ''}`.trim() : 
+        fromZip ? `${fromCity}, ${fromState} ${fromZip}` : `${fromCity}, ${fromState}`;
       const toLocation = toZip ? `${toCity}, ${toState} ${toZip}` : `${toCity}, ${toState}`;
       const isLocalMove = fromState.toUpperCase() === toState.toUpperCase();
       const moveType = isLocalMove ? "local" : "long-distance";
+      
+      const systemMessage = "You are an API that returns location-relevant, verified business listings in structured JSON format for a relocation concierge app. Focus on accuracy and real companies that serve the specified locations.";
       
       const prompt = `I am moving from ${fromLocation} to ${toLocation}. Please return a comprehensive list of moving companies that can handle this out-of-state residential move.
 
@@ -251,7 +255,7 @@ Research actual moving companies that serve ${fromCity}, ${fromState} and handle
         messages: [
           { 
             role: "system", 
-            content: "You are an expert on the moving industry with comprehensive knowledge of companies, service areas, and pricing. Provide accurate, real company information only." 
+            content: systemMessage
           },
           { role: "user", content: prompt }
         ],
