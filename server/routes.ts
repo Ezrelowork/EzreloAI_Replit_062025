@@ -414,19 +414,116 @@ Return JSON with ONLY the actual providers that serve this exact address. If mul
     }
   });
 
-  // Moving companies endpoint for checklist integration
+  // Moving companies endpoint using ChatGPT
   app.post("/api/moving-companies", async (req, res) => {
     try {
       const { fromCity, fromState, fromZip, toCity, toState, toZip } = req.body;
       
-      // Calculate if this is a local move (same state and within reasonable distance)
+      if (!fromCity || !fromState || !toCity || !toState) {
+        return res.status(400).json({ error: "Origin and destination cities and states are required" });
+      }
+
+      // Check if OpenAI API key is available
+      if (!process.env.OPENAI_API_KEY) {
+        return res.status(503).json({ 
+          error: "Service temporarily unavailable. Please contact support for assistance.",
+          companies: []
+        });
+      }
+
+      const OpenAI = (await import('openai')).default;
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+      const fromLocation = fromZip ? `${fromCity}, ${fromState} ${fromZip}` : `${fromCity}, ${fromState}`;
+      const toLocation = toZip ? `${toCity}, ${toState} ${toZip}` : `${toCity}, ${toState}`;
+      
+      // Calculate if this is a local move
       const isLocalMove = fromState.toUpperCase() === toState.toUpperCase();
-      const isShortDistance = fromState.toUpperCase() === toState.toUpperCase() && fromCity !== toCity;
+      const moveType = isLocalMove ? "local" : "long-distance";
       
-      console.log(`Move detection: from=${fromState}, to=${toState}, isLocalMove=${isLocalMove}`);
+      const prompt = `I need a comprehensive list of moving companies for a ${moveType} move from ${fromLocation} to ${toLocation}.
+
+Please provide both:
+1. Local/regional moving companies that specifically serve this route
+2. Major national moving companies that handle this type of move
+
+For each company, include accurate contact information and real pricing estimates based on the distance and move type.
+
+Return the response in JSON format with this structure:
+{
+  "companies": [
+    {
+      "provider": "Company Name",
+      "phone": "Phone number",
+      "website": "Official website URL", 
+      "description": "Brief description including years in business, specialties, and service area",
+      "estimatedCost": "Realistic cost range for this specific route",
+      "services": ["Service 1", "Service 2", "Service 3"],
+      "category": "Local Moving Companies" or "National Moving Companies"
+    }
+  ]
+}
+
+Focus on:
+- Companies that actually serve the ${fromLocation} area
+- Accurate pricing for ${moveType} moves of this distance
+- Mix of local specialists and national carriers
+- Real phone numbers and websites
+- Current business information
+
+Prioritize companies with good reputations and established service in these areas.`;
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        messages: [
+          { 
+            role: "system", 
+            content: "You are an expert on the moving industry with comprehensive knowledge of local and national moving companies, their service areas, pricing, and reputations. Provide only accurate, real company information." 
+          },
+          { role: "user", content: prompt }
+        ],
+        response_format: { type: "json_object" },
+        temperature: 0.1, // Lower temperature for more accurate, factual responses
+        max_tokens: 3000
+      });
+
+      const aiResponse = JSON.parse(completion.choices[0].message.content || '{}');
       
-      // Base major moving companies
-      let movingCompanies = [
+      // Format companies with additional fields for our interface
+      const formattedCompanies = (aiResponse.companies || []).map((company: any) => ({
+        category: company.category || "Moving Companies",
+        provider: company.provider,
+        phone: company.phone || "Contact for details",
+        description: company.description,
+        website: company.website || `https://www.google.com/search?q=${encodeURIComponent(company.provider)}`,
+        referralUrl: company.website || `https://www.google.com/search?q=${encodeURIComponent(company.provider)}`,
+        affiliateCode: "",
+        hours: "Contact for hours",
+        rating: 0, // We can add rating data later if needed
+        services: company.services || ["Moving Services"],
+        estimatedCost: company.estimatedCost || "Contact for estimate"
+      }));
+
+      return res.json({
+        success: true,
+        companies: formattedCompanies,
+        searchInfo: {
+          from: fromLocation,
+          to: toLocation,
+          moveType: moveType
+        }
+      });
+
+    } catch (error) {
+      console.error("Moving companies search error:", error);
+      return res.status(500).json({ error: "Failed to load moving companies" });
+    }
+  });
+
+  // Legacy moving companies data (keeping for fallback if needed)
+  const legacyMovingCompaniesEndpoint = () => {
+    // Base major moving companies
+    let movingCompanies = [
         {
           category: "Moving Companies",
           provider: "United Van Lines",
@@ -858,7 +955,7 @@ Return JSON with ONLY the actual providers that serve this exact address. If mul
     }
   });
 
-  // Utility providers endpoint
+  // Utility providers endpoint using ChatGPT
   app.post("/api/utility-providers", async (req, res) => {
     try {
       const { city, state, zip, utilityType } = req.body;
@@ -867,120 +964,203 @@ Return JSON with ONLY the actual providers that serve this exact address. If mul
         return res.status(400).json({ error: "City and state are required" });
       }
 
-      let providers: any[] = [];
-
-      // Use Google Places API to find utility providers
-      if (process.env.GOOGLE_API_KEY) {
-        try {
-          const searchQueries = {
-            electricity: `electricity provider ${city} ${state}`,
-            internet: `internet provider cable ${city} ${state}`,
-            water: `water utility ${city} ${state}`,
-            waste: `waste management trash ${city} ${state}`
-          };
-
-          const query = searchQueries[utilityType as keyof typeof searchQueries] || `${utilityType} provider ${city} ${state}`;
-          
-          const placesUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(query)}&key=${process.env.GOOGLE_API_KEY}`;
-          
-          const placesResponse = await fetch(placesUrl);
-          const placesData = await placesResponse.json();
-
-          if (placesData.results && placesData.results.length > 0) {
-            providers = await Promise.all(
-              placesData.results.slice(0, 8).map(async (place: any) => {
-                let phone = "Contact for details";
-                let website = `https://www.google.com/search?q=${encodeURIComponent(place.name + " " + city + " " + state)}`;
-
-                // Get detailed place information for phone and website
-                try {
-                  const detailsResponse = await fetch(
-                    `https://maps.googleapis.com/maps/api/place/details/json?place_id=${place.place_id}&fields=website,formatted_phone_number&key=${process.env.GOOGLE_API_KEY}`
-                  );
-                  
-                  if (detailsResponse.ok) {
-                    const detailsData = await detailsResponse.json();
-                    phone = detailsData.result?.formatted_phone_number || phone;
-                    website = detailsData.result?.website || website;
-                  }
-                } catch (error) {
-                  console.log(`Could not get details for ${place.name}`);
-                }
-
-                return {
-                  provider: place.name,
-                  phone: phone,
-                  website: website,
-                  referralUrl: website,
-                  affiliateCode: "",
-                  description: `${utilityType} service provider in ${city}, ${state}. ${place.formatted_address || ''}`,
-                  rating: place.rating || 0,
-                  services: [`${utilityType} service`, "Customer support", "Online billing"],
-                  estimatedCost: utilityType === "electricity" ? "$0.08-0.15/kWh" : 
-                               utilityType === "internet" ? "$40-100/month" :
-                               utilityType === "water" ? "$30-80/month" : "$25-50/month",
-                  availability: place.business_status === "OPERATIONAL" ? "Available in your area" : "Contact to verify availability",
-                  setupFee: utilityType === "internet" ? "$50-100" : "Varies by location",
-                  connectionTime: utilityType === "internet" ? "1-2 weeks" : "3-5 business days"
-                };
-              })
-            );
-          }
-        } catch (error) {
-          console.error("Google Places API error:", error);
-        }
+      // Check if OpenAI API key is available
+      if (!process.env.OPENAI_API_KEY) {
+        return res.status(503).json({ 
+          error: "Service temporarily unavailable. Please contact support for assistance.",
+          providers: []
+        });
       }
 
-      // Add known major providers as additional options
-      const majorProviders = {
-        electricity: [
-          {
-            provider: "TXU Energy",
-            phone: "1-855-TXU-ENERGY",
-            website: "https://www.txu.com",
-            referralUrl: "https://www.txu.com",
-            affiliateCode: "",
-            description: "Leading electricity provider in Texas with competitive rates",
-            rating: 4.2,
-            services: ["Residential electricity", "Business electricity", "Green energy options"],
-            estimatedCost: "$0.09-0.13/kWh",
-            availability: "Available in Texas",
-            setupFee: "No setup fee",
-            connectionTime: "Same day to 3 business days"
-          }
+      const OpenAI = (await import('openai')).default;
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+      const fullAddress = zip ? `${city}, ${state} ${zip}` : `${city}, ${state}`;
+      
+      const prompt = `What ${utilityType} providers are available at this specific address: ${fullAddress}?
+
+Please provide a comprehensive list of actual ${utilityType} providers that serve this exact location. Include only real companies that actually provide service to this area.
+
+Return the response in JSON format with this structure:
+{
+  "providers": [
+    {
+      "provider": "Company Name",
+      "phone": "Phone number",
+      "website": "Official website URL",
+      "description": "Brief description of services and coverage",
+      "estimatedCost": "Cost range",
+      "availability": "Service availability details",
+      "setupFee": "Setup/installation fees",
+      "connectionTime": "How long to get service",
+      "services": ["Service 1", "Service 2", "Service 3"]
+    }
+  ]
+}
+
+Focus on accuracy - only include providers that actually serve this specific location. For internet providers, be especially precise about which companies actually have infrastructure in this area.`;
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        messages: [
+          { 
+            role: "system", 
+            content: "You are an expert on utility and service providers with comprehensive knowledge of service areas, coverage maps, and availability by location. Provide only accurate, real provider information for specific addresses." 
+          },
+          { role: "user", content: prompt }
         ],
-        internet: [
-          {
-            provider: "Xfinity",
-            phone: "1-800-XFINITY",
-            website: "https://www.xfinity.com",
-            referralUrl: "https://www.xfinity.com",
-            affiliateCode: "",
-            description: "High-speed internet and cable services nationwide",
-            rating: 3.8,
-            services: ["Internet", "Cable TV", "Home phone", "Home security"],
-            estimatedCost: "$30-80/month",
-            availability: "Most urban areas",
-            setupFee: "$89.99",
-            connectionTime: "7-14 days"
-          }
-        ]
-      };
+        response_format: { type: "json_object" },
+        temperature: 0.1, // Lower temperature for more accurate, factual responses
+        max_tokens: 2000
+      });
 
-      // Add major providers if available for this utility type
-      if (majorProviders[utilityType as keyof typeof majorProviders]) {
-        providers.push(...majorProviders[utilityType as keyof typeof majorProviders]);
-      }
+      const aiResponse = JSON.parse(completion.choices[0].message.content || '{}');
+      
+      // Format providers with additional fields for our interface
+      const formattedProviders = (aiResponse.providers || []).map((provider: any) => ({
+        ...provider,
+        referralUrl: provider.website || `https://www.google.com/search?q=${encodeURIComponent(provider.provider)}`,
+        affiliateCode: "",
+        rating: 0 // We'll add rating data later if needed
+      }));
 
       res.json({ 
-        providers,
-        location: `${city}, ${state}`,
+        providers: formattedProviders,
+        location: fullAddress,
         utilityType 
       });
 
     } catch (error) {
       console.error("Error finding utility providers:", error);
       res.status(500).json({ error: "Failed to find utility providers" });
+    }
+  });
+
+  // AI Recommendations endpoint
+  app.post("/api/ai-recommendations", async (req, res) => {
+    try {
+      const { query, fromLocation, toLocation, moveDate, familySize, budget, priorities } = req.body;
+      
+      if (!fromLocation || !toLocation) {
+        return res.status(400).json({ error: "Both current and destination locations are required" });
+      }
+
+      // Check if OpenAI API key is available
+      if (!process.env.OPENAI_API_KEY) {
+        return res.status(503).json({ 
+          error: "AI service is temporarily unavailable. Please contact support for assistance.",
+          recommendations: [],
+          summary: "AI analysis requires OpenAI API configuration.",
+          timeline: [],
+          estimatedTotalCost: "Contact for estimate"
+        });
+      }
+
+      const OpenAI = (await import('openai')).default;
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+      // Create a comprehensive prompt for the AI
+      const systemPrompt = `You are an expert relocation concierge AI assistant specializing in comprehensive moving and relocation planning. 
+
+Your role is to analyze relocation scenarios and provide detailed, actionable recommendations covering:
+- Moving services and logistics
+- Utility setup and transfers
+- Local area insights and lifestyle adjustments
+- Cost optimization strategies
+- Timeline planning
+- Service provider recommendations
+
+Always provide specific, practical advice with reasoning behind each recommendation.`;
+
+      const userPrompt = `Help me plan my relocation with these details:
+
+Moving from: ${fromLocation}
+Moving to: ${toLocation}
+Move date: ${moveDate || 'Not specified'}
+Household size: ${familySize}
+Budget range: ${budget}
+Priorities: ${priorities.length > 0 ? priorities.join(', ') : 'None specified'}
+
+${query ? `Specific question: ${query}` : ''}
+
+Please provide a comprehensive relocation plan in JSON format with this structure:
+{
+  "summary": "Brief overview of the move and key considerations",
+  "recommendations": [
+    {
+      "category": "Category name (e.g., Moving Services, Utilities, etc.)",
+      "title": "Recommendation title",
+      "description": "Detailed description",
+      "reasoning": "Why this recommendation makes sense for this specific move",
+      "priority": "high|medium|low",
+      "estimatedCost": "Cost range",
+      "timeframe": "When to handle this",
+      "providers": [
+        {
+          "name": "Provider name",
+          "description": "Why this provider is recommended",
+          "contact": "Contact information or how to reach them"
+        }
+      ],
+      "nextSteps": ["Step 1", "Step 2", "Step 3"]
+    }
+  ],
+  "timeline": [
+    {
+      "week": "8 weeks before move",
+      "tasks": ["Task 1", "Task 2"]
+    }
+  ],
+  "estimatedTotalCost": "Total cost estimate"
+}
+
+Focus on actionable recommendations specific to moving from ${fromLocation} to ${toLocation}.`;
+
+      // Call OpenAI API
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt }
+        ],
+        response_format: { type: "json_object" },
+        temperature: 0.7,
+        max_tokens: 3000
+      });
+
+      const aiResponse = JSON.parse(completion.choices[0].message.content || '{}');
+
+      // Ensure the response has the expected structure
+      const structuredResponse = {
+        summary: aiResponse.summary || "AI analysis complete for your relocation plan.",
+        recommendations: aiResponse.recommendations || [],
+        timeline: aiResponse.timeline || [],
+        estimatedTotalCost: aiResponse.estimatedTotalCost || "Varies by services selected"
+      };
+
+      res.json(structuredResponse);
+
+    } catch (error) {
+      console.error("AI Recommendations error:", error);
+      
+      // Provide a helpful error response
+      if (error instanceof Error && error.message.includes('API key')) {
+        return res.status(503).json({ 
+          error: "AI service configuration issue. Please contact support.",
+          recommendations: [],
+          summary: "AI analysis temporarily unavailable.",
+          timeline: [],
+          estimatedTotalCost: "Contact for estimate"
+        });
+      }
+      
+      return res.status(500).json({ 
+        error: "AI analysis temporarily unavailable. Please try again or contact support.",
+        recommendations: [],
+        summary: "Unable to generate AI recommendations at this time.",
+        timeline: [],
+        estimatedTotalCost: "Contact for estimate"
+      });
     }
   });
 

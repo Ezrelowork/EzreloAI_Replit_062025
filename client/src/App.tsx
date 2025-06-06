@@ -10,6 +10,7 @@ import MovingChecklist from "@/pages/moving-checklist";
 import RelocationHub from "@/pages/relocation-hub-simple";
 import Dashboard from "@/pages/dashboard";
 import Utilities from "@/pages/utilities";
+import AIAssistant from "@/pages/ai-assistant";
 import NotFound from "@/pages/not-found";
 
 function Navigation() {
@@ -26,6 +27,11 @@ function Navigation() {
             <Link href="/">
               <Button variant={location === "/" ? "default" : "ghost"} size="sm">
                 Relocation Hub
+              </Button>
+            </Link>
+            <Link href="/ai-assistant">
+              <Button variant={location === "/ai-assistant" ? "default" : "ghost"} size="sm">
+                AI Concierge
               </Button>
             </Link>
             <Link href="/utilities">
@@ -57,6 +63,7 @@ function Router() {
       <Switch>
         <Route path="/" component={RelocationHub} />
         <Route path="/dashboard" component={Dashboard} />
+        <Route path="/ai-assistant" component={AIAssistant} />
         <Route path="/utilities" component={Utilities} />
         <Route path="/moving-checklist" component={MovingChecklist} />
         <Route path="/analytics" component={Analytics} />
