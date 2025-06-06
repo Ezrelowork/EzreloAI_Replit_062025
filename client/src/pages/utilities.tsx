@@ -37,6 +37,9 @@ interface UtilityProvider {
   availability: string;
   setupFee?: string;
   connectionTime?: string;
+  connectionType?: string;
+  maxSpeed?: string;
+  notes?: string;
 }
 
 interface UtilityRequest {

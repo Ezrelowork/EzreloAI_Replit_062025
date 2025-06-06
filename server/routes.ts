@@ -41,21 +41,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const prompt = `Provide comprehensive service provider information for someone moving to ${location}.
 
-I need real companies with accurate contact information for these categories:
-- Moving companies (both local and national)
-- Internet providers
-- Electricity providers  
-- Water/sewer utilities
-- Waste management
-- Cable/TV providers
-
-For each provider, include:
-- Company name
-- Phone number
-- Website
-- Brief description
-- Service area coverage
-- Estimated pricing
+Include specific availability percentages, connection types, speeds, pricing, and service limitations for each provider.
 
 Return response in JSON format:
 {
@@ -64,18 +50,50 @@ Return response in JSON format:
       "provider": "Company Name",
       "phone": "Phone number",
       "website": "Website URL",
-      "description": "Service description",
-      "estimatedCost": "Price range"
+      "description": "Service description with years in business",
+      "estimatedCost": "Price range for typical move",
+      "availability": "Service coverage percentage",
+      "services": ["Local Moving", "Long Distance", "Packing"],
+      "notes": "Special features or limitations"
     }
   ],
-  "internet": [...],
-  "electricity": [...],
+  "internet": [
+    {
+      "provider": "Company Name",
+      "phone": "Phone number", 
+      "website": "Website URL",
+      "description": "Service description",
+      "estimatedCost": "Monthly cost (e.g., $29.99/mo)",
+      "availability": "Availability percentage (e.g., ~97%)",
+      "connectionType": "Technology (Fiber, Cable, DSL, 5G)",
+      "maxSpeed": "Max speed (e.g., Up to 7,000 Mbps)",
+      "setupFee": "Installation fees",
+      "connectionTime": "Activation timeframe",
+      "services": ["Internet", "Phone", "TV"],
+      "notes": "Data caps, limitations, or special features"
+    }
+  ],
+  "electricity": [
+    {
+      "provider": "Company Name",
+      "phone": "Phone number",
+      "website": "Website URL", 
+      "description": "Service description",
+      "estimatedCost": "Rate per kWh or monthly estimate",
+      "availability": "Service area coverage",
+      "planTypes": ["Fixed Rate", "Variable Rate", "Green Energy"],
+      "setupFee": "Connection fees",
+      "connectionTime": "Service activation time",
+      "services": ["Residential", "Business", "Green Options"],
+      "notes": "Contract terms, renewable options, or special programs"
+    }
+  ],
   "water": [...],
   "waste": [...],
   "cable": [...]
 }
 
-Focus on accuracy - only include providers that actually serve ${location}.`;
+Focus on accuracy and specificity - include availability percentages, exact speeds/rates, connection technologies, and service limitations. Only include providers with actual infrastructure in ${location}.`;
 
       const completion = await openai.chat.completions.create({
         model: "gpt-4o",
@@ -189,7 +207,7 @@ Focus on accuracy - only include providers that actually serve ${location}.`;
       
       const prompt = `Find comprehensive moving companies for a ${moveType} move from ${fromLocation} to ${toLocation}.
 
-Provide both local/regional companies and major national carriers that serve this route.
+Provide detailed information including availability, specialties, licensing, and specific service details.
 
 Return JSON format:
 {
@@ -199,14 +217,20 @@ Return JSON format:
       "phone": "Phone number",
       "website": "Website URL",
       "description": "Company description with years in business and specialties",
-      "estimatedCost": "Realistic cost range for this route",
-      "services": ["Service 1", "Service 2"],
-      "category": "Local Moving Companies" or "National Moving Companies"
+      "estimatedCost": "Realistic cost range for this specific route and distance",
+      "availability": "Service area coverage percentage or availability details",
+      "services": ["Local Moving", "Long Distance", "Packing", "Storage"],
+      "category": "Local Moving Companies" or "National Moving Companies",
+      "licenseInfo": "DOT number, state licensing, or certification details",
+      "specialties": ["Residential", "Commercial", "Piano Moving", "Fragile Items"],
+      "insuranceOptions": ["Basic", "Full Value Protection", "Third Party"],
+      "estimatedTimeframe": "Typical delivery timeframe for this route",
+      "notes": "Important details about services, restrictions, or special features"
     }
   ]
 }
 
-Focus on companies that actually serve the ${fromLocation} area with accurate pricing for ${moveType} moves.`;
+Focus on companies that actually serve ${fromLocation} with accurate pricing for ${moveType} moves of this distance. Include licensing information, insurance options, and service specialties.`;
 
       const completion = await openai.chat.completions.create({
         model: "gpt-4o",
@@ -238,7 +262,13 @@ Focus on companies that actually serve the ${fromLocation} area with accurate pr
             hours: "Contact for hours",
             rating: 0,
             services: company.services || ["Moving Services"],
-            estimatedCost: company.estimatedCost || "Contact for estimate"
+            estimatedCost: company.estimatedCost || "Contact for estimate",
+            availability: company.availability || undefined,
+            licenseInfo: company.licenseInfo || undefined,
+            specialties: company.specialties || undefined,
+            insuranceOptions: company.insuranceOptions || undefined,
+            estimatedTimeframe: company.estimatedTimeframe || undefined,
+            notes: company.notes || undefined
           };
 
           // Enhance with Google Places data

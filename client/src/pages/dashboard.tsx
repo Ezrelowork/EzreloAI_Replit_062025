@@ -73,6 +73,12 @@ interface MovingCompany {
   rating: number;
   services: string[];
   estimatedCost: string;
+  availability?: string;
+  licenseInfo?: string;
+  specialties?: string[];
+  insuranceOptions?: string[];
+  estimatedTimeframe?: string;
+  notes?: string;
 }
 
 export default function Dashboard() {
@@ -705,6 +711,29 @@ export default function Dashboard() {
                     </CardHeader>
                     <CardContent className="pt-0">
                       <div className="space-y-3">
+                        {/* Enhanced Service Details */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                          {company.availability && (
+                            <div>
+                              <span className="font-medium text-gray-700">Availability:</span>
+                              <p className="text-gray-600 font-semibold">{company.availability}</p>
+                            </div>
+                          )}
+                          {company.estimatedTimeframe && (
+                            <div>
+                              <span className="font-medium text-gray-700">Delivery Time:</span>
+                              <p className="text-gray-600">{company.estimatedTimeframe}</p>
+                            </div>
+                          )}
+                          {company.licenseInfo && (
+                            <div>
+                              <span className="font-medium text-gray-700">License:</span>
+                              <p className="text-gray-600">{company.licenseInfo}</p>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Services */}
                         {company.services && company.services.length > 0 && (
                           <div>
                             <p className="text-sm font-medium text-gray-700 mb-2">Services:</p>
@@ -720,6 +749,43 @@ export default function Dashboard() {
                                 </Badge>
                               )}
                             </div>
+                          </div>
+                        )}
+
+                        {/* Specialties */}
+                        {company.specialties && company.specialties.length > 0 && (
+                          <div>
+                            <p className="text-sm font-medium text-gray-700 mb-2">Specialties:</p>
+                            <div className="flex flex-wrap gap-1">
+                              {company.specialties.map((specialty, idx) => (
+                                <Badge key={idx} variant="outline" className="text-xs">
+                                  {specialty}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Insurance Options */}
+                        {company.insuranceOptions && company.insuranceOptions.length > 0 && (
+                          <div>
+                            <p className="text-sm font-medium text-gray-700 mb-2">Insurance Options:</p>
+                            <div className="flex flex-wrap gap-1">
+                              {company.insuranceOptions.map((option, idx) => (
+                                <Badge key={idx} variant="outline" className="text-xs border-green-200 text-green-700">
+                                  {option}
+                                </Badge>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Special Notes */}
+                        {company.notes && (
+                          <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                            <p className="text-sm text-blue-800">
+                              <strong>Note:</strong> {company.notes}
+                            </p>
                           </div>
                         )}
                         
