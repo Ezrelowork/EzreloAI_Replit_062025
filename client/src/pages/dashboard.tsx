@@ -88,7 +88,45 @@ export default function Dashboard() {
   const [moveSetupComplete, setMoveSetupComplete] = useState(false);
   const [movingCompanies, setMovingCompanies] = useState<MovingCompany[]>([]);
   const [moveAddresses, setMoveAddresses] = useState<MoveAddresses>(() => {
-    // Load saved addresses from localStorage
+    // First check URL parameters from AI assistant
+    const urlParams = new URLSearchParams(window.location.search);
+    const fromParam = urlParams.get('from');
+    const toParam = urlParams.get('to');
+    const dateParam = urlParams.get('date');
+    
+    if (fromParam && toParam) {
+      // Parse addresses from AI assistant format
+      const parseAddress = (address: string) => {
+        const parts = address.split(',').map(part => part.trim());
+        if (parts.length >= 3) {
+          const street = parts[0] || '';
+          const city = parts[1] || '';
+          const stateZip = parts[2] || '';
+          const stateZipParts = stateZip.split(' ');
+          const state = stateZipParts[0] || '';
+          const zip = stateZipParts[1] || '';
+          return { street, city, state, zip };
+        }
+        return { street: address, city: '', state: '', zip: '' };
+      };
+      
+      const fromParsed = parseAddress(fromParam);
+      const toParsed = parseAddress(toParam);
+      
+      return {
+        currentAddress: fromParsed.street,
+        currentCity: fromParsed.city,
+        currentState: fromParsed.state,
+        currentZip: fromParsed.zip,
+        newAddress: toParsed.street,
+        newCity: toParsed.city,
+        newState: toParsed.state,
+        newZip: toParsed.zip,
+        moveDate: dateParam || ""
+      };
+    }
+    
+    // Fallback to localStorage
     const savedCurrentAddress = localStorage.getItem('currentAddress') || "";
     const savedCurrentCity = localStorage.getItem('currentCity') || "";
     const savedCurrentState = localStorage.getItem('currentState') || "";
@@ -112,10 +150,18 @@ export default function Dashboard() {
     };
   });
 
-  // Scroll to top when component mounts or when switching to address setup
+  // Auto-complete setup if addresses are provided via URL
   useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const fromParam = urlParams.get('from');
+    const toParam = urlParams.get('to');
+    
+    if (fromParam && toParam && moveAddresses.currentAddress && moveAddresses.newAddress) {
+      setMoveSetupComplete(true);
+    }
+    
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [moveSetupComplete]);
+  }, [moveSetupComplete, moveAddresses]);
 
   // Save addresses to localStorage whenever they change
   useEffect(() => {

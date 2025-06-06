@@ -372,7 +372,9 @@ export default function AIAssistant() {
                           <p className="text-sm text-gray-600 mb-2">{action.description}</p>
                           <p className="text-xs text-gray-500">Best to complete: {action.timeframe}</p>
                         </div>
-                        <Link href={action.route}>
+                        <Link href={action.route === "/dashboard" ? 
+                          `/dashboard?from=${encodeURIComponent(relocationDetails.fromLocation)}&to=${encodeURIComponent(relocationDetails.toLocation)}&date=${relocationDetails.moveDate}` 
+                          : action.route}>
                           <Button size="sm" className="flex items-center gap-1">
                             Start Task
                             <ArrowRight className="w-3 h-3" />
