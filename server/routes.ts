@@ -205,19 +205,11 @@ Focus on accuracy and specificity - include availability percentages, exact spee
       const isLocalMove = fromState.toUpperCase() === toState.toUpperCase();
       const moveType = isLocalMove ? "local" : "long-distance";
       
-      const prompt = `Find comprehensive moving options for a ${moveType} move from ${fromLocation} to ${toLocation}.
+      const prompt = `Please list local moving companies based near ${fromLocation} first — especially those with experience in out-of-state or interstate moves — followed by trusted national or nationwide moving companies that offer long-distance services to ${toLocation}.
 
-IMPORTANT: Search for BOTH local AND national options. Include:
+For each option, include: company name, website, phone number, customer reviews/ratings (if available), whether they offer packing services, and if they provide flat-rate or hourly pricing for long-distance moves.
 
-1. LOCAL/REGIONAL MOVERS: Search specifically for moving companies based in or serving ${fromLocation} that handle interstate/long-distance moves. Examples of local movers include companies like Brown Box Movers, local family-owned businesses, regional chains, etc.
-
-2. MAJOR NATIONAL CARRIERS: United Van Lines, Atlas Van Lines, Mayflower, North American Van Lines, Allied Van Lines, etc.
-
-3. ALTERNATIVE SOLUTIONS: U-Pack, PODS, U-Haul U-Box, Budget Truck Rental, Enterprise Truck Rental, etc.
-
-4. HYBRID OPTIONS: Companies where you pack, they drive (like U-Pack ReloCube)
-
-Return JSON format with at least 10-15 companies:
+Return JSON format:
 {
   "companies": [
     {
@@ -225,25 +217,20 @@ Return JSON format with at least 10-15 companies:
       "phone": "Phone number",
       "website": "Website URL",
       "description": "Company description with years in business and specialties",
-      "estimatedCost": "Realistic cost range for this specific route and distance",
-      "availability": "Service area coverage percentage or availability details",
-      "services": ["Local Moving", "Long Distance", "Packing", "Storage"],
-      "category": "Local Moving Companies" or "National Moving Companies" or "Alternative Moving Solutions",
+      "estimatedCost": "Pricing structure (flat-rate vs hourly) and cost range for this route",
+      "availability": "Service area coverage or availability details",
+      "services": ["Packing", "Loading", "Transport", "Storage"],
+      "category": "Local Moving Companies" or "National Moving Companies",
       "licenseInfo": "DOT number, state licensing, or certification details",
-      "specialties": ["Residential", "Commercial", "Piano Moving", "Fragile Items"],
+      "specialties": ["Interstate Experience", "Residential", "Commercial"],
       "insuranceOptions": ["Basic", "Full Value Protection", "Third Party"],
-      "estimatedTimeframe": "Typical delivery timeframe for this route",
-      "notes": "Important details about services, restrictions, or special features"
+      "estimatedTimeframe": "Delivery timeframe for this route",
+      "notes": "Customer review highlights, special features, or pricing details"
     }
   ]
 }
 
-MUST INCLUDE:
-- At least 4-6 local/regional movers from ${fromLocation} area that do interstate moves
-- At least 4-5 major national moving companies
-- At least 3-4 alternative/hybrid solutions (U-Pack, PODS, etc.)
-
-Research actual local moving companies in ${fromLocation} that advertise interstate moving services.`;
+Focus on actual companies that serve ${fromLocation} and handle moves to ${toLocation}. Prioritize local companies first, then include major national carriers like United Van Lines, Atlas, Mayflower, etc.`;
 
       const completion = await openai.chat.completions.create({
         model: "gpt-4o",
