@@ -271,22 +271,20 @@ export default function MovingJourney() {
       </div>
 
       {/* Highway Timeline Container */}
-      <div className="relative max-w-7xl mx-auto p-6 min-h-[600px]">
+      <div className="relative max-w-7xl mx-auto p-6 min-h-[600px] z-10">
         {/* Highway Background */}
-        <img 
-          src={highwayBackground}
-          alt="Highway Background"
-          className="absolute inset-0 w-full h-full object-cover rounded-3xl opacity-90"
-          style={{ zIndex: -10 }}
-          onError={(e) => {
-            console.error('Background image failed to load:', highwayBackground);
-            e.currentTarget.style.display = 'none';
-          }}
-          onLoad={() => console.log('Background image loaded successfully')}
-        />
-        
-        {/* Fallback background if image fails */}
-        <div className="absolute inset-0 -z-20 bg-gradient-to-br from-green-100 via-blue-100 to-indigo-200 rounded-3xl"></div>
+        <div className="absolute inset-0 w-full h-full rounded-3xl overflow-hidden z-0">
+          <img 
+            src={highwayBackground}
+            alt="Highway Background"
+            className="w-full h-full object-cover opacity-95"
+            onError={(e) => {
+              console.error('Background image failed to load:', highwayBackground);
+              e.currentTarget.style.display = 'none';
+            }}
+            onLoad={() => console.log('Background image loaded successfully')}
+          />
+        </div>
 
         {/* Highway Signs Positioned Along Road */}
         {journeyData.map((step, index) => {
@@ -321,7 +319,7 @@ export default function MovingJourney() {
             <div
               key={step.id}
               ref={el => taskCardRefs.current[step.id] = el}
-              className="absolute cursor-pointer transition-all duration-300 hover:scale-110 hover:z-10"
+              className="absolute cursor-pointer transition-all duration-300 hover:scale-110 z-20"
               style={{
                 left: position.left,
                 top: position.top,
