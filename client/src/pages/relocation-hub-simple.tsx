@@ -14,8 +14,8 @@ import {
 } from "lucide-react";
 
 export default function RelocationHub() {
-  // Simple progress calculation for landing page
-  const overallProgress = 33;
+  // Dynamic progress calculation - starts at 0 for new users
+  const overallProgress = 0;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -81,8 +81,8 @@ export default function RelocationHub() {
               <p className="text-gray-600 mb-3">Essential preparations 8-4 weeks before your move</p>
               <div className="text-sm text-blue-600 font-medium">8-4 weeks before</div>
               <div className="mt-3">
-                <Progress value={50} className="w-full h-2" />
-                <div className="text-xs text-gray-500 mt-1">50% Complete</div>
+                <Progress value={0} className="w-full h-2" />
+                <div className="text-xs text-gray-500 mt-1">0% Complete</div>
               </div>
             </div>
             <div className="text-center">
@@ -93,8 +93,8 @@ export default function RelocationHub() {
               <p className="text-gray-600 mb-3">Critical utilities and services for your new home</p>
               <div className="text-sm text-blue-600 font-medium">2-4 weeks before</div>
               <div className="mt-3">
-                <Progress value={25} className="w-full h-2" />
-                <div className="text-xs text-gray-500 mt-1">25% Complete</div>
+                <Progress value={0} className="w-full h-2" />
+                <div className="text-xs text-gray-500 mt-1">0% Complete</div>
               </div>
             </div>
             <div className="text-center">
