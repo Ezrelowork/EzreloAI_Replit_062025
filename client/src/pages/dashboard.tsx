@@ -663,6 +663,9 @@ export default function Dashboard() {
                             <Button 
                               size="sm" 
                               onClick={() => {
+                                console.log('Moving services button clicked');
+                                console.log('Moving companies length:', movingCompanies.length);
+                                console.log('Move addresses:', moveAddresses);
                                 if (movingCompanies.length === 0) {
                                   movingCompanyMutation.mutate(moveAddresses);
                                 } else {
