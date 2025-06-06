@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
+import { PageTransition } from "@/components/page-transition";
 import Home from "@/pages/home";
 import Analytics from "@/pages/analytics";
 import MovingChecklist from "@/pages/moving-checklist";
@@ -40,17 +41,19 @@ function Router() {
   return (
     <div>
       <Navigation />
-      <Switch>
-        <Route path="/" component={RelocationHub} />
-        <Route path="/dashboard" component={Dashboard} />
-        <Route path="/ai-assistant" component={AIAssistant} />
-        <Route path="/moving-journey" component={MovingJourney} />
-        <Route path="/utilities" component={Utilities} />
-        <Route path="/moving-checklist" component={MovingChecklist} />
-        <Route path="/analytics" component={Analytics} />
-        <Route path="/logo-showcase" component={LogoShowcase} />
-        <Route component={NotFound} />
-      </Switch>
+      <PageTransition>
+        <Switch>
+          <Route path="/" component={RelocationHub} />
+          <Route path="/dashboard" component={Dashboard} />
+          <Route path="/ai-assistant" component={AIAssistant} />
+          <Route path="/moving-journey" component={MovingJourney} />
+          <Route path="/utilities" component={Utilities} />
+          <Route path="/moving-checklist" component={MovingChecklist} />
+          <Route path="/analytics" component={Analytics} />
+          <Route path="/logo-showcase" component={LogoShowcase} />
+          <Route component={NotFound} />
+        </Switch>
+      </PageTransition>
     </div>
   );
 }
