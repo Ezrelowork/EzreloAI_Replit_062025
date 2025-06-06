@@ -43,7 +43,8 @@ function Router() {
       <Navigation />
       <PageTransition>
         <Switch>
-          <Route path="/" component={RelocationHub} />
+          <Route path="/" component={MovingJourneySimple} />
+          <Route path="/home" component={RelocationHub} />
           <Route path="/dashboard" component={Dashboard} />
           <Route path="/ai-assistant" component={AIAssistant} />
           <Route path="/moving-journey" component={MovingJourneySimple} />

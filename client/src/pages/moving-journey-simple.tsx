@@ -129,6 +129,72 @@ export default function MovingJourney() {
       });
       
       setJourneyData(steps);
+    } else {
+      // Sample data for testing highway graphics
+      const sampleSteps: JourneyStep[] = [
+        {
+          id: 'step-1',
+          title: 'Find Moving Company',
+          description: 'Research and get quotes from professional moving companies',
+          week: 'Week 8-6',
+          tasks: ['Get moving quotes', 'Compare services', 'Book moving company'],
+          route: '/dashboard',
+          position: { x: 15, y: 80 },
+          signType: 'warning',
+          completed: false,
+          priority: 'high'
+        },
+        {
+          id: 'step-2',
+          title: 'Set Up Utilities',
+          description: 'Schedule power, water, and internet installation',
+          week: 'Week 4-2',
+          tasks: ['Contact utility companies', 'Schedule installations'],
+          route: '/utilities',
+          position: { x: 25, y: 65 },
+          signType: 'highway',
+          completed: false,
+          priority: 'high'
+        },
+        {
+          id: 'step-3',
+          title: 'Address Changes',
+          description: 'Update address with banks, employers, and government',
+          week: 'Week 2-1',
+          tasks: ['Update bank records', 'Notify employer', 'Change voter registration'],
+          route: '/moving-checklist',
+          position: { x: 45, y: 50 },
+          signType: 'info',
+          completed: false,
+          priority: 'medium'
+        },
+        {
+          id: 'step-4',
+          title: 'Transfer Services',
+          description: 'Move internet, cable, and other services to new address',
+          week: 'Week 1',
+          tasks: ['Transfer internet', 'Move cable service', 'Update subscriptions'],
+          route: '/utilities',
+          position: { x: 65, y: 35 },
+          signType: 'highway',
+          completed: false,
+          priority: 'medium'
+        },
+        {
+          id: 'step-5',
+          title: 'Essential Services',
+          description: 'Find new doctor, dentist, and register kids for school',
+          week: 'Week 1-2',
+          tasks: ['Find healthcare providers', 'Transfer prescriptions', 'School registration'],
+          route: '/moving-checklist',
+          position: { x: 80, y: 20 },
+          signType: 'info',
+          completed: false,
+          priority: 'low'
+        }
+      ];
+      
+      setJourneyData(sampleSteps);
     }
   }, []);
 
