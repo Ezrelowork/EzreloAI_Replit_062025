@@ -232,7 +232,7 @@ export default function AIAssistant() {
                     id="fromLocation"
                     value={relocationDetails.fromLocation}
                     onChange={(e) => setRelocationDetails(prev => ({ ...prev, fromLocation: e.target.value }))}
-                    placeholder="Dallas, TX"
+                    placeholder="123 Main St, Dallas, TX 75201"
                     required
                   />
                 </div>
@@ -242,7 +242,7 @@ export default function AIAssistant() {
                     id="toLocation"
                     value={relocationDetails.toLocation}
                     onChange={(e) => setRelocationDetails(prev => ({ ...prev, toLocation: e.target.value }))}
-                    placeholder="Austin, TX"
+                    placeholder="456 Oak Ave, Austin, TX 78701"
                     required
                   />
                 </div>
