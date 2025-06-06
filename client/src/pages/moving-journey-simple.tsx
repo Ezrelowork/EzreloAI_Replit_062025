@@ -273,13 +273,16 @@ export default function MovingJourney() {
       {/* Highway Timeline Container */}
       <div className="relative max-w-7xl mx-auto p-6 min-h-[600px]">
         {/* Highway Background */}
-        <div className="absolute inset-0 -z-10">
-          <img 
-            src={customGraphics.roadBackground.src}
-            alt={customGraphics.roadBackground.alt}
-            className="w-full h-full object-cover opacity-80 rounded-3xl"
-          />
-        </div>
+        <div 
+          className="absolute inset-0 -z-10 rounded-3xl"
+          style={{
+            backgroundImage: `url(${customGraphics.roadBackground.src})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            opacity: 0.9
+          }}
+        ></div>
 
         {/* Highway Signs Positioned Along Road */}
         {journeyData.map((step, index) => {
@@ -327,7 +330,7 @@ export default function MovingJourney() {
                 <img 
                   src={customSign.src}
                   alt={customSign.alt}
-                  className={`w-24 h-16 object-contain transition-all duration-300 ${
+                  className={`w-32 h-20 object-contain transition-all duration-300 ${
                     step.completed ? 'opacity-80 saturate-50' : 'hover:brightness-110'
                   }`}
                 />
