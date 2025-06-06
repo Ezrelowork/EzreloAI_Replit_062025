@@ -32,24 +32,27 @@ export class GraphicsManager {
         };
       }
 
-      // Individual road signs (sign1, sign2, sign3, sign4, sign5)
+      // Individual road signs (SIgn1.png, Sign2.png, etc.)
       if (fileName.toLowerCase().includes('sign')) {
         if (!newGraphics.taskIcons) newGraphics.taskIcons = {};
         
-        // Extract sign number or type from filename
+        // Map specific signs to task categories based on content
         let signKey = 'default';
-        if (fileName.includes('sign1') || fileName.includes('1')) signKey = 'sign1';
-        if (fileName.includes('sign2') || fileName.includes('2')) signKey = 'sign2';
-        if (fileName.includes('sign3') || fileName.includes('3')) signKey = 'sign3';
-        if (fileName.includes('sign4') || fileName.includes('4')) signKey = 'sign4';
-        if (fileName.includes('sign5') || fileName.includes('5')) signKey = 'sign5';
         
-        // Also check for task type names
-        if (fileName.includes('moving') || fileName.includes('truck')) signKey = 'moving';
-        if (fileName.includes('utility') || fileName.includes('electric')) signKey = 'utilities';
-        if (fileName.includes('pack') || fileName.includes('box')) signKey = 'packing';
-        if (fileName.includes('home') || fileName.includes('house')) signKey = 'housing';
-        if (fileName.includes('medical') || fileName.includes('health')) signKey = 'medical';
+        // Sign1 = Core Moving Tasks
+        if (fileName.includes('SIgn1') || fileName.includes('Sign1')) signKey = 'moving';
+        
+        // Sign2 = Set Up Utilities  
+        if (fileName.includes('Sign2')) signKey = 'utilities-setup';
+        
+        // Sign3 = Address Changes
+        if (fileName.includes('Sign3')) signKey = 'address-changes';
+        
+        // Sign4 = Utilities & Services
+        if (fileName.includes('Sign4')) signKey = 'utilities-services';
+        
+        // Sign5 = Essential Services
+        if (fileName.includes('Sign5')) signKey = 'essential-services';
         
         newGraphics.taskIcons[signKey] = {
           src: assetPath,
