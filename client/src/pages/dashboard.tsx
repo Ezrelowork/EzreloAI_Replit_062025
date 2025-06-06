@@ -23,7 +23,8 @@ import {
   Building,
   Wrench,
   Star,
-  ExternalLink
+  ExternalLink,
+  Globe
 } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -819,17 +820,32 @@ export default function Dashboard() {
                         )}
                         
                         <div className="flex items-center justify-between pt-2">
-                          <div className="flex items-center gap-4 text-sm text-gray-600">
-                            {company.phone && (
+                          <div className="flex flex-col gap-2 text-sm text-gray-600">
+                            <div className="flex items-center gap-4">
+                              {company.phone && (
+                                <div className="flex items-center gap-1">
+                                  <Phone className="w-4 h-4" />
+                                  <span>{company.phone}</span>
+                                </div>
+                              )}
+                              {company.hours && (
+                                <div className="flex items-center gap-1">
+                                  <Clock className="w-4 h-4" />
+                                  <span>{company.hours}</span>
+                                </div>
+                              )}
+                            </div>
+                            {company.website && company.website !== `https://www.google.com/search?q=${encodeURIComponent(company.provider)}` && (
                               <div className="flex items-center gap-1">
-                                <Phone className="w-4 h-4" />
-                                <span>{company.phone}</span>
-                              </div>
-                            )}
-                            {company.hours && (
-                              <div className="flex items-center gap-1">
-                                <Clock className="w-4 h-4" />
-                                <span>{company.hours}</span>
+                                <Globe className="w-4 h-4" />
+                                <a 
+                                  href={company.website} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 hover:text-blue-800 underline"
+                                >
+                                  {company.website.replace(/^https?:\/\//, '').replace(/\/$/, '')}
+                                </a>
                               </div>
                             )}
                           </div>
