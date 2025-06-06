@@ -48,8 +48,6 @@ const getTaskIcon = (task: string) => {
 export default function MovingJourney() {
   const [, setLocation] = useLocation();
   const [journeyData, setJourneyData] = useState<JourneyStep[]>([]);
-  const [selectedStep, setSelectedStep] = useState<JourneyStep | null>(null);
-
   useEffect(() => {
     // Get action plan data from localStorage (from AI assistant)
     const savedActionPlan = localStorage.getItem('aiActionPlan');
