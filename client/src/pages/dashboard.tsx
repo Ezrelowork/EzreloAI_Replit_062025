@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -91,6 +91,11 @@ export default function Dashboard() {
     newZip: "",
     moveDate: ""
   });
+
+  // Scroll to top when component mounts or when switching to address setup
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [moveSetupComplete]);
 
   // Moving company search mutation
   const movingCompanyMutation = useMutation({
