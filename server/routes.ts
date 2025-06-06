@@ -328,26 +328,29 @@ Focus on companies that actually serve the ${fromLocation} area with accurate pr
       
       const prompt = `What ${utilityType} providers are available at ${fullAddress}?
 
-Provide comprehensive list of actual providers that serve this exact location.
+Provide comprehensive list of actual providers that serve this exact location. Include specific availability percentages, connection types, and detailed service information.
 
 Return JSON format:
 {
   "providers": [
     {
       "provider": "Company Name",
-      "phone": "Phone number",
+      "phone": "Phone number", 
       "website": "Official website URL",
-      "description": "Service description and coverage",
-      "estimatedCost": "Cost range",
-      "availability": "Service availability details",
-      "setupFee": "Setup fees",
-      "connectionTime": "Service activation time",
-      "services": ["Service 1", "Service 2"]
+      "description": "Service description and coverage details",
+      "estimatedCost": "Monthly cost range (e.g., $29.99/mo)",
+      "availability": "Availability percentage in this area (e.g., ~97%)",
+      "connectionType": "Technology type (e.g., Fiber, Cable, DSL, 5G)",
+      "maxSpeed": "Maximum speed offered (e.g., Up to 7,000 Mbps)",
+      "setupFee": "Installation/setup fees",
+      "connectionTime": "Service activation timeframe",
+      "services": ["Service 1", "Service 2"],
+      "notes": "Important details about data caps, limitations, or special features"
     }
   ]
 }
 
-Focus on accuracy - only include providers with actual infrastructure in this area.`;
+Focus on accuracy and specificity - include availability percentages, exact speeds, connection technologies, and any service limitations or special features. Only include providers with actual infrastructure in this area.`;
 
       const completion = await openai.chat.completions.create({
         model: "gpt-4o",

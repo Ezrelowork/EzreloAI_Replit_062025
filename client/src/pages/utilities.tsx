@@ -328,11 +328,23 @@ export default function Utilities() {
                   <CardContent className="pt-0">
                     <div className="space-y-3">
                       {/* Service Details */}
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
                         <div>
                           <span className="font-medium text-gray-700">Availability:</span>
-                          <p className="text-gray-600">{provider.availability}</p>
+                          <p className="text-gray-600 font-semibold">{provider.availability}</p>
                         </div>
+                        {provider.connectionType && (
+                          <div>
+                            <span className="font-medium text-gray-700">Connection:</span>
+                            <p className="text-gray-600">{provider.connectionType}</p>
+                          </div>
+                        )}
+                        {provider.maxSpeed && (
+                          <div>
+                            <span className="font-medium text-gray-700">Max Speed:</span>
+                            <p className="text-gray-600">{provider.maxSpeed}</p>
+                          </div>
+                        )}
                         {provider.setupFee && (
                           <div>
                             <span className="font-medium text-gray-700">Setup Fee:</span>
@@ -341,11 +353,20 @@ export default function Utilities() {
                         )}
                         {provider.connectionTime && (
                           <div>
-                            <span className="font-medium text-gray-700">Connection Time:</span>
+                            <span className="font-medium text-gray-700">Activation:</span>
                             <p className="text-gray-600">{provider.connectionTime}</p>
                           </div>
                         )}
                       </div>
+
+                      {/* Special Notes */}
+                      {provider.notes && (
+                        <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                          <p className="text-sm text-blue-800">
+                            <strong>Note:</strong> {provider.notes}
+                          </p>
+                        </div>
+                      )}
 
                       {/* Services */}
                       {provider.services && provider.services.length > 0 && (
