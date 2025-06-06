@@ -86,22 +86,48 @@ export default function Dashboard() {
   const [selectedPhase, setSelectedPhase] = useState("pre-move");
   const [moveSetupComplete, setMoveSetupComplete] = useState(false);
   const [movingCompanies, setMovingCompanies] = useState<MovingCompany[]>([]);
-  const [moveAddresses, setMoveAddresses] = useState<MoveAddresses>({
-    currentAddress: "",
-    currentCity: "",
-    currentState: "",
-    currentZip: "",
-    newAddress: "",
-    newCity: "",
-    newState: "",
-    newZip: "",
-    moveDate: ""
+  const [moveAddresses, setMoveAddresses] = useState<MoveAddresses>(() => {
+    // Load saved addresses from localStorage
+    const savedCurrentAddress = localStorage.getItem('currentAddress') || "";
+    const savedCurrentCity = localStorage.getItem('currentCity') || "";
+    const savedCurrentState = localStorage.getItem('currentState') || "";
+    const savedCurrentZip = localStorage.getItem('currentZip') || "";
+    const savedNewAddress = localStorage.getItem('newAddress') || "";
+    const savedNewCity = localStorage.getItem('newCity') || "";
+    const savedNewState = localStorage.getItem('newState') || "";
+    const savedNewZip = localStorage.getItem('newZip') || "";
+    const savedMoveDate = localStorage.getItem('moveDate') || "";
+    
+    return {
+      currentAddress: savedCurrentAddress,
+      currentCity: savedCurrentCity,
+      currentState: savedCurrentState,
+      currentZip: savedCurrentZip,
+      newAddress: savedNewAddress,
+      newCity: savedNewCity,
+      newState: savedNewState,
+      newZip: savedNewZip,
+      moveDate: savedMoveDate
+    };
   });
 
   // Scroll to top when component mounts or when switching to address setup
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [moveSetupComplete]);
+
+  // Save addresses to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('currentAddress', moveAddresses.currentAddress);
+    localStorage.setItem('currentCity', moveAddresses.currentCity);
+    localStorage.setItem('currentState', moveAddresses.currentState);
+    localStorage.setItem('currentZip', moveAddresses.currentZip);
+    localStorage.setItem('newAddress', moveAddresses.newAddress);
+    localStorage.setItem('newCity', moveAddresses.newCity);
+    localStorage.setItem('newState', moveAddresses.newState);
+    localStorage.setItem('newZip', moveAddresses.newZip);
+    localStorage.setItem('moveDate', moveAddresses.moveDate);
+  }, [moveAddresses]);
 
   // Moving company search mutation
   const movingCompanyMutation = useMutation({
