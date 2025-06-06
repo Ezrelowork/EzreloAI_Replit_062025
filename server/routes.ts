@@ -291,7 +291,169 @@ Focus on accuracy and specificity - include availability percentages, exact spee
     }
   });
 
-  // Other endpoints would continue here...
+  // AI Recommendations endpoint
+  app.post("/api/ai-recommendations", async (req, res) => {
+    try {
+      const { query, fromLocation, toLocation, moveDate, familySize, budget, priorities } = req.body;
+      
+      if (!fromLocation || !toLocation) {
+        return res.status(400).json({ error: "Both current and destination locations are required" });
+      }
+
+      // Check if OpenAI API key is available
+      if (!process.env.OPENAI_API_KEY) {
+        return res.status(503).json({ 
+          error: "AI service is temporarily unavailable. Please contact support for assistance.",
+          recommendations: [],
+          summary: "AI analysis requires OpenAI API configuration.",
+          timeline: [],
+          estimatedTotalCost: "Contact for estimate"
+        });
+      }
+
+      const OpenAI = (await import('openai')).default;
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+      // Create a comprehensive prompt for the AI
+      const systemPrompt = `You are an expert relocation concierge AI assistant specializing in comprehensive moving and relocation planning. 
+
+Your role is to analyze relocation scenarios and provide detailed, actionable recommendations covering:
+- Moving services and logistics
+- Utility setup and transfers
+- Local area insights and lifestyle adjustments
+- Cost optimization strategies
+- Timeline planning
+- Service provider recommendations with actual contact info and websites
+
+Always provide specific, actionable recommendations with real provider information including:
+- Provider names with actual phone numbers
+- Website URLs when available
+- Service descriptions and specialties
+- Realistic cost estimates
+- Detailed timelines and next steps
+
+Provide comprehensive relocation plan in JSON format:
+{
+  "summary": "Brief overview and key considerations",
+  "recommendations": [
+    {
+      "category": "Category name",
+      "title": "Recommendation title", 
+      "description": "Detailed description",
+      "reasoning": "Why this recommendation makes sense",
+      "priority": "high|medium|low",
+      "estimatedCost": "Cost range",
+      "timeframe": "When to handle this",
+      "providers": [
+        {
+          "name": "Provider name",
+          "description": "Why recommended and service details",
+          "contact": "Phone number",
+          "website": "https://website.com",
+          "rating": 4.2,
+          "services": ["Service 1", "Service 2", "Service 3"]
+        }
+      ],
+      "nextSteps": ["Step 1", "Step 2"]
+    }
+  ],
+  "timeline": [
+    {
+      "week": "8 weeks before move",
+      "tasks": ["Task 1", "Task 2"]
+    }
+  ],
+  "estimatedTotalCost": "Total cost estimate"
+}
+
+Focus on actionable recommendations specific to moving from ${fromLocation} to ${toLocation}.`;
+
+      const userPrompt = `Help me plan my relocation:
+
+From: ${fromLocation}
+To: ${toLocation}
+Move Date: ${moveDate || "Not specified"}
+Family Size: ${familySize}
+Budget: ${budget}
+Priorities: ${priorities.join(", ") || "None specified"}
+
+Query: ${query}
+
+Please provide a comprehensive relocation plan with specific provider recommendations, realistic costs, and actionable next steps. Include actual phone numbers and websites for all recommended providers.`;
+
+      // Call OpenAI API
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt }
+        ],
+        response_format: { type: "json_object" },
+        temperature: 0.7,
+        max_tokens: 3000
+      });
+
+      const aiResponse = JSON.parse(completion.choices[0].message.content || '{}');
+
+      // Ensure the response has the expected structure
+      const structuredResponse = {
+        summary: aiResponse.summary || "AI analysis complete for your relocation plan.",
+        recommendations: aiResponse.recommendations || [],
+        timeline: aiResponse.timeline || [],
+        estimatedTotalCost: aiResponse.estimatedTotalCost || "Varies by services selected"
+      };
+
+      res.json(structuredResponse);
+
+    } catch (error) {
+      console.error("AI Recommendations error:", error);
+      
+      // Provide a helpful error response
+      if (error instanceof Error && error.message.includes('API key')) {
+        return res.status(503).json({ 
+          error: "AI service configuration issue. Please contact support.",
+          recommendations: [],
+          summary: "AI analysis temporarily unavailable.",
+          timeline: [],
+          estimatedTotalCost: "Contact for estimate"
+        });
+      }
+      
+      return res.status(500).json({ 
+        error: "AI analysis temporarily unavailable. Please try again or contact support.",
+        recommendations: [],
+        summary: "Unable to generate AI recommendations at this time.",
+        timeline: [],
+        estimatedTotalCost: "Contact for estimate"
+      });
+    }
+  });
+
+  // Track referral clicks
+  app.post("/api/track-referral", async (req, res) => {
+    try {
+      const { provider, category, action, userAddress } = req.body;
+      
+      const timestamp = new Date().toISOString();
+      const ipAddress = req.ip || 'unknown';
+
+      // For now, just log the referral click since we don't have the database table
+      console.log('Referral click tracked:', {
+        provider,
+        category,
+        action,
+        userAddress,
+        timestamp,
+        ipAddress
+      });
+
+      res.json({ success: true });
+
+    } catch (error) {
+      console.error("Referral tracking error:", error);
+      res.status(500).json({ error: "Failed to track referral" });
+    }
+  });
 
   const httpServer = createServer(app);
   return httpServer;

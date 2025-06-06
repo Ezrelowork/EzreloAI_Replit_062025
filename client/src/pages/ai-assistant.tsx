@@ -18,7 +18,11 @@ import {
   Sparkles,
   Zap,
   Target,
-  Users
+  Users,
+  Globe,
+  Phone,
+  Star,
+  ExternalLink
 } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -46,6 +50,9 @@ interface AIRecommendation {
     name: string;
     description: string;
     contact: string;
+    website?: string;
+    rating?: number;
+    services?: string[];
   }>;
   nextSteps: string[];
 }
@@ -377,12 +384,88 @@ export default function AIAssistant() {
                       {rec.providers && rec.providers.length > 0 && (
                         <div>
                           <h4 className="font-medium text-gray-900 mb-2">Recommended Providers:</h4>
-                          <div className="space-y-2">
+                          <div className="space-y-3">
                             {rec.providers.map((provider, idx) => (
-                              <div key={idx} className="bg-gray-50 p-3 rounded-lg">
-                                <h5 className="font-medium">{provider.name}</h5>
-                                <p className="text-sm text-gray-600">{provider.description}</p>
-                                <p className="text-sm text-gray-500">{provider.contact}</p>
+                              <div key={idx} className="bg-gray-50 p-4 rounded-lg border">
+                                <div className="flex items-start justify-between mb-2">
+                                  <div className="flex-1">
+                                    <h5 className="font-medium text-lg flex items-center gap-2">
+                                      {provider.name}
+                                      {provider.rating && provider.rating > 0 && (
+                                        <div className="flex items-center gap-1">
+                                          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                                          <span className="text-sm font-normal text-gray-600">
+                                            {provider.rating.toFixed(1)}
+                                          </span>
+                                        </div>
+                                      )}
+                                    </h5>
+                                    <p className="text-sm text-gray-600 mt-1">{provider.description}</p>
+                                  </div>
+                                </div>
+                                
+                                {provider.services && provider.services.length > 0 && (
+                                  <div className="mb-3">
+                                    <div className="flex flex-wrap gap-1">
+                                      {provider.services.slice(0, 3).map((service, serviceIdx) => (
+                                        <Badge key={serviceIdx} variant="secondary" className="text-xs">
+                                          {service}
+                                        </Badge>
+                                      ))}
+                                      {provider.services.length > 3 && (
+                                        <Badge variant="secondary" className="text-xs">
+                                          +{provider.services.length - 3} more
+                                        </Badge>
+                                      )}
+                                    </div>
+                                  </div>
+                                )}
+                                
+                                <div className="flex items-center justify-between">
+                                  <div className="flex flex-col gap-1 text-sm text-gray-600">
+                                    {provider.contact && (
+                                      <div className="flex items-center gap-1">
+                                        <Phone className="w-4 h-4" />
+                                        <span>{provider.contact}</span>
+                                      </div>
+                                    )}
+                                    {provider.website && (
+                                      <div className="flex items-center gap-1">
+                                        <Globe className="w-4 h-4" />
+                                        <a 
+                                          href={provider.website} 
+                                          target="_blank" 
+                                          rel="noopener noreferrer"
+                                          className="text-blue-600 hover:text-blue-800 underline"
+                                        >
+                                          {provider.website.replace(/^https?:\/\//, '').replace(/\/$/, '')}
+                                        </a>
+                                      </div>
+                                    )}
+                                  </div>
+                                  
+                                  <div className="flex gap-2">
+                                    {provider.contact && (
+                                      <Button 
+                                        variant="outline" 
+                                        size="sm"
+                                        onClick={() => window.open(`tel:${provider.contact}`, '_self')}
+                                      >
+                                        Call
+                                      </Button>
+                                    )}
+                                    {provider.website && (
+                                      <Button 
+                                        size="sm"
+                                        onClick={() => window.open(provider.website, '_blank')}
+                                        className="flex items-center gap-1"
+                                      >
+                                        Visit
+                                        <ExternalLink className="w-3 h-3" />
+                                      </Button>
+                                    )}
+                                  </div>
+                                </div>
                               </div>
                             ))}
                           </div>

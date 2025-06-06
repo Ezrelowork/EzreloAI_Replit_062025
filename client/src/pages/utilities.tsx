@@ -18,7 +18,8 @@ import {
   Clock,
   ArrowLeft,
   CheckCircle,
-  AlertCircle
+  AlertCircle,
+  Globe
 } from "lucide-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -392,11 +393,26 @@ export default function Utilities() {
 
                       {/* Action Buttons */}
                       <div className="flex items-center justify-between pt-2">
-                        <div className="flex items-center gap-4 text-sm text-gray-600">
-                          {provider.phone && (
+                        <div className="flex flex-col gap-2 text-sm text-gray-600">
+                          <div className="flex items-center gap-4">
+                            {provider.phone && (
+                              <div className="flex items-center gap-1">
+                                <Phone className="w-4 h-4" />
+                                <span>{provider.phone}</span>
+                              </div>
+                            )}
+                          </div>
+                          {provider.website && provider.website !== `https://www.google.com/search?q=${encodeURIComponent(provider.provider)}` && (
                             <div className="flex items-center gap-1">
-                              <Phone className="w-4 h-4" />
-                              <span>{provider.phone}</span>
+                              <Globe className="w-4 h-4" />
+                              <a 
+                                href={provider.website} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:text-blue-800 underline"
+                              >
+                                {provider.website.replace(/^https?:\/\//, '').replace(/\/$/, '')}
+                              </a>
                             </div>
                           )}
                         </div>
