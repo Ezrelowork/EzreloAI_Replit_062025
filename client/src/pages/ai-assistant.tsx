@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { Brain, Calendar, MapPin, DollarSign, ArrowRight, CheckCircle2 } from "lucide-react";
+import { Brain, Calendar, MapPin, DollarSign, ArrowRight, CheckCircle2, Home, Truck, Wifi, Zap, Phone, CreditCard, FileText, Package, Users, Clock, Search, Building } from "lucide-react";
 import { Link } from "wouter";
 
 interface RelocationQuery {
@@ -107,6 +107,23 @@ export default function AIAssistant() {
       case "medium": return "bg-yellow-100 text-yellow-800 border-yellow-200";
       case "low": return "bg-green-100 text-green-800 border-green-200";
     }
+  };
+
+  const getTaskIcon = (task: string) => {
+    const taskLower = task.toLowerCase();
+    if (taskLower.includes('mover') || taskLower.includes('moving') || taskLower.includes('truck')) return Truck;
+    if (taskLower.includes('internet') || taskLower.includes('wifi') || taskLower.includes('cable')) return Wifi;
+    if (taskLower.includes('electric') || taskLower.includes('power') || taskLower.includes('utility')) return Zap;
+    if (taskLower.includes('phone') || taskLower.includes('mobile') || taskLower.includes('cellular')) return Phone;
+    if (taskLower.includes('bank') || taskLower.includes('credit') || taskLower.includes('financial')) return CreditCard;
+    if (taskLower.includes('document') || taskLower.includes('paperwork') || taskLower.includes('form')) return FileText;
+    if (taskLower.includes('pack') || taskLower.includes('box') || taskLower.includes('storage')) return Package;
+    if (taskLower.includes('school') || taskLower.includes('family') || taskLower.includes('children')) return Users;
+    if (taskLower.includes('schedule') || taskLower.includes('timing') || taskLower.includes('calendar')) return Clock;
+    if (taskLower.includes('research') || taskLower.includes('find') || taskLower.includes('search')) return Search;
+    if (taskLower.includes('home') || taskLower.includes('house') || taskLower.includes('property')) return Home;
+    if (taskLower.includes('office') || taskLower.includes('work') || taskLower.includes('business')) return Building;
+    return CheckCircle2; // Default icon
   };
 
   return (
@@ -312,12 +329,15 @@ export default function AIAssistant() {
                           {phase.week}
                         </h5>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                          {phase.tasks.map((task, taskIndex) => (
-                            <div key={taskIndex} className="text-sm text-gray-700 flex items-center gap-2">
-                              <CheckCircle2 className="w-4 h-4 text-blue-500 flex-shrink-0" />
-                              {task}
-                            </div>
-                          ))}
+                          {phase.tasks.map((task, taskIndex) => {
+                            const IconComponent = getTaskIcon(task);
+                            return (
+                              <div key={taskIndex} className="text-sm text-gray-700 flex items-center gap-2">
+                                <IconComponent className="w-4 h-4 text-blue-500 flex-shrink-0" />
+                                {task}
+                              </div>
+                            );
+                          })}
                         </div>
                       </div>
                     ))}
