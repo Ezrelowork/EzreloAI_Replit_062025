@@ -1,10 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { JourneyRoad, JourneyLandscape } from "@/components/journey-assets";
 import { ProgressTracker, JourneyStats } from "@/components/progress-tracker";
 import { TaskModal, useTaskModal } from "@/components/task-modal";
+import { ZoomNavigation, useZoomNavigation } from "@/components/zoom-navigation";
+import { TaskPage } from "@/components/task-page";
 import { 
   ArrowLeft,
   Truck,
@@ -94,6 +96,8 @@ export default function MovingJourney() {
   const [, setLocation] = useLocation();
   const [journeyData, setJourneyData] = useState<JourneyStep[]>([]);
   const { isOpen, currentTask, openModal, closeModal } = useTaskModal();
+  const { isZoomed, zoomOrigin, currentTaskData, zoomIntoTask, zoomOut } = useZoomNavigation();
+  const taskCardRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   useEffect(() => {
     // Get action plan data from localStorage (from AI assistant)
     const savedActionPlan = localStorage.getItem('aiActionPlan');
@@ -136,16 +140,19 @@ export default function MovingJourney() {
 
 
 
-  const handleTaskClick = (step: JourneyStep) => {
-    // Open modal instead of navigating away
-    openModal({
-      id: step.id,
-      title: step.title,
-      description: step.description,
-      priority: step.priority,
-      week: step.week,
-      category: getCategoryFromTask(step.title)
-    });
+  const handleTaskClick = (step: JourneyStep, event: React.MouseEvent) => {
+    const cardElement = taskCardRefs.current[step.id];
+    if (cardElement) {
+      // Cinematic zoom into the task card
+      zoomIntoTask(cardElement, {
+        id: step.id,
+        title: step.title,
+        description: step.description,
+        priority: step.priority,
+        week: step.week,
+        category: getCategoryFromTask(step.title)
+      });
+    }
   };
 
   const handleStartTask = (step: JourneyStep) => {
@@ -258,8 +265,9 @@ export default function MovingJourney() {
 
               {/* Step Card */}
               <div 
+                ref={(el) => { taskCardRefs.current[step.id] = el; }}
                 className="bg-white rounded-2xl shadow-xl border border-gray-200 p-6 ml-4 cursor-pointer interactive-element group"
-                onClick={() => handleTaskClick(step)}
+                onClick={(e) => handleTaskClick(step, e)}
               >
                 <div className="flex items-start gap-4">
                   <div className={`p-3 rounded-xl ${
@@ -287,7 +295,7 @@ export default function MovingJourney() {
                         Timeline: {step.week}
                       </div>
                       <div className="flex items-center gap-2 text-blue-600 font-semibold group-hover:text-blue-700 transition-colors">
-                        View Details
+                        Zoom In
                         <ArrowLeft className="w-4 h-4 rotate-180 group-hover:translate-x-1 transition-transform" />
                       </div>
                     </div>
@@ -317,20 +325,27 @@ export default function MovingJourney() {
       {/* Interactive Instructions */}
       <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-black/90 backdrop-blur-sm rounded-2xl px-8 py-4 shadow-2xl z-30">
         <div className="text-white text-center">
-          <div className="text-lg font-bold mb-2">Interactive Moving Journey</div>
-          <div className="text-sm opacity-90">Click any task card to view details • Follow your personalized timeline</div>
+          <div className="text-lg font-bold mb-2">🎬 Cinematic Journey</div>
+          <div className="text-sm opacity-90">Click any task card to zoom in • Experience immersive task management</div>
         </div>
       </div>
 
-      {/* Task Modal */}
-      {currentTask && (
-        <TaskModal
-          isOpen={isOpen}
-          onClose={closeModal}
-          task={currentTask}
-          onStartTask={() => handleStartTask(currentTask)}
-        />
-      )}
+      {/* Cinematic Zoom Navigation */}
+      <ZoomNavigation
+        isZoomed={isZoomed}
+        onZoomOut={zoomOut}
+        zoomOrigin={zoomOrigin}
+      >
+        {currentTaskData && (
+          <TaskPage
+            task={currentTaskData}
+            onComplete={() => {
+              // Mark task as complete and zoom out
+              zoomOut();
+            }}
+          />
+        )}
+      </ZoomNavigation>
 
     </div>
   );
