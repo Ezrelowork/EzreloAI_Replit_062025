@@ -156,6 +156,25 @@ export default function RelocationHub() {
           </div>
         </div>
       </section>
+
+      {/* Get Started Section - At the bottom after all explanations */}
+      <section className="py-16 bg-gradient-to-br from-blue-50 to-indigo-100">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">Ready to Begin Your Relocation Journey?</h2>
+          <p className="text-gray-600 max-w-2xl mx-auto mb-8">
+            Let our AI concierge analyze your move and create a personalized plan that guides you through each step.
+          </p>
+          <Link href="/ai-assistant">
+            <Button size="lg" className="px-8 py-4 text-lg bg-blue-600 hover:bg-blue-700">
+              Start Your Move
+              <ArrowRight className="w-5 h-5 ml-2" />
+            </Button>
+          </Link>
+          <p className="text-sm text-gray-500 mt-4">
+            No signup required • Instant AI analysis • Personalized recommendations
+          </p>
+        </div>
+      </section>
     </div>
   );
 }
