@@ -304,7 +304,11 @@ export default function MovingJourney() {
           completedSteps={journeyData.filter(step => step.completed).length}
           currentStep={journeyData.findIndex(step => !step.completed) + 1}
         />
-        <JourneyStats journeyData={journeyData} />
+        <JourneyStats 
+          highPriority={journeyData.filter(step => step.priority === 'high').length}
+          mediumPriority={journeyData.filter(step => step.priority === 'medium').length}
+          lowPriority={journeyData.filter(step => step.priority === 'low').length}
+        />
       </div>
 
       {/* Cinematic Journey Info */}
