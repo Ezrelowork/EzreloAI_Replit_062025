@@ -207,13 +207,17 @@ Focus on accuracy and specificity - include availability percentages, exact spee
       
       const prompt = `Find comprehensive moving options for a ${moveType} move from ${fromLocation} to ${toLocation}.
 
-Include ALL types of moving solutions:
-1. Local/regional moving companies in the ${fromLocation} area that handle long-distance moves
-2. Major national moving companies (United Van Lines, Atlas, Mayflower, North American, etc.)
-3. Alternative moving options (U-Pack, PODS, Budget Truck Rental, etc.)
-4. Hybrid solutions (you pack, they drive)
+IMPORTANT: Search for BOTH local AND national options. Include:
 
-Return JSON format with detailed information:
+1. LOCAL/REGIONAL MOVERS: Search specifically for moving companies based in or serving ${fromLocation} that handle interstate/long-distance moves. Examples of local movers include companies like Brown Box Movers, local family-owned businesses, regional chains, etc.
+
+2. MAJOR NATIONAL CARRIERS: United Van Lines, Atlas Van Lines, Mayflower, North American Van Lines, Allied Van Lines, etc.
+
+3. ALTERNATIVE SOLUTIONS: U-Pack, PODS, U-Haul U-Box, Budget Truck Rental, Enterprise Truck Rental, etc.
+
+4. HYBRID OPTIONS: Companies where you pack, they drive (like U-Pack ReloCube)
+
+Return JSON format with at least 10-15 companies:
 {
   "companies": [
     {
@@ -234,13 +238,12 @@ Return JSON format with detailed information:
   ]
 }
 
-Provide at least 8-12 options covering:
-- Local movers in ${fromLocation} area who do interstate moves
-- Major national carriers with service to this route
-- Alternative solutions like U-Pack, PODS, portable storage
-- DIY options with truck rentals
+MUST INCLUDE:
+- At least 4-6 local/regional movers from ${fromLocation} area that do interstate moves
+- At least 4-5 major national moving companies
+- At least 3-4 alternative/hybrid solutions (U-Pack, PODS, etc.)
 
-Focus on companies that actually serve this specific route with accurate pricing estimates.`;
+Research actual local moving companies in ${fromLocation} that advertise interstate moving services.`;
 
       const completion = await openai.chat.completions.create({
         model: "gpt-4o",
