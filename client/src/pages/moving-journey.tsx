@@ -182,20 +182,20 @@ export default function MovingJourney() {
         </svg>
       </div>
 
-      {/* Realistic Winding Highway */}
+      {/* Vertical Zigzag Highway */}
       <div className="absolute inset-0 pt-20">
         <svg className="w-full h-full" viewBox="0 0 1200 800" preserveAspectRatio="none">
           <defs>
-            <pattern id="roadDashes" patternUnits="userSpaceOnUse" width="40" height="8">
-              <rect width="20" height="8" fill="#fbbf24" />
+            <pattern id="roadDashes" patternUnits="userSpaceOnUse" width="30" height="8">
+              <rect width="15" height="8" fill="#fbbf24" />
             </pattern>
           </defs>
           
           {/* Road shadow/depth */}
           <path 
-            d="M 100 400 Q 300 300 500 380 Q 700 460 900 350 Q 1000 300 1100 380" 
+            d="M 200 150 Q 400 250 200 350 Q 0 450 200 550 Q 400 650 200 750" 
             stroke="#2d3748" 
-            strokeWidth="85" 
+            strokeWidth="120" 
             fill="none"
             opacity="0.3"
             transform="translate(5, 5)"
@@ -203,112 +203,131 @@ export default function MovingJourney() {
           
           {/* Main road surface */}
           <path 
-            d="M 100 400 Q 300 300 500 380 Q 700 460 900 350 Q 1000 300 1100 380" 
+            d="M 200 150 Q 400 250 200 350 Q 0 450 200 550 Q 400 650 200 750" 
             stroke="#4a5568" 
-            strokeWidth="80" 
+            strokeWidth="110" 
             fill="none"
           />
           
           {/* Road edge lines */}
           <path 
-            d="M 100 400 Q 300 300 500 380 Q 700 460 900 350 Q 1000 300 1100 380" 
+            d="M 200 150 Q 400 250 200 350 Q 0 450 200 550 Q 400 650 200 750" 
             stroke="#2d3748" 
-            strokeWidth="4" 
+            strokeWidth="6" 
             fill="none"
-            transform="translate(0, -38)"
+            transform="translate(-52, 0)"
           />
           <path 
-            d="M 100 400 Q 300 300 500 380 Q 700 460 900 350 Q 1000 300 1100 380" 
+            d="M 200 150 Q 400 250 200 350 Q 0 450 200 550 Q 400 650 200 750" 
             stroke="#2d3748" 
-            strokeWidth="4" 
+            strokeWidth="6" 
             fill="none"
-            transform="translate(0, 38)"
+            transform="translate(52, 0)"
           />
           
           {/* Yellow center dashed line */}
           <path 
-            d="M 100 400 Q 300 300 500 380 Q 700 460 900 350 Q 1000 300 1100 380" 
+            d="M 200 150 Q 400 250 200 350 Q 0 450 200 550 Q 400 650 200 750" 
             stroke="url(#roadDashes)" 
-            strokeWidth="6" 
+            strokeWidth="8" 
             fill="none"
-            strokeDasharray="30,20"
+            strokeDasharray="25,15"
           />
         </svg>
       </div>
 
-      {/* Highway Signs - Action Plan as Green Road Signs */}
+      {/* Cartoon Highway Signs Following Zigzag Road */}
       <div className="absolute inset-0 pt-24">
         {journeyData.map((step, index) => {
           const IconComponent = getTaskIcon(step.title);
           
-          // Calculate position along the curved road path
-          const roadProgress = index / (journeyData.length - 1 || 1);
-          const roadX = 100 + (roadProgress * 900); // Follow the road path from 100 to 1000
+          // Calculate position along the vertical zigzag path
+          const progress = index / (journeyData.length - 1 || 1);
+          const yPosition = 150 + (progress * 600); // Vertical progression from 150 to 750
           
-          // Calculate Y position along the curved road
-          let roadY;
-          if (roadProgress <= 0.33) {
-            // First curve: descending
-            roadY = 400 - (roadProgress * 3) * 100;
-          } else if (roadProgress <= 0.66) {
-            // Second curve: ascending
-            const localProgress = (roadProgress - 0.33) / 0.33;
-            roadY = 300 + localProgress * 160;
+          // Calculate horizontal zigzag position
+          const segment = Math.floor(progress * 4); // 4 segments in the zigzag
+          const localProgress = (progress * 4) % 1;
+          
+          let xPosition;
+          if (segment % 2 === 0) {
+            // Moving right: from center to right
+            xPosition = 200 + (localProgress * 200);
           } else {
-            // Final curve: descending to finish
-            const localProgress = (roadProgress - 0.66) / 0.34;
-            roadY = 460 - localProgress * 110;
+            // Moving left: from right to left
+            xPosition = 400 - (localProgress * 400);
           }
+          
+          // Offset signs to the side of the road
+          const signOffset = index % 2 === 0 ? 150 : -150;
+          const finalX = xPosition + signOffset;
           
           return (
             <div
               key={step.id}
-              className="absolute cursor-pointer group transform hover:scale-105 transition-all duration-300"
+              className="absolute cursor-pointer group transform hover:scale-110 transition-all duration-300"
               style={{
-                left: `${(roadX / 1200) * 100}%`,
-                top: `${(roadY / 800) * 100}%`,
+                left: `${(finalX / 1200) * 100}%`,
+                top: `${(yPosition / 800) * 100}%`,
                 transform: 'translate(-50%, -50%)'
               }}
               onClick={() => handleStartTask(step)}
             >
               {/* Sign Post */}
               <div className="flex flex-col items-center">
-                <div className="w-4 h-24 bg-gray-600 shadow-lg"></div>
-                
-                {/* Green Highway Sign */}
-                <div className="bg-green-700 text-white px-6 py-4 rounded-lg shadow-2xl border-4 border-white transform group-hover:rotate-1 transition-all duration-300 min-w-48 text-center">
-                  <div className="flex items-center justify-center gap-3 mb-2">
-                    <IconComponent className="w-8 h-8" />
+                {/* Cartoon-style green highway sign */}
+                <div className="bg-green-600 text-white px-8 py-6 rounded-2xl shadow-2xl border-4 border-white transform group-hover:rotate-2 transition-all duration-300 min-w-64 text-center relative">
+                  {/* Sign border effect */}
+                  <div className="absolute inset-2 border-2 border-white/30 rounded-xl"></div>
+                  
+                  <div className="relative z-10">
+                    <div className="flex items-center justify-center gap-4 mb-3">
+                      <IconComponent className="w-10 h-10 drop-shadow-lg" />
+                    </div>
+                    <div className="text-2xl font-black uppercase tracking-wider leading-tight drop-shadow-md">
+                      {step.title.length > 12 ? 
+                        step.title.substring(0, 12).toUpperCase() : 
+                        step.title.toUpperCase()
+                      }
+                    </div>
+                    <div className="text-sm font-bold mt-2 opacity-95 leading-relaxed">
+                      {step.description.substring(0, 50)}...
+                    </div>
                   </div>
-                  <div className="text-lg font-black uppercase tracking-wider leading-tight">
-                    {step.title.length > 15 ? 
-                      step.title.substring(0, 15).split(' ').slice(0, -1).join(' ') + '...' : 
-                      step.title
-                    }
-                  </div>
-                  <div className="text-xs font-semibold mt-1 opacity-90">
-                    {step.description.substring(0, 40)}...
+                  
+                  {/* Priority indicator */}
+                  <div className={`absolute -top-3 -right-3 w-8 h-8 rounded-full flex items-center justify-center text-xs font-black border-2 border-white shadow-lg ${
+                    step.priority === 'high' ? 'bg-red-500' : 
+                    step.priority === 'medium' ? 'bg-yellow-500' : 'bg-blue-500'
+                  }`}>
+                    {index + 1}
                   </div>
                 </div>
 
-                {/* Interactive Hover Details */}
-                <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 mt-3 bg-white/95 backdrop-blur-sm rounded-xl p-4 shadow-xl border-2 border-green-200 max-w-56">
-                  <div className="text-sm font-bold text-gray-800 mb-2">
+                {/* Sign post */}
+                <div className="w-6 h-32 bg-gray-600 shadow-lg mt-2"></div>
+
+                {/* Interactive details on hover */}
+                <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 mt-4 bg-white/95 backdrop-blur-sm rounded-2xl p-5 shadow-2xl border-2 border-green-200 max-w-72">
+                  <div className="text-lg font-bold text-gray-800 mb-3">
                     {step.title}
                   </div>
-                  <div className="text-xs text-gray-600 mb-3 leading-relaxed">
+                  <div className="text-sm text-gray-600 mb-4 leading-relaxed">
                     {step.description}
                   </div>
                   <div className="flex items-center justify-between">
-                    <div className={`px-3 py-1 rounded-full text-xs font-bold text-white ${
+                    <div className={`px-4 py-2 rounded-full text-sm font-bold text-white ${
                       step.priority === 'high' ? 'bg-red-500' : 
                       step.priority === 'medium' ? 'bg-yellow-500' : 'bg-green-500'
                     }`}>
-                      {step.priority.toUpperCase()}
+                      {step.priority.toUpperCase()} PRIORITY
                     </div>
-                    <div className="text-xs font-bold text-green-700 bg-green-100 px-2 py-1 rounded">
+                    <div className="text-sm font-bold text-green-700 bg-green-100 px-3 py-2 rounded-lg">
                       CLICK TO START →
                     </div>
+                  </div>
+                  <div className="text-xs text-gray-500 mt-3 text-center">
+                    Timeline: {step.week}
                   </div>
                 </div>
               </div>
