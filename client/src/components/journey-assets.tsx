@@ -154,8 +154,98 @@ export const HighwaySignTemplate: React.FC<{
   );
 };
 
-// Custom asset loader utility
-export const loadCustomAsset = (assetPath: string) => {
-  // This will be used when custom graphics are provided
-  return assetPath;
+// Asset management for custom graphics integration
+export interface GraphicAsset {
+  src: string;
+  alt: string;
+  width?: number;
+  height?: number;
+}
+
+export interface JourneyGraphics {
+  roadBackground?: GraphicAsset;
+  timelinePath?: GraphicAsset;
+  taskIcons?: {
+    [key: string]: GraphicAsset;
+  };
+  decorativeElements?: GraphicAsset[];
+}
+
+// Dynamic asset loader with fallback support
+export const AssetLoader: React.FC<{
+  asset?: GraphicAsset;
+  fallback: React.ReactNode;
+  className?: string;
+}> = ({ asset, fallback, className }) => {
+  if (!asset) return <>{fallback}</>;
+  
+  return (
+    <img 
+      src={asset.src}
+      alt={asset.alt}
+      width={asset.width}
+      height={asset.height}
+      className={className}
+      onError={(e) => {
+        // Fallback to SVG if custom asset fails to load
+        e.currentTarget.style.display = 'none';
+      }}
+    />
+  );
+};
+
+// Graphics configuration hook
+export const useJourneyGraphics = () => {
+  // This will be populated when custom graphics are available
+  const graphics: JourneyGraphics = {
+    // Default fallbacks using current SVG system
+  };
+  
+  return graphics;
+};
+
+// Enhanced timeline component with graphics integration
+export const GraphicsTimeline: React.FC<{
+  className?: string;
+  graphics?: JourneyGraphics;
+}> = ({ className, graphics }) => {
+  return (
+    <div className={`relative ${className}`}>
+      {/* Background graphics layer */}
+      {graphics?.roadBackground ? (
+        <AssetLoader 
+          asset={graphics.roadBackground}
+          fallback={<div className="w-full h-full bg-gradient-to-br from-blue-50 to-purple-50" />}
+          className="absolute inset-0 object-cover"
+        />
+      ) : (
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50" />
+      )}
+      
+      {/* Timeline path graphics */}
+      {graphics?.timelinePath ? (
+        <AssetLoader 
+          asset={graphics.timelinePath}
+          fallback={<div className="absolute left-12 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-500 via-purple-500 to-green-500 rounded-full shadow-lg" />}
+          className="absolute left-12 top-0 bottom-0"
+        />
+      ) : (
+        <div className="absolute left-12 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-500 via-purple-500 to-green-500 rounded-full shadow-lg" />
+      )}
+      
+      {/* Decorative elements */}
+      {graphics?.decorativeElements?.map((element, index) => (
+        <AssetLoader 
+          key={index}
+          asset={element}
+          fallback={null}
+          className="absolute"
+          style={{
+            top: `${Math.random() * 80 + 10}%`,
+            left: `${Math.random() * 80 + 10}%`,
+          }}
+        />
+      ))}
+    </div>
+  );
 };
