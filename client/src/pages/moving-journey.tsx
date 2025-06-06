@@ -131,54 +131,109 @@ export default function MovingJourney() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-sky-200 via-sky-100 to-green-200 relative overflow-hidden">
+    <div className="min-h-screen relative overflow-hidden" style={{
+      background: 'linear-gradient(to bottom, #87ceeb 0%, #98d982 40%, #7cb342 100%)'
+    }}>
       {/* Header */}
-      <div className="absolute top-0 left-0 right-0 z-20 bg-white/90 backdrop-blur-sm border-b border-gray-200 p-4">
+      <div className="absolute top-0 left-0 right-0 z-20 p-6">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <Link href="/ai-assistant">
-            <Button variant="outline" size="sm" className="flex items-center gap-2">
+            <Button variant="outline" size="sm" className="flex items-center gap-2 bg-white/90 backdrop-blur-sm">
               <ArrowLeft className="w-4 h-4" />
               Back to AI Assistant
             </Button>
           </Link>
-          <h1 className="text-2xl font-bold text-gray-900">Your Moving Journey</h1>
+          <h1 className="text-4xl font-black text-gray-900 tracking-wide drop-shadow-lg">MOVING JOURNEY</h1>
           <div className="w-32"></div>
         </div>
       </div>
 
-      {/* Sky and Clouds */}
+      {/* Rolling Hills Background with Trees */}
       <div className="absolute inset-0">
-        {/* Clouds */}
-        <div className="absolute top-20 left-20 w-32 h-16 bg-white rounded-full opacity-80 animate-pulse"></div>
-        <div className="absolute top-32 right-40 w-24 h-12 bg-white rounded-full opacity-70 animate-pulse"></div>
-        <div className="absolute top-16 right-80 w-28 h-14 bg-white rounded-full opacity-75 animate-pulse"></div>
-      </div>
-
-      {/* Ground/Hills */}
-      <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-green-400 to-green-200">
-        <svg className="w-full h-full" viewBox="0 0 1200 200" preserveAspectRatio="none">
-          <path d="M0,200 Q300,150 600,180 T1200,160 L1200,200 Z" fill="#22c55e" opacity="0.8"/>
-          <path d="M0,200 Q200,170 400,190 T800,175 T1200,185 L1200,200 Z" fill="#16a34a" opacity="0.6"/>
+        {/* Background Hills */}
+        <svg className="absolute inset-0 w-full h-full" viewBox="0 0 1200 800" preserveAspectRatio="none">
+          <defs>
+            <radialGradient id="treeGradient" cx="50%" cy="30%">
+              <stop offset="0%" stopColor="#2d5016"/>
+              <stop offset="100%" stopColor="#1a3009"/>
+            </radialGradient>
+          </defs>
+          
+          {/* Rolling hills layers */}
+          <path d="M0,800 Q200,600 400,650 T800,620 T1200,640 L1200,800 Z" fill="#7cb342" opacity="0.9"/>
+          <path d="M0,800 Q300,580 600,610 T1000,590 T1200,605 L1200,800 Z" fill="#689f38" opacity="0.8"/>
+          <path d="M0,800 Q150,620 350,640 T700,630 T1200,650 L1200,800 Z" fill="#558b2f" opacity="0.7"/>
+          
+          {/* Trees scattered on hills */}
+          <ellipse cx="150" cy="620" rx="25" ry="40" fill="url(#treeGradient)" opacity="0.8"/>
+          <ellipse cx="320" cy="640" rx="30" ry="45" fill="url(#treeGradient)" opacity="0.7"/>
+          <ellipse cx="480" cy="610" rx="20" ry="35" fill="url(#treeGradient)" opacity="0.9"/>
+          <ellipse cx="650" cy="630" rx="35" ry="50" fill="url(#treeGradient)" opacity="0.6"/>
+          <ellipse cx="820" cy="620" rx="25" ry="40" fill="url(#treeGradient)" opacity="0.8"/>
+          <ellipse cx="950" cy="640" rx="28" ry="42" fill="url(#treeGradient)" opacity="0.7"/>
+          <ellipse cx="1100" cy="630" rx="22" ry="38" fill="url(#treeGradient)" opacity="0.9"/>
+          
+          {/* Additional tree clusters */}
+          <ellipse cx="90" cy="680" rx="15" ry="25" fill="url(#treeGradient)" opacity="0.6"/>
+          <ellipse cx="250" cy="690" rx="18" ry="30" fill="url(#treeGradient)" opacity="0.8"/>
+          <ellipse cx="420" cy="670" rx="20" ry="35" fill="url(#treeGradient)" opacity="0.7"/>
+          <ellipse cx="580" cy="685" rx="16" ry="28" fill="url(#treeGradient)" opacity="0.9"/>
+          <ellipse cx="750" cy="675" rx="22" ry="36" fill="url(#treeGradient)" opacity="0.6"/>
+          <ellipse cx="890" cy="690" rx="19" ry="32" fill="url(#treeGradient)" opacity="0.8"/>
+          <ellipse cx="1050" cy="680" rx="17" ry="29" fill="url(#treeGradient)" opacity="0.7"/>
         </svg>
       </div>
 
-      {/* Main Road */}
-      <div className="absolute inset-0 pt-24">
-        <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-          {/* Road surface */}
+      {/* Realistic Winding Highway */}
+      <div className="absolute inset-0 pt-20">
+        <svg className="w-full h-full" viewBox="0 0 1200 800" preserveAspectRatio="none">
+          <defs>
+            <pattern id="roadDashes" patternUnits="userSpaceOnUse" width="40" height="8">
+              <rect width="20" height="8" fill="#fbbf24" />
+            </pattern>
+          </defs>
+          
+          {/* Road shadow/depth */}
           <path 
-            d="M 5 50 Q 25 30 50 50 Q 75 70 95 50" 
-            stroke="#374151" 
-            strokeWidth="8" 
+            d="M 100 400 Q 300 300 500 380 Q 700 460 900 350 Q 1000 300 1100 380" 
+            stroke="#2d3748" 
+            strokeWidth="85" 
+            fill="none"
+            opacity="0.3"
+            transform="translate(5, 5)"
+          />
+          
+          {/* Main road surface */}
+          <path 
+            d="M 100 400 Q 300 300 500 380 Q 700 460 900 350 Q 1000 300 1100 380" 
+            stroke="#4a5568" 
+            strokeWidth="80" 
             fill="none"
           />
-          {/* Road centerline */}
+          
+          {/* Road edge lines */}
           <path 
-            d="M 5 50 Q 25 30 50 50 Q 75 70 95 50" 
-            stroke="#fbbf24" 
-            strokeWidth="0.5" 
+            d="M 100 400 Q 300 300 500 380 Q 700 460 900 350 Q 1000 300 1100 380" 
+            stroke="#2d3748" 
+            strokeWidth="4" 
             fill="none"
-            strokeDasharray="2,2"
+            transform="translate(0, -38)"
+          />
+          <path 
+            d="M 100 400 Q 300 300 500 380 Q 700 460 900 350 Q 1000 300 1100 380" 
+            stroke="#2d3748" 
+            strokeWidth="4" 
+            fill="none"
+            transform="translate(0, 38)"
+          />
+          
+          {/* Yellow center dashed line */}
+          <path 
+            d="M 100 400 Q 300 300 500 380 Q 700 460 900 350 Q 1000 300 1100 380" 
+            stroke="url(#roadDashes)" 
+            strokeWidth="6" 
+            fill="none"
+            strokeDasharray="30,20"
           />
         </svg>
       </div>
