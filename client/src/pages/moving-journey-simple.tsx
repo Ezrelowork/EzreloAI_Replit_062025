@@ -344,10 +344,7 @@ export default function MovingJourney() {
                   </div>
                 )}
                 
-                {/* Current Step Indicator */}
-                {isCurrentStep && (
-                  <div className="absolute inset-0 rounded-lg ring-4 ring-blue-400 ring-opacity-50 animate-pulse"></div>
-                )}
+
                 
                 {/* Hover Card */}
                 <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
