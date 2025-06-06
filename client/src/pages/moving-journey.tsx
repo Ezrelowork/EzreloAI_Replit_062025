@@ -283,37 +283,10 @@ export default function MovingJourney() {
           <div className="absolute inset-0 -z-10 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-3xl"></div>
         )}
 
-        {/* Custom Timeline Path or Default */}
-        {graphics.timelinePath ? (
-          <div className="absolute left-12 top-0 bottom-0 w-8">
-            <img 
-              src={graphics.timelinePath.src}
-              alt={graphics.timelinePath.alt}
-              className="w-full h-full object-cover"
-            />
-          </div>
-        ) : (
+        {/* Hide default timeline when using custom background */}
+        {!graphics.roadBackground && (
           <div className="absolute left-12 top-0 bottom-0 w-1 bg-gradient-to-b from-blue-500 via-purple-500 to-green-500 rounded-full shadow-lg"></div>
         )}
-
-        {/* Decorative Elements */}
-        {graphics.decorativeElements?.map((element, index) => (
-          <div
-            key={index}
-            className="absolute pointer-events-none"
-            style={{
-              left: `${10 + (index * 15) % 80}%`,
-              top: `${20 + (index * 25) % 60}%`,
-              transform: 'translate(-50%, -50%)'
-            }}
-          >
-            <img 
-              src={element.src}
-              alt={element.alt}
-              className="w-16 h-16 object-contain opacity-60"
-            />
-          </div>
-        ))}
 
         {/* Journey Steps */}
         {journeyData.map((step, index) => {

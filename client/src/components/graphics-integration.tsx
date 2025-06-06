@@ -14,7 +14,7 @@ export class GraphicsManager {
     return GraphicsManager.instance;
   }
 
-  // Load custom graphics from attached assets with @assets prefix
+  // Load static background with road and separate road signs
   async loadCustomGraphics(assetFiles: string[]): Promise<void> {
     const newGraphics: JourneyGraphics = {};
 
@@ -22,62 +22,46 @@ export class GraphicsManager {
     for (const fileName of assetFiles) {
       const assetPath = `@assets/${fileName}`;
       
-      // Background graphics
-      if (fileName.includes('background') || fileName.includes('landscape')) {
+      // Main background with road
+      if (fileName.toLowerCase().includes('background') || fileName.toLowerCase().includes('road')) {
         newGraphics.roadBackground = {
           src: assetPath,
-          alt: 'Journey Background',
-          width: 1200,
-          height: 800
-        };
-      }
-      
-      // Timeline/road path
-      if (fileName.includes('road') || fileName.includes('path') || fileName.includes('timeline')) {
-        newGraphics.timelinePath = {
-          src: assetPath,
-          alt: 'Journey Path',
+          alt: 'Highway Journey Background',
           width: 1200,
           height: 800
         };
       }
 
-      // Task category icons
-      if (fileName.includes('icon-') || fileName.includes('task-')) {
+      // Individual road signs (sign1, sign2, sign3, sign4, sign5)
+      if (fileName.toLowerCase().includes('sign')) {
         if (!newGraphics.taskIcons) newGraphics.taskIcons = {};
         
-        let taskType = 'default';
-        if (fileName.includes('moving') || fileName.includes('truck')) taskType = 'moving';
-        if (fileName.includes('utility') || fileName.includes('electric')) taskType = 'utilities';
-        if (fileName.includes('pack') || fileName.includes('box')) taskType = 'packing';
-        if (fileName.includes('home') || fileName.includes('house')) taskType = 'housing';
-        if (fileName.includes('medical') || fileName.includes('health')) taskType = 'medical';
-        if (fileName.includes('school') || fileName.includes('education')) taskType = 'education';
-        if (fileName.includes('bank') || fileName.includes('finance')) taskType = 'financial';
+        // Extract sign number or type from filename
+        let signKey = 'default';
+        if (fileName.includes('sign1') || fileName.includes('1')) signKey = 'sign1';
+        if (fileName.includes('sign2') || fileName.includes('2')) signKey = 'sign2';
+        if (fileName.includes('sign3') || fileName.includes('3')) signKey = 'sign3';
+        if (fileName.includes('sign4') || fileName.includes('4')) signKey = 'sign4';
+        if (fileName.includes('sign5') || fileName.includes('5')) signKey = 'sign5';
         
-        newGraphics.taskIcons[taskType] = {
-          src: assetPath,
-          alt: `${taskType} task icon`,
-          width: 64,
-          height: 64
-        };
-      }
-
-      // Decorative elements (trees, signs, landmarks)
-      if (fileName.includes('tree') || fileName.includes('sign') || fileName.includes('landmark') || fileName.includes('decoration')) {
-        if (!newGraphics.decorativeElements) newGraphics.decorativeElements = [];
+        // Also check for task type names
+        if (fileName.includes('moving') || fileName.includes('truck')) signKey = 'moving';
+        if (fileName.includes('utility') || fileName.includes('electric')) signKey = 'utilities';
+        if (fileName.includes('pack') || fileName.includes('box')) signKey = 'packing';
+        if (fileName.includes('home') || fileName.includes('house')) signKey = 'housing';
+        if (fileName.includes('medical') || fileName.includes('health')) signKey = 'medical';
         
-        newGraphics.decorativeElements.push({
+        newGraphics.taskIcons[signKey] = {
           src: assetPath,
-          alt: 'Decorative element',
+          alt: `Highway Sign ${signKey}`,
           width: 120,
-          height: 120
-        });
+          height: 80
+        };
       }
     }
 
     this.updateGraphics(newGraphics);
-    console.log('Custom graphics loaded:', newGraphics);
+    console.log('Static highway graphics loaded:', newGraphics);
   }
 
   // Update graphics and notify listeners
