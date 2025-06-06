@@ -335,22 +335,20 @@ CRITICAL: Include an actionPlan array that routes users to these specific pages 
 
 Create action plan items that guide users through their relocation journey sequentially. Do NOT include specific provider recommendations in the main recommendations - keep those high-level and strategic.
 
-Provide comprehensive relocation plan in JSON format:
+Provide strategic relocation overview in JSON format:
 {
-  "summary": "Brief overview and key considerations",
-  "recommendations": [
+  "summary": "Brief overview and key considerations for this specific move",
+  "timeline": [
     {
-      "category": "Category name",
-      "title": "Recommendation title", 
-      "description": "Detailed description",
-      "reasoning": "Why this recommendation makes sense",
-      "priority": "high|medium|low",
-      "estimatedCost": "Cost range",
-      "timeframe": "When to handle this",
-
-      "nextSteps": ["Step 1", "Step 2"]
+      "week": "8-10 weeks before",
+      "tasks": ["Research new area", "Create moving budget", "Start decluttering"]
+    },
+    {
+      "week": "6-8 weeks before", 
+      "tasks": ["Get moving quotes", "Research schools/services", "Start utility transfers"]
     }
   ],
+  "estimatedTotalCost": "Total budget range for the entire move",
   "actionPlan": [
     {
       "title": "Get Moving Quotes",
