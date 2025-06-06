@@ -332,6 +332,14 @@ Always provide specific, actionable recommendations with real provider informati
 - Realistic cost estimates
 - Detailed timelines and next steps
 
+CRITICAL: Include an actionPlan array that routes users to these specific pages based on their needs:
+- "/dashboard" - For finding moving companies, storage, and professional services
+- "/utilities" - For setting up internet, electric, gas, water, and other utilities
+- "/moving-checklist" - For step-by-step moving tasks and timeline management
+- "/ai-assistant" - For additional AI guidance and questions
+
+Create action plan items that guide users through their relocation journey sequentially.
+
 Provide comprehensive relocation plan in JSON format:
 {
   "summary": "Brief overview and key considerations",
@@ -355,6 +363,40 @@ Provide comprehensive relocation plan in JSON format:
         }
       ],
       "nextSteps": ["Step 1", "Step 2"]
+    }
+  ],
+  "actionPlan": [
+    {
+      "title": "Get Moving Quotes",
+      "description": "Find and compare local moving companies for your relocation",
+      "route": "/dashboard",
+      "priority": "high",
+      "timeframe": "6-8 weeks before",
+      "status": "pending"
+    },
+    {
+      "title": "Set Up Utilities",
+      "description": "Transfer or establish internet, electric, gas, and water services",
+      "route": "/utilities",
+      "priority": "high", 
+      "timeframe": "4-6 weeks before",
+      "status": "pending"
+    },
+    {
+      "title": "Complete Moving Tasks",
+      "description": "Follow step-by-step checklist for packing and preparation",
+      "route": "/moving-checklist",
+      "priority": "medium",
+      "timeframe": "2-4 weeks before",
+      "status": "pending"
+    },
+    {
+      "title": "Get Additional AI Help",
+      "description": "Ask specific questions about your destination area",
+      "route": "/ai-assistant",
+      "priority": "low",
+      "timeframe": "Ongoing",
+      "status": "pending"
     }
   ],
   "timeline": [
@@ -399,6 +441,7 @@ Please provide a comprehensive relocation plan with specific provider recommenda
       const structuredResponse = {
         summary: aiResponse.summary || "AI analysis complete for your relocation plan.",
         recommendations: aiResponse.recommendations || [],
+        actionPlan: aiResponse.actionPlan || [],
         timeline: aiResponse.timeline || [],
         estimatedTotalCost: aiResponse.estimatedTotalCost || "Varies by services selected"
       };

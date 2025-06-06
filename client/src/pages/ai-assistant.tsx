@@ -65,6 +65,14 @@ interface AIResponse {
     tasks: string[];
   }>;
   estimatedTotalCost: string;
+  actionPlan?: Array<{
+    title: string;
+    description: string;
+    route: string;
+    priority: "high" | "medium" | "low";
+    timeframe: string;
+    status: "pending" | "in_progress" | "completed";
+  }>;
 }
 
 export default function AIAssistant() {
@@ -169,7 +177,7 @@ export default function AIAssistant() {
             </div>
             <div>
               <h1 className="text-3xl font-bold text-gray-900">AI Relocation Concierge</h1>
-              <p className="text-gray-600">Your personalized moving assistant powered by AI</p>
+              <p className="text-gray-600">Create your personalized moving plan, then execute it step-by-step</p>
             </div>
           </div>
           
@@ -198,7 +206,7 @@ export default function AIAssistant() {
                 Tell Me About Your Move
               </CardTitle>
               <CardDescription>
-                Share your relocation details and I'll create a personalized plan with AI-powered recommendations
+                I'll analyze your move and create a custom action plan that guides you through our specialized tools for movers, utilities, and checklists
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -495,6 +503,59 @@ export default function AIAssistant() {
                 ))}
               </div>
             </div>
+
+            {/* Personalized Action Plan */}
+            {aiResponse.actionPlan && aiResponse.actionPlan.length > 0 && (
+              <Card className="border-blue-200">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Target className="w-5 h-5 text-blue-600" />
+                    Your Personalized Action Plan
+                  </CardTitle>
+                  <CardDescription>
+                    AI-generated steps tailored to your relocation from {relocationDetails.fromLocation} to {relocationDetails.toLocation}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid gap-4">
+                    {aiResponse.actionPlan.map((action, index) => (
+                      <div key={index} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex-1">
+                            <h4 className="font-medium text-lg flex items-center gap-2">
+                              {action.title}
+                              <Badge variant={action.priority === "high" ? "destructive" : action.priority === "medium" ? "default" : "secondary"}>
+                                {action.priority} priority
+                              </Badge>
+                            </h4>
+                            <p className="text-sm text-gray-600 mt-1">{action.description}</p>
+                          </div>
+                          <Badge variant="outline" className="ml-4">
+                            {action.timeframe}
+                          </Badge>
+                        </div>
+                        
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-1 text-sm text-gray-500">
+                            <Clock className="w-4 h-4" />
+                            <span>Status: {action.status.replace('_', ' ')}</span>
+                          </div>
+                          
+                          <Button 
+                            size="sm"
+                            onClick={() => window.location.href = action.route}
+                            className="flex items-center gap-1"
+                          >
+                            Start Task
+                            <ArrowRight className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Timeline */}
             {aiResponse.timeline && aiResponse.timeline.length > 0 && (
