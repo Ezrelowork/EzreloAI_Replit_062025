@@ -199,7 +199,7 @@ export default function Dashboard() {
           icon: Truck,
           status: movingCompanies.length > 0 ? "completed" : "not_started",
           urgency: "high",
-          route: "#moving-services",
+          route: "#",
           estimatedTime: "30-45 min"
         },
         {
