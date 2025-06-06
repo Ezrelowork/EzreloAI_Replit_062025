@@ -78,7 +78,7 @@ export default function RelocationHub() {
                 1
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">Pre-Move Planning</h3>
-              <p className="text-gray-600 mb-3">Essential preparations 8-4 weeks before your move</p>
+              <p className="text-gray-600 mb-3">Essential preparations for your move</p>
               <div className="text-sm text-blue-600 font-medium">8-4 weeks before</div>
               <div className="mt-3">
                 <Progress value={0} className="w-full h-2" />
@@ -90,7 +90,7 @@ export default function RelocationHub() {
                 2
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">Essential Services Setup</h3>
-              <p className="text-gray-600 mb-3">Critical utilities and services for your new home</p>
+              <p className="text-gray-600 mb-3">Set up utilities and essential services</p>
               <div className="text-sm text-blue-600 font-medium">2-4 weeks before</div>
               <div className="mt-3">
                 <Progress value={0} className="w-full h-2" />
