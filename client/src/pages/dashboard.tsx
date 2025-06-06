@@ -320,9 +320,9 @@ export default function Dashboard() {
   // If move setup is not complete, show the address setup form
   if (!moveSetupComplete) {
     return (
-      <div className="min-h-screen bg-gray-50 p-6">
+      <div className="min-h-screen bg-gray-50 py-8 px-6">
         <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-8">
+          <div className="text-center mb-8 pt-4">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Start Your Move</h1>
             <p className="text-gray-600">Let's organize your relocation by setting up your move details</p>
           </div>
