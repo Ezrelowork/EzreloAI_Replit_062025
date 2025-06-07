@@ -276,7 +276,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete }) => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
       {/* Top Notification */}
       {showNotification && (
-        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 pointer-events-none">
+        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 pointer-events-none">
           <div className="flex items-center gap-3 text-center">
             <CheckCircle className="w-6 h-6 text-green-600" />
             <p className="text-lg font-semibold text-gray-900">{notificationMessage}</p>
