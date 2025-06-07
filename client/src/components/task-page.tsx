@@ -94,6 +94,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
   const [selectedFont, setSelectedFont] = useState('font-inter');
   const [selectedMover, setSelectedMover] = useState<MovingCompany | null>(null);
   const [movingProject, setMovingProject] = useState<any>(null);
+  const [expandedReviews, setExpandedReviews] = useState<string[]>([]);
   const [showQuestionnaireForm, setShowQuestionnaireForm] = useState(false);
   const [formProgress, setFormProgress] = useState(0);
   const [isSharing, setIsSharing] = useState(false);

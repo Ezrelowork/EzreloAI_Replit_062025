@@ -16,6 +16,44 @@ function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
   return R * c;
 }
 
+// Google Places API functions for live reviews
+async function searchGooglePlaces(companyName: string, location?: string): Promise<any> {
+  const baseUrl = 'https://maps.googleapis.com/maps/api/place/textsearch/json';
+  const query = `${companyName} moving company ${location || ''}`.trim();
+  const params = new URLSearchParams({
+    query,
+    key: process.env.GOOGLE_API_KEY!,
+    type: 'moving_company'
+  });
+
+  try {
+    const response = await fetch(`${baseUrl}?${params}`);
+    const data = await response.json();
+    return data.results?.[0] || null;
+  } catch (error) {
+    console.error('Google Places search error:', error);
+    return null;
+  }
+}
+
+async function getPlaceDetails(placeId: string): Promise<any> {
+  const baseUrl = 'https://maps.googleapis.com/maps/api/place/details/json';
+  const params = new URLSearchParams({
+    place_id: placeId,
+    key: process.env.GOOGLE_API_KEY!,
+    fields: 'name,rating,reviews,formatted_phone_number,website,formatted_address,business_status,opening_hours,price_level,user_ratings_total'
+  });
+
+  try {
+    const response = await fetch(`${baseUrl}?${params}`);
+    const data = await response.json();
+    return data.result || null;
+  } catch (error) {
+    console.error('Google Places details error:', error);
+    return null;
+  }
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Service providers endpoint using ChatGPT
   app.post("/api/service-providers", async (req, res) => {
@@ -885,6 +923,67 @@ Please provide a comprehensive strategic relocation plan focusing on planning gu
     } catch (error) {
       console.error("Error sharing with movers:", error);
       res.status(500).json({ error: "Failed to share with movers" });
+    }
+  });
+
+  // Google Reviews endpoint
+  app.get("/api/google-reviews/:companyName", async (req, res) => {
+    try {
+      const { companyName } = req.params;
+      const { location } = req.query;
+      
+      if (!process.env.GOOGLE_API_KEY) {
+        return res.status(503).json({ error: "Google API service temporarily unavailable" });
+      }
+
+      // Search for the company in Google Places
+      const place = await searchGooglePlaces(companyName, location as string);
+      
+      if (!place || !place.place_id) {
+        return res.json({ 
+          reviews: [], 
+          rating: null, 
+          totalReviews: 0,
+          message: "No Google listing found for this company" 
+        });
+      }
+
+      // Get detailed place information including reviews
+      const details = await getPlaceDetails(place.place_id);
+      
+      if (!details) {
+        return res.json({ 
+          reviews: [], 
+          rating: null, 
+          totalReviews: 0,
+          message: "Unable to fetch company details" 
+        });
+      }
+
+      const reviews = details.reviews || [];
+      const processedReviews = reviews.map((review: any) => ({
+        author: review.author_name,
+        rating: review.rating,
+        text: review.text,
+        time: review.time,
+        relativeTime: review.relative_time_description,
+        profilePhoto: review.profile_photo_url
+      }));
+
+      res.json({
+        reviews: processedReviews,
+        rating: details.rating,
+        totalReviews: details.user_ratings_total || 0,
+        website: details.website,
+        phone: details.formatted_phone_number,
+        address: details.formatted_address,
+        businessStatus: details.business_status,
+        priceLevel: details.price_level
+      });
+
+    } catch (error) {
+      console.error("Error fetching Google reviews:", error);
+      res.status(500).json({ error: "Failed to fetch reviews" });
     }
   });
 
