@@ -473,33 +473,25 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
           <div className="w-full max-w-[40%]">
             <div className="space-y-4">
               
-              {/* Moving Timeline */}
+              {/* Pro Tips - Moved to top */}
               <div className="bg-white rounded-lg shadow-md border p-4">
                 <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
-                  <div className="w-1 h-6 bg-orange-500 rounded-full"></div>
-                  Moving Timeline
+                  <div className="w-1 h-6 bg-blue-500 rounded-full"></div>
+                  Pro Tips
                 </h3>
                 <div className="space-y-3">
-                  {[
-                    { weeks: '8-10 weeks', task: 'Research & book movers', status: 'current' },
-                    { weeks: '6-8 weeks', task: 'Order moving supplies', status: 'pending' },
-                    { weeks: '4-6 weeks', task: 'Start decluttering', status: 'pending' },
-                    { weeks: '2-4 weeks', task: 'Confirm moving details', status: 'pending' },
-                    { weeks: '1-2 weeks', task: 'Pack non-essentials', status: 'pending' },
-                    { weeks: 'Moving week', task: 'Pack essentials & move', status: 'pending' }
-                  ].map((item, index) => (
-                    <div key={index} className={`flex items-center gap-3 p-2 rounded ${
-                      item.status === 'current' ? 'bg-orange-50 border border-orange-200' : 'bg-gray-50'
-                    }`}>
-                      <div className={`w-2 h-2 rounded-full ${
-                        item.status === 'current' ? 'bg-orange-500' : 'bg-gray-300'
-                      }`}></div>
-                      <div className="flex-1">
-                        <div className="text-sm font-medium text-gray-900">{item.task}</div>
-                        <div className="text-xs text-gray-600">{item.weeks} before</div>
-                      </div>
-                    </div>
-                  ))}
+                  <div className="bg-blue-50 p-3 rounded">
+                    <div className="text-sm font-medium text-blue-900">Best Booking Time</div>
+                    <div className="text-xs text-blue-700">Book 8+ weeks ahead for summer moves, 4+ weeks for off-season</div>
+                  </div>
+                  <div className="bg-yellow-50 p-3 rounded">
+                    <div className="text-sm font-medium text-yellow-900">Save Money</div>
+                    <div className="text-xs text-yellow-700">Move mid-month, mid-week, and avoid summer peak season</div>
+                  </div>
+                  <div className="bg-green-50 p-3 rounded">
+                    <div className="text-sm font-medium text-green-900">Red Flags</div>
+                    <div className="text-xs text-green-700">Avoid companies requiring large deposits or door-to-door sales</div>
+                  </div>
                 </div>
               </div>
 
@@ -558,27 +550,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                 </div>
               </div>
 
-              {/* Moving Tips */}
-              <div className="bg-white rounded-lg shadow-md border p-4">
-                <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
-                  <div className="w-1 h-6 bg-blue-500 rounded-full"></div>
-                  Pro Tips
-                </h3>
-                <div className="space-y-3">
-                  <div className="bg-blue-50 p-3 rounded">
-                    <div className="text-sm font-medium text-blue-900">Best Booking Time</div>
-                    <div className="text-xs text-blue-700">Book 8+ weeks ahead for summer moves, 4+ weeks for off-season</div>
-                  </div>
-                  <div className="bg-yellow-50 p-3 rounded">
-                    <div className="text-sm font-medium text-yellow-900">Save Money</div>
-                    <div className="text-xs text-yellow-700">Move mid-month, mid-week, and avoid summer peak season</div>
-                  </div>
-                  <div className="bg-green-50 p-3 rounded">
-                    <div className="text-sm font-medium text-green-900">Red Flags</div>
-                    <div className="text-xs text-green-700">Avoid companies requiring large deposits or door-to-door sales</div>
-                  </div>
-                </div>
-              </div>
+
 
             </div>
           </div>
