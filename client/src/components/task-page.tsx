@@ -103,7 +103,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
     squareFootage: '',
     currentFloors: '',
     destinationFloors: '',
-    majorItems: '',
+    majorItems: {} as Record<string, number>,
     packingServices: '',
     furnitureDisassembly: '',
     fragileItems: '',
@@ -455,7 +455,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
       { label: 'Square Footage:', value: questionnaireData.squareFootage },
       { label: 'Current Location Floors:', value: questionnaireData.currentFloors },
       { label: 'Destination Floors:', value: questionnaireData.destinationFloors },
-      { label: 'Major Items:', value: questionnaireData.majorItems },
+      { label: 'Major Items:', value: Object.entries(questionnaireData.majorItems).map(([item, qty]) => `${item} (${qty})`).join(', ') || 'None specified' },
       { label: 'Packing Services:', value: questionnaireData.packingServices },
       { label: 'Furniture Disassembly:', value: questionnaireData.furnitureDisassembly },
       { label: 'Fragile Items:', value: questionnaireData.fragileItems },
@@ -539,7 +539,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
             squareFootage: '',
             currentFloors: '',
             destinationFloors: '',
-            majorItems: '',
+            majorItems: {},
             packingServices: '',
             furnitureDisassembly: '',
             fragileItems: '',
@@ -694,14 +694,65 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                 </div>
 
                 <div>
-                  <Label htmlFor="majorItems">Major Items Being Moved</Label>
-                  <Textarea
-                    id="majorItems"
-                    value={questionnaireData.majorItems}
-                    onChange={(e) => setQuestionnaireData({...questionnaireData, majorItems: e.target.value})}
-                    placeholder="List furniture, appliances, piano, safe, etc."
-                    rows={3}
-                  />
+                  <Label>Major Items Being Moved</Label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2 p-4 border rounded-lg bg-gray-50 max-h-80 overflow-y-auto">
+                    {[
+                      // Living Room
+                      { category: 'Living Room', items: ['Sofa/Couch', 'Coffee Table', 'End Tables', 'TV Stand', 'Entertainment Center', 'Recliner', 'Bookshelf', 'Armchair'] },
+                      // Bedroom
+                      { category: 'Bedroom', items: ['Queen Bed', 'King Bed', 'Twin Bed', 'Dresser', 'Nightstand', 'Wardrobe', 'Mattress'] },
+                      // Dining Room
+                      { category: 'Dining Room', items: ['Dining Table', 'Dining Chairs', 'China Cabinet', 'Bar Stools'] },
+                      // Kitchen
+                      { category: 'Kitchen', items: ['Refrigerator', 'Dishwasher', 'Microwave', 'Washer', 'Dryer'] },
+                      // Electronics
+                      { category: 'Electronics', items: ['Large TV (55"+)', 'Medium TV (32-54")', 'Computer/Desk', 'Piano', 'Exercise Equipment'] },
+                      // Storage & Misc
+                      { category: 'Storage & Misc', items: ['Filing Cabinet', 'Safe', 'Tool Chest', 'Outdoor Furniture', 'Lawn Mower', 'Bicycles'] }
+                    ].map((category) => (
+                      <div key={category.category} className="space-y-2">
+                        <h4 className="font-semibold text-sm text-gray-800 border-b pb-1">{category.category}</h4>
+                        {category.items.map((item) => (
+                          <div key={item} className="flex items-center justify-between gap-2">
+                            <label className="flex items-center gap-2 text-sm flex-1">
+                              <input
+                                type="checkbox"
+                                checked={(questionnaireData.majorItems[item] || 0) > 0}
+                                onChange={(e) => {
+                                  const newItems = { ...questionnaireData.majorItems };
+                                  if (e.target.checked) {
+                                    newItems[item] = 1;
+                                  } else {
+                                    delete newItems[item];
+                                  }
+                                  setQuestionnaireData({...questionnaireData, majorItems: newItems});
+                                }}
+                                className="w-4 h-4"
+                              />
+                              <span className="text-gray-700">{item}</span>
+                            </label>
+                            {(questionnaireData.majorItems[item] || 0) > 0 && (
+                              <input
+                                type="number"
+                                min="1"
+                                max="20"
+                                value={questionnaireData.majorItems[item] || 1}
+                                onChange={(e) => {
+                                  const quantity = parseInt(e.target.value) || 1;
+                                  setQuestionnaireData({
+                                    ...questionnaireData, 
+                                    majorItems: { ...questionnaireData.majorItems, [item]: quantity }
+                                  });
+                                }}
+                                className="w-16 px-2 py-1 text-sm border rounded"
+                                placeholder="1"
+                              />
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
