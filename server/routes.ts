@@ -796,11 +796,26 @@ Please provide a comprehensive strategic relocation plan focusing on planning gu
       const project = await storage.getMovingProject(parseInt(projectId));
       
       if (project && project.questionnaireData) {
-        const questionnaire = JSON.parse(project.questionnaireData as string);
-        res.json({
-          ...questionnaire,
-          updatedAt: project.lastQuestionnaireUpdate || project.updatedAt
-        });
+        let questionnaire;
+        try {
+          console.log('Raw questionnaire data type:', typeof project.questionnaireData);
+          console.log('Raw questionnaire data:', project.questionnaireData);
+          
+          // Handle both string and object types
+          if (typeof project.questionnaireData === 'string') {
+            questionnaire = JSON.parse(project.questionnaireData);
+          } else {
+            questionnaire = project.questionnaireData;
+          }
+          res.json({
+            ...questionnaire,
+            updatedAt: project.lastQuestionnaireUpdate || project.updatedAt
+          });
+        } catch (error) {
+          console.error('Error parsing questionnaire data:', error);
+          console.error('Data that failed to parse:', project.questionnaireData);
+          res.json(null);
+        }
       } else {
         res.json(null);
       }
