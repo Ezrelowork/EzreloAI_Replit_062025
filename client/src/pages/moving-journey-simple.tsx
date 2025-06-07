@@ -311,6 +311,11 @@ export default function MovingJourney() {
 
           const customSign = signsByIndex[index] || customGraphics.taskIcons['moving'];
           
+          // Debug logging for fifth sign
+          if (index === 4) {
+            console.log('Fifth sign data:', { index, customSign, step: step.title });
+          }
+          
           // Position first four signs with different graphics
           let position;
           if (index === 0) {
