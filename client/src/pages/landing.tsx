@@ -13,7 +13,7 @@ export default function Landing() {
             <span className="block text-blue-600">Reimagined</span>
           </h1>
           
-          <p className="text-xl md:text-2xl text-gray-600 mb-10 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
             Transform your relocation from overwhelming chaos into a guided, visual journey. 
             Our AI creates your personalized moving plan and shows your progress as an interactive highway experience.
           </p>
