@@ -6,17 +6,8 @@ export default function Landing() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
       {/* Hero Section */}
-      <section className="relative px-6 py-20 overflow-hidden">
-        {/* Highway Background */}
-        <div 
-          className="absolute inset-0 opacity-15 bg-cover bg-center bg-no-repeat"
-          style={{
-            backgroundImage: `url('/attached_assets/highway-background.png')`,
-            filter: 'blur(8px)'
-          }}
-        />
-        
-        <div className="relative max-w-6xl mx-auto text-center">
+      <section className="px-6 py-20">
+        <div className="max-w-6xl mx-auto text-center">
           <h1 className="text-5xl md:text-7xl font-bold text-gray-900 mb-6">
             Your Moving Journey,
             <span className="block text-blue-600">Reimagined</span>
@@ -129,8 +120,16 @@ export default function Landing() {
       </section>
 
       {/* Call to Action */}
-      <section className="px-6 py-20 bg-blue-600">
-        <div className="max-w-4xl mx-auto text-center">
+      <section className="relative px-6 py-20 bg-blue-600 overflow-hidden">
+        {/* Highway Background */}
+        <div 
+          className="absolute inset-0 opacity-30 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: `url('/attached_assets/highway-background.png')`,
+            filter: 'blur(6px)'
+          }}
+        />
+        <div className="relative max-w-4xl mx-auto text-center">
           <h2 className="text-4xl font-bold text-white mb-6">
             Ready to Transform Your Move?
           </h2>
