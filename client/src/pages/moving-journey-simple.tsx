@@ -311,12 +311,14 @@ export default function MovingJourney() {
 
           const customSign = signsByIndex[index] || customGraphics.taskIcons['moving'];
           
-          // Position first two signs with different graphics
+          // Position first three signs with different graphics
           let position;
           if (index === 0) {
             position = { left: '15%', top: '75%' };    // First sign - moving graphic
           } else if (index === 1) {
             position = { left: '70%', top: '60%' };    // Second sign - utilities graphic
+          } else if (index === 2) {
+            position = { left: '45%', top: '25%' };    // Third sign - address changes graphic
           } else {
             // Hide remaining signs for now
             return null;
