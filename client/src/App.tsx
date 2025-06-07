@@ -16,6 +16,7 @@ import MovingJourneySimple from "@/pages/moving-journey-simple";
 import MovingCompanies from "@/pages/moving-companies";
 import LogoShowcase from "@/pages/logo-showcase";
 import NotFound from "@/pages/not-found";
+import { TaskPage } from "@/components/task-page";
 
 function Navigation() {
   const [location] = useLocation();
@@ -53,6 +54,17 @@ function Router() {
           <Route path="/moving-checklist" component={MovingChecklist} />
           <Route path="/analytics" component={Analytics} />
           <Route path="/logo-showcase" component={LogoShowcase} />
+          <Route path="/task/moving" component={() => {
+            const mockTask = {
+              id: "moving-companies",
+              title: "Research Moving Companies",
+              description: "Find and compare moving companies for your relocation. Get quotes, check reviews, and select the best option for your needs.",
+              priority: "high" as const,
+              week: "6-8 weeks before",
+              category: "Moving Services"
+            };
+            return <TaskPage task={mockTask} onComplete={() => {}} />;
+          }} />
           <Route component={NotFound} />
         </Switch>
       </PageTransition>
