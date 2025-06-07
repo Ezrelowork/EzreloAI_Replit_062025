@@ -34,8 +34,7 @@ export const DynamicHighwaySign: React.FC<DynamicSignProps> = ({
 
   return (
     <div 
-      className={`relative cursor-pointer transform transition-all duration-300 hover:scale-105 ${className}`}
-      onClick={onClick}
+      className={`relative ${className}`}
     >
       {/* Custom blank sign background - 35% larger */}
       <div className="relative w-64 h-44">
@@ -43,6 +42,18 @@ export const DynamicHighwaySign: React.FC<DynamicSignProps> = ({
           src={blankSignPath} 
           alt="Highway Sign" 
           className="w-full h-full object-contain"
+        />
+        
+        {/* Clickable area overlay - positioned over actual sign */}
+        <div 
+          className="absolute cursor-pointer transform transition-all duration-300 hover:scale-105"
+          onClick={onClick}
+          style={{
+            left: '15%',
+            top: '25%', 
+            width: '70%',
+            height: '50%'
+          }}
         />
         
         {/* Dynamic text overlay */}
@@ -79,8 +90,16 @@ export const DynamicHighwaySign: React.FC<DynamicSignProps> = ({
           </div>
         )}
 
-        {/* Priority border indicator */}
-        <div className={`absolute inset-0 border-2 ${priorityBorders[priority]} rounded-lg ${completed ? 'opacity-40' : ''}`} />
+        {/* Priority border indicator - positioned over actual sign */}
+        <div 
+          className={`absolute border-2 ${priorityBorders[priority]} rounded-lg ${completed ? 'opacity-40' : ''}`}
+          style={{
+            left: '15%',
+            top: '25%', 
+            width: '70%',
+            height: '50%'
+          }}
+        />
       </div>
 
       {/* Hover tooltip with description */}
