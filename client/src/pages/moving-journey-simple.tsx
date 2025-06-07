@@ -375,8 +375,8 @@ export default function MovingJourney() {
 
 
 
-      {/* Priority Stats Box - Inside Map Lower Right */}
-      <div className="absolute bottom-4 right-4 z-30">
+      {/* Priority Stats Box - In Grass Area Lower Right */}
+      <div className="absolute bottom-8 right-8 z-30">
         <JourneyStats 
           highPriority={journeyData.filter(step => step.priority === 'high').length}
           mediumPriority={journeyData.filter(step => step.priority === 'medium').length}
