@@ -278,7 +278,7 @@ export default function MovingJourney() {
               console.error('Background image failed to load:', highwayBackground);
               e.currentTarget.style.display = 'none';
             }}
-            onLoad={() => console.log('Background image loaded successfully')}
+            onLoad={() => {}}
           />
         </div>
 
@@ -303,9 +303,9 @@ export default function MovingJourney() {
           if (index === 0) {
             position = { left: '15%', top: '75%' };    // Sign 1 - moving company (largest)
           } else if (index === 1) {
-            position = { left: '40%', top: '55%' };    // Sign 3 - address changes (cropped)
+            position = { left: '40%', top: '65%' };    // Sign 3 - address changes (cropped)
           } else if (index === 2) {
-            position = { left: '60%', top: '40%' };    // Sign 4 - transfer services (cropped)
+            position = { left: '65%', top: '35%' };    // Sign 4 - transfer services (cropped)
           } else if (index === 3) {
             position = { left: '50%', top: '20%' };    // Sign 5 - essential services (top center)
           } else {
