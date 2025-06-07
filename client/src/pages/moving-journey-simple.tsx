@@ -339,7 +339,7 @@ export default function MovingJourney() {
                 <img 
                   src={customSign.src}
                   alt={customSign.alt}
-                  className={`w-96 h-64 object-cover transition-all duration-300 ${
+                  className={`w-56 h-36 object-cover transition-all duration-300 ${
                     step.completed ? 'opacity-80 saturate-50' : 'hover:brightness-110'
                   }`}
                 />
