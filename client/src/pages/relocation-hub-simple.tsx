@@ -63,6 +63,53 @@ export default function RelocationHub() {
         </div>
       </section>
 
+      {/* Quick Actions Section */}
+      <section className="py-12 bg-white border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Start Your Journey</h2>
+            <p className="text-gray-600">Choose how you'd like to begin your relocation planning</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+            <Link href="/ai-assistant">
+              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-6 hover:border-blue-300 hover:shadow-lg transition-all duration-200 cursor-pointer group h-full">
+                <div className="flex items-center mb-4">
+                  <div className="w-12 h-12 bg-blue-600 rounded-lg flex items-center justify-center mr-4">
+                    <Zap className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold text-gray-900 group-hover:text-blue-700">AI Assistant</h3>
+                    <p className="text-sm text-gray-600">Get personalized plan</p>
+                  </div>
+                </div>
+                <p className="text-gray-600 mb-4">Tell our AI about your move and get a customized step-by-step plan with timeline, budget estimates, and priority tasks.</p>
+                <div className="flex items-center text-blue-600 font-medium group-hover:text-blue-700">
+                  Create My Plan <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </div>
+            </Link>
+            
+            <Link href="/moving-journey">
+              <div className="bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-6 hover:border-green-300 hover:shadow-lg transition-all duration-200 cursor-pointer group h-full">
+                <div className="flex items-center mb-4">
+                  <div className="w-12 h-12 bg-green-600 rounded-lg flex items-center justify-center mr-4">
+                    <MapPin className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold text-gray-900 group-hover:text-green-700">Moving Journey</h3>
+                    <p className="text-sm text-gray-600">Interactive roadmap</p>
+                  </div>
+                </div>
+                <p className="text-gray-600 mb-4">Navigate your move with our cinematic highway journey interface. Click on highway signs to access tasks, providers, and resources.</p>
+                <div className="flex items-center text-green-600 font-medium group-hover:text-green-700">
+                  Start Journey <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                </div>
+              </div>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* How It Works Section */}
       <section className="py-12 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

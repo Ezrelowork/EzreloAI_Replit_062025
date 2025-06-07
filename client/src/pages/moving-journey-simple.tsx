@@ -321,10 +321,16 @@ export default function MovingJourney() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-4">
-              <Link href="/ai-assistant">
+              <Link href="/">
                 <Button variant="ghost" size="sm" className="gap-2">
                   <ArrowLeft className="w-4 h-4" />
-                  Back to AI Assistant
+                  Back to Hub
+                </Button>
+              </Link>
+              <span className="text-gray-300">|</span>
+              <Link href="/ai-assistant">
+                <Button variant="ghost" size="sm" className="gap-2 text-blue-600 hover:text-blue-700">
+                  AI Assistant
                 </Button>
               </Link>
               <div>
