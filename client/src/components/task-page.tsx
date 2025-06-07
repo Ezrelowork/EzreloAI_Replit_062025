@@ -133,6 +133,13 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
     }
   };
 
+  // Load saved questionnaire data when available
+  useEffect(() => {
+    if (currentQuestionnaire && !showQuestionnaireForm) {
+      setQuestionnaireData(currentQuestionnaire as any);
+    }
+  }, [currentQuestionnaire, showQuestionnaireForm]);
+
   // Create or get moving project
   const createProjectMutation = useMutation({
     mutationFn: async (projectData: any) => {
@@ -550,25 +557,9 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
             refreshCurrentQuestionnaire();
           }
           
-          // Close form and reset
+          // Close form but keep data
           setShowQuestionnaireForm(false);
-          setQuestionnaireData({
-            currentAddress: '',
-            destinationAddress: '',
-            movingDate: '',
-            homeSize: '',
-            squareFootage: '',
-            currentFloors: '',
-            destinationFloors: '',
-            majorItems: {},
-            packingServices: '',
-            furnitureDisassembly: '',
-            fragileItems: '',
-            storageNeeds: '',
-            parkingAccess: '',
-            additionalNotes: '',
-            email: ''
-          });
+          // Don't reset the data - it's now saved in the project
         }
       };
       
@@ -631,6 +622,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
         }
         
         setShowQuestionnaireForm(false);
+        // Don't reset data - it's saved in the project
       }
     } catch (error) {
       toast({
