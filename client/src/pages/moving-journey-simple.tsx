@@ -305,7 +305,7 @@ export default function MovingJourney() {
           } else if (index === 1) {
             position = { left: '40%', top: '65%' };    // Sign 3 - address changes (cropped)
           } else if (index === 2) {
-            position = { left: '70%', top: '46%' };    // Sign 4 - transfer services (cropped)
+            position = { left: '70%', top: '49%' };    // Sign 4 - transfer services (cropped)
           } else if (index === 3) {
             position = { left: '50%', top: '20%' };    // Sign 5 - essential services (top center)
           } else {
