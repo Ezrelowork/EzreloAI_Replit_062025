@@ -409,29 +409,7 @@ export default function AIAssistant() {
               </Link>
             </div>
 
-            <div className="text-center mt-8">
-              <div className="w-24 h-24 mx-auto mb-4 bg-gradient-to-b from-blue-100 to-green-100 rounded-full flex items-center justify-center">
-                <ArrowRight className="w-8 h-8 text-blue-600" />
-              </div>
-              <Button 
-                variant="outline" 
-                size="lg"
-                onClick={() => {
-                  setAiResponse(null);
-                  setQuery("");
-                  setRelocationDetails({
-                    fromLocation: "",
-                    toLocation: "",
-                    moveDate: "",
-                    familySize: "",
-                    budget: "",
-                    priorities: []
-                  });
-                }}
-              >
-                Create New Plan
-              </Button>
-            </div>
+
           </div>
         )}
       </div>
