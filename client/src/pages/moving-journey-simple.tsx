@@ -353,7 +353,7 @@ export default function MovingJourney() {
                   index === 0 ? 'bottom-full left-1/2 transform -translate-x-1/2 mb-2' :
                   index === 1 ? 'bottom-full right-3/4 mb-2' :
                   index === 2 ? 'bottom-full right-0 mb-2' :
-                  'top-full left-1/2 transform -translate-x-1/2 mt-2'
+                  'top-full right-full mr-2 mt-2'
                 }`}>
                   <div className="bg-white rounded-lg shadow-xl p-3 border min-w-48 max-w-64">
                     <h4 className="font-semibold text-sm text-gray-900">{step.title}</h4>
