@@ -87,6 +87,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
   const [isAnimating, setIsAnimating] = useState(false);
   const [searchType, setSearchType] = useState<'moving' | 'utilities' | 'housing'>('moving');
   const [moveData, setMoveData] = useState({ from: '', to: '', date: '' });
+  const [selectedFont, setSelectedFont] = useState('font-source');
 
   const { toast } = useToast();
 
@@ -294,7 +295,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+    <div className={`min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 ${selectedFont}`}>
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Header Section */}
         <div className="bg-white rounded-3xl shadow-2xl p-8 mb-8 border border-gray-100">
@@ -363,6 +364,33 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
           </div>
         </div>
 
+        {/* Font Selector */}
+        <div className="mb-4">
+          <div className="bg-white rounded-lg shadow-sm border p-3">
+            <label className="text-xs font-medium text-gray-700 mb-2 block">Font Style:</label>
+            <div className="flex gap-2">
+              {[
+                { value: 'font-source', label: 'Source Sans Pro' },
+                { value: 'font-inter', label: 'Inter' },
+                { value: 'font-roboto', label: 'Roboto' },
+                { value: 'font-open', label: 'Open Sans' }
+              ].map((font) => (
+                <button
+                  key={font.value}
+                  onClick={() => setSelectedFont(font.value)}
+                  className={`px-3 py-1 rounded text-xs font-medium transition-all ${
+                    selectedFont === font.value
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+                >
+                  {font.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
         {/* Action Buttons */}
         <div className="flex gap-3 mb-6">
           <Button
@@ -423,54 +451,58 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                   <div className="space-y-4">
                     {searchType === 'moving' && movingCompanies.length > 0 && 
                       movingCompanies.map((company, index) => (
-                        <div key={index} className="border border-gray-200 rounded-xl p-6 hover:border-blue-300 hover:shadow-md transition-all">
-                          <div className="flex items-start justify-between mb-4">
+                        <div key={index} className="border border-gray-200 rounded-lg p-3 hover:border-blue-300 hover:shadow-sm transition-all">
+                          <div className="flex items-start justify-between mb-2">
                             <div className="flex-1">
-                              <h3 className="text-xl font-bold text-gray-900 mb-2">{company.provider}</h3>
-                              <div className="flex items-center gap-4 mb-3">
+                              <div className="flex items-center justify-between mb-1">
+                                <h3 className="text-sm font-bold text-gray-900">{company.provider}</h3>
+                                <span className="text-sm font-bold text-green-600">{company.estimatedCost}</span>
+                              </div>
+                              <div className="flex items-center gap-2 mb-2">
                                 <div className="flex items-center gap-1">
                                   {[...Array(5)].map((_, i) => (
                                     <Star
                                       key={i}
-                                      className={`w-4 h-4 ${
+                                      className={`w-3 h-3 ${
                                         i < company.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
                                       }`}
                                     />
                                   ))}
-                                  <span className="text-sm text-gray-600 ml-1">({company.rating})</span>
+                                  <span className="text-xs text-gray-600">({company.rating})</span>
                                 </div>
-                                <span className="text-lg font-bold text-green-600">{company.estimatedCost}</span>
+                                <span className="text-xs text-gray-500">•</span>
+                                <span className="text-xs text-gray-600">{company.phone}</span>
                               </div>
-                              <p className="text-gray-700 mb-3">{company.description}</p>
-                              <div className="flex flex-wrap gap-2 mb-4">
-                                {company.services.slice(0, 3).map((service, idx) => (
-                                  <span key={idx} className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                              <p className="text-xs text-gray-700 mb-2 line-clamp-2">{company.description}</p>
+                              <div className="flex flex-wrap gap-1 mb-2">
+                                {company.services.slice(0, 4).map((service, idx) => (
+                                  <span key={idx} className="px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs font-medium">
                                     {service}
                                   </span>
                                 ))}
                               </div>
                             </div>
                           </div>
-                          <div className="flex gap-3">
+                          <div className="flex gap-2">
                             <Button
                               onClick={() => handleReferralClick(company, 'website_visit')}
-                              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold"
+                              className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs font-medium"
                             >
-                              Visit Website
+                              Website
                             </Button>
                             <Button
                               onClick={() => window.open(`tel:${company.phone}`, '_self')}
                               variant="outline"
-                              className="border-green-500 text-green-700 hover:bg-green-50 px-6 py-2 rounded-lg font-semibold"
+                              className="border-green-500 text-green-700 hover:bg-green-50 px-3 py-1 rounded text-xs font-medium"
                             >
-                              Call {company.phone}
+                              Call
                             </Button>
                             <Button
                               onClick={() => handleReferralClick(company, 'quote_request')}
                               variant="outline"
-                              className="border-orange-500 text-orange-700 hover:bg-orange-50 px-6 py-2 rounded-lg font-semibold"
+                              className="border-orange-500 text-orange-700 hover:bg-orange-50 px-3 py-1 rounded text-xs font-medium"
                             >
-                              Get Quote
+                              Quote
                             </Button>
                           </div>
                         </div>
