@@ -50,7 +50,7 @@ export const DynamicHighwaySign: React.FC<DynamicSignProps> = ({
           onClick={onClick}
           style={{
             left: '15%',
-            top: '15%', 
+            top: '14%', 
             width: '70%',
             height: '50%'
           }}
@@ -61,7 +61,7 @@ export const DynamicHighwaySign: React.FC<DynamicSignProps> = ({
           className="absolute flex flex-col justify-center items-center p-2"
           style={{
             left: '15%',
-            top: '15%', 
+            top: '14%', 
             width: '70%',
             height: '50%'
           }}
@@ -98,16 +98,7 @@ export const DynamicHighwaySign: React.FC<DynamicSignProps> = ({
           </div>
         )}
 
-        {/* Priority border indicator - positioned over actual sign */}
-        <div 
-          className={`absolute border-2 ${priorityBorders[priority]} rounded-lg ${completed ? 'opacity-40' : ''}`}
-          style={{
-            left: '15%',
-            top: '15%', 
-            width: '70%',
-            height: '50%'
-          }}
-        />
+
       </div>
 
       {/* Hover tooltip with description */}
