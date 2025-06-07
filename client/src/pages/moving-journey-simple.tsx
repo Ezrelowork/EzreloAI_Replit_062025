@@ -346,7 +346,7 @@ export default function MovingJourney() {
                   className={`${index === 0 ? 'w-[26rem] h-[17rem]' : index === 2 ? 'w-96 h-64' : index === 3 ? 'w-96 h-64' : 'w-72 h-48'} object-contain transition-all duration-300 ${
                     step.completed ? 'opacity-80 saturate-50' : 'hover:brightness-110'
                   }`}
-                  style={index === 2 ? { clipPath: 'inset(0 0 30% 0)' } : undefined}
+                  style={index === 2 ? { clipPath: 'inset(0 0 30% 0)' } : index === 3 ? { clipPath: 'inset(0 0 20% 0)' } : undefined}
                 />
                 
                 {/* Completion Check */}
