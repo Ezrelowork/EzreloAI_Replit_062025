@@ -397,7 +397,7 @@ export default function MovingJourney() {
           } else if (index === 1) {
             position = { left: '75%', top: '65%' };    // Sign 2 - moved 35% total right to other side of road
           } else if (index === 2) {
-            position = { left: '40%', top: '34%' };    // Sign 3 - moved left 30% and up 15%
+            position = { left: '35%', top: '29%' };    // Sign 3 - moved left 35% total and up 20% total
           } else if (index === 3) {
             position = { left: '50%', top: '20%' };    // Sign 5 - essential services (top center)
           } else {
