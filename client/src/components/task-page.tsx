@@ -1116,18 +1116,20 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                     {/* Progress Fill */}
                     <div className="bg-blue-600 h-3 rounded-full transition-all duration-300" style={{ width: '25%' }}></div>
                     
-                    {/* Milestone Markers */}
-                    <div className="absolute top-0 left-1/3 w-0.5 h-3 bg-gray-400 transform -translate-x-0.5"></div>
-                    <div className="absolute top-0 left-2/3 w-0.5 h-3 bg-gray-400 transform -translate-x-0.5"></div>
+                    {/* Milestone Markers - Quarters */}
+                    <div className="absolute top-0 left-1/4 w-0.5 h-3 bg-gray-400 transform -translate-x-0.5"></div>
+                    <div className="absolute top-0 left-2/4 w-0.5 h-3 bg-gray-400 transform -translate-x-0.5"></div>
+                    <div className="absolute top-0 left-3/4 w-0.5 h-3 bg-gray-400 transform -translate-x-0.5"></div>
                   </div>
                   
                   {/* Milestone Labels */}
-                  <div className="flex justify-between text-xs text-gray-500 mt-1">
-                    <span className="flex items-center gap-1">
+                  <div className="grid grid-cols-4 gap-1 text-xs text-gray-500 mt-1">
+                    <span className="flex items-center gap-1 text-left">
                       <CheckCircle className="w-3 h-3 text-green-500" />
                       Research
                     </span>
-                    <span className="text-center">Outreach</span>
+                    <span className="text-center">Quote</span>
+                    <span className="text-center">Book</span>
                     <span className="text-right">Complete</span>
                   </div>
                 </div>
