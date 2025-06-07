@@ -256,6 +256,17 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete }) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
       <div className="max-w-7xl mx-auto">
+        {/* Back Navigation */}
+        <div className="mb-6">
+          <Button
+            onClick={() => setLocation('/moving-journey')}
+            variant="outline"
+            className="flex items-center gap-2 text-gray-600 hover:text-gray-800 border-gray-300"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Journey
+          </Button>
+        </div>
         {/* Header */}
         <div className={`${config.bgColor} ${config.borderColor} border-2 rounded-3xl p-8 mb-6`}>
           <div className="flex items-center gap-6">
@@ -551,8 +562,56 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete }) => {
 
           {/* Sidebar */}
           <div className="space-y-6">
+            {/* Quick Actions */}
+            <div className="bg-white rounded-2xl shadow-lg p-6">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">Quick Actions</h3>
+              <div className="space-y-3">
+                <Button
+                  onClick={() => window.open('tel:+18007685522', '_self')}
+                  variant="outline"
+                  className="w-full border-green-300 text-green-700 hover:bg-green-50 font-semibold py-3 rounded-xl"
+                >
+                  📞 Call Moving Hotline
+                </Button>
+                <Button
+                  onClick={() => window.open('https://www.moving.org/checklist/', '_blank')}
+                  variant="outline"
+                  className="w-full border-blue-300 text-blue-700 hover:bg-blue-50 font-semibold py-3 rounded-xl"
+                >
+                  📋 Download Checklist
+                </Button>
+                <Button
+                  onClick={() => window.open('https://www.calculator.net/moving-cost-calculator.html', '_blank')}
+                  variant="outline"
+                  className="w-full border-purple-300 text-purple-700 hover:bg-purple-50 font-semibold py-3 rounded-xl"
+                >
+                  💰 Cost Calculator
+                </Button>
+              </div>
+            </div>
 
-
+            {/* Moving Timeline */}
+            <div className="bg-gradient-to-br from-indigo-50 to-purple-50 border border-indigo-200 rounded-2xl p-6">
+              <h4 className="font-bold text-indigo-900 mb-4">Moving Timeline</h4>
+              <div className="space-y-3 text-sm">
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                  <span className="text-gray-700"><strong>8 weeks:</strong> Research & Budget</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                  <span className="text-gray-700"><strong>6 weeks:</strong> Get Quotes</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 bg-orange-500 rounded-full"></div>
+                  <span className="text-gray-700"><strong>4 weeks:</strong> Book Services</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                  <span className="text-gray-700"><strong>2 weeks:</strong> Pack & Prepare</span>
+                </div>
+              </div>
+            </div>
 
             {/* Tips */}
             <div className="bg-blue-50 border border-blue-200 rounded-2xl p-6">
