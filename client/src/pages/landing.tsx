@@ -123,10 +123,10 @@ export default function Landing() {
       <section className="relative px-6 py-20 bg-blue-600 overflow-hidden">
         {/* Highway Background */}
         <div 
-          className="absolute inset-0 opacity-30 bg-cover bg-center bg-no-repeat"
+          className="absolute inset-0 opacity-50 bg-cover bg-center bg-no-repeat"
           style={{
             backgroundImage: `url('/attached_assets/highway-background.png')`,
-            filter: 'blur(6px)'
+            filter: 'blur(4px)'
           }}
         />
         <div className="relative max-w-4xl mx-auto text-center">
