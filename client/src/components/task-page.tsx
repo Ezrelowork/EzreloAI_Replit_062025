@@ -86,7 +86,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
   const [showResults, setShowResults] = useState(false);
   const [searchType, setSearchType] = useState<'moving' | 'utilities' | 'housing'>('moving');
   const [moveData, setMoveData] = useState({ from: '', to: '', date: '' });
-  const [selectedFont, setSelectedFont] = useState('font-source');
+  const [selectedFont, setSelectedFont] = useState('font-inter');
 
   const { toast } = useToast();
 
@@ -440,9 +440,9 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                     movingCompanies.map((company, index) => (
                       <div key={index} className="border border-gray-200 rounded-lg p-3 hover:border-blue-300 hover:shadow-sm transition-all">
                         <div className="flex items-center justify-between mb-1">
-                          <h3 className="text-sm font-bold text-gray-900">{company.provider}</h3>
+                          <h3 className="text-base font-bold text-gray-900">{company.provider}</h3>
                           {company.estimatedCost && !company.estimatedCost.includes('Contact for') && (
-                            <span className="text-sm font-bold text-green-600">{company.estimatedCost}</span>
+                            <span className="text-base font-bold text-green-600">{company.estimatedCost}</span>
                           )}
                         </div>
                         <div className="flex items-center gap-2 mb-2">
@@ -455,15 +455,15 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                                 }`}
                               />
                             ))}
-                            <span className="text-xs text-gray-600">({company.rating})</span>
+                            <span className="text-sm text-gray-600">({company.rating})</span>
                           </div>
-                          <span className="text-xs text-gray-500">•</span>
-                          <span className="text-xs text-gray-600">{company.phone}</span>
+                          <span className="text-sm text-gray-500">•</span>
+                          <span className="text-sm text-gray-600">{company.phone}</span>
                         </div>
-                        <p className="text-xs text-gray-700 mb-2">{company.description}</p>
+                        <p className="text-sm text-gray-700 mb-2">{company.description}</p>
                         <div className="flex flex-wrap gap-1 mb-3">
                           {company.services.slice(0, 4).map((service, idx) => (
-                            <span key={idx} className="px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs font-medium">
+                            <span key={idx} className="px-2 py-1 bg-blue-50 text-blue-700 rounded text-sm font-medium">
                               {service}
                             </span>
                           ))}
@@ -471,14 +471,14 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                         <div className="flex gap-2">
                           <Button
                             onClick={() => handleReferralClick(company, 'website_visit')}
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs font-medium"
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm font-medium"
                           >
                             Website
                           </Button>
                           <Button
                             onClick={() => window.open(`tel:${company.phone}`, '_self')}
                             variant="outline"
-                            className="border-green-500 text-green-700 hover:bg-green-50 px-3 py-1 rounded text-xs font-medium"
+                            className="border-green-500 text-green-700 hover:bg-green-50 px-3 py-1 rounded text-sm font-medium"
                           >
                             Call
                           </Button>
