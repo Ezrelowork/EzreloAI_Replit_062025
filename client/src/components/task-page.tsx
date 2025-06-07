@@ -1332,7 +1332,12 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                               )}
                             </div>
                             <span className="text-sm text-gray-500">•</span>
-                            <span className="text-sm text-gray-600">{googleData?.phone || company.phone}</span>
+                            <a 
+                              href={`tel:${googleData?.phone || company.phone}`}
+                              className="text-sm text-blue-600 hover:text-blue-700 underline"
+                            >
+                              {googleData?.phone || company.phone}
+                            </a>
                           </div>
 
                           <p className="text-sm text-gray-700 mb-3">{company.description}</p>
@@ -1400,12 +1405,6 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                                 className="text-blue-600 hover:text-blue-700 text-sm font-medium underline"
                               >
                                 Website
-                              </button>
-                              <button
-                                onClick={() => window.open(`tel:${googleData?.phone || company.phone}`, '_self')}
-                                className="text-green-600 hover:text-green-700 text-sm font-medium underline"
-                              >
-                                Call
                               </button>
                               <button
                                 onClick={() => handleSelectMover(company)}
