@@ -678,7 +678,16 @@ Please provide a comprehensive strategic relocation plan focusing on planning gu
   // Create project task endpoint
   app.post('/api/project-task', async (req, res) => {
     try {
-      const task = await storage.createProjectTask(req.body);
+      // Map incoming fields to database schema
+      const taskData = {
+        projectId: req.body.projectId,
+        taskName: req.body.title || req.body.taskName,
+        description: req.body.description,
+        status: req.body.status || 'pending',
+        dueDate: req.body.timeframe || req.body.dueDate
+      };
+      
+      const task = await storage.createProjectTask(taskData);
       res.json(task);
     } catch (error) {
       console.error('Error creating project task:', error);
