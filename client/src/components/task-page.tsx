@@ -150,15 +150,10 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
     enabled: !!movingProject?.id,
   });
 
-  // Debug currentQuestionnaire value
-  useEffect(() => {
-    console.log('currentQuestionnaire updated:', currentQuestionnaire);
-    console.log('Has questionnaire?', !!currentQuestionnaire);
-  }, [currentQuestionnaire]);
+
 
   const refreshCurrentQuestionnaire = () => {
     if (movingProject?.id) {
-      console.log('Invalidating query for project:', movingProject.id);
       queryClient.invalidateQueries({
         queryKey: [`/api/current-questionnaire/${movingProject.id}`, movingProject.id]
       });
@@ -166,8 +161,6 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
       queryClient.refetchQueries({
         queryKey: [`/api/current-questionnaire/${movingProject.id}`, movingProject.id]
       });
-    } else {
-      console.log('No project ID available for refresh');
     }
   };
 
@@ -1255,12 +1248,6 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                   Prepare for accurate moving quotes by having these details ready when you call.
                 </p>
                 <div className="space-y-3">
-                  {/* Debug button state */}
-                  <div className="text-xs text-gray-500 p-2 bg-gray-100 rounded">
-                    Debug: currentQuestionnaire = {currentQuestionnaire ? 'EXISTS' : 'NULL'}, 
-                    projectId = {movingProject?.id || 'NO_ID'}
-                  </div>
-                  
                   {!currentQuestionnaire ? (
                     <button
                       onClick={() => setShowQuestionnaireForm(true)}
