@@ -393,7 +393,7 @@ export default function MovingJourney() {
           // Position four signs with different graphics
           let position;
           if (index === 0) {
-            position = { left: '20%', top: '75%' };    // Sign 1 - moving company (moved 5% right)
+            position = { left: '22%', top: '73%' };    // Sign 1 - moved right 7% total and up 2%
           } else if (index === 1) {
             position = { left: '75%', top: '65%' };    // Sign 2 - moved 35% total right to other side of road
           } else if (index === 2) {
