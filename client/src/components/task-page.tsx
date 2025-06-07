@@ -96,9 +96,10 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
   // Create or get moving project
   const createProjectMutation = useMutation({
     mutationFn: async (projectData: any) => {
-      return await apiRequest("POST", "/api/moving-project", projectData);
+      const response = await apiRequest("POST", "/api/moving-project", projectData);
+      return response.json();
     },
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       setMovingProject(data.project);
     }
   });
@@ -106,9 +107,10 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
   // Select mover mutation
   const selectMoverMutation = useMutation({
     mutationFn: async ({ projectId, moverData }: { projectId: number; moverData: MovingCompany }) => {
-      return await apiRequest("POST", "/api/select-mover", { projectId, moverData });
+      const response = await apiRequest("POST", "/api/select-mover", { projectId, moverData });
+      return response.json();
     },
-    onSuccess: (data) => {
+    onSuccess: (data: any) => {
       setSelectedMover(data.project.selectedMover);
       setMovingProject(data.project);
       toast({
