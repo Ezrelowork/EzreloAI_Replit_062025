@@ -544,10 +544,26 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
             description: `Your moving questionnaire has been sent to ${questionnaireData.email}`,
           });
           
-          // Archive in project if exists
-          if (movingProject?.id) {
+          // Create or get moving project and save questionnaire
+          let projectToUse = movingProject;
+          if (!projectToUse?.id) {
+            // Create a new project for this questionnaire
+            const projectResponse = await apiRequest("POST", "/api/moving-project", {
+              userId: 1, // Default user for now
+              fromAddress: questionnaireData.currentAddress || "Not specified",
+              toAddress: questionnaireData.destinationAddress || "Not specified",
+              moveDate: questionnaireData.movingDate || null,
+              projectStatus: "active"
+            });
+            if (projectResponse.ok) {
+              projectToUse = await projectResponse.json();
+              setMovingProject(projectToUse);
+            }
+          }
+          
+          if (projectToUse?.id) {
             await apiRequest("POST", "/api/archive-questionnaire", {
-              projectId: movingProject.id,
+              projectId: projectToUse.id,
               questionnaire: questionnaireData,
               pdfData: base64PDF,
               type: "email_pdf"
@@ -601,16 +617,32 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
           description: "Your move details have been sent to our top recommended movers. Expect quotes within 24 hours.",
         });
         
-        // Archive questionnaire and log the AI-powered communication
-        if (movingProject?.id) {
+        // Create or get moving project and save questionnaire
+        let projectToUse = movingProject;
+        if (!projectToUse?.id) {
+          // Create a new project for this questionnaire
+          const projectResponse = await apiRequest("POST", "/api/moving-project", {
+            userId: 1, // Default user for now
+            fromAddress: questionnaireData.currentAddress || "Not specified",
+            toAddress: questionnaireData.destinationAddress || "Not specified",
+            moveDate: questionnaireData.movingDate || null,
+            projectStatus: "active"
+          });
+          if (projectResponse.ok) {
+            projectToUse = await projectResponse.json();
+            setMovingProject(projectToUse);
+          }
+        }
+        
+        if (projectToUse?.id) {
           await apiRequest("POST", "/api/archive-questionnaire", {
-            projectId: movingProject.id,
+            projectId: projectToUse.id,
             questionnaire: questionnaireData,
             type: "ai_outreach"
           });
           
           await apiRequest("POST", "/api/communication", {
-            projectId: movingProject.id,
+            projectId: projectToUse.id,
             communicationType: "ai_outreach",
             subject: "AI-Powered Mover Outreach Initiated",
             notes: `Ezrelo AI automatically shared comprehensive move details with ${movingCompanies.slice(0, 3).length} premium movers. Includes detailed inventory, preferences, and timeline.`,
