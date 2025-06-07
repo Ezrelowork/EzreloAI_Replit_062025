@@ -122,34 +122,26 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
 
   const { toast } = useToast();
 
-  // Custom hook to fetch Google reviews for a company
-  const useGoogleReviews = (companyName: string, location?: string) => {
-    return useQuery({
-      queryKey: ['google-reviews', companyName, location],
-      queryFn: async () => {
-        if (!companyName) return null;
-        const response = await apiRequest('GET', `/api/google-reviews/${encodeURIComponent(companyName)}?location=${encodeURIComponent(location || '')}`);
-        return response.json();
-      },
-      enabled: !!companyName,
-      staleTime: 1000 * 60 * 30, // Cache for 30 minutes
-    });
-  };
+  // Google reviews data state
+  const [googleReviewsData, setGoogleReviewsData] = useState<{[key: string]: any}>({});
+  const [loadingReviews, setLoadingReviews] = useState<{[key: string]: boolean}>({});
 
-  // Fetch Google reviews for all companies
-  const companyNames = movingCompanies.map(company => company.provider);
-  const reviewsQueries = useQueries({
-    queries: companyNames.map(companyName => ({
-      queryKey: ['google-reviews', companyName, moveData.to],
-      queryFn: async () => {
-        if (!companyName) return null;
-        const response = await apiRequest('GET', `/api/google-reviews/${encodeURIComponent(companyName)}?location=${encodeURIComponent(moveData.to || '')}`);
-        return response.json();
-      },
-      enabled: !!companyName,
-      staleTime: 1000 * 60 * 30, // Cache for 30 minutes
-    }))
-  });
+  // Function to fetch Google reviews for a specific company
+  const fetchGoogleReviews = async (companyName: string, location: string) => {
+    if (googleReviewsData[companyName] || loadingReviews[companyName]) return;
+    
+    setLoadingReviews(prev => ({ ...prev, [companyName]: true }));
+    
+    try {
+      const response = await apiRequest('GET', `/api/google-reviews/${encodeURIComponent(companyName)}?location=${encodeURIComponent(location || '')}`);
+      const data = await response.json();
+      setGoogleReviewsData(prev => ({ ...prev, [companyName]: data }));
+    } catch (error) {
+      console.error('Failed to fetch Google reviews for', companyName, error);
+    } finally {
+      setLoadingReviews(prev => ({ ...prev, [companyName]: false }));
+    }
+  };
 
   const queryClient = useQueryClient();
 
@@ -1276,20 +1268,22 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                 <div className="space-y-3">
                   {searchType === 'moving' && movingCompanies.length > 0 && 
                     movingCompanies.map((company, index) => {
-                      const reviewsQuery = useGoogleReviews(company.provider, moveData.to);
                       const isExpanded = expandedReviews.includes(company.provider);
+                      const googleData = googleReviewsData[company.provider];
+                      const isLoadingReviews = loadingReviews[company.provider];
+                      const displayRating = googleData?.rating || company.rating;
+                      const totalReviews = googleData?.totalReviews || 0;
                       
                       const toggleReviews = () => {
+                        if (!googleData && !isLoadingReviews) {
+                          fetchGoogleReviews(company.provider, moveData.to);
+                        }
                         setExpandedReviews(prev => 
                           isExpanded 
                             ? prev.filter(name => name !== company.provider)
                             : [...prev, company.provider]
                         );
                       };
-
-                      const googleData = reviewsQuery.data;
-                      const displayRating = googleData?.rating || company.rating;
-                      const totalReviews = googleData?.totalReviews || 0;
 
                       return (
                         <div key={index} className="border border-gray-200 rounded-lg p-4 hover:border-blue-300 hover:shadow-md transition-all">
@@ -1329,46 +1323,53 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                           <p className="text-sm text-gray-700 mb-3">{company.description}</p>
 
                           {/* Google Reviews Section */}
-                          {googleData?.reviews && googleData.reviews.length > 0 && (
-                            <div className="mb-3">
-                              <button
-                                onClick={toggleReviews}
-                                className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-medium mb-2"
-                              >
-                                <MessageSquare className="w-4 h-4" />
-                                {isExpanded ? 'Hide' : 'Show'} Google Reviews ({googleData.reviews.length})
-                              </button>
-                              
-                              {isExpanded && (
-                                <div className="space-y-3 max-h-64 overflow-y-auto">
-                                  {googleData.reviews.slice(0, 3).map((review: any, idx: number) => (
-                                    <div key={idx} className="bg-gray-50 rounded-lg p-3 text-sm">
-                                      <div className="flex items-center gap-2 mb-2">
-                                        <User className="w-4 h-4 text-gray-400" />
-                                        <span className="font-medium text-gray-900">{review.author}</span>
-                                        <div className="flex items-center">
-                                          {[...Array(5)].map((_, i) => (
-                                            <Star
-                                              key={i}
-                                              className={`w-3 h-3 ${
-                                                i < review.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
-                                              }`}
-                                            />
-                                          ))}
-                                        </div>
-                                        <span className="text-xs text-gray-500">{review.relativeTime}</span>
+                          <div className="mb-3">
+                            <button
+                              onClick={toggleReviews}
+                              className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-medium mb-2"
+                            >
+                              <MessageSquare className="w-4 h-4" />
+                              {isLoadingReviews ? 'Loading...' : 
+                               googleData?.reviews?.length > 0 ? 
+                               `${isExpanded ? 'Hide' : 'Show'} Google Reviews (${googleData.reviews.length})` :
+                               'Load Google Reviews'}
+                            </button>
+                            
+                            {isExpanded && googleData?.reviews && googleData.reviews.length > 0 && (
+                              <div className="space-y-3 max-h-64 overflow-y-auto">
+                                {googleData.reviews.slice(0, 3).map((review: any, idx: number) => (
+                                  <div key={idx} className="bg-gray-50 rounded-lg p-3 text-sm">
+                                    <div className="flex items-center gap-2 mb-2">
+                                      <User className="w-4 h-4 text-gray-400" />
+                                      <span className="font-medium text-gray-900">{review.author}</span>
+                                      <div className="flex items-center">
+                                        {[...Array(5)].map((_, i) => (
+                                          <Star
+                                            key={i}
+                                            className={`w-3 h-3 ${
+                                              i < review.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
+                                            }`}
+                                          />
+                                        ))}
                                       </div>
-                                      <p className="text-gray-700 text-xs leading-relaxed">
-                                        {review.text.length > 150 
-                                          ? `${review.text.substring(0, 150)}...` 
-                                          : review.text}
-                                      </p>
+                                      <span className="text-xs text-gray-500">{review.relativeTime}</span>
                                     </div>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-                          )}
+                                    <p className="text-gray-700 text-xs leading-relaxed">
+                                      {review.text.length > 150 
+                                        ? `${review.text.substring(0, 150)}...` 
+                                        : review.text}
+                                    </p>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+
+                            {isExpanded && googleData && (!googleData.reviews || googleData.reviews.length === 0) && (
+                              <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded">
+                                No Google reviews found for this company.
+                              </div>
+                            )}
+                          </div>
 
                           <div className="flex items-center justify-between">
                             <div className="flex flex-wrap gap-1">
@@ -1400,7 +1401,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                             </div>
                           </div>
 
-                          {reviewsQuery.isLoading && (
+                          {isLoadingReviews && (
                             <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">
                               <Loader2 className="w-3 h-3 animate-spin" />
                               Loading Google reviews...
