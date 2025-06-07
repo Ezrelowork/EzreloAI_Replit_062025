@@ -119,6 +119,31 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
+  // Auto-load or create project on page load
+  useEffect(() => {
+    const loadProject = async () => {
+      if (!movingProject) {
+        try {
+          // Try to get existing project for user
+          const response = await apiRequest("POST", "/api/moving-project", {
+            userId: 1, // Default user for now
+            fromAddress: "Not specified",
+            toAddress: "Not specified",
+            moveDate: null,
+            projectStatus: "active"
+          });
+          if (response.ok) {
+            const projectData = await response.json();
+            setMovingProject(projectData.project);
+          }
+        } catch (error) {
+          console.error('Error loading project:', error);
+        }
+      }
+    };
+    loadProject();
+  }, [movingProject]);
+
   // Fetch current questionnaire
   const { data: currentQuestionnaire } = useQuery({
     queryKey: ['/api/current-questionnaire', movingProject?.id],
