@@ -315,7 +315,7 @@ export default function MovingJourney() {
           // Position only the first sign for now
           let position;
           if (index === 0) {
-            position = { left: '10%', top: '88%' };    // Pink circle 1 - bottom left
+            position = { left: '15%', top: '75%' };    // First sign positioned
           } else {
             // Hide other signs for now
             return null;
