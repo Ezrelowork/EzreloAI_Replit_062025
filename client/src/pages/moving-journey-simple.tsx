@@ -214,59 +214,28 @@ export default function MovingJourney() {
         
         setJourneyData(steps);
       } else {
-        // Sample data for testing highway graphics (4 signs only)
-      const sampleSteps: JourneyStep[] = [
-        {
-          id: 'step-1',
-          title: 'Find Moving Company',
-          description: 'Research and get quotes from professional moving companies',
-          week: 'Week 8-6',
-          tasks: ['Get moving quotes', 'Compare services', 'Book moving company'],
-          route: '/dashboard',
-          position: { x: 15, y: 80 },
-          signType: 'warning',
-          completed: false,
-          priority: 'high'
-        },
-        {
-          id: 'step-3',
-          title: 'Address Changes',
-          description: 'Update address with banks, employers, and government',
-          week: 'Week 2-1',
-          tasks: ['Update bank records', 'Notify employer', 'Change voter registration'],
-          route: '/moving-checklist',
-          position: { x: 45, y: 50 },
+        // Create blank highway signs that await AI-generated content
+        const blankSignPositions = [
+          { x: 25, y: 45 },
+          { x: 45, y: 35 },
+          { x: 65, y: 55 },
+          { x: 85, y: 40 }
+        ];
+        
+        const blankSigns: JourneyStep[] = blankSignPositions.map((position, index) => ({
+          id: `blank-sign-${index + 1}`,
+          title: 'Generate Your Plan',
+          description: 'Use the AI Assistant to create your personalized moving timeline',
+          week: 'AI Planning',
+          tasks: ['Start with AI Assistant to populate this sign with your custom plan'],
+          route: '/ai-assistant',
+          position,
           signType: 'info',
           completed: false,
           priority: 'medium'
-        },
-        {
-          id: 'step-4',
-          title: 'Transfer Services',
-          description: 'Move internet, cable, and other services to new address',
-          week: 'Week 1',
-          tasks: ['Transfer internet', 'Move cable service', 'Update subscriptions'],
-          route: '/utilities',
-          position: { x: 65, y: 35 },
-          signType: 'highway',
-          completed: false,
-          priority: 'medium'
-        },
-        {
-          id: 'step-5',
-          title: 'Essential Services',
-          description: 'Find new doctor, dentist, and register kids for school',
-          week: 'Week 1-2',
-          tasks: ['Find healthcare providers', 'Transfer prescriptions', 'School registration'],
-          route: '/moving-checklist',
-          position: { x: 80, y: 20 },
-          signType: 'info',
-          completed: false,
-          priority: 'low'
-        }
-      ];
-      
-        setJourneyData(sampleSteps);
+        }));
+        
+        setJourneyData(blankSigns);
       }
     }
   }, [projectQuery.data, tasksQuery.data]);
