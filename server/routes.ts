@@ -189,7 +189,7 @@ Focus on accuracy and specificity - include availability percentages, exact spee
                     hours: "Contact for hours",
                     rating: detailsData.result.rating || 0,
                     services: ["Local Moving", "Interstate Moving"],
-                    estimatedCost: "$1,200-3,500",
+                    estimatedCost: "Contact for estimate",
                     availability: `Serves ${fromCity} area`,
                     specialties: ["Local Moving", "Interstate Moving"],
                     notes: `Google rating: ${detailsData.result.rating || 'Not rated'} | Address: ${detailsData.result.formatted_address || 'Contact for address'}`
@@ -220,7 +220,7 @@ Focus on accuracy and specificity - include availability percentages, exact spee
           hours: "Contact for hours",
           rating: 4.1,
           services: ["Interstate Moving", "Packing", "Storage"],
-          estimatedCost: "$2,800-4,200",
+          estimatedCost: "Contact for estimate",
           availability: "Nationwide service",
           specialties: ["Long Distance", "Interstate", "Full Service"],
           notes: "Major national carrier with agents nationwide"
@@ -236,7 +236,7 @@ Focus on accuracy and specificity - include availability percentages, exact spee
           hours: "Contact for hours", 
           rating: 4.0,
           services: ["Interstate Moving", "Packing", "Storage"],
-          estimatedCost: "$2,600-4,000",
+          estimatedCost: "Contact for estimate",
           availability: "Nationwide service",
           specialties: ["Long Distance", "Interstate", "Corporate Moves"],
           notes: "Established national carrier"
@@ -252,7 +252,7 @@ Focus on accuracy and specificity - include availability percentages, exact spee
           hours: "Contact for hours",
           rating: 4.2,
           services: ["Interstate Moving", "Moving Containers"],
-          estimatedCost: "$1,400-2,800",
+          estimatedCost: "Contact for estimate",
           availability: "Nationwide service",
           specialties: ["Hybrid Moving", "Cost-Effective", "Flexible"],
           notes: "You pack, they drive - cost-effective option"
@@ -268,7 +268,7 @@ Focus on accuracy and specificity - include availability percentages, exact spee
           hours: "Contact for hours",
           rating: 4.0,
           services: ["Portable Storage", "Moving Containers"],
-          estimatedCost: "$1,800-3,200", 
+          estimatedCost: "Contact for estimate", 
           availability: "Nationwide service",
           specialties: ["Storage", "Flexible Moving", "Containers"],
           notes: "Portable storage containers delivered to your location"

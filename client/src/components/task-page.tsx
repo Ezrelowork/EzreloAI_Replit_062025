@@ -133,9 +133,15 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
 
   const movingCompanyMutation = useMutation({
     mutationFn: async () => {
+      // Parse from and to locations
+      const [fromCity, fromState] = moveData.from.split(', ');
+      const [toCity, toState] = moveData.to.split(', ');
+      
       const response = await apiRequest("POST", "/api/moving-companies", {
-        from: moveData.from,
-        to: moveData.to,
+        fromCity,
+        fromState,
+        toCity,
+        toState,
         moveDate: moveData.date
       });
       return await response.json();
