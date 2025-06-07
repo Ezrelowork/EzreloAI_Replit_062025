@@ -23,7 +23,7 @@ export const ProgressTracker: React.FC<ProgressTrackerProps> = ({
       </div>
       
       {/* Minimal progress bar */}
-      <div className="w-32 bg-gray-200 rounded-full h-2">
+      <div className="w-64 bg-gray-200 rounded-full h-2">
         <div 
           className="bg-gradient-to-r from-green-500 to-blue-500 h-2 rounded-full transition-all duration-500 ease-out"
           style={{ width: `${progressPercentage}%` }}
