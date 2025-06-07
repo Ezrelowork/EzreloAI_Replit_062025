@@ -7,35 +7,14 @@ export default function Landing() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
       {/* Hero Section */}
       <section className="relative px-6 py-20 overflow-hidden">
-        {/* Blurred Road Background */}
-        <div className="absolute inset-0 opacity-10">
-          <svg viewBox="0 0 1200 600" className="w-full h-full">
-            <defs>
-              <linearGradient id="roadGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#4F46E5" />
-                <stop offset="50%" stopColor="#06B6D4" />
-                <stop offset="100%" stopColor="#10B981" />
-              </linearGradient>
-            </defs>
-            <path 
-              d="M 0 300 Q 300 200 600 300 Q 900 400 1200 300" 
-              stroke="url(#roadGradient)" 
-              strokeWidth="60" 
-              fill="none"
-              strokeLinecap="round"
-              filter="blur(8px)"
-            />
-            <path 
-              d="M 0 300 Q 300 200 600 300 Q 900 400 1200 300" 
-              stroke="white" 
-              strokeWidth="4" 
-              fill="none"
-              strokeDasharray="20,15"
-              strokeLinecap="round"
-              filter="blur(2px)"
-            />
-          </svg>
-        </div>
+        {/* Highway Background */}
+        <div 
+          className="absolute inset-0 opacity-15 bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: `url('/attached_assets/highway-background.png')`,
+            filter: 'blur(8px)'
+          }}
+        />
         
         <div className="relative max-w-6xl mx-auto text-center">
           <h1 className="text-5xl md:text-7xl font-bold text-gray-900 mb-6">
