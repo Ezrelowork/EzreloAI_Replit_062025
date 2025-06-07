@@ -1329,10 +1329,10 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                               className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-medium mb-2"
                             >
                               <MessageSquare className="w-4 h-4" />
-                              {isLoadingReviews ? 'Loading...' : 
+                              {isLoadingReviews ? 'Loading Google Reviews...' : 
                                googleData?.reviews?.length > 0 ? 
-                               `${isExpanded ? 'Hide' : 'Show'} Google Reviews (${googleData.reviews.length})` :
-                               'Load Google Reviews'}
+                               `Google Reviews (${googleData.reviews.length})` :
+                               'Google Reviews'}
                             </button>
                             
                             {isExpanded && googleData?.reviews && googleData.reviews.length > 0 && (
