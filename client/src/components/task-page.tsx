@@ -82,6 +82,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete }) => {
   const [utilities, setUtilities] = useState<UtilityService[]>([]);
   const [housingServices, setHousingServices] = useState<HousingService[]>([]);
   const [showResults, setShowResults] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
   const [searchType, setSearchType] = useState<'moving' | 'utilities' | 'housing'>('moving');
   const [moveData, setMoveData] = useState({ from: '', to: '', date: '' });
   const { toast } = useToast();
@@ -120,7 +121,14 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete }) => {
       const companies = data?.companies || [];
       setMovingCompanies(companies);
       setSearchType('moving');
-      setShowResults(true);
+      
+      // Trigger animation sequence
+      setIsAnimating(true);
+      setTimeout(() => {
+        setShowResults(true);
+        setTimeout(() => setIsAnimating(false), 50);
+      }, 100);
+      
       toast({
         title: "Moving Companies Found",
         description: `Found ${companies.length} moving companies for your route`,
@@ -350,16 +358,9 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete }) => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Task Overview and Steps */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Animated Service Results - slides down from header, constrained to task overview width */}
+            {/* Service Results */}
             {showResults && (
-              <div 
-                className="mb-6 overflow-hidden"
-                style={{
-                  animation: 'slideDown 0.7s ease-out forwards',
-                  transform: 'translateY(-20px)',
-                  opacity: 0
-                }}
-              >
+              <div className="mb-6">
                 <div className="bg-white rounded-2xl shadow-xl border-2 border-blue-100 p-6">
                   <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
                     <div className="w-1 h-8 bg-blue-600 rounded-full"></div>
