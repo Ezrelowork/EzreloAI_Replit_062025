@@ -342,32 +342,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
           </div>
         </div>
 
-        {/* Font Selector */}
-        <div className="mb-4">
-          <div className="bg-white rounded-lg shadow-sm border p-3">
-            <label className="text-xs font-medium text-gray-700 mb-2 block">Font Style:</label>
-            <div className="flex gap-2">
-              {[
-                { value: 'font-source', label: 'Source Sans Pro' },
-                { value: 'font-inter', label: 'Inter' },
-                { value: 'font-roboto', label: 'Roboto' },
-                { value: 'font-open', label: 'Open Sans' }
-              ].map((font) => (
-                <button
-                  key={font.value}
-                  onClick={() => setSelectedFont(font.value)}
-                  className={`px-3 py-1 rounded text-xs font-medium transition-all ${
-                    selectedFont === font.value
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  {font.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
+
 
         {/* Action Buttons */}
         <div className="flex gap-3 mb-6">
