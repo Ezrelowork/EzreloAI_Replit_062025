@@ -429,7 +429,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete }) => {
                     ))
                   }
 
-                  {searchType === 'housing' && housingServices.length > 0 &&
+                  {searchType === 'housing' && housingServices.length > 0 && 
                     housingServices.map((service, index) => (
                       <div key={index} className="border border-gray-200 rounded-xl p-6 hover:border-blue-300 hover:shadow-md transition-all">
                         <div className="flex items-start justify-between mb-4">
