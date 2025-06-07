@@ -220,7 +220,7 @@ Focus on accuracy and specificity - include availability percentages, exact spee
           hours: "Contact for hours",
           rating: 4.1,
           services: ["Interstate Moving", "Packing", "Storage"],
-          estimatedCost: "Contact for quote",
+          estimatedCost: "$2,800-4,200",
           availability: "Nationwide service",
           specialties: ["Long Distance", "Interstate", "Full Service"],
           notes: "Major national carrier with agents nationwide"
@@ -236,7 +236,7 @@ Focus on accuracy and specificity - include availability percentages, exact spee
           hours: "Contact for hours", 
           rating: 4.0,
           services: ["Interstate Moving", "Packing", "Storage"],
-          estimatedCost: "Contact for quote",
+          estimatedCost: "$2,600-4,000",
           availability: "Nationwide service",
           specialties: ["Long Distance", "Interstate", "Corporate Moves"],
           notes: "Established national carrier"
