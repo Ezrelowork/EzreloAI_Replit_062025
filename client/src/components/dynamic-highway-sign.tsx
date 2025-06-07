@@ -50,14 +50,22 @@ export const DynamicHighwaySign: React.FC<DynamicSignProps> = ({
           onClick={onClick}
           style={{
             left: '15%',
-            top: '25%', 
+            top: '15%', 
             width: '70%',
             height: '50%'
           }}
         />
         
-        {/* Dynamic text overlay */}
-        <div className="absolute inset-0 flex flex-col justify-center items-center p-3">
+        {/* Dynamic text overlay - contained within sign bounds */}
+        <div 
+          className="absolute flex flex-col justify-center items-center p-2"
+          style={{
+            left: '15%',
+            top: '15%', 
+            width: '70%',
+            height: '50%'
+          }}
+        >
           <div className={`text-center text-white ${completed ? 'opacity-60' : ''}`}>
             {/* Priority indicator */}
             <div className={`text-[9px] font-bold mb-1 ${priorityColors[priority]} uppercase tracking-wider drop-shadow-sm`}>
@@ -95,7 +103,7 @@ export const DynamicHighwaySign: React.FC<DynamicSignProps> = ({
           className={`absolute border-2 ${priorityBorders[priority]} rounded-lg ${completed ? 'opacity-40' : ''}`}
           style={{
             left: '15%',
-            top: '25%', 
+            top: '15%', 
             width: '70%',
             height: '50%'
           }}
