@@ -606,6 +606,117 @@ Please provide a comprehensive strategic relocation plan focusing on planning gu
     }
   });
 
+  // Create or get moving project
+  app.post("/api/moving-project", async (req, res) => {
+    try {
+      const { userId, fromAddress, toAddress, moveDate } = req.body;
+      
+      // Check if project already exists
+      let project = await storage.getMovingProject(userId, fromAddress, toAddress);
+      
+      if (!project) {
+        // Create new project
+        project = await storage.createMovingProject({
+          userId,
+          fromAddress,
+          toAddress,
+          moveDate,
+          projectStatus: "searching"
+        });
+
+        // Create initial project tasks
+        const initialTasks = [
+          { taskName: "Get 3+ written estimates", description: "Collect quotes from multiple moving companies", dueDate: "2 weeks" },
+          { taskName: "Check insurance coverage", description: "Verify moving company insurance and liability coverage", dueDate: "2 weeks" },
+          { taskName: "Read reviews & references", description: "Research company reputation and customer feedback", dueDate: "2 weeks" },
+          { taskName: "Verify license & bonding", description: "Confirm company licensing and bonding status", dueDate: "2 weeks" },
+          { taskName: "Understand pricing structure", description: "Review all fees, charges, and payment terms", dueDate: "1 week" },
+          { taskName: "Confirm moving date", description: "Finalize moving date and schedule with chosen company", dueDate: "1 week" }
+        ];
+
+        for (const task of initialTasks) {
+          await storage.createProjectTask({
+            projectId: project.id,
+            ...task
+          });
+        }
+      }
+
+      res.json({ project });
+    } catch (error) {
+      console.error("Error creating/getting moving project:", error);
+      res.status(500).json({ error: "Failed to manage moving project" });
+    }
+  });
+
+  // Select mover for project
+  app.post("/api/select-mover", async (req, res) => {
+    try {
+      const { projectId, moverData } = req.body;
+      
+      const updatedProject = await storage.updateMovingProject(projectId, {
+        selectedMover: moverData,
+        projectStatus: "mover_selected"
+      });
+
+      // Create communication log for mover selection
+      await storage.createCommunication({
+        projectId,
+        communicationType: "selection",
+        subject: `Selected ${moverData.provider} as moving company`,
+        notes: `Company: ${moverData.provider}\nPhone: ${moverData.phone}\nEstimated Cost: ${moverData.estimatedCost}`,
+        contactPerson: moverData.provider
+      });
+
+      res.json({ project: updatedProject });
+    } catch (error) {
+      console.error("Error selecting mover:", error);
+      res.status(500).json({ error: "Failed to select mover" });
+    }
+  });
+
+  // Get project with tasks and communications
+  app.get("/api/moving-project/:projectId", async (req, res) => {
+    try {
+      const projectId = parseInt(req.params.projectId);
+      
+      const [tasks, communications] = await Promise.all([
+        storage.getProjectTasks(projectId),
+        storage.getProjectCommunications(projectId)
+      ]);
+
+      res.json({ tasks, communications });
+    } catch (error) {
+      console.error("Error fetching project details:", error);
+      res.status(500).json({ error: "Failed to fetch project details" });
+    }
+  });
+
+  // Update task status
+  app.patch("/api/project-task/:taskId", async (req, res) => {
+    try {
+      const taskId = parseInt(req.params.taskId);
+      const { status } = req.body;
+      
+      const updatedTask = await storage.updateTaskStatus(taskId, status);
+      res.json({ task: updatedTask });
+    } catch (error) {
+      console.error("Error updating task:", error);
+      res.status(500).json({ error: "Failed to update task" });
+    }
+  });
+
+  // Add communication log
+  app.post("/api/communication", async (req, res) => {
+    try {
+      const communication = await storage.createCommunication(req.body);
+      res.json({ communication });
+    } catch (error) {
+      console.error("Error creating communication:", error);
+      res.status(500).json({ error: "Failed to create communication" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

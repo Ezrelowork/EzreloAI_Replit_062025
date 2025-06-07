@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import { 
   ArrowLeft, 
@@ -87,8 +87,36 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
   const [searchType, setSearchType] = useState<'moving' | 'utilities' | 'housing'>('moving');
   const [moveData, setMoveData] = useState({ from: '', to: '', date: '' });
   const [selectedFont, setSelectedFont] = useState('font-inter');
+  const [selectedMover, setSelectedMover] = useState<MovingCompany | null>(null);
+  const [movingProject, setMovingProject] = useState<any>(null);
 
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // Create or get moving project
+  const createProjectMutation = useMutation({
+    mutationFn: async (projectData: any) => {
+      return await apiRequest("POST", "/api/moving-project", projectData);
+    },
+    onSuccess: (data) => {
+      setMovingProject(data.project);
+    }
+  });
+
+  // Select mover mutation
+  const selectMoverMutation = useMutation({
+    mutationFn: async ({ projectId, moverData }: { projectId: number; moverData: MovingCompany }) => {
+      return await apiRequest("POST", "/api/select-mover", { projectId, moverData });
+    },
+    onSuccess: (data) => {
+      setSelectedMover(data.project.selectedMover);
+      setMovingProject(data.project);
+      toast({
+        title: "Mover Selected Successfully",
+        description: `${data.project.selectedMover.provider} is now your chosen moving company. Your project has been created.`,
+      });
+    }
+  });
 
   // Load move data and cached results from localStorage on component mount
   useEffect(() => {
@@ -236,6 +264,35 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
       }
     } catch (error) {
       console.error('Failed to track referral click:', error);
+    }
+  };
+
+  const handleSelectMover = async (company: MovingCompany) => {
+    try {
+      // First, create or get the moving project
+      if (!movingProject) {
+        const projectData = {
+          userId: 1, // For now, using a default user ID - in real app would get from auth
+          fromAddress: moveData.from,
+          toAddress: moveData.to,
+          moveDate: moveData.date
+        };
+        await createProjectMutation.mutateAsync(projectData);
+      }
+
+      // Then select the mover
+      if (movingProject?.id) {
+        await selectMoverMutation.mutateAsync({
+          projectId: movingProject.id,
+          moverData: company
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Selection Failed",
+        description: "Unable to select mover. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -446,7 +503,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                               </span>
                             ))}
                           </div>
-                          <div className="flex gap-4">
+                          <div className="flex gap-3">
                             <button
                               onClick={() => handleReferralClick(company, 'website_visit')}
                               className="text-blue-600 hover:text-blue-700 text-sm font-medium underline"
@@ -458,6 +515,12 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                               className="text-green-600 hover:text-green-700 text-sm font-medium underline"
                             >
                               Call
+                            </button>
+                            <button
+                              onClick={() => handleSelectMover(company)}
+                              className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-sm font-medium transition-colors"
+                            >
+                              Choose This Mover
                             </button>
                           </div>
                         </div>
