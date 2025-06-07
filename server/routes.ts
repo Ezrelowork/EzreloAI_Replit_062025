@@ -792,7 +792,7 @@ Please provide a comprehensive strategic relocation plan focusing on planning gu
       const project = await storage.getMovingProject(parseInt(projectId));
       
       if (project && project.questionnaireData) {
-        const questionnaire = JSON.parse(project.questionnaireData);
+        const questionnaire = JSON.parse(project.questionnaireData as string);
         res.json({
           ...questionnaire,
           updatedAt: project.lastQuestionnaireUpdate || project.updatedAt

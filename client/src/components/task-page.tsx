@@ -1201,8 +1201,8 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                   {currentQuestionnaire && (
                     <div className="p-3 bg-green-50 rounded border border-green-200">
                       <div className="text-xs text-green-700">
-                        <div className="font-medium">{Object.keys(currentQuestionnaire.majorItems || {}).length} items • {currentQuestionnaire.homeSize}</div>
-                        <div>Last updated: {new Date(currentQuestionnaire.updatedAt).toLocaleDateString()}</div>
+                        <div className="font-medium">{Object.keys((currentQuestionnaire as any)?.majorItems || {}).length} items • {(currentQuestionnaire as any)?.homeSize}</div>
+                        <div>Last updated: {new Date((currentQuestionnaire as any)?.updatedAt).toLocaleDateString()}</div>
                       </div>
                     </div>
                   )}
