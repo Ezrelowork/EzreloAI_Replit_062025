@@ -9,35 +9,27 @@ interface PageTransitionProps {
 export const PageTransition: React.FC<PageTransitionProps> = ({ children, className = '' }) => {
   const [location] = useLocation();
   const [displayLocation, setDisplayLocation] = useState(location);
-  const [transitionStage, setTransitionStage] = useState<'idle' | 'exiting' | 'entering'>('idle');
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   useEffect(() => {
     if (location !== displayLocation) {
-      setTransitionStage('exiting');
+      setIsTransitioning(true);
       
-      const exitTimer = setTimeout(() => {
+      // Immediately update the display location and reset transition
+      const timer = setTimeout(() => {
         setDisplayLocation(location);
-        setTransitionStage('entering');
-        
-        const enterTimer = setTimeout(() => {
-          setTransitionStage('idle');
-        }, 400);
-        
-        return () => clearTimeout(enterTimer);
-      }, 200);
+        setIsTransitioning(false);
+      }, 100);
 
-      return () => clearTimeout(exitTimer);
+      return () => clearTimeout(timer);
     }
   }, [location, displayLocation]);
 
   return (
     <div className={`page-transition-container ${className}`}>
       <div 
-        className={`page-content ${
-          transitionStage === 'exiting' ? 'slide-out-left' :
-          transitionStage === 'entering' ? 'slide-in-from-right' :
-          'slide-in'
-        }`}
+        className={`page-content ${isTransitioning ? 'opacity-0' : 'opacity-100'} transition-opacity duration-100`}
+        key={displayLocation}
       >
         {children}
       </div>
