@@ -241,18 +241,8 @@ export default function MovingJourney() {
       }, 200);
     }
     
-    const cardElement = taskCardRefs.current[step.id];
-    if (cardElement) {
-      // Cinematic zoom into the task card
-      zoomIntoTask(cardElement, {
-        id: step.id,
-        title: step.title,
-        description: step.description,
-        priority: step.priority,
-        week: step.week,
-        category: getCategoryFromTask(step.title)
-      });
-    }
+    // Direct navigation to task page instead of modal
+    handleStartTask(step);
   };
 
   const handleCompleteTask = (taskId: string) => {
