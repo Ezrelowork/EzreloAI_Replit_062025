@@ -16,6 +16,74 @@ function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
   return R * c;
 }
 
+function getServicesByCategory(category: string): string[] {
+  switch (category) {
+    case 'Real Estate Agent':
+      return ['Home buying', 'Home selling', 'Market analysis', 'Property tours', 'Negotiation'];
+    case 'Property Management':
+      return ['Tenant screening', 'Rent collection', 'Property maintenance', 'Lease management'];
+    case 'Home Inspection':
+      return ['Pre-purchase inspection', 'New construction inspection', 'Specialty inspections'];
+    case 'Mortgage Lender':
+      return ['Conventional loans', 'FHA loans', 'VA loans', 'Refinancing', 'Pre-approval'];
+    case 'Title Company':
+      return ['Title search', 'Title insurance', 'Closing services', 'Escrow services'];
+    default:
+      return ['Professional services'];
+  }
+}
+
+function getEstimatedCost(category: string): string {
+  switch (category) {
+    case 'Real Estate Agent':
+      return '5-6% commission';
+    case 'Property Management':
+      return '8-12% monthly rent';
+    case 'Home Inspection':
+      return '$300-$600';
+    case 'Mortgage Lender':
+      return '0.5-2% of loan amount';
+    case 'Title Company':
+      return '$500-$2,000';
+    default:
+      return 'Contact for quote';
+  }
+}
+
+function getSpecialtiesByCategory(category: string): string[] {
+  switch (category) {
+    case 'Real Estate Agent':
+      return ['First-time buyers', 'Investment properties', 'Luxury homes', 'Relocation specialist'];
+    case 'Property Management':
+      return ['Residential properties', 'Commercial properties', 'Vacation rentals'];
+    case 'Home Inspection':
+      return ['Structural inspection', 'Electrical systems', 'Plumbing systems', 'HVAC systems'];
+    case 'Mortgage Lender':
+      return ['First-time homebuyers', 'Investment properties', 'Jumbo loans', 'Self-employed borrowers'];
+    case 'Title Company':
+      return ['Residential closings', 'Commercial transactions', '1031 exchanges'];
+    default:
+      return ['General services'];
+  }
+}
+
+function getCertificationsByCategory(category: string): string[] {
+  switch (category) {
+    case 'Real Estate Agent':
+      return ['Licensed Real Estate Agent', 'MLS Member', 'NAR Member'];
+    case 'Property Management':
+      return ['Property Management License', 'CAM Certification'];
+    case 'Home Inspection':
+      return ['ASHI Certified', 'State Licensed Inspector'];
+    case 'Mortgage Lender':
+      return ['NMLS Licensed', 'FHA Approved'];
+    case 'Title Company':
+      return ['State Licensed Title Agent', 'ALTA Member'];
+    default:
+      return ['Licensed Professional'];
+  }
+}
+
 // Google Places API functions for live reviews
 async function searchGooglePlaces(companyName: string, location?: string): Promise<any> {
   const baseUrl = 'https://maps.googleapis.com/maps/api/place/textsearch/json';
@@ -1033,6 +1101,89 @@ Please provide a comprehensive strategic relocation plan focusing on planning gu
     } catch (error) {
       console.error("Error fetching Google reviews:", error);
       res.status(500).json({ error: "Failed to fetch reviews" });
+    }
+  });
+
+  // Housing services search endpoint
+  app.post("/api/search-housing-services", async (req, res) => {
+    try {
+      const { location, serviceTypes } = req.body;
+      
+      if (!location || !serviceTypes) {
+        return res.status(400).json({ error: "Location and service types are required" });
+      }
+
+      const housingServices = [];
+
+      // Search for each service type
+      for (const serviceType of serviceTypes) {
+        let searchQuery = '';
+        let category = '';
+        
+        switch (serviceType) {
+          case 'real_estate':
+            searchQuery = `real estate agents in ${location}`;
+            category = 'Real Estate Agent';
+            break;
+          case 'property_management':
+            searchQuery = `property management companies in ${location}`;
+            category = 'Property Management';
+            break;
+          case 'home_inspection':
+            searchQuery = `home inspectors in ${location}`;
+            category = 'Home Inspection';
+            break;
+          case 'mortgage':
+            searchQuery = `mortgage lenders in ${location}`;
+            category = 'Mortgage Lender';
+            break;
+          case 'title_company':
+            searchQuery = `title companies in ${location}`;
+            category = 'Title Company';
+            break;
+          default:
+            continue;
+        }
+
+        try {
+          const places = await searchGooglePlaces(searchQuery, location);
+          
+          if (places && places.length > 0) {
+            const limitedPlaces = places.slice(0, 3); // Limit to 3 per category
+            
+            for (const place of limitedPlaces) {
+              const details = await getPlaceDetails(place.place_id);
+              
+              if (details) {
+                housingServices.push({
+                  category,
+                  provider: place.name,
+                  phone: details.formatted_phone_number || 'Contact via website',
+                  description: `Professional ${category.toLowerCase()} serving ${location}`,
+                  website: details.website || `https://www.google.com/search?q=${encodeURIComponent(place.name)}`,
+                  referralUrl: details.website || `https://www.google.com/search?q=${encodeURIComponent(place.name)}`,
+                  services: getServicesByCategory(category),
+                  estimatedCost: getEstimatedCost(category),
+                  rating: details.rating || 0,
+                  specialties: getSpecialtiesByCategory(category),
+                  availability: 'Contact for availability',
+                  licenseInfo: `Licensed ${category.toLowerCase()} in ${location}`,
+                  serviceAreas: [location],
+                  experience: 'Professional service provider',
+                  certifications: getCertificationsByCategory(category)
+                });
+              }
+            }
+          }
+        } catch (error) {
+          console.error(`Error searching for ${serviceType}:`, error);
+        }
+      }
+
+      res.json({ services: housingServices });
+    } catch (error) {
+      console.error("Error searching housing services:", error);
+      res.status(500).json({ error: "Failed to search housing services" });
     }
   });
 

@@ -298,6 +298,9 @@ export default function MovingJourney() {
     } else if (combined.includes('utility') || combined.includes('electric') || combined.includes('internet') || 
                combined.includes('gas') || combined.includes('water') || combined.includes('cable')) {
       targetRoute = '/utilities';
+    } else if (combined.includes('housing') || combined.includes('real estate') || combined.includes('home') || 
+               combined.includes('mortgage') || combined.includes('inspection') || combined.includes('property')) {
+      targetRoute = '/housing';
     } else if (combined.includes('pack') || combined.includes('organize') || combined.includes('checklist')) {
       targetRoute = '/moving-checklist';
     }
