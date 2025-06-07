@@ -91,7 +91,13 @@ export class DatabaseStorage implements IStorage {
   async updateMovingProject(projectId: number, updates: Partial<InsertMovingProject>): Promise<MovingProject> {
     const [updatedProject] = await db
       .update(movingProjects)
-      .set({ ...updates, updatedAt: new Date() })
+      .set({ 
+        ...updates, 
+        updatedAt: new Date(),
+        // Explicitly handle questionnaire fields
+        ...(updates.questionnaireData && { questionnaireData: updates.questionnaireData }),
+        ...(updates.lastQuestionnaireUpdate && { lastQuestionnaireUpdate: updates.lastQuestionnaireUpdate })
+      })
       .where(eq(movingProjects.id, projectId))
       .returning();
     return updatedProject;

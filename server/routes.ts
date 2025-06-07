@@ -1,7 +1,9 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { movingProjectSchema } from "@shared/schema";
+import { db } from "./db";
+import { movingProjects, movingProjectSchema } from "@shared/schema";
+import { eq } from "drizzle-orm";
 
 function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const R = 3959; // Earth's radius in miles
@@ -759,10 +761,12 @@ Please provide a comprehensive strategic relocation plan focusing on planning gu
       const { projectId, questionnaire, pdfData, type } = req.body;
       
       // Update the project with current questionnaire data
-      await storage.updateMovingProject(projectId, {
-        questionnaireData: JSON.stringify(questionnaire),
-        lastQuestionnaireUpdate: new Date()
+      console.log('Updating project', projectId, 'with questionnaire data');
+      const updatedProject = await storage.updateMovingProject(projectId, {
+        questionnaireData: JSON.stringify(questionnaire) as any,
+        lastQuestionnaireUpdate: new Date() as any
       });
+      console.log('Project updated:', updatedProject.id, 'questionnaire saved:', !!updatedProject.questionnaireData);
       
       // Log the activity as communication record
       await storage.createCommunication({
