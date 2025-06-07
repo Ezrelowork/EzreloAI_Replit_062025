@@ -84,6 +84,138 @@ function getCertificationsByCategory(category: string): string[] {
   }
 }
 
+function getServiceDescription(category: string, location: string): string {
+  switch (category) {
+    case 'Elementary School':
+      return `Quality elementary education serving families in ${location}`;
+    case 'Family Medicine':
+      return `Comprehensive family healthcare services in ${location}`;
+    case 'Pharmacy':
+      return `Full-service pharmacy providing medications and health services`;
+    case 'Veterinary Clinic':
+      return `Professional veterinary care for pets in ${location}`;
+    case 'Fitness Center':
+      return `Modern fitness facility with equipment and classes`;
+    case 'Bank':
+      return `Full-service banking and financial services`;
+    default:
+      return `Professional services in ${location}`;
+  }
+}
+
+function getLocalServicesByCategory(category: string): string[] {
+  switch (category) {
+    case 'Elementary School':
+      return ['K-5 Education', 'After School Programs', 'Special Education', 'Arts & Music'];
+    case 'Family Medicine':
+      return ['Annual Checkups', 'Sick Visits', 'Vaccinations', 'Health Screenings'];
+    case 'Pharmacy':
+      return ['Prescription Medications', 'Over-the-Counter', 'Vaccinations', 'Health Consultations'];
+    case 'Veterinary Clinic':
+      return ['Wellness Exams', 'Vaccinations', 'Surgery', 'Emergency Care'];
+    case 'Fitness Center':
+      return ['Cardio Equipment', 'Weight Training', 'Group Classes', 'Personal Training'];
+    case 'Bank':
+      return ['Checking Accounts', 'Savings Accounts', 'Loans', 'Investment Services'];
+    default:
+      return ['Professional Services'];
+  }
+}
+
+function getLocalServiceCost(category: string): string {
+  switch (category) {
+    case 'Elementary School':
+      return 'Public/Free';
+    case 'Family Medicine':
+      return '$150-$300 per visit';
+    case 'Pharmacy':
+      return 'Varies by medication';
+    case 'Veterinary Clinic':
+      return '$50-$200 per visit';
+    case 'Fitness Center':
+      return '$30-$80/month';
+    case 'Bank':
+      return 'Free checking available';
+    default:
+      return 'Contact for pricing';
+  }
+}
+
+function getLocalServiceSpecialties(category: string): string[] {
+  switch (category) {
+    case 'Elementary School':
+      return ['STEM Programs', 'Reading Specialists', 'Gifted Education', 'ESL Support'];
+    case 'Family Medicine':
+      return ['Pediatrics', 'Women\'s Health', 'Chronic Disease Management', 'Preventive Care'];
+    case 'Pharmacy':
+      return ['Compounding', 'Diabetes Care', 'Immunizations', 'Medication Therapy'];
+    case 'Veterinary Clinic':
+      return ['Small Animals', 'Surgery', 'Dental Care', 'Emergency Medicine'];
+    case 'Fitness Center':
+      return ['Yoga Classes', 'HIIT Training', 'Senior Fitness', 'Youth Programs'];
+    case 'Bank':
+      return ['Home Loans', 'Small Business', 'Investment Planning', 'Online Banking'];
+    default:
+      return ['General Services'];
+  }
+}
+
+function getServiceHours(category: string): string {
+  switch (category) {
+    case 'Elementary School':
+      return 'School Days 8:00 AM - 3:00 PM';
+    case 'Family Medicine':
+      return 'Mon-Fri 8:00 AM - 5:00 PM';
+    case 'Pharmacy':
+      return 'Daily 9:00 AM - 9:00 PM';
+    case 'Veterinary Clinic':
+      return 'Mon-Sat 8:00 AM - 6:00 PM';
+    case 'Fitness Center':
+      return 'Daily 5:00 AM - 11:00 PM';
+    case 'Bank':
+      return 'Mon-Fri 9:00 AM - 5:00 PM, Sat 9:00 AM - 1:00 PM';
+    default:
+      return 'Call for hours';
+  }
+}
+
+function getInsuranceInfo(category: string): string[] {
+  switch (category) {
+    case 'Family Medicine':
+      return ['Blue Cross Blue Shield', 'Aetna', 'Cigna', 'UnitedHealthcare', 'Medicare', 'Medicaid'];
+    case 'Pharmacy':
+      return ['Most Insurance Plans', 'Medicare Part D', 'Medicaid', 'GoodRx'];
+    case 'Veterinary Clinic':
+      return ['Pet Insurance Plans', 'Care Credit', 'Scratch Pay'];
+    default:
+      return [];
+  }
+}
+
+function getAgeGroups(category: string): string[] {
+  switch (category) {
+    case 'Elementary School':
+      return ['Ages 5-11', 'Kindergarten', 'Grades 1-5'];
+    case 'Family Medicine':
+      return ['All Ages', 'Pediatrics', 'Adults', 'Seniors'];
+    case 'Fitness Center':
+      return ['Ages 16+', 'Senior Programs', 'Youth Classes'];
+    default:
+      return [];
+  }
+}
+
+function getPrograms(category: string): string[] {
+  switch (category) {
+    case 'Elementary School':
+      return ['Accelerated Learning', 'Art Programs', 'Music Education', 'Sports Teams'];
+    case 'Fitness Center':
+      return ['Beginner Classes', 'Advanced Training', 'Group Fitness', 'Personal Training'];
+    default:
+      return [];
+  }
+}
+
 // Google Places API functions for live reviews
 async function searchGooglePlaces(companyName: string, location?: string): Promise<any> {
   const baseUrl = 'https://maps.googleapis.com/maps/api/place/textsearch/json';
@@ -1104,8 +1236,8 @@ Please provide a comprehensive strategic relocation plan focusing on planning gu
     }
   });
 
-  // Housing services search endpoint
-  app.post("/api/search-housing-services", async (req, res) => {
+  // Local services search endpoint
+  app.post("/api/search-local-services", async (req, res) => {
     try {
       const { location, serviceTypes } = req.body;
       
@@ -1113,7 +1245,7 @@ Please provide a comprehensive strategic relocation plan focusing on planning gu
         return res.status(400).json({ error: "Location and service types are required" });
       }
 
-      const housingServices = [];
+      const localServices = [];
 
       // Search for each service type
       for (const serviceType of serviceTypes) {
@@ -1121,25 +1253,29 @@ Please provide a comprehensive strategic relocation plan focusing on planning gu
         let category = '';
         
         switch (serviceType) {
-          case 'real_estate':
-            searchQuery = `real estate agents in ${location}`;
-            category = 'Real Estate Agent';
+          case 'schools':
+            searchQuery = `elementary schools in ${location}`;
+            category = 'Elementary School';
             break;
-          case 'property_management':
-            searchQuery = `property management companies in ${location}`;
-            category = 'Property Management';
+          case 'healthcare':
+            searchQuery = `family doctors in ${location}`;
+            category = 'Family Medicine';
             break;
-          case 'home_inspection':
-            searchQuery = `home inspectors in ${location}`;
-            category = 'Home Inspection';
+          case 'pharmacies':
+            searchQuery = `pharmacies in ${location}`;
+            category = 'Pharmacy';
             break;
-          case 'mortgage':
-            searchQuery = `mortgage lenders in ${location}`;
-            category = 'Mortgage Lender';
+          case 'veterinary':
+            searchQuery = `veterinary clinics in ${location}`;
+            category = 'Veterinary Clinic';
             break;
-          case 'title_company':
-            searchQuery = `title companies in ${location}`;
-            category = 'Title Company';
+          case 'gyms':
+            searchQuery = `gyms fitness centers in ${location}`;
+            category = 'Fitness Center';
+            break;
+          case 'banks':
+            searchQuery = `banks credit unions in ${location}`;
+            category = 'Bank';
             break;
           default:
             continue;
@@ -1155,22 +1291,23 @@ Please provide a comprehensive strategic relocation plan focusing on planning gu
               const details = await getPlaceDetails(place.place_id);
               
               if (details) {
-                housingServices.push({
+                localServices.push({
                   category,
                   provider: place.name,
-                  phone: details.formatted_phone_number || 'Contact via website',
-                  description: `Professional ${category.toLowerCase()} serving ${location}`,
+                  phone: details.formatted_phone_number || 'Contact for availability',
+                  description: getServiceDescription(category, location),
                   website: details.website || `https://www.google.com/search?q=${encodeURIComponent(place.name)}`,
                   referralUrl: details.website || `https://www.google.com/search?q=${encodeURIComponent(place.name)}`,
-                  services: getServicesByCategory(category),
-                  estimatedCost: getEstimatedCost(category),
+                  services: getLocalServicesByCategory(category),
+                  estimatedCost: getLocalServiceCost(category),
                   rating: details.rating || 0,
-                  specialties: getSpecialtiesByCategory(category),
-                  availability: 'Contact for availability',
-                  licenseInfo: `Licensed ${category.toLowerCase()} in ${location}`,
-                  serviceAreas: [location],
-                  experience: 'Professional service provider',
-                  certifications: getCertificationsByCategory(category)
+                  specialties: getLocalServiceSpecialties(category),
+                  availability: getServiceHours(category),
+                  address: details.formatted_address || '',
+                  hours: details.opening_hours?.weekday_text?.join(', ') || 'Call for hours',
+                  insurance: getInsuranceInfo(category),
+                  ageGroups: getAgeGroups(category),
+                  programs: getPrograms(category)
                 });
               }
             }
@@ -1180,10 +1317,10 @@ Please provide a comprehensive strategic relocation plan focusing on planning gu
         }
       }
 
-      res.json({ services: housingServices });
+      res.json({ services: localServices });
     } catch (error) {
-      console.error("Error searching housing services:", error);
-      res.status(500).json({ error: "Failed to search housing services" });
+      console.error("Error searching local services:", error);
+      res.status(500).json({ error: "Failed to search local services" });
     }
   });
 
