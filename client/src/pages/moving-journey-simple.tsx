@@ -78,6 +78,18 @@ export default function MovingJourney() {
   const [journeyData, setJourneyData] = useState<JourneyStep[]>([]);
   const { isOpen, currentTask, openModal, closeModal } = useTaskModal();
   const { isZoomed, zoomOrigin, currentTaskData, zoomIntoTask, zoomOut } = useZoomNavigation();
+  
+  // Add effect to reset positions after zoom out
+  useEffect(() => {
+    if (!isZoomed && !zoomOrigin) {
+      // Force position reset after zoom out completes
+      const container = document.querySelector('.relative.max-w-7xl');
+      if (container) {
+        container.style.transform = 'none';
+        container.style.transformOrigin = 'initial';
+      }
+    }
+  }, [isZoomed, zoomOrigin]);
   const taskCardRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
   // Highway graphics
@@ -281,7 +293,10 @@ export default function MovingJourney() {
       </div>
 
       {/* Highway Timeline Container */}
-      <div className="relative max-w-7xl mx-auto p-6 min-h-[600px] z-10">
+      <div 
+        className="relative max-w-7xl mx-auto p-6 min-h-[600px] z-10"
+        style={{ transform: 'none', transformOrigin: 'initial' }}
+      >
         {/* Highway Background */}
         <div className="absolute inset-0 w-full h-full rounded-3xl overflow-hidden z-0">
           <img 

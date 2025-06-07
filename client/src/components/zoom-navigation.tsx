@@ -80,10 +80,18 @@ export const useZoomNavigation = () => {
     setIsZoomed(false);
     document.body.style.overflow = 'auto';
     
-    // Clear data after transition
+    // Clear data after transition and reset any transform effects
     setTimeout(() => {
       setZoomOrigin(null);
       setCurrentTaskData(null);
+      
+      // Reset any lingering transform effects on the body/page
+      const body = document.body;
+      body.style.transform = '';
+      body.style.transformOrigin = '';
+      
+      // Force a reflow to ensure positions are reset
+      window.scrollTo(0, 0);
     }, 800);
   };
 
