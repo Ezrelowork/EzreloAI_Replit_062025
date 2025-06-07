@@ -646,6 +646,46 @@ Please provide a comprehensive strategic relocation plan focusing on planning gu
     }
   });
 
+  // Get current project endpoint
+  app.get('/api/current-project', async (req, res) => {
+    try {
+      // For now, get the most recent project (user ID 1)
+      const project = await storage.getMovingProject(1);
+      
+      if (!project) {
+        return res.status(404).json({ error: 'No project found' });
+      }
+      
+      res.json(project);
+    } catch (error) {
+      console.error('Error fetching current project:', error);
+      res.status(500).json({ error: 'Failed to fetch project' });
+    }
+  });
+
+  // Get project tasks endpoint
+  app.get('/api/project-tasks/:projectId', async (req, res) => {
+    try {
+      const { projectId } = req.params;
+      const tasks = await storage.getProjectTasks(parseInt(projectId));
+      res.json(tasks);
+    } catch (error) {
+      console.error('Error fetching project tasks:', error);
+      res.status(500).json({ error: 'Failed to fetch tasks' });
+    }
+  });
+
+  // Create project task endpoint
+  app.post('/api/project-task', async (req, res) => {
+    try {
+      const task = await storage.createProjectTask(req.body);
+      res.json(task);
+    } catch (error) {
+      console.error('Error creating project task:', error);
+      res.status(500).json({ error: 'Failed to create task' });
+    }
+  });
+
   // Create or get moving project
   app.post("/api/moving-project", async (req, res) => {
     try {
