@@ -87,8 +87,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
   const [isAnimating, setIsAnimating] = useState(false);
   const [searchType, setSearchType] = useState<'moving' | 'utilities' | 'housing'>('moving');
   const [moveData, setMoveData] = useState({ from: '', to: '', date: '' });
-  const [showNotification, setShowNotification] = useState(false);
-  const [notificationMessage, setNotificationMessage] = useState('');
+
   const { toast } = useToast();
 
   // Load move data from localStorage on component mount
@@ -125,16 +124,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
       const companies = data?.companies || [];
       setMovingCompanies(companies);
       setSearchType('moving');
-      
-      // Show centered notification
-      setNotificationMessage(`Found ${companies.length} moving companies for your route`);
-      setShowNotification(true);
       setShowResults(true);
-      
-      // Auto-hide notification after 3 seconds
-      setTimeout(() => {
-        setShowNotification(false);
-      }, 3000);
     },
     onError: (error) => {
       toast({
@@ -276,16 +266,6 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      {/* Top Notification */}
-      {showNotification && (
-        <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 pointer-events-none">
-          <div className="flex items-center gap-3 text-center">
-            <CheckCircle className="w-6 h-6 text-green-600" />
-            <p className="text-lg font-semibold text-gray-900">{notificationMessage}</p>
-          </div>
-        </div>
-      )}
-      
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Header Section */}
         <div className="bg-white rounded-3xl shadow-2xl p-8 mb-8 border border-gray-100">
@@ -302,12 +282,33 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                 <span className="text-gray-600 font-medium">Timeline: {task.week}</span>
                 <span className="text-gray-600 font-medium">Category: {task.category}</span>
               </div>
-              <div className="flex items-center gap-2 text-lg font-semibold text-gray-700">
-                <MapPin className="w-5 h-5 text-blue-600" />
-                <span>{moveData.from}</span>
-                <span className="text-blue-600">→</span>
-                <span>{moveData.to}</span>
-                <span className="text-gray-500 text-base ml-4">Move Date: {new Date(moveData.date).toLocaleDateString()}</span>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 text-lg font-semibold text-gray-700">
+                  <MapPin className="w-5 h-5 text-blue-600" />
+                  <span>{moveData.from}</span>
+                  <span className="text-blue-600">→</span>
+                  <span>{moveData.to}</span>
+                  <span className="text-gray-500 text-base ml-4">Move Date: {new Date(moveData.date).toLocaleDateString()}</span>
+                </div>
+                {/* Status Information */}
+                {showResults && searchType === 'moving' && movingCompanies.length > 0 && (
+                  <div className="flex items-center gap-2 text-sm text-green-700 bg-green-50 px-3 py-2 rounded-lg w-fit">
+                    <CheckCircle className="w-4 h-4" />
+                    <span>Found {movingCompanies.length} moving companies for your route</span>
+                  </div>
+                )}
+                {showResults && searchType === 'utilities' && utilities.length > 0 && (
+                  <div className="flex items-center gap-2 text-sm text-green-700 bg-green-50 px-3 py-2 rounded-lg w-fit">
+                    <CheckCircle className="w-4 h-4" />
+                    <span>Found {utilities.length} utility services in your area</span>
+                  </div>
+                )}
+                {showResults && searchType === 'housing' && housingServices.length > 0 && (
+                  <div className="flex items-center gap-2 text-sm text-green-700 bg-green-50 px-3 py-2 rounded-lg w-fit">
+                    <CheckCircle className="w-4 h-4" />
+                    <span>Found {housingServices.length} housing services available</span>
+                  </div>
+                )}
               </div>
             </div>
             
