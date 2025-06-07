@@ -352,7 +352,14 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete }) => {
           <div className="lg:col-span-2 space-y-6">
             {/* Animated Service Results - slides down from header, constrained to task overview width */}
             {showResults && (
-              <div className="transform transition-all duration-700 ease-in-out animate-in slide-in-from-top-4 mb-6">
+              <div 
+                className="mb-6 overflow-hidden"
+                style={{
+                  animation: 'slideDown 0.7s ease-out forwards',
+                  transform: 'translateY(-20px)',
+                  opacity: 0
+                }}
+              >
                 <div className="bg-white rounded-2xl shadow-xl border-2 border-blue-100 p-6">
                   <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
                     <div className="w-1 h-8 bg-blue-600 rounded-full"></div>

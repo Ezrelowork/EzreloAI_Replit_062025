@@ -3,6 +3,17 @@
 @tailwind components;
 @tailwind utilities;
 
+@keyframes slideDown {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
 @layer base {
   :root {
     --background: 210 11% 98%; /* #F5F7FA */
