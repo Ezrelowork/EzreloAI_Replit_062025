@@ -120,13 +120,8 @@ export default function Landing() {
       </section>
 
       {/* Call to Action */}
-      <section className="relative px-6 py-20 overflow-hidden" style={{
-        background: `url('/attached_assets/highway-background.png')`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat'
-      }}>
-        <div className="relative max-w-4xl mx-auto text-center">
+      <section className="px-6 py-20 bg-blue-600">
+        <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-4xl font-bold text-white mb-6">
             Ready to Transform Your Move?
           </h2>
