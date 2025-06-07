@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle, Clock, AlertTriangle } from 'lucide-react';
+import { CheckCircle, Clock, AlertTriangle, Car } from 'lucide-react';
 
 interface ProgressTrackerProps {
   totalSteps: number;
@@ -22,12 +22,22 @@ export const ProgressTracker: React.FC<ProgressTrackerProps> = ({
         {completedSteps}/{totalSteps}
       </div>
       
-      {/* Minimal progress bar */}
-      <div className="w-64 bg-gray-200 rounded-full h-2">
+      {/* Progress bar with traveling car */}
+      <div className="relative w-64">
+        <div className="w-64 bg-gray-200 rounded-full h-2">
+          <div 
+            className="bg-gradient-to-r from-green-500 to-blue-500 h-2 rounded-full transition-all duration-500 ease-out"
+            style={{ width: `${progressPercentage}%` }}
+          ></div>
+        </div>
+        
+        {/* Traveling car icon */}
         <div 
-          className="bg-gradient-to-r from-green-500 to-blue-500 h-2 rounded-full transition-all duration-500 ease-out"
-          style={{ width: `${progressPercentage}%` }}
-        ></div>
+          className="absolute -top-3 transform -translate-x-1/2 transition-all duration-500 ease-out"
+          style={{ left: `${Math.max(8, Math.min(92, progressPercentage))}%` }}
+        >
+          <Car className="w-4 h-4 text-blue-600" />
+        </div>
       </div>
       
       <span className="text-sm text-green-600 font-medium">
