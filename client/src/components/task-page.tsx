@@ -95,6 +95,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
   const [selectedMover, setSelectedMover] = useState<MovingCompany | null>(null);
   const [movingProject, setMovingProject] = useState<any>(null);
   const [showQuestionnaireForm, setShowQuestionnaireForm] = useState(false);
+  const [formProgress, setFormProgress] = useState(0);
   const [questionnaireData, setQuestionnaireData] = useState({
     currentAddress: '',
     destinationAddress: '',
@@ -649,7 +650,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-50 p-4 pt-8">
           <div className="bg-white rounded-lg max-w-2xl w-full max-h-[85vh] overflow-y-auto mt-4">
             <div className="p-6">
-              <div className="flex justify-between items-center mb-6">
+              <div className="flex justify-between items-center mb-4">
                 <h2 className="text-2xl font-bold text-gray-900">Moving Estimate Questionnaire</h2>
                 <button
                   onClick={() => setShowQuestionnaireForm(false)}
@@ -659,6 +660,20 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
+              </div>
+              
+              {/* Progress Bar */}
+              <div className="mb-6">
+                <div className="flex justify-between text-sm text-gray-600 mb-2">
+                  <span>Progress</span>
+                  <span>{Math.round(formProgress)}% Complete</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div 
+                    className="bg-gradient-to-r from-purple-500 to-blue-500 h-2 rounded-full transition-all duration-300 ease-out"
+                    style={{ width: `${formProgress}%` }}
+                  ></div>
+                </div>
               </div>
 
               <form className="space-y-4">
@@ -903,10 +918,11 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                   <Button
                     type="button"
                     onClick={handleShareWithMovers}
-                    className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-medium flex items-center justify-center gap-2"
+                    className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-medium flex items-center justify-center gap-2 relative overflow-hidden"
                   >
-                    <span>🚀</span>
-                    Share with Recommended Movers
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 animate-pulse"></div>
+                    <span className="relative">🚀</span>
+                    <span className="relative">AI-Powered Mover Outreach</span>
                   </Button>
                 </div>
               </form>
