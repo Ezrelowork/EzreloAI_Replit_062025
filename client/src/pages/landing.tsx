@@ -17,15 +17,13 @@ export default function Landing() {
             Transform your relocation from overwhelming chaos into a guided, visual journey. 
             Our AI creates your personalized moving plan and shows your progress as an interactive highway experience.
           </p>
-
-          <p className="text-gray-500">Free • No signup required • 2 minutes to start</p>
         </div>
       </section>
 
       {/* How It Works */}
-      <section className="px-6 py-16 bg-white">
+      <section className="px-6 py-8 bg-white">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-center text-gray-900 mb-16">
+          <h2 className="text-4xl font-bold text-center text-gray-900 mb-12">
             How Ezrelo Works
           </h2>
           
@@ -67,9 +65,9 @@ export default function Landing() {
       </section>
 
       {/* Features */}
-      <section className="px-6 py-16 bg-gray-50">
+      <section className="px-6 py-8 bg-gray-50">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-center text-gray-900 mb-16">
+          <h2 className="text-4xl font-bold text-center text-gray-900 mb-12">
             Why Choose Ezrelo
           </h2>
           
