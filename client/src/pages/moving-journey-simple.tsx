@@ -78,19 +78,35 @@ export default function MovingJourney() {
   const [journeyData, setJourneyData] = useState<JourneyStep[]>([]);
   const { isOpen, currentTask, openModal, closeModal } = useTaskModal();
   const { isZoomed, zoomOrigin, currentTaskData, zoomIntoTask, zoomOut } = useZoomNavigation();
+  const taskCardRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+  const signPositionsRef = useRef<{ [key: string]: { left: string; top: string } }>({});
   
-  // Add effect to reset positions after zoom out
+  // Store original sign positions and force reset after zoom out
   useEffect(() => {
     if (!isZoomed && !zoomOrigin) {
-      // Force position reset after zoom out completes
-      const container = document.querySelector('.relative.max-w-7xl');
-      if (container) {
-        container.style.transform = 'none';
-        container.style.transformOrigin = 'initial';
-      }
+      // Small delay to ensure zoom animation completes
+      setTimeout(() => {
+        // Reset all sign positions to their stored originals
+        Object.keys(signPositionsRef.current).forEach(stepId => {
+          const signElement = document.querySelector(`[data-step-id="${stepId}"]`) as HTMLElement;
+          if (signElement && signElement.style) {
+            const originalPos = signPositionsRef.current[stepId];
+            signElement.style.left = originalPos.left;
+            signElement.style.top = originalPos.top;
+            signElement.style.transform = 'translate(-50%, -50%)';
+            signElement.style.transformOrigin = 'center';
+          }
+        });
+        
+        // Reset container
+        const container = document.querySelector('.relative.max-w-7xl') as HTMLElement;
+        if (container) {
+          container.style.transform = 'none';
+          container.style.transformOrigin = 'initial';
+        }
+      }, 100);
     }
   }, [isZoomed, zoomOrigin]);
-  const taskCardRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
 
   // Highway graphics
   const customGraphics = {
@@ -342,10 +358,14 @@ export default function MovingJourney() {
             return null;
           }
           
+          // Store original position
+          signPositionsRef.current[step.id] = { left: position.left, top: position.top };
+          
           return (
             <div
               key={step.id}
               ref={el => taskCardRefs.current[step.id] = el}
+              data-step-id={step.id}
               className="absolute cursor-pointer transition-all duration-300 hover:scale-110 z-20"
               style={{
                 left: position.left,

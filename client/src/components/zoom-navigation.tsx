@@ -90,6 +90,25 @@ export const useZoomNavigation = () => {
       body.style.transform = '';
       body.style.transformOrigin = '';
       
+      // Reset all highway signs to their original positions
+      const signs = document.querySelectorAll('[data-step-id]');
+      signs.forEach((sign) => {
+        const htmlSign = sign as HTMLElement;
+        if (htmlSign.style) {
+          // Force recalculation of positions
+          htmlSign.style.position = 'absolute';
+          htmlSign.style.transform = 'translate(-50%, -50%)';
+          htmlSign.style.transformOrigin = 'center';
+        }
+      });
+      
+      // Reset highway container
+      const container = document.querySelector('.relative.max-w-7xl') as HTMLElement;
+      if (container && container.style) {
+        container.style.transform = 'none';
+        container.style.transformOrigin = 'initial';
+      }
+      
       // Force a reflow to ensure positions are reset
       window.scrollTo(0, 0);
     }, 800);
