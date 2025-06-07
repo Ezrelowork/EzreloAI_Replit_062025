@@ -1245,16 +1245,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
             </Button>
           )}
           
-          {/* Secondary action - questionnaire button when completed */}
-          {currentQuestionnaire && (
-            <Button
-              onClick={() => setShowQuestionnaireForm(true)}
-              variant="outline"
-              className="border-gray-300 text-gray-700 hover:bg-gray-50 font-medium py-2 px-4 rounded-lg text-sm shadow-sm transition-all"
-            >
-              View Questionnaire
-            </Button>
-          )}
+
           
           <Button
             onClick={onComplete}
