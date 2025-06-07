@@ -397,7 +397,7 @@ export default function MovingJourney() {
           } else if (index === 1) {
             position = { left: '75%', top: '65%' };    // Sign 2 - moved 35% total right to other side of road
           } else if (index === 2) {
-            position = { left: '37%', top: '29%' };    // Sign 3 - moved left 33% total and up 20% total
+            position = { left: '38%', top: '29%' };    // Sign 3 - moved left 32% total and up 20% total
           } else if (index === 3) {
             position = { left: '78%', top: '23%' };    // Sign 4 - moved right 28% total and down 3%
           } else {
