@@ -485,7 +485,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                           <Button
                             onClick={() => handleReferralClick(company, 'quote_request')}
                             variant="outline"
-                            className="border-orange-500 text-orange-700 hover:bg-orange-50 px-3 py-1 rounded text-xs font-medium"
+                            className="border-orange-500 text-orange-700 hover:bg-orange-50 px-3 py-1 rounded text-sm font-medium"
                           >
                             Quote
                           </Button>
