@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient, useQueries } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
 import jsPDF from 'jspdf';
 import { 
@@ -20,7 +20,10 @@ import {
   Phone,
   CheckCircle,
   AlertTriangle,
-  Info
+  Info,
+  MessageSquare,
+  User,
+  Loader2
 } from 'lucide-react';
 
 interface MovingCompany {
@@ -118,6 +121,36 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
   });
 
   const { toast } = useToast();
+
+  // Custom hook to fetch Google reviews for a company
+  const useGoogleReviews = (companyName: string, location?: string) => {
+    return useQuery({
+      queryKey: ['google-reviews', companyName, location],
+      queryFn: async () => {
+        if (!companyName) return null;
+        const response = await apiRequest('GET', `/api/google-reviews/${encodeURIComponent(companyName)}?location=${encodeURIComponent(location || '')}`);
+        return response.json();
+      },
+      enabled: !!companyName,
+      staleTime: 1000 * 60 * 30, // Cache for 30 minutes
+    });
+  };
+
+  // Fetch Google reviews for all companies
+  const companyNames = movingCompanies.map(company => company.provider);
+  const reviewsQueries = useQueries({
+    queries: companyNames.map(companyName => ({
+      queryKey: ['google-reviews', companyName, moveData.to],
+      queryFn: async () => {
+        if (!companyName) return null;
+        const response = await apiRequest('GET', `/api/google-reviews/${encodeURIComponent(companyName)}?location=${encodeURIComponent(moveData.to || '')}`);
+        return response.json();
+      },
+      enabled: !!companyName,
+      staleTime: 1000 * 60 * 30, // Cache for 30 minutes
+    }))
+  });
+
   const queryClient = useQueryClient();
 
   // Auto-load or create project on page load
@@ -1242,61 +1275,140 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                 </h2>
                 <div className="space-y-3">
                   {searchType === 'moving' && movingCompanies.length > 0 && 
-                    movingCompanies.map((company, index) => (
-                      <div key={index} className="border border-gray-200 rounded-lg p-3 hover:border-blue-300 hover:shadow-sm transition-all">
-                        <div className="flex items-center justify-between mb-1">
-                          <h3 className="text-base font-bold text-gray-900">{company.provider}</h3>
-                          {company.estimatedCost && !company.estimatedCost.includes('Contact for') && (
-                            <span className="text-base font-bold text-green-600">{company.estimatedCost}</span>
+                    movingCompanies.map((company, index) => {
+                      const reviewsQuery = useGoogleReviews(company.provider, moveData.to);
+                      const isExpanded = expandedReviews.includes(company.provider);
+                      
+                      const toggleReviews = () => {
+                        setExpandedReviews(prev => 
+                          isExpanded 
+                            ? prev.filter(name => name !== company.provider)
+                            : [...prev, company.provider]
+                        );
+                      };
+
+                      const googleData = reviewsQuery.data;
+                      const displayRating = googleData?.rating || company.rating;
+                      const totalReviews = googleData?.totalReviews || 0;
+
+                      return (
+                        <div key={index} className="border border-gray-200 rounded-lg p-4 hover:border-blue-300 hover:shadow-md transition-all">
+                          <div className="flex items-center justify-between mb-2">
+                            <h3 className="text-base font-bold text-gray-900">{company.provider}</h3>
+                            {company.estimatedCost && !company.estimatedCost.includes('Contact for') && (
+                              <span className="text-base font-bold text-green-600">{company.estimatedCost}</span>
+                            )}
+                          </div>
+                          
+                          <div className="flex items-center gap-3 mb-3">
+                            <div className="flex items-center gap-1">
+                              {[...Array(5)].map((_, i) => (
+                                <Star
+                                  key={i}
+                                  className={`w-4 h-4 ${
+                                    i < Math.floor(displayRating) ? 'text-yellow-400 fill-current' : 'text-gray-300'
+                                  }`}
+                                />
+                              ))}
+                              <span className="text-sm text-gray-700 font-medium">
+                                {displayRating.toFixed(1)}
+                                {totalReviews > 0 && (
+                                  <span className="text-gray-500"> ({totalReviews} reviews)</span>
+                                )}
+                              </span>
+                              {googleData && (
+                                <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full ml-2">
+                                  Google Verified
+                                </span>
+                              )}
+                            </div>
+                            <span className="text-sm text-gray-500">•</span>
+                            <span className="text-sm text-gray-600">{googleData?.phone || company.phone}</span>
+                          </div>
+
+                          <p className="text-sm text-gray-700 mb-3">{company.description}</p>
+
+                          {/* Google Reviews Section */}
+                          {googleData?.reviews && googleData.reviews.length > 0 && (
+                            <div className="mb-3">
+                              <button
+                                onClick={toggleReviews}
+                                className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-medium mb-2"
+                              >
+                                <MessageSquare className="w-4 h-4" />
+                                {isExpanded ? 'Hide' : 'Show'} Google Reviews ({googleData.reviews.length})
+                              </button>
+                              
+                              {isExpanded && (
+                                <div className="space-y-3 max-h-64 overflow-y-auto">
+                                  {googleData.reviews.slice(0, 3).map((review: any, idx: number) => (
+                                    <div key={idx} className="bg-gray-50 rounded-lg p-3 text-sm">
+                                      <div className="flex items-center gap-2 mb-2">
+                                        <User className="w-4 h-4 text-gray-400" />
+                                        <span className="font-medium text-gray-900">{review.author}</span>
+                                        <div className="flex items-center">
+                                          {[...Array(5)].map((_, i) => (
+                                            <Star
+                                              key={i}
+                                              className={`w-3 h-3 ${
+                                                i < review.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
+                                              }`}
+                                            />
+                                          ))}
+                                        </div>
+                                        <span className="text-xs text-gray-500">{review.relativeTime}</span>
+                                      </div>
+                                      <p className="text-gray-700 text-xs leading-relaxed">
+                                        {review.text.length > 150 
+                                          ? `${review.text.substring(0, 150)}...` 
+                                          : review.text}
+                                      </p>
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          <div className="flex items-center justify-between">
+                            <div className="flex flex-wrap gap-1">
+                              {company.services.slice(0, 3).map((service, idx) => (
+                                <span key={idx} className="px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs font-medium">
+                                  {service}
+                                </span>
+                              ))}
+                            </div>
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => handleReferralClick(company, 'website_visit')}
+                                className="text-blue-600 hover:text-blue-700 text-sm font-medium underline"
+                              >
+                                Website
+                              </button>
+                              <button
+                                onClick={() => window.open(`tel:${googleData?.phone || company.phone}`, '_self')}
+                                className="text-green-600 hover:text-green-700 text-sm font-medium underline"
+                              >
+                                Call
+                              </button>
+                              <button
+                                onClick={() => handleSelectMover(company)}
+                                className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-sm font-medium transition-colors"
+                              >
+                                Choose This Mover
+                              </button>
+                            </div>
+                          </div>
+
+                          {reviewsQuery.isLoading && (
+                            <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">
+                              <Loader2 className="w-3 h-3 animate-spin" />
+                              Loading Google reviews...
+                            </div>
                           )}
                         </div>
-                        <div className="flex items-center gap-2 mb-2">
-                          <div className="flex items-center gap-1">
-                            {[...Array(5)].map((_, i) => (
-                              <Star
-                                key={i}
-                                className={`w-3 h-3 ${
-                                  i < company.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
-                                }`}
-                              />
-                            ))}
-                            <span className="text-sm text-gray-600">({company.rating})</span>
-                          </div>
-                          <span className="text-sm text-gray-500">•</span>
-                          <span className="text-sm text-gray-600">{company.phone}</span>
-                        </div>
-                        <p className="text-sm text-gray-700 mb-2">{company.description}</p>
-                        <div className="flex items-center justify-between">
-                          <div className="flex flex-wrap gap-1">
-                            {company.services.slice(0, 4).map((service, idx) => (
-                              <span key={idx} className="px-2 py-1 bg-blue-50 text-blue-700 rounded text-sm font-medium">
-                                {service}
-                              </span>
-                            ))}
-                          </div>
-                          <div className="flex gap-3">
-                            <button
-                              onClick={() => handleReferralClick(company, 'website_visit')}
-                              className="text-blue-600 hover:text-blue-700 text-sm font-medium underline"
-                            >
-                              Website
-                            </button>
-                            <button
-                              onClick={() => window.open(`tel:${company.phone}`, '_self')}
-                              className="text-green-600 hover:text-green-700 text-sm font-medium underline"
-                            >
-                              Call
-                            </button>
-                            <button
-                              onClick={() => handleSelectMover(company)}
-                              className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-sm font-medium transition-colors"
-                            >
-                              Choose This Mover
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                 </div>
               </div>
             </div>
