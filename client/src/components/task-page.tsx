@@ -562,12 +562,14 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
           }
           
           if (projectToUse?.id) {
-            await apiRequest("POST", "/api/archive-questionnaire", {
+            console.log('Archiving questionnaire for project:', projectToUse.id);
+            const archiveResponse = await apiRequest("POST", "/api/archive-questionnaire", {
               projectId: projectToUse.id,
               questionnaire: questionnaireData,
               pdfData: base64PDF,
               type: "email_pdf"
             });
+            console.log('Archive response:', archiveResponse.status);
             
             // Refresh current questionnaire
             refreshCurrentQuestionnaire();
