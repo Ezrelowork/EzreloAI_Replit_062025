@@ -72,6 +72,7 @@ export default function AIAssistant() {
       // Create moving project with AI data
       try {
         const projectData = {
+          userId: 1, // Default user ID for now
           fromAddress: relocationDetails.fromLocation,
           toAddress: relocationDetails.toLocation,
           moveDate: relocationDetails.moveDate,
