@@ -290,25 +290,27 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                   <span>{moveData.to}</span>
                   <span className="text-gray-500 text-base ml-4">Move Date: {new Date(moveData.date).toLocaleDateString()}</span>
                 </div>
-                {/* Status Information */}
-                {showResults && searchType === 'moving' && movingCompanies.length > 0 && (
-                  <div className="flex items-center gap-2 text-sm text-green-700 bg-green-50 px-3 py-2 rounded-lg w-fit">
-                    <CheckCircle className="w-4 h-4" />
-                    <span>Found {movingCompanies.length} moving companies for your route</span>
-                  </div>
-                )}
-                {showResults && searchType === 'utilities' && utilities.length > 0 && (
-                  <div className="flex items-center gap-2 text-sm text-green-700 bg-green-50 px-3 py-2 rounded-lg w-fit">
-                    <CheckCircle className="w-4 h-4" />
-                    <span>Found {utilities.length} utility services in your area</span>
-                  </div>
-                )}
-                {showResults && searchType === 'housing' && housingServices.length > 0 && (
-                  <div className="flex items-center gap-2 text-sm text-green-700 bg-green-50 px-3 py-2 rounded-lg w-fit">
-                    <CheckCircle className="w-4 h-4" />
-                    <span>Found {housingServices.length} housing services available</span>
-                  </div>
-                )}
+                {/* Status Information - Reserve space to prevent layout shift */}
+                <div className="min-h-[32px] flex items-center">
+                  {showResults && searchType === 'moving' && movingCompanies.length > 0 && (
+                    <div className="flex items-center gap-2 text-sm text-green-700 bg-green-50 px-3 py-2 rounded-lg w-fit">
+                      <CheckCircle className="w-4 h-4" />
+                      <span>Found {movingCompanies.length} moving companies for your route</span>
+                    </div>
+                  )}
+                  {showResults && searchType === 'utilities' && utilities.length > 0 && (
+                    <div className="flex items-center gap-2 text-sm text-green-700 bg-green-50 px-3 py-2 rounded-lg w-fit">
+                      <CheckCircle className="w-4 h-4" />
+                      <span>Found {utilities.length} utility services in your area</span>
+                    </div>
+                  )}
+                  {showResults && searchType === 'housing' && housingServices.length > 0 && (
+                    <div className="flex items-center gap-2 text-sm text-green-700 bg-green-50 px-3 py-2 rounded-lg w-fit">
+                      <CheckCircle className="w-4 h-4" />
+                      <span>Found {housingServices.length} housing services available</span>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
             
