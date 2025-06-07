@@ -90,7 +90,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
 
   const { toast } = useToast();
 
-  // Load move data from localStorage on component mount
+  // Load move data and cached results from localStorage on component mount
   useEffect(() => {
     const fromLocation = localStorage.getItem('aiFromLocation') || 'Austin, TX';
     const toLocation = localStorage.getItem('aiToLocation') || 'Dallas, TX';
@@ -101,7 +101,35 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
       to: toLocation,
       date: moveDate
     });
-  }, []);
+
+    // Load cached data based on task type
+    const taskTitle = task.title.toLowerCase();
+    if (taskTitle.includes('moving') || taskTitle.includes('mover')) {
+      const cachedMovingData = localStorage.getItem(`movingCompanies_${fromLocation}_${toLocation}`);
+      if (cachedMovingData) {
+        const companies = JSON.parse(cachedMovingData);
+        setMovingCompanies(companies);
+        setSearchType('moving');
+        setShowResults(true);
+      }
+    } else if (taskTitle.includes('utilities') || taskTitle.includes('electric') || taskTitle.includes('gas')) {
+      const cachedUtilitiesData = localStorage.getItem(`utilities_${toLocation}`);
+      if (cachedUtilitiesData) {
+        const utilities = JSON.parse(cachedUtilitiesData);
+        setUtilities(utilities);
+        setSearchType('utilities');
+        setShowResults(true);
+      }
+    } else if (taskTitle.includes('housing') || taskTitle.includes('real estate') || taskTitle.includes('home')) {
+      const cachedHousingData = localStorage.getItem(`housing_${toLocation}`);
+      if (cachedHousingData) {
+        const housing = JSON.parse(cachedHousingData);
+        setHousingServices(housing);
+        setSearchType('housing');
+        setShowResults(true);
+      }
+    }
+  }, [task.title]);
 
   // Moving company search mutation
   const movingCompanyMutation = useMutation({
@@ -125,6 +153,9 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
       setMovingCompanies(companies);
       setSearchType('moving');
       setShowResults(true);
+      
+      // Cache the results for future visits
+      localStorage.setItem(`movingCompanies_${moveData.from}_${moveData.to}`, JSON.stringify(companies));
     },
     onError: (error) => {
       toast({
@@ -151,10 +182,9 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
       setUtilities(utilityServices);
       setSearchType('utilities');
       setShowResults(true);
-      toast({
-        title: "Utilities Found",
-        description: `Found ${utilityServices.length} utility services in your area`,
-      });
+      
+      // Cache the results for future visits
+      localStorage.setItem(`utilities_${moveData.to}`, JSON.stringify(utilityServices));
     },
     onError: (error) => {
       toast({
@@ -181,10 +211,9 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
       setHousingServices(services);
       setSearchType('housing');
       setShowResults(true);
-      toast({
-        title: "Housing Services Found",
-        description: `Found ${services.length} housing services in your area`,
-      });
+      
+      // Cache the results for future visits
+      localStorage.setItem(`housing_${moveData.to}`, JSON.stringify(services));
     },
     onError: (error) => {
       toast({
