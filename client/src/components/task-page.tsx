@@ -1102,19 +1102,34 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
             </div>
             
             {/* Right Section - Progress (1/3 width) */}
-            <div className="w-1/3 text-right">
-              <h3 className="text-sm font-bold text-gray-900 mb-3">Progress</h3>
+            <div className="w-1/3">
+              <h3 className="text-sm font-bold text-gray-900 mb-3 text-right">Progress</h3>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <span className="text-xs text-gray-600">Complete</span>
                   <span className="text-xs font-bold text-blue-600">25%</span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div className="bg-blue-600 h-2 rounded-full" style={{ width: '25%' }}></div>
-                </div>
-                <div className="flex items-center justify-end gap-1 text-xs text-gray-600">
-                  <CheckCircle className="w-3 h-3 text-green-500" />
-                  <span>Research done</span>
+                
+                {/* Progress Bar with Milestone Markers */}
+                <div className="relative">
+                  <div className="w-full bg-gray-200 rounded-full h-3 relative">
+                    {/* Progress Fill */}
+                    <div className="bg-blue-600 h-3 rounded-full transition-all duration-300" style={{ width: '25%' }}></div>
+                    
+                    {/* Milestone Markers */}
+                    <div className="absolute top-0 left-1/3 w-0.5 h-3 bg-gray-400 transform -translate-x-0.5"></div>
+                    <div className="absolute top-0 left-2/3 w-0.5 h-3 bg-gray-400 transform -translate-x-0.5"></div>
+                  </div>
+                  
+                  {/* Milestone Labels */}
+                  <div className="flex justify-between text-xs text-gray-500 mt-1">
+                    <span className="flex items-center gap-1">
+                      <CheckCircle className="w-3 h-3 text-green-500" />
+                      Research
+                    </span>
+                    <span className="text-center">Outreach</span>
+                    <span className="text-right">Complete</span>
+                  </div>
                 </div>
               </div>
             </div>
