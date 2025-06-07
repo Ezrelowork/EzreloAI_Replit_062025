@@ -37,8 +37,8 @@ export const DynamicHighwaySign: React.FC<DynamicSignProps> = ({
       className={`relative cursor-pointer transform transition-all duration-300 hover:scale-105 ${className}`}
       onClick={onClick}
     >
-      {/* Custom blank sign background */}
-      <div className="relative w-48 h-32">
+      {/* Custom blank sign background - 35% larger */}
+      <div className="relative w-64 h-44">
         <img 
           src={blankSignPath} 
           alt="Highway Sign" 
