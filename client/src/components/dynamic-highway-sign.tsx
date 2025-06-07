@@ -68,7 +68,7 @@ export const DynamicHighwaySign: React.FC<DynamicSignProps> = ({
         >
           <div className={`text-center text-white ${completed ? 'opacity-60' : ''}`}>
             {/* Priority indicator */}
-            <div className={`text-[9px] font-bold mb-1 ${priorityColors[priority]} uppercase tracking-wider drop-shadow-sm`}>
+            <div className={`text-[10px] font-bold mb-1 ${priorityColors[priority]} uppercase tracking-wider drop-shadow-sm`}>
               {priority} PRIORITY
             </div>
             
