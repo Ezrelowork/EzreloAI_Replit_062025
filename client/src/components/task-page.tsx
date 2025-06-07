@@ -399,9 +399,11 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
           </div>
         </div>
 
-        {/* Main Content - Service Results (55% width) */}
-        <div className="w-full max-w-[55%]">
-          {showResults && (
+        {/* Main Content Layout */}
+        <div className="flex gap-6">
+          {/* Service Results (55% width) */}
+          <div className="w-full max-w-[55%]">
+            {showResults && (
             <div className="mb-6">
               <div className="bg-white rounded-lg shadow-md border border-blue-100 p-4">
                 <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
@@ -465,6 +467,121 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
               </div>
             </div>
           )}
+          </div>
+
+          {/* Moving Organization Sidebar */}
+          <div className="w-full max-w-[40%]">
+            <div className="space-y-4">
+              
+              {/* Moving Timeline */}
+              <div className="bg-white rounded-lg shadow-md border p-4">
+                <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+                  <div className="w-1 h-6 bg-orange-500 rounded-full"></div>
+                  Moving Timeline
+                </h3>
+                <div className="space-y-3">
+                  {[
+                    { weeks: '8-10 weeks', task: 'Research & book movers', status: 'current' },
+                    { weeks: '6-8 weeks', task: 'Order moving supplies', status: 'pending' },
+                    { weeks: '4-6 weeks', task: 'Start decluttering', status: 'pending' },
+                    { weeks: '2-4 weeks', task: 'Confirm moving details', status: 'pending' },
+                    { weeks: '1-2 weeks', task: 'Pack non-essentials', status: 'pending' },
+                    { weeks: 'Moving week', task: 'Pack essentials & move', status: 'pending' }
+                  ].map((item, index) => (
+                    <div key={index} className={`flex items-center gap-3 p-2 rounded ${
+                      item.status === 'current' ? 'bg-orange-50 border border-orange-200' : 'bg-gray-50'
+                    }`}>
+                      <div className={`w-2 h-2 rounded-full ${
+                        item.status === 'current' ? 'bg-orange-500' : 'bg-gray-300'
+                      }`}></div>
+                      <div className="flex-1">
+                        <div className="text-sm font-medium text-gray-900">{item.task}</div>
+                        <div className="text-xs text-gray-600">{item.weeks} before</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Moving Checklist */}
+              <div className="bg-white rounded-lg shadow-md border p-4">
+                <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+                  <div className="w-1 h-6 bg-green-500 rounded-full"></div>
+                  Quick Checklist
+                </h3>
+                <div className="space-y-2">
+                  {[
+                    'Get 3+ written estimates',
+                    'Check insurance coverage',
+                    'Read reviews & references', 
+                    'Verify license & bonding',
+                    'Understand pricing structure',
+                    'Confirm moving date'
+                  ].map((item, index) => (
+                    <div key={index} className="flex items-center gap-2">
+                      <input type="checkbox" className="w-4 h-4 text-blue-600 rounded" />
+                      <span className="text-sm text-gray-700">{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Moving Costs */}
+              <div className="bg-white rounded-lg shadow-md border p-4">
+                <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+                  <div className="w-1 h-6 bg-purple-500 rounded-full"></div>
+                  Estimated Costs
+                </h3>
+                <div className="space-y-2">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Local Move (same city)</span>
+                    <span className="font-medium">$800-1,500</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Long Distance (interstate)</span>
+                    <span className="font-medium">$2,500-5,000</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Packing Services</span>
+                    <span className="font-medium">$500-1,200</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-600">Storage (per month)</span>
+                    <span className="font-medium">$50-200</span>
+                  </div>
+                  <div className="border-t pt-2 mt-2">
+                    <div className="flex justify-between text-sm font-bold">
+                      <span className="text-gray-900">Total Range</span>
+                      <span className="text-green-600">$1,350-6,700</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Moving Tips */}
+              <div className="bg-white rounded-lg shadow-md border p-4">
+                <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+                  <div className="w-1 h-6 bg-blue-500 rounded-full"></div>
+                  Pro Tips
+                </h3>
+                <div className="space-y-3">
+                  <div className="bg-blue-50 p-3 rounded">
+                    <div className="text-sm font-medium text-blue-900">Best Booking Time</div>
+                    <div className="text-xs text-blue-700">Book 8+ weeks ahead for summer moves, 4+ weeks for off-season</div>
+                  </div>
+                  <div className="bg-yellow-50 p-3 rounded">
+                    <div className="text-sm font-medium text-yellow-900">Save Money</div>
+                    <div className="text-xs text-yellow-700">Move mid-month, mid-week, and avoid summer peak season</div>
+                  </div>
+                  <div className="bg-green-50 p-3 rounded">
+                    <div className="text-sm font-medium text-green-900">Red Flags</div>
+                    <div className="text-xs text-green-700">Avoid companies requiring large deposits or door-to-door sales</div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </div>
         </div>
       </div>
     </div>
