@@ -1345,8 +1345,8 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                             >
                               <MessageSquare className="w-4 h-4" />
                               {isLoadingReviews ? 'Loading Google Reviews...' : 
-                               googleData?.reviews?.length > 0 ? 
-                               `Google Reviews (${googleData.reviews.length})` :
+                               totalReviews > 0 ? 
+                               `Google Reviews (${totalReviews})` :
                                'Google Reviews'}
                             </button>
                             
