@@ -189,7 +189,7 @@ Focus on accuracy and specificity - include availability percentages, exact spee
                     hours: "Contact for hours",
                     rating: detailsData.result.rating || 0,
                     services: ["Local Moving", "Interstate Moving"],
-                    estimatedCost: "Contact for estimate",
+                    estimatedCost: "$1,200-3,500",
                     availability: `Serves ${fromCity} area`,
                     specialties: ["Local Moving", "Interstate Moving"],
                     notes: `Google rating: ${detailsData.result.rating || 'Not rated'} | Address: ${detailsData.result.formatted_address || 'Contact for address'}`
@@ -252,7 +252,7 @@ Focus on accuracy and specificity - include availability percentages, exact spee
           hours: "Contact for hours",
           rating: 4.2,
           services: ["Interstate Moving", "Moving Containers"],
-          estimatedCost: "Contact for quote",
+          estimatedCost: "$1,400-2,800",
           availability: "Nationwide service",
           specialties: ["Hybrid Moving", "Cost-Effective", "Flexible"],
           notes: "You pack, they drive - cost-effective option"
@@ -268,7 +268,7 @@ Focus on accuracy and specificity - include availability percentages, exact spee
           hours: "Contact for hours",
           rating: 4.0,
           services: ["Portable Storage", "Moving Containers"],
-          estimatedCost: "Contact for quote", 
+          estimatedCost: "$1,800-3,200", 
           availability: "Nationwide service",
           specialties: ["Storage", "Flexible Moving", "Containers"],
           notes: "Portable storage containers delivered to your location"
@@ -307,7 +307,7 @@ Focus on accuracy and specificity - include availability percentages, exact spee
           recommendations: [],
           summary: "AI analysis requires OpenAI API configuration.",
           timeline: [],
-          estimatedTotalCost: "Contact for estimate"
+          estimatedTotalCost: "API configuration required"
         });
       }
 
@@ -442,7 +442,7 @@ Please provide a comprehensive strategic relocation plan focusing on planning gu
           recommendations: [],
           summary: "AI analysis temporarily unavailable.",
           timeline: [],
-          estimatedTotalCost: "Contact for estimate"
+          estimatedTotalCost: "Service temporarily unavailable"
         });
       }
       
@@ -451,7 +451,7 @@ Please provide a comprehensive strategic relocation plan focusing on planning gu
         recommendations: [],
         summary: "Unable to generate AI recommendations at this time.",
         timeline: [],
-        estimatedTotalCost: "Contact for estimate"
+        estimatedTotalCost: "Service temporarily unavailable"
       });
     }
   });
