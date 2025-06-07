@@ -71,7 +71,21 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete }) => {
   const [housingServices, setHousingServices] = useState<HousingService[]>([]);
   const [showResults, setShowResults] = useState(false);
   const [searchType, setSearchType] = useState<'moving' | 'utilities' | 'housing'>('moving');
+  const [moveData, setMoveData] = useState({ from: '', to: '', date: '' });
   const { toast } = useToast();
+
+  // Load move data from localStorage on component mount
+  useEffect(() => {
+    const fromLocation = localStorage.getItem('aiFromLocation') || 'Austin, TX';
+    const toLocation = localStorage.getItem('aiToLocation') || 'Dallas, TX';
+    const moveDate = localStorage.getItem('aiMoveDate') || '2024-08-15';
+    
+    setMoveData({
+      from: fromLocation,
+      to: toLocation,
+      date: moveDate
+    });
+  }, []);
   
   // Determine task type from title
   const getTaskType = () => {
@@ -88,14 +102,18 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete }) => {
   // Moving company search mutation
   const movingCompanyMutation = useMutation({
     mutationFn: async () => {
+      // Parse the actual move locations
+      const fromParts = moveData.from.split(',');
+      const toParts = moveData.to.split(',');
+      
       const response = await apiRequest("POST", "/api/moving-companies", {
         fromAddress: "",
-        fromCity: "Austin",
-        fromState: "TX",
-        fromZip: "78701",
-        toCity: "Dallas",
-        toState: "TX",
-        toZip: "75201"
+        fromCity: fromParts[0]?.trim() || "Austin",
+        fromState: fromParts[1]?.trim() || "TX",
+        fromZip: fromParts[2]?.trim() || "78701",
+        toCity: toParts[0]?.trim() || "Dallas",
+        toState: toParts[1]?.trim() || "TX",
+        toZip: toParts[2]?.trim() || "75201"
       });
       return await response.json();
     },
@@ -121,10 +139,11 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete }) => {
   // Utilities search mutation
   const utilitiesMutation = useMutation({
     mutationFn: async () => {
+      const toParts = moveData.to.split(',');
       const response = await apiRequest("POST", "/api/utilities-search", {
-        city: "Dallas",
-        state: "TX",
-        zipCode: "75201"
+        city: toParts[0]?.trim() || "Dallas",
+        state: toParts[1]?.trim() || "TX",
+        zipCode: toParts[2]?.trim() || "75201"
       });
       return await response.json();
     },
@@ -150,10 +169,11 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete }) => {
   // Housing services search mutation
   const housingMutation = useMutation({
     mutationFn: async () => {
+      const toParts = moveData.to.split(',');
       const response = await apiRequest("POST", "/api/housing-services", {
-        city: "Dallas",
-        state: "TX",
-        zipCode: "75201"
+        city: toParts[0]?.trim() || "Dallas",
+        state: toParts[1]?.trim() || "TX",
+        zipCode: toParts[2]?.trim() || "75201"
       });
       return await response.json();
     },
@@ -275,12 +295,19 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete }) => {
             </div>
             <div className="flex-1">
               <h1 className="text-4xl font-bold text-gray-900 mb-3">{task.title}</h1>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-4 mb-2">
                 <span className={`px-4 py-2 rounded-full text-sm font-bold text-white ${config.color}`}>
                   {task.priority.toUpperCase()} PRIORITY
                 </span>
                 <span className="text-gray-600 font-medium">Timeline: {task.week}</span>
                 <span className="text-gray-600 font-medium">Category: {task.category}</span>
+              </div>
+              <div className="flex items-center gap-2 text-lg font-semibold text-gray-700">
+                <MapPin className="w-5 h-5 text-blue-600" />
+                <span>{moveData.from}</span>
+                <span className="text-blue-600">→</span>
+                <span>{moveData.to}</span>
+                <span className="text-gray-500 text-base ml-4">Move Date: {new Date(moveData.date).toLocaleDateString()}</span>
               </div>
             </div>
             
@@ -335,9 +362,9 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete }) => {
             {showResults ? (
               <div className="bg-white rounded-2xl shadow-lg p-6">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">
-                  {searchType === 'moving' && 'Moving Companies for Austin → Dallas'}
-                  {searchType === 'utilities' && 'Utilities & Services for Dallas, TX'}
-                  {searchType === 'housing' && 'Housing Services for Dallas, TX'}
+                  {searchType === 'moving' && `Moving Companies for ${moveData.from} → ${moveData.to}`}
+                  {searchType === 'utilities' && `Utilities & Services for ${moveData.to}`}
+                  {searchType === 'housing' && `Housing Services for ${moveData.to}`}
                 </h2>
                 {/* Results Display */}
                 <div className="space-y-4">
