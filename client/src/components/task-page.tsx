@@ -274,19 +274,12 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete }) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
-      {/* Centered Notification Modal */}
+      {/* Top Notification */}
       {showNotification && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
-          <div className="bg-white rounded-2xl shadow-2xl border-2 border-green-200 p-6 max-w-md mx-4 transform transition-all duration-500 ease-out opacity-95">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
-                <CheckCircle className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-gray-900">Success!</h3>
-                <p className="text-gray-700">{notificationMessage}</p>
-              </div>
-            </div>
+        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 pointer-events-none">
+          <div className="flex items-center gap-3 text-center">
+            <CheckCircle className="w-6 h-6 text-green-600" />
+            <p className="text-lg font-semibold text-gray-900">{notificationMessage}</p>
           </div>
         </div>
       )}
