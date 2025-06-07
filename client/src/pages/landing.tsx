@@ -121,7 +121,7 @@ export default function Landing() {
 
       {/* Call to Action */}
       <section className="relative px-6 py-20 overflow-hidden" style={{
-        background: `linear-gradient(rgba(37, 99, 235, 0.7), rgba(37, 99, 235, 0.7)), url('/attached_assets/highway-background.png')`,
+        background: `url('/attached_assets/highway-background.png')`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat'
