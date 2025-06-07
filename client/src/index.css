@@ -1,4 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@200;300;400;600;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100;300;400;500;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700;800&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -13,6 +16,12 @@
     opacity: 1;
   }
 }
+
+/* Font utility classes for easy testing */
+.font-inter { font-family: 'Inter', sans-serif; }
+.font-source { font-family: 'Source Sans Pro', sans-serif; }
+.font-roboto { font-family: 'Roboto', sans-serif; }
+.font-open { font-family: 'Open Sans', sans-serif; }
 
 @layer base {
   :root {

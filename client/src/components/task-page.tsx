@@ -303,60 +303,60 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
               <IconComponent className="w-12 h-12" />
             </div>
             <div className="flex-1">
-              <h1 className="text-4xl font-bold text-gray-900 mb-3">{task.title}</h1>
-              <div className="flex items-center gap-4 mb-2">
-                <span className={`px-4 py-2 rounded-full text-sm font-bold text-white ${config.color}`}>
-                  {task.priority.toUpperCase()} PRIORITY
+              <h1 className="text-2xl font-bold text-gray-900 mb-2 tracking-tight">{task.title}</h1>
+              <div className="flex items-center gap-3 mb-2">
+                <span className={`px-3 py-1 rounded-full text-xs font-bold text-white ${config.color}`}>
+                  {task.priority.toUpperCase()}
                 </span>
-                <span className="text-gray-600 font-medium">Timeline: {task.week}</span>
-                <span className="text-gray-600 font-medium">Category: {task.category}</span>
+                <span className="text-gray-600 text-sm font-medium">Timeline: {task.week}</span>
+                <span className="text-gray-600 text-sm font-medium">Category: {task.category}</span>
               </div>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2 text-lg font-semibold text-gray-700">
-                  <MapPin className="w-5 h-5 text-blue-600" />
+              <div className="space-y-1">
+                <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                  <MapPin className="w-4 h-4 text-blue-600" />
                   <span>{moveData.from}</span>
                   <span className="text-blue-600">→</span>
                   <span>{moveData.to}</span>
-                  <span className="text-gray-500 text-base ml-4">Move Date: {new Date(moveData.date).toLocaleDateString()}</span>
+                  <span className="text-gray-500 text-xs ml-3">Move Date: {new Date(moveData.date).toLocaleDateString()}</span>
                 </div>
                 {/* Status Information - Reserve space to prevent layout shift */}
-                <div className="min-h-[32px] flex items-center gap-4">
+                <div className="min-h-[24px] flex items-center gap-2">
                   {showResults && searchType === 'moving' && movingCompanies.length > 0 && (
-                    <div className="flex items-center gap-2 text-sm text-green-700 bg-green-50 px-3 py-2 rounded-lg w-fit">
-                      <CheckCircle className="w-4 h-4" />
-                      <span>Found {movingCompanies.length} moving companies (cached results)</span>
+                    <div className="flex items-center gap-1 text-xs text-green-700 bg-green-50 px-2 py-1 rounded-md w-fit">
+                      <CheckCircle className="w-3 h-3" />
+                      <span>{movingCompanies.length} providers (cached)</span>
                     </div>
                   )}
                   {showResults && searchType === 'utilities' && utilities.length > 0 && (
-                    <div className="flex items-center gap-2 text-sm text-green-700 bg-green-50 px-3 py-2 rounded-lg w-fit">
-                      <CheckCircle className="w-4 h-4" />
-                      <span>Found {utilities.length} utility services (cached results)</span>
+                    <div className="flex items-center gap-1 text-xs text-green-700 bg-green-50 px-2 py-1 rounded-md w-fit">
+                      <CheckCircle className="w-3 h-3" />
+                      <span>{utilities.length} services (cached)</span>
                     </div>
                   )}
                   {showResults && searchType === 'housing' && housingServices.length > 0 && (
-                    <div className="flex items-center gap-2 text-sm text-green-700 bg-green-50 px-3 py-2 rounded-lg w-fit">
-                      <CheckCircle className="w-4 h-4" />
-                      <span>Found {housingServices.length} housing services (cached results)</span>
+                    <div className="flex items-center gap-1 text-xs text-green-700 bg-green-50 px-2 py-1 rounded-md w-fit">
+                      <CheckCircle className="w-3 h-3" />
+                      <span>{housingServices.length} services (cached)</span>
                     </div>
                   )}
                 </div>
               </div>
             </div>
             
-            {/* Task Progress - moved from sidebar */}
-            <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-6 min-w-[280px]">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">Task Progress</h3>
-              <div className="space-y-3">
+            {/* Task Progress - compact version */}
+            <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-md p-4 min-w-[220px]">
+              <h3 className="text-sm font-bold text-gray-900 mb-3">Progress</h3>
+              <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">Completion</span>
-                  <span className="text-sm font-bold text-blue-600">25%</span>
+                  <span className="text-xs text-gray-600">Complete</span>
+                  <span className="text-xs font-bold text-blue-600">25%</span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-3">
-                  <div className="bg-blue-600 h-3 rounded-full" style={{ width: '25%' }}></div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="bg-blue-600 h-2 rounded-full" style={{ width: '25%' }}></div>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <CheckCircle className="w-4 h-4 text-green-500" />
-                  <span>Research phase completed</span>
+                <div className="flex items-center gap-1 text-xs text-gray-600">
+                  <CheckCircle className="w-3 h-3 text-green-500" />
+                  <span>Research done</span>
                 </div>
               </div>
             </div>
@@ -364,45 +364,45 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
         </div>
 
         {/* Action Buttons */}
-        <div className="flex gap-4 mb-8">
+        <div className="flex gap-3 mb-6">
           <Button
             onClick={() => setLocation('/')}
             variant="outline"
-            className="gap-2"
+            className="gap-1 text-sm py-2 px-4"
           >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Hub
+            <ArrowLeft className="w-3 h-3" />
+            Hub
           </Button>
           <Button
             onClick={() => onBack ? onBack() : setLocation('/moving-journey')}
             variant="outline"
-            className="border-2 border-blue-600 hover:border-blue-700 text-blue-700 hover:text-blue-800 font-bold py-4 px-8 rounded-xl text-lg shadow-lg transform hover:scale-105 transition-all"
+            className="border border-blue-600 hover:border-blue-700 text-blue-700 hover:text-blue-800 font-medium py-2 px-4 rounded-lg text-sm shadow-sm transform hover:scale-105 transition-all"
           >
-            <ArrowLeft className="w-5 h-5 mr-2" />
-            Back to Journey
+            <ArrowLeft className="w-3 h-3 mr-1" />
+            Journey
           </Button>
           
           <Button
             onClick={() => movingCompanyMutation.mutate()}
             disabled={movingCompanyMutation.isPending}
-            className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-4 px-8 rounded-xl text-lg shadow-lg transform hover:scale-105 transition-all"
+            className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg text-sm shadow-sm transition-all"
           >
-            {movingCompanyMutation.isPending ? 'Searching...' : 'Find Movers'}
+            {movingCompanyMutation.isPending ? 'Searching...' : 'Find Providers'}
           </Button>
           
           <Button
             onClick={onComplete}
-            className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-bold py-4 px-8 rounded-xl text-lg shadow-lg transform hover:scale-105 transition-all"
+            className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-6 rounded-lg text-sm shadow-sm transition-all"
           >
-            <CheckCircle className="w-5 h-5 mr-2" />
-            Mark Complete
+            <CheckCircle className="w-3 h-3 mr-1" />
+            Complete
           </Button>
           
           <Button
             variant="outline"
-            className="border-2 border-gray-400 hover:border-gray-500 text-gray-700 hover:text-gray-900 font-bold py-4 px-8 rounded-xl text-lg shadow-lg transform hover:scale-105 transition-all"
+            className="border border-gray-400 hover:border-gray-500 text-gray-700 hover:text-gray-900 font-medium py-2 px-6 rounded-lg text-sm shadow-sm transition-all"
           >
-            Need Help?
+            Help
           </Button>
         </div>
 
@@ -413,11 +413,11 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
             {/* Service Results */}
             {showResults && (
               <div className="mb-6">
-                <div className="bg-white rounded-2xl shadow-xl border-2 border-blue-100 p-6">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-                    <div className="w-1 h-8 bg-blue-600 rounded-full"></div>
-                    {searchType === 'moving' && `Moving Companies for ${moveData.from} → ${moveData.to}`}
-                    {searchType === 'utilities' && `Utilities & Services for ${moveData.to}`}
+                <div className="bg-white rounded-lg shadow-md border border-blue-100 p-4">
+                  <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <div className="w-1 h-6 bg-blue-600 rounded-full"></div>
+                    {searchType === 'moving' && `Providers: ${moveData.from} → ${moveData.to}`}
+                    {searchType === 'utilities' && `Services: ${moveData.to}`}
                     {searchType === 'housing' && `Housing Services for ${moveData.to}`}
                   </h2>
                   <div className="space-y-4">
