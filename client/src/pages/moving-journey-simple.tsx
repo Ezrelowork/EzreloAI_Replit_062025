@@ -311,7 +311,7 @@ export default function MovingJourney() {
 
           const customSign = signsByIndex[index] || customGraphics.taskIcons['moving'];
           
-          // Position first three signs with different graphics
+          // Position first four signs with different graphics
           let position;
           if (index === 0) {
             position = { left: '15%', top: '75%' };    // First sign - moving graphic
@@ -319,6 +319,8 @@ export default function MovingJourney() {
             position = { left: '65%', top: '70%' };    // Second sign - utilities graphic
           } else if (index === 2) {
             position = { left: '45%', top: '45%' };    // Third sign - address changes graphic
+          } else if (index === 3) {
+            position = { left: '60%', top: '40%' };    // Fourth sign - Sign4.png graphic
           } else {
             // Hide remaining signs for now
             return null;
