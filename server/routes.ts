@@ -456,6 +456,128 @@ Please provide a comprehensive strategic relocation plan focusing on planning gu
     }
   });
 
+  // Utilities setup endpoint
+  app.post("/api/utilities-search", async (req, res) => {
+    try {
+      const { city, state, zipCode } = req.body;
+      
+      if (!city || !state) {
+        return res.status(400).json({ error: "City and state are required" });
+      }
+
+      const utilities = [
+        {
+          category: "Internet",
+          provider: "AT&T Fiber",
+          phone: "1-800-288-2020",
+          description: "High-speed fiber internet with up to 5 Gig speeds",
+          website: "att.com",
+          referralUrl: "https://www.att.com/internet/fiber/",
+          services: ["Fiber Internet", "Streaming TV", "Phone Service"],
+          estimatedCost: "$55-80/month",
+          rating: 4.2,
+          availability: "Available in most areas"
+        },
+        {
+          category: "Internet", 
+          provider: "Spectrum",
+          phone: "1-855-243-8892",
+          description: "Cable internet with speeds up to 1 Gig",
+          website: "spectrum.com",
+          referralUrl: "https://www.spectrum.com/internet",
+          services: ["Cable Internet", "TV", "Mobile"],
+          estimatedCost: "$49.99-79.99/month",
+          rating: 3.8,
+          availability: "Widely available"
+        },
+        {
+          category: "Electric",
+          provider: "TXU Energy",
+          phone: "1-800-242-9113", 
+          description: "Reliable electricity service with green energy options",
+          website: "txu.com",
+          referralUrl: "https://www.txu.com/",
+          services: ["Electricity", "Solar Plans", "Smart Home"],
+          estimatedCost: "$0.10-0.15/kWh",
+          rating: 4.0,
+          availability: "Texas service area"
+        },
+        {
+          category: "Gas",
+          provider: "Atmos Energy",
+          phone: "1-888-286-6700",
+          description: "Natural gas service for heating and cooking",
+          website: "atmosenergy.com", 
+          referralUrl: "https://www.atmosenergy.com/",
+          services: ["Natural Gas", "Gas Appliances", "Safety Services"],
+          estimatedCost: "$40-80/month",
+          rating: 4.1,
+          availability: "Texas and other states"
+        }
+      ];
+
+      res.json({ success: true, utilities });
+    } catch (error) {
+      console.error("Error in utilities search:", error);
+      res.status(500).json({ error: "Failed to fetch utilities" });
+    }
+  });
+
+  // Housing services endpoint
+  app.post("/api/housing-services", async (req, res) => {
+    try {
+      const { city, state, zipCode } = req.body;
+      
+      if (!city || !state) {
+        return res.status(400).json({ error: "City and state are required" });
+      }
+
+      const services = [
+        {
+          category: "Real Estate",
+          provider: "Keller Williams",
+          phone: "1-512-459-4700",
+          description: "Full-service real estate with local market expertise",
+          website: "kw.com",
+          referralUrl: "https://www.kw.com/",
+          services: ["Home Buying", "Home Selling", "Market Analysis"],
+          estimatedCost: "3% commission",
+          rating: 4.5,
+          specialties: ["First-time buyers", "Luxury homes", "Investment properties"]
+        },
+        {
+          category: "Home Insurance",
+          provider: "State Farm",
+          phone: "1-800-782-8332",
+          description: "Comprehensive home insurance with local agents",
+          website: "statefarm.com",
+          referralUrl: "https://www.statefarm.com/insurance/home-and-property",
+          services: ["Homeowners Insurance", "Renters Insurance", "Auto Bundle"],
+          estimatedCost: "$800-1,500/year",
+          rating: 4.3,
+          specialties: ["Bundle discounts", "Claim support", "Local agents"]
+        },
+        {
+          category: "Home Security",
+          provider: "ADT",
+          phone: "1-800-238-2727",
+          description: "Professional home security monitoring and installation",
+          website: "adt.com",
+          referralUrl: "https://www.adt.com/",
+          services: ["Security Systems", "24/7 Monitoring", "Smart Home"],
+          estimatedCost: "$45-60/month",
+          rating: 4.0,
+          specialties: ["Professional installation", "Mobile app", "Emergency response"]
+        }
+      ];
+
+      res.json({ success: true, services });
+    } catch (error) {
+      console.error("Error in housing services search:", error);
+      res.status(500).json({ error: "Failed to fetch housing services" });
+    }
+  });
+
   // Track referral clicks
   app.post("/api/track-referral", async (req, res) => {
     try {

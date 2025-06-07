@@ -26,6 +26,32 @@ interface MovingCompany {
   notes?: string;
 }
 
+interface UtilityService {
+  category: string;
+  provider: string;
+  phone: string;
+  description: string;
+  website: string;
+  referralUrl: string;
+  services: string[];
+  estimatedCost: string;
+  rating: number;
+  availability: string;
+}
+
+interface HousingService {
+  category: string;
+  provider: string;
+  phone: string;
+  description: string;
+  website: string;
+  referralUrl: string;
+  services: string[];
+  estimatedCost: string;
+  rating: number;
+  specialties: string[];
+}
+
 interface TaskPageProps {
   task: {
     id: string;
@@ -41,9 +67,24 @@ interface TaskPageProps {
 export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete }) => {
   const [, setLocation] = useLocation();
   const [movingCompanies, setMovingCompanies] = useState<MovingCompany[]>([]);
-  const [showMovers, setShowMovers] = useState(false);
+  const [utilities, setUtilities] = useState<UtilityService[]>([]);
+  const [housingServices, setHousingServices] = useState<HousingService[]>([]);
+  const [showResults, setShowResults] = useState(false);
+  const [searchType, setSearchType] = useState<'moving' | 'utilities' | 'housing'>('moving');
   const { toast } = useToast();
   
+  // Determine task type from title
+  const getTaskType = () => {
+    const title = task.title.toLowerCase();
+    if (title.includes('utility') || title.includes('electric') || title.includes('internet') || title.includes('gas')) {
+      return 'utilities';
+    }
+    if (title.includes('home') || title.includes('house') || title.includes('insurance') || title.includes('real estate')) {
+      return 'housing';
+    }
+    return 'moving';
+  };
+
   // Moving company search mutation
   const movingCompanyMutation = useMutation({
     mutationFn: async () => {
@@ -61,7 +102,8 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete }) => {
     onSuccess: (data) => {
       const companies = data?.companies || [];
       setMovingCompanies(companies);
-      setShowMovers(true);
+      setSearchType('moving');
+      setShowResults(true);
       toast({
         title: "Moving Companies Found",
         description: `Found ${companies.length} qualified moving companies for your route`,
@@ -76,13 +118,99 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete }) => {
     },
   });
 
-  const handleFindMovers = () => {
-    if (showMovers) {
-      // Already showing movers, toggle off
-      setShowMovers(false);
-    } else {
-      // Search for movers
-      movingCompanyMutation.mutate();
+  // Utilities search mutation
+  const utilitiesMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("POST", "/api/utilities-search", {
+        city: "Dallas",
+        state: "TX",
+        zipCode: "75201"
+      });
+      return await response.json();
+    },
+    onSuccess: (data) => {
+      const utilityServices = data?.utilities || [];
+      setUtilities(utilityServices);
+      setSearchType('utilities');
+      setShowResults(true);
+      toast({
+        title: "Utilities Found",
+        description: `Found ${utilityServices.length} utility providers for your new area`,
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Search Error",
+        description: "Unable to find utilities. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Housing services search mutation
+  const housingMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("POST", "/api/housing-services", {
+        city: "Dallas",
+        state: "TX",
+        zipCode: "75201"
+      });
+      return await response.json();
+    },
+    onSuccess: (data) => {
+      const services = data?.services || [];
+      setHousingServices(services);
+      setSearchType('housing');
+      setShowResults(true);
+      toast({
+        title: "Housing Services Found",
+        description: `Found ${services.length} housing service providers`,
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Search Error",
+        description: "Unable to find housing services. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleFindServices = () => {
+    const taskType = getTaskType();
+    
+    if (showResults) {
+      setShowResults(false);
+      return;
+    }
+
+    switch (taskType) {
+      case 'utilities':
+        utilitiesMutation.mutate();
+        break;
+      case 'housing':
+        housingMutation.mutate();
+        break;
+      default:
+        movingCompanyMutation.mutate();
+        break;
+    }
+  };
+
+  const getButtonText = () => {
+    const taskType = getTaskType();
+    const isLoading = movingCompanyMutation.isPending || utilitiesMutation.isPending || housingMutation.isPending;
+    
+    if (isLoading) return 'Searching...';
+    if (showResults) return 'Hide Results';
+    
+    switch (taskType) {
+      case 'utilities':
+        return 'Find Utilities';
+      case 'housing':
+        return 'Find Services';
+      default:
+        return 'Find Movers';
     }
   };
 
@@ -150,11 +278,11 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete }) => {
         {/* Prominent Action Buttons */}
         <div className="flex items-center justify-center gap-6 mb-8">
           <Button
-            onClick={handleFindMovers}
-            disabled={movingCompanyMutation.isPending}
+            onClick={handleFindServices}
+            disabled={movingCompanyMutation.isPending || utilitiesMutation.isPending || housingMutation.isPending}
             className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-xl text-lg shadow-lg transform hover:scale-105 transition-all disabled:opacity-70"
           >
-            {movingCompanyMutation.isPending ? 'Searching...' : showMovers ? 'Hide Movers' : 'Find Movers'}
+            {getButtonText()}
           </Button>
           <Button
             onClick={onComplete}
@@ -172,14 +300,19 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete }) => {
 
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Moving Companies or Task Details */}
+          {/* Service Results or Task Details */}
           <div className="lg:col-span-2 space-y-6">
-            {showMovers ? (
+            {showResults ? (
               <div className="bg-white rounded-2xl shadow-lg p-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Moving Companies for Austin → Dallas</h2>
-                {movingCompanies.length > 0 ? (
-                  <div className="space-y-4">
-                    {movingCompanies.map((company, index) => (
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                  {searchType === 'moving' && 'Moving Companies for Austin → Dallas'}
+                  {searchType === 'utilities' && 'Utilities & Services for Dallas, TX'}
+                  {searchType === 'housing' && 'Housing Services for Dallas, TX'}
+                </h2>
+                {/* Results Display */}
+                <div className="space-y-4">
+                  {searchType === 'moving' && movingCompanies.length > 0 && 
+                    movingCompanies.map((company, index) => (
                       <div key={index} className="border border-gray-200 rounded-xl p-6 hover:border-blue-300 hover:shadow-md transition-all">
                         <div className="flex items-start justify-between mb-4">
                           <div className="flex-1">
@@ -241,13 +374,122 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete }) => {
                           </Button>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <p className="text-gray-500">No moving companies found. Please try again.</p>
-                  </div>
-                )}
+                    ))
+                  }
+
+                  {searchType === 'utilities' && utilities.length > 0 && 
+                    utilities.map((utility, index) => (
+                      <div key={index} className="border border-gray-200 rounded-xl p-6 hover:border-blue-300 hover:shadow-md transition-all">
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="flex-1">
+                            <h3 className="text-xl font-bold text-gray-900 mb-2">{utility.provider}</h3>
+                            <span className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm font-medium mb-3 inline-block">
+                              {utility.category}
+                            </span>
+                            <div className="flex items-center gap-4 mb-3">
+                              <div className="flex items-center gap-1">
+                                {[...Array(5)].map((_, i) => (
+                                  <Star
+                                    key={i}
+                                    className={`w-4 h-4 ${
+                                      i < utility.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
+                                    }`}
+                                  />
+                                ))}
+                                <span className="text-sm text-gray-600 ml-1">({utility.rating})</span>
+                              </div>
+                              <span className="text-lg font-bold text-green-600">{utility.estimatedCost}</span>
+                            </div>
+                            <p className="text-gray-700 mb-3">{utility.description}</p>
+                            <div className="flex flex-wrap gap-2 mb-4">
+                              {utility.services.slice(0, 3).map((service, idx) => (
+                                <span key={idx} className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                                  {service}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex gap-3 pt-4 border-t border-gray-100">
+                          <Button
+                            onClick={() => window.open(utility.referralUrl, '_blank')}
+                            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-xl flex-1"
+                          >
+                            Get Service
+                          </Button>
+                          <Button
+                            onClick={() => window.open(`tel:${utility.phone}`, '_self')}
+                            variant="outline"
+                            className="border-green-300 text-green-700 hover:bg-green-50 font-semibold px-6 py-2 rounded-xl flex-1"
+                          >
+                            Call Now
+                          </Button>
+                        </div>
+                      </div>
+                    ))
+                  }
+
+                  {searchType === 'housing' && housingServices.length > 0 &&
+                    housingServices.map((service, index) => (
+                      <div key={index} className="border border-gray-200 rounded-xl p-6 hover:border-blue-300 hover:shadow-md transition-all">
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="flex-1">
+                            <h3 className="text-xl font-bold text-gray-900 mb-2">{service.provider}</h3>
+                            <span className="px-3 py-1 bg-orange-100 text-orange-800 rounded-full text-sm font-medium mb-3 inline-block">
+                              {service.category}
+                            </span>
+                            <div className="flex items-center gap-4 mb-3">
+                              <div className="flex items-center gap-1">
+                                {[...Array(5)].map((_, i) => (
+                                  <Star
+                                    key={i}
+                                    className={`w-4 h-4 ${
+                                      i < service.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
+                                    }`}
+                                  />
+                                ))}
+                                <span className="text-sm text-gray-600 ml-1">({service.rating})</span>
+                              </div>
+                              <span className="text-lg font-bold text-green-600">{service.estimatedCost}</span>
+                            </div>
+                            <p className="text-gray-700 mb-3">{service.description}</p>
+                            <div className="flex flex-wrap gap-2 mb-4">
+                              {service.services.slice(0, 3).map((serviceItem, idx) => (
+                                <span key={idx} className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                                  {serviceItem}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex gap-3 pt-4 border-t border-gray-100">
+                          <Button
+                            onClick={() => window.open(service.referralUrl, '_blank')}
+                            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-xl flex-1"
+                          >
+                            Get Quote
+                          </Button>
+                          <Button
+                            onClick={() => window.open(`tel:${service.phone}`, '_self')}
+                            variant="outline"
+                            className="border-green-300 text-green-700 hover:bg-green-50 font-semibold px-6 py-2 rounded-xl flex-1"
+                          >
+                            Call Now
+                          </Button>
+                        </div>
+                      </div>
+                    ))
+                  }
+
+                  {/* No Results Message */}
+                  {((searchType === 'moving' && movingCompanies.length === 0) ||
+                    (searchType === 'utilities' && utilities.length === 0) ||
+                    (searchType === 'housing' && housingServices.length === 0)) && (
+                    <div className="text-center py-8">
+                      <p className="text-gray-500">No services found. Please try again.</p>
+                    </div>
+                  )}
+                </div>
               </div>
             ) : (
               <div className="bg-white rounded-2xl shadow-lg p-6">
