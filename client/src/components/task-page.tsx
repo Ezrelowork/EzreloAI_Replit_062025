@@ -102,6 +102,16 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
   const [formProgress, setFormProgress] = useState(0);
   const [isSharing, setIsSharing] = useState(false);
   const [savedQuestionnaires, setSavedQuestionnaires] = useState<any[]>([]);
+  const [hasCompletedActions, setHasCompletedActions] = useState(false);
+
+  // Determine if task can be marked complete based on user actions
+  const canCompleteTask = () => {
+    if (searchType === 'moving') {
+      return selectedMover !== null || hasCompletedActions || 
+             (currentQuestionnaire && Object.keys((currentQuestionnaire as any)?.majorItems || {}).length > 0);
+    }
+    return showResults; // For other task types, showing results indicates engagement
+  };
   const [questionnaireData, setQuestionnaireData] = useState({
     currentAddress: '',
     destinationAddress: '',
@@ -382,8 +392,10 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
       
       if (action === 'website_visit') {
         window.open(company.website, '_blank');
+        setHasCompletedActions(true); // Mark progress for website visits
       } else if (action === 'quote_request') {
         window.open(company.referralUrl, '_blank');
+        setHasCompletedActions(true); // Mark progress for quote requests
       }
     } catch (error) {
       console.error('Failed to track referral click:', error);
@@ -409,6 +421,9 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
           projectId: movingProject.id,
           moverData: company
         });
+        
+        // Mark that user has completed meaningful actions
+        setHasCompletedActions(true);
       }
     } catch (error) {
       toast({
@@ -670,6 +685,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
           // Close form but keep data
           setShowQuestionnaireForm(false);
           // Don't reset the data - it's now saved in the project
+          setHasCompletedActions(true); // Mark progress for questionnaire completion
         }
       };
       
@@ -1249,10 +1265,15 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
           
           <Button
             onClick={onComplete}
-            className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-6 rounded-lg text-sm shadow-sm transition-all"
+            disabled={!canCompleteTask()}
+            className={`font-medium py-2 px-6 rounded-lg text-sm shadow-sm transition-all ${
+              canCompleteTask() 
+                ? "bg-green-600 hover:bg-green-700 text-white" 
+                : "bg-gray-300 text-gray-500 cursor-not-allowed"
+            }`}
           >
             <CheckCircle className="w-3 h-3 mr-1" />
-            Complete
+            {canCompleteTask() ? "Complete" : "Complete Task First"}
           </Button>
         </div>
 
@@ -1325,6 +1346,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                             <span className="text-sm text-gray-500">•</span>
                             <a 
                               href={`tel:${googleData?.phone || company.phone}`}
+                              onClick={() => setHasCompletedActions(true)}
                               className="text-sm text-blue-600 hover:text-blue-700 underline"
                             >
                               {googleData?.phone || company.phone}
