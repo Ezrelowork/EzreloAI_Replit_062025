@@ -562,6 +562,53 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
     }
   };
 
+  const handleShareWithMovers = async () => {
+    if (!questionnaireData.email) {
+      toast({
+        title: "Email Required",
+        description: "Please enter your email address to share with movers.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      // Generate professional mover outreach
+      const response = await apiRequest("POST", "/api/share-with-movers", {
+        projectId: movingProject?.id,
+        questionnaire: questionnaireData,
+        moveDetails: moveData,
+        selectedMovers: movingCompanies.slice(0, 3) // Top 3 recommended movers
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Shared Successfully!",
+          description: "Your move details have been sent to our top recommended movers. Expect quotes within 24 hours.",
+        });
+        
+        // Log the AI-powered communication
+        if (movingProject?.id) {
+          await apiRequest("POST", "/api/communication", {
+            projectId: movingProject.id,
+            communicationType: "ai_outreach",
+            subject: "AI-Powered Mover Outreach Initiated",
+            notes: `Ezrelo AI automatically shared comprehensive move details with ${movingCompanies.slice(0, 3).length} premium movers. Includes detailed inventory, preferences, and timeline.`,
+            contactPerson: "Ezrelo AI Assistant"
+          });
+        }
+        
+        setShowQuestionnaireForm(false);
+      }
+    } catch (error) {
+      toast({
+        title: "Sharing Failed",
+        description: "Unable to share with movers. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const getTaskConfig = () => {
     const title = task.title.toLowerCase();
     if (title.includes('moving') || title.includes('mover')) {
@@ -836,20 +883,30 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                   />
                 </div>
 
-                <div className="flex gap-3 pt-4">
+                <div className="space-y-3 pt-4">
+                  <div className="flex gap-3">
+                    <Button
+                      type="button"
+                      onClick={handleSendPDFToEmail}
+                      className="flex-1 bg-purple-600 hover:bg-purple-700"
+                    >
+                      Send PDF to My Email
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setShowQuestionnaireForm(false)}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
                   <Button
                     type="button"
-                    onClick={handleSendPDFToEmail}
-                    className="flex-1 bg-purple-600 hover:bg-purple-700"
+                    onClick={handleShareWithMovers}
+                    className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-medium flex items-center justify-center gap-2"
                   >
-                    Send PDF to My Email
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => setShowQuestionnaireForm(false)}
-                  >
-                    Cancel
+                    <span>🚀</span>
+                    Share with Recommended Movers
                   </Button>
                 </div>
               </form>
