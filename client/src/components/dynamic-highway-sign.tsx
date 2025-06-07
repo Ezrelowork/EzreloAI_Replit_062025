@@ -46,25 +46,25 @@ export const DynamicHighwaySign: React.FC<DynamicSignProps> = ({
         />
         
         {/* Dynamic text overlay */}
-        <div className="absolute inset-0 flex flex-col justify-center items-center p-2">
+        <div className="absolute inset-0 flex flex-col justify-center items-center p-3">
           <div className={`text-center text-white ${completed ? 'opacity-60' : ''}`}>
             {/* Priority indicator */}
-            <div className={`text-[8px] font-bold mb-0.5 ${priorityColors[priority]} uppercase tracking-wider`}>
+            <div className={`text-[9px] font-bold mb-1 ${priorityColors[priority]} uppercase tracking-wider drop-shadow-sm`}>
               {priority} PRIORITY
             </div>
             
-            {/* Main title - smaller and more lines */}
-            <div className="text-[10px] font-bold mb-0.5 leading-tight px-1">
-              {title.length > 50 ? title.substring(0, 50) + '...' : title}
+            {/* Main title - larger and more readable */}
+            <div className="text-[12px] font-bold mb-1 leading-tight px-1 drop-shadow-lg">
+              {title.length > 45 ? title.substring(0, 45) + '...' : title}
             </div>
             
             {/* Description - additional info */}
-            <div className="text-[8px] opacity-90 leading-tight px-1 mb-0.5">
-              {description.length > 60 ? description.substring(0, 60) + '...' : description}
+            <div className="text-[9px] opacity-95 leading-tight px-1 mb-1 drop-shadow-sm">
+              {description.length > 55 ? description.substring(0, 55) + '...' : description}
             </div>
             
             {/* Week/timeframe */}
-            <div className="text-[8px] opacity-80 font-semibold">
+            <div className="text-[9px] opacity-85 font-semibold drop-shadow-sm">
               {week}
             </div>
           </div>
