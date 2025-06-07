@@ -1,4 +1,4 @@
-import { pgTable, text, serial, json } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, json, timestamp, boolean, integer } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -26,6 +26,40 @@ export const referralClicks = pgTable("referral_clicks", {
   timestamp: text("timestamp").notNull(),
   ipAddress: text("ip_address"),
   userAgent: text("user_agent"),
+});
+
+export const movingProjects = pgTable("moving_projects", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  fromAddress: text("from_address").notNull(),
+  toAddress: text("to_address").notNull(),
+  moveDate: text("move_date"),
+  selectedMover: json("selected_mover"),
+  projectStatus: text("project_status").notNull().default("searching"), // searching, mover_selected, quote_received, booked, in_progress, completed
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const projectTasks = pgTable("project_tasks", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").notNull(),
+  taskName: text("task_name").notNull(),
+  description: text("description"),
+  status: text("status").notNull().default("pending"), // pending, in_progress, completed
+  dueDate: text("due_date"),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const movingCommunications = pgTable("moving_communications", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").notNull(),
+  communicationType: text("communication_type").notNull(), // call, email, visit, quote, contract
+  subject: text("subject").notNull(),
+  notes: text("notes"),
+  contactPerson: text("contact_person"),
+  nextFollowUp: text("next_follow_up"),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
@@ -56,6 +90,32 @@ export const referralClickSchema = z.object({
   timestamp: z.string(),
 });
 
+export const movingProjectSchema = createInsertSchema(movingProjects).pick({
+  userId: true,
+  fromAddress: true,
+  toAddress: true,
+  moveDate: true,
+  selectedMover: true,
+  projectStatus: true,
+});
+
+export const projectTaskSchema = createInsertSchema(projectTasks).pick({
+  projectId: true,
+  taskName: true,
+  description: true,
+  status: true,
+  dueDate: true,
+});
+
+export const movingCommunicationSchema = createInsertSchema(movingCommunications).pick({
+  projectId: true,
+  communicationType: true,
+  subject: true,
+  notes: true,
+  contactPerson: true,
+  nextFollowUp: true,
+});
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type AddressSearch = z.infer<typeof addressSearchSchema>;
@@ -63,3 +123,9 @@ export type ServiceProvider = z.infer<typeof serviceProviderSchema>;
 export type ServiceProvidersData = {
   [key: string]: ServiceProvider | ServiceProvider[];
 };
+export type MovingProject = typeof movingProjects.$inferSelect;
+export type InsertMovingProject = z.infer<typeof movingProjectSchema>;
+export type ProjectTask = typeof projectTasks.$inferSelect;
+export type InsertProjectTask = z.infer<typeof projectTaskSchema>;
+export type MovingCommunication = typeof movingCommunications.$inferSelect;
+export type InsertMovingCommunication = z.infer<typeof movingCommunicationSchema>;
