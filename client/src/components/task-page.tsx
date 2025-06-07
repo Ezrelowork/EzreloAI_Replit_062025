@@ -119,16 +119,16 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Fetch saved questionnaires
-  const { data: savedQuestionnairesData } = useQuery({
-    queryKey: ['/api/saved-questionnaires', movingProject?.id],
+  // Fetch current questionnaire
+  const { data: currentQuestionnaire } = useQuery({
+    queryKey: ['/api/current-questionnaire', movingProject?.id],
     enabled: !!movingProject?.id,
   });
 
-  const fetchSavedQuestionnaires = () => {
+  const refreshCurrentQuestionnaire = () => {
     if (movingProject?.id) {
       queryClient.invalidateQueries({
-        queryKey: ['/api/saved-questionnaires', movingProject.id]
+        queryKey: ['/api/current-questionnaire', movingProject.id]
       });
     }
   };
@@ -546,8 +546,8 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
               type: "email_pdf"
             });
             
-            // Refresh saved questionnaires
-            fetchSavedQuestionnaires();
+            // Refresh current questionnaire
+            refreshCurrentQuestionnaire();
           }
           
           // Close form and reset
@@ -626,8 +626,8 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
             contactPerson: "Ezrelo AI Assistant"
           });
           
-          // Refresh saved questionnaires
-          fetchSavedQuestionnaires();
+          // Refresh current questionnaire
+          refreshCurrentQuestionnaire();
         }
         
         setShowQuestionnaireForm(false);
@@ -1182,33 +1182,28 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                     Fill Out Questionnaire
                   </button>
                   
-                  {/* Saved Questionnaires */}
-                  {savedQuestionnairesData && savedQuestionnairesData.length > 0 && (
+                  {/* Current Questionnaire Status */}
+                  {currentQuestionnaire && (
                     <div className="mt-3 pt-3 border-t border-gray-200">
-                      <h4 className="text-sm font-bold text-gray-700 mb-2">Previously Completed</h4>
-                      <div className="space-y-2">
-                        {savedQuestionnairesData.map((questionnaire: any, index: number) => (
-                          <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded text-xs">
-                            <div>
-                              <div className="font-medium text-gray-900 flex items-center gap-1">
-                                {questionnaire.type === 'email_pdf' ? '📧' : '🚀'}
-                                {questionnaire.type === 'email_pdf' ? 'PDF Sent' : 'AI Outreach'}
-                              </div>
-                              <div className="text-gray-600">
-                                {new Date(questionnaire.createdAt).toLocaleDateString()}
-                              </div>
+                      <h4 className="text-sm font-bold text-gray-700 mb-2">Your Move Questionnaire</h4>
+                      <div className="p-3 bg-green-50 rounded border border-green-200">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <div className="text-sm font-medium text-green-900">Questionnaire Completed</div>
+                            <div className="text-xs text-green-700">
+                              {Object.keys(currentQuestionnaire.majorItems || {}).length} items • {currentQuestionnaire.homeSize} • Last updated: {new Date(currentQuestionnaire.updatedAt).toLocaleDateString()}
                             </div>
-                            <button
-                              onClick={() => {
-                                setQuestionnaireData(questionnaire.data);
-                                setShowQuestionnaireForm(true);
-                              }}
-                              className="text-purple-600 hover:text-purple-800 font-medium"
-                            >
-                              View
-                            </button>
                           </div>
-                        ))}
+                          <button
+                            onClick={() => {
+                              setQuestionnaireData(currentQuestionnaire);
+                              setShowQuestionnaireForm(true);
+                            }}
+                            className="text-green-700 hover:text-green-900 font-medium text-sm px-3 py-1 bg-green-100 rounded"
+                          >
+                            Edit
+                          </button>
+                        </div>
                       </div>
                     </div>
                   )}

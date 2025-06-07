@@ -753,57 +753,56 @@ Please provide a comprehensive strategic relocation plan focusing on planning gu
     }
   });
 
-  // Archive questionnaire in project
+  // Update current questionnaire for project
   app.post("/api/archive-questionnaire", async (req, res) => {
     try {
       const { projectId, questionnaire, pdfData, type } = req.body;
       
-      // Store questionnaire as communication record
+      // Update the project with current questionnaire data
+      await storage.updateMovingProject(projectId, {
+        questionnaireData: JSON.stringify(questionnaire),
+        lastQuestionnaireUpdate: new Date()
+      });
+      
+      // Log the activity as communication record
       await storage.createCommunication({
         projectId,
-        communicationType: "questionnaire",
-        subject: `Moving Questionnaire - ${type === 'email_pdf' ? 'PDF Sent' : 'AI Outreach'}`,
+        communicationType: "questionnaire_update",
+        subject: `Questionnaire ${type === 'email_pdf' ? 'PDF Sent' : 'AI Outreach Completed'}`,
         notes: JSON.stringify({
-          questionnaire,
+          action: type,
           pdfGenerated: !!pdfData,
           completedAt: new Date().toISOString(),
-          type: type || 'general'
+          itemCount: Object.keys(questionnaire.majorItems || {}).length
         }),
         contactPerson: "Customer"
       });
 
-      res.json({ success: true, message: "Questionnaire archived successfully" });
+      res.json({ success: true, message: "Questionnaire updated successfully" });
     } catch (error) {
-      console.error("Error archiving questionnaire:", error);
-      res.status(500).json({ error: "Failed to archive questionnaire" });
+      console.error("Error updating questionnaire:", error);
+      res.status(500).json({ error: "Failed to update questionnaire" });
     }
   });
 
-  // Get saved questionnaires for project
-  app.get("/api/saved-questionnaires/:projectId", async (req, res) => {
+  // Get current questionnaire for project
+  app.get("/api/current-questionnaire/:projectId", async (req, res) => {
     try {
       const { projectId } = req.params;
-      const communications = await storage.getProjectCommunications(parseInt(projectId));
+      const project = await storage.getMovingProject(parseInt(projectId));
       
-      // Filter for questionnaire communications
-      const questionnaires = communications
-        .filter(comm => comm.communicationType === 'questionnaire')
-        .map(comm => {
-          const notes = JSON.parse(comm.notes || '{}');
-          return {
-            id: comm.id,
-            data: notes.questionnaire,
-            type: notes.type,
-            createdAt: comm.createdAt,
-            subject: comm.subject
-          };
-        })
-        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-
-      res.json(questionnaires);
+      if (project && project.questionnaireData) {
+        const questionnaire = JSON.parse(project.questionnaireData);
+        res.json({
+          ...questionnaire,
+          updatedAt: project.lastQuestionnaireUpdate || project.updatedAt
+        });
+      } else {
+        res.json(null);
+      }
     } catch (error) {
-      console.error("Error fetching saved questionnaires:", error);
-      res.status(500).json({ error: "Failed to fetch questionnaires" });
+      console.error("Error fetching current questionnaire:", error);
+      res.status(500).json({ error: "Failed to fetch questionnaire" });
     }
   });
 
