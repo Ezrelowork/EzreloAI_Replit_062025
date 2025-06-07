@@ -65,7 +65,16 @@ function Router() {
               week: urlParams.get('taskWeek') || "Current week",
               category: "Moving Services"
             };
-            return <TaskPage task={task} onComplete={() => {}} onBack={() => window.history.back()} />;
+            return <TaskPage task={task} onComplete={() => {
+              // Show completion confirmation without navigating away
+              const event = new CustomEvent('showToast', {
+                detail: {
+                  title: "Task Completed!",
+                  description: "Great work! You can continue researching or return to your journey.",
+                }
+              });
+              window.dispatchEvent(event);
+            }} onBack={() => window.history.back()} />;
           }} />
           <Route path="/task/moving" component={() => {
             const mockTask = {
