@@ -756,17 +756,18 @@ Please provide a comprehensive strategic relocation plan focusing on planning gu
   // Archive questionnaire in project
   app.post("/api/archive-questionnaire", async (req, res) => {
     try {
-      const { projectId, questionnaire, pdfData } = req.body;
+      const { projectId, questionnaire, pdfData, type } = req.body;
       
       // Store questionnaire as communication record
       await storage.createCommunication({
         projectId,
         communicationType: "questionnaire",
-        subject: "Moving Estimate Questionnaire Completed",
+        subject: `Moving Questionnaire - ${type === 'email_pdf' ? 'PDF Sent' : 'AI Outreach'}`,
         notes: JSON.stringify({
           questionnaire,
           pdfGenerated: !!pdfData,
-          completedAt: new Date().toISOString()
+          completedAt: new Date().toISOString(),
+          type: type || 'general'
         }),
         contactPerson: "Customer"
       });
@@ -775,6 +776,34 @@ Please provide a comprehensive strategic relocation plan focusing on planning gu
     } catch (error) {
       console.error("Error archiving questionnaire:", error);
       res.status(500).json({ error: "Failed to archive questionnaire" });
+    }
+  });
+
+  // Get saved questionnaires for project
+  app.get("/api/saved-questionnaires/:projectId", async (req, res) => {
+    try {
+      const { projectId } = req.params;
+      const communications = await storage.getProjectCommunications(parseInt(projectId));
+      
+      // Filter for questionnaire communications
+      const questionnaires = communications
+        .filter(comm => comm.communicationType === 'questionnaire')
+        .map(comm => {
+          const notes = JSON.parse(comm.notes || '{}');
+          return {
+            id: comm.id,
+            data: notes.questionnaire,
+            type: notes.type,
+            createdAt: comm.createdAt,
+            subject: comm.subject
+          };
+        })
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+      res.json(questionnaires);
+    } catch (error) {
+      console.error("Error fetching saved questionnaires:", error);
+      res.status(500).json({ error: "Failed to fetch questionnaires" });
     }
   });
 

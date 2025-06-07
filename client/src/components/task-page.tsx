@@ -97,6 +97,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
   const [showQuestionnaireForm, setShowQuestionnaireForm] = useState(false);
   const [formProgress, setFormProgress] = useState(0);
   const [isSharing, setIsSharing] = useState(false);
+  const [savedQuestionnaires, setSavedQuestionnaires] = useState<any[]>([]);
   const [questionnaireData, setQuestionnaireData] = useState({
     currentAddress: '',
     destinationAddress: '',
@@ -117,6 +118,20 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
+
+  // Fetch saved questionnaires
+  const { data: savedQuestionnairesData } = useQuery({
+    queryKey: ['/api/saved-questionnaires', movingProject?.id],
+    enabled: !!movingProject?.id,
+  });
+
+  const fetchSavedQuestionnaires = () => {
+    if (movingProject?.id) {
+      queryClient.invalidateQueries({
+        queryKey: ['/api/saved-questionnaires', movingProject.id]
+      });
+    }
+  };
 
   // Create or get moving project
   const createProjectMutation = useMutation({
@@ -527,8 +542,12 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
             await apiRequest("POST", "/api/archive-questionnaire", {
               projectId: movingProject.id,
               questionnaire: questionnaireData,
-              pdfData: base64PDF
+              pdfData: base64PDF,
+              type: "email_pdf"
             });
+            
+            // Refresh saved questionnaires
+            fetchSavedQuestionnaires();
           }
           
           // Close form and reset
@@ -591,8 +610,14 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
           description: "Your move details have been sent to our top recommended movers. Expect quotes within 24 hours.",
         });
         
-        // Log the AI-powered communication
+        // Archive questionnaire and log the AI-powered communication
         if (movingProject?.id) {
+          await apiRequest("POST", "/api/archive-questionnaire", {
+            projectId: movingProject.id,
+            questionnaire: questionnaireData,
+            type: "ai_outreach"
+          });
+          
           await apiRequest("POST", "/api/communication", {
             projectId: movingProject.id,
             communicationType: "ai_outreach",
@@ -600,6 +625,9 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
             notes: `Ezrelo AI automatically shared comprehensive move details with ${movingCompanies.slice(0, 3).length} premium movers. Includes detailed inventory, preferences, and timeline.`,
             contactPerson: "Ezrelo AI Assistant"
           });
+          
+          // Refresh saved questionnaires
+          fetchSavedQuestionnaires();
         }
         
         setShowQuestionnaireForm(false);
@@ -1153,6 +1181,37 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                     </svg>
                     Fill Out Questionnaire
                   </button>
+                  
+                  {/* Saved Questionnaires */}
+                  {savedQuestionnairesData && savedQuestionnairesData.length > 0 && (
+                    <div className="mt-3 pt-3 border-t border-gray-200">
+                      <h4 className="text-sm font-bold text-gray-700 mb-2">Previously Completed</h4>
+                      <div className="space-y-2">
+                        {savedQuestionnairesData.map((questionnaire: any, index: number) => (
+                          <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded text-xs">
+                            <div>
+                              <div className="font-medium text-gray-900 flex items-center gap-1">
+                                {questionnaire.type === 'email_pdf' ? '📧' : '🚀'}
+                                {questionnaire.type === 'email_pdf' ? 'PDF Sent' : 'AI Outreach'}
+                              </div>
+                              <div className="text-gray-600">
+                                {new Date(questionnaire.createdAt).toLocaleDateString()}
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => {
+                                setQuestionnaireData(questionnaire.data);
+                                setShowQuestionnaireForm(true);
+                              }}
+                              className="text-purple-600 hover:text-purple-800 font-medium"
+                            >
+                              View
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                   
                   <div className="bg-purple-50 p-3 rounded">
                     <div className="text-sm font-medium text-purple-900 mb-2">Key Information Needed:</div>
