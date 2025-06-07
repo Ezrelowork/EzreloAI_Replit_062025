@@ -85,6 +85,8 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete }) => {
   const [isAnimating, setIsAnimating] = useState(false);
   const [searchType, setSearchType] = useState<'moving' | 'utilities' | 'housing'>('moving');
   const [moveData, setMoveData] = useState({ from: '', to: '', date: '' });
+  const [showNotification, setShowNotification] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState('');
   const { toast } = useToast();
 
   // Load move data from localStorage on component mount
@@ -122,17 +124,15 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete }) => {
       setMovingCompanies(companies);
       setSearchType('moving');
       
-      // Trigger animation sequence
-      setIsAnimating(true);
-      setTimeout(() => {
-        setShowResults(true);
-        setTimeout(() => setIsAnimating(false), 50);
-      }, 100);
+      // Show centered notification
+      setNotificationMessage(`Found ${companies.length} moving companies for your route`);
+      setShowNotification(true);
+      setShowResults(true);
       
-      toast({
-        title: "Moving Companies Found",
-        description: `Found ${companies.length} moving companies for your route`,
-      });
+      // Auto-hide notification after 3 seconds
+      setTimeout(() => {
+        setShowNotification(false);
+      }, 3000);
     },
     onError: (error) => {
       toast({
@@ -274,6 +274,23 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete }) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50">
+      {/* Centered Notification Modal */}
+      {showNotification && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
+          <div className="bg-white rounded-2xl shadow-2xl border-2 border-green-200 p-6 max-w-md mx-4 transform transition-all duration-500 ease-out animate-pulse">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
+                <CheckCircle className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900">Success!</h3>
+                <p className="text-gray-700">{notificationMessage}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Header Section */}
         <div className="bg-white rounded-3xl shadow-2xl p-8 mb-8 border border-gray-100">
