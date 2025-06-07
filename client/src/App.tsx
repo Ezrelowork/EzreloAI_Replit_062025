@@ -55,6 +55,18 @@ function Router() {
           <Route path="/moving-checklist" component={MovingChecklist} />
           <Route path="/analytics" component={Analytics} />
           <Route path="/logo-showcase" component={LogoShowcase} />
+          <Route path="/task" component={() => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const task = {
+              id: urlParams.get('taskId') || "default-task",
+              title: urlParams.get('taskTitle') || "Task",
+              description: urlParams.get('taskDescription') || "Complete this task",
+              priority: (urlParams.get('taskPriority') as 'high' | 'medium' | 'low') || "medium",
+              week: urlParams.get('taskWeek') || "Current week",
+              category: "Moving Services"
+            };
+            return <TaskPage task={task} onComplete={() => {}} onBack={() => window.history.back()} />;
+          }} />
           <Route path="/task/moving" component={() => {
             const mockTask = {
               id: "moving-companies",

@@ -294,7 +294,7 @@ export default function MovingJourney() {
     
     // Override route based on task content for better UX
     if (combined.includes('mover') || combined.includes('moving') || combined.includes('truck') || combined.includes('quote')) {
-      targetRoute = '/dashboard';
+      targetRoute = '/task';
     } else if (combined.includes('utility') || combined.includes('electric') || combined.includes('internet') || 
                combined.includes('gas') || combined.includes('water') || combined.includes('cable')) {
       targetRoute = '/utilities';
@@ -307,6 +307,13 @@ export default function MovingJourney() {
     if (fromParam) params.set('from', fromParam);
     if (toParam) params.set('to', toParam);
     if (dateParam) params.set('date', dateParam);
+    
+    // Add task details for the task page
+    params.set('taskId', step.id);
+    params.set('taskTitle', step.title);
+    params.set('taskDescription', step.description);
+    params.set('taskPriority', step.priority);
+    params.set('taskWeek', step.week);
     
     const queryString = params.toString();
     const finalRoute = queryString ? `${targetRoute}?${queryString}` : targetRoute;
