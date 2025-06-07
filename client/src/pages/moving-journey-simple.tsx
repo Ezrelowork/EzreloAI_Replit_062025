@@ -312,13 +312,13 @@ export default function MovingJourney() {
 
           const customSign = getCustomSign(step.title);
           
-          // Position signs along the winding road path - following actual road curves
+          // Position signs exactly where you marked with pink circles
           const roadPositions = [
-            { left: '15%', top: '75%' },   // Road entry point bottom left
-            { left: '30%', top: '58%' },   // First curve rising
-            { left: '50%', top: '40%' },   // Center S-curve peak
-            { left: '70%', top: '25%' },   // Upper curve continuation
-            { left: '85%', top: '12%' }    // Final destination with truck
+            { left: '18%', top: '82%' },   // Bottom left - first pink circle
+            { left: '38%', top: '62%' },   // Second curve - second pink circle  
+            { left: '58%', top: '42%' },   // Middle section - third pink circle
+            { left: '78%', top: '28%' },   // Upper right area - fourth pink circle
+            { left: '88%', top: '18%' }    // Final destination - fifth pink circle
           ];
           
           const position = roadPositions[index] || { left: '50%', top: '50%' };
