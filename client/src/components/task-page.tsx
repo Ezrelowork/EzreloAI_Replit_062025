@@ -164,6 +164,8 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
     }
   };
 
+
+
   // Load saved questionnaire data when available
   useEffect(() => {
     if (currentQuestionnaire && !showQuestionnaireForm) {
@@ -1106,15 +1108,19 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
               <h3 className="text-sm font-bold text-gray-900 mb-3 text-right">Progress</h3>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs text-gray-600">Complete</span>
-                  <span className="text-xs font-bold text-blue-600">25%</span>
+                  <span className="text-xs text-gray-600">
+                    {selectedMover ? 'Book' : currentQuestionnaire ? 'Quote' : 'Research'}
+                  </span>
+                  <span className="text-xs font-bold text-blue-600">
+                    {selectedMover ? '75' : currentQuestionnaire ? '50' : '25'}%
+                  </span>
                 </div>
                 
                 {/* Progress Bar with Milestone Markers */}
                 <div className="relative">
                   <div className="w-full bg-gray-200 rounded-full h-3 relative">
                     {/* Progress Fill */}
-                    <div className="bg-blue-600 h-3 rounded-full transition-all duration-300" style={{ width: '25%' }}></div>
+                    <div className="bg-blue-600 h-3 rounded-full transition-all duration-500" style={{ width: `${currentQuestionnaire ? '50' : '25'}%` }}></div>
                     
                     {/* Milestone Markers - Quarters */}
                     <div className="absolute top-0 left-1/4 w-0.5 h-3 bg-gray-400 transform -translate-x-0.5"></div>
