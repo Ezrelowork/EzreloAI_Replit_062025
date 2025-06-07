@@ -158,6 +158,11 @@ export default function Dashboard() {
     
     if (fromParam && toParam && moveAddresses.currentAddress && moveAddresses.newAddress) {
       setMoveSetupComplete(true);
+      
+      // Auto-trigger moving company search when coming from highway journey
+      if (moveAddresses.currentCity && moveAddresses.newCity && movingCompanies.length === 0) {
+        movingCompanyMutation.mutate(moveAddresses);
+      }
     }
     
     window.scrollTo({ top: 0, behavior: 'smooth' });

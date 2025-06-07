@@ -187,6 +187,15 @@ export default function MovingJourney() {
   }, []);
 
   const handleTaskClick = (step: JourneyStep, event: React.MouseEvent) => {
+    // Visual feedback - sign click animation
+    const element = event.currentTarget as HTMLElement;
+    element.style.transform = 'scale(0.95)';
+    element.style.transition = 'transform 0.2s ease';
+    
+    setTimeout(() => {
+      element.style.transform = 'scale(1)';
+    }, 200);
+    
     const cardElement = taskCardRefs.current[step.id];
     if (cardElement) {
       // Cinematic zoom into the task card
