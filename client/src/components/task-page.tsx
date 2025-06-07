@@ -96,6 +96,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
   const [movingProject, setMovingProject] = useState<any>(null);
   const [showQuestionnaireForm, setShowQuestionnaireForm] = useState(false);
   const [formProgress, setFormProgress] = useState(0);
+  const [isSharing, setIsSharing] = useState(false);
   const [questionnaireData, setQuestionnaireData] = useState({
     currentAddress: '',
     destinationAddress: '',
@@ -573,6 +574,8 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
       return;
     }
 
+    setIsSharing(true);
+    
     try {
       // Generate professional mover outreach
       const response = await apiRequest("POST", "/api/share-with-movers", {
@@ -584,7 +587,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
 
       if (response.ok) {
         toast({
-          title: "Shared Successfully!",
+          title: "AI Outreach Complete!",
           description: "Your move details have been sent to our top recommended movers. Expect quotes within 24 hours.",
         });
         
@@ -607,6 +610,8 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
         description: "Unable to share with movers. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsSharing(false);
     }
   };
 
@@ -918,11 +923,21 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                   <Button
                     type="button"
                     onClick={handleShareWithMovers}
-                    className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-medium flex items-center justify-center gap-2 relative overflow-hidden"
+                    disabled={isSharing}
+                    className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 disabled:opacity-75 text-white font-medium flex items-center justify-center gap-2 relative overflow-hidden"
                   >
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 animate-pulse"></div>
-                    <span className="relative">🚀</span>
-                    <span className="relative">AI-Powered Mover Outreach</span>
+                    {isSharing ? (
+                      <>
+                        <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
+                        <span>Processing AI Outreach...</span>
+                      </>
+                    ) : (
+                      <>
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 animate-pulse"></div>
+                        <span className="relative">🚀</span>
+                        <span className="relative">AI-Powered Mover Outreach</span>
+                      </>
+                    )}
                   </Button>
                 </div>
               </form>
