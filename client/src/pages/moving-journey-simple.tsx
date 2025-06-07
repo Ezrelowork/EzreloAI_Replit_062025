@@ -301,6 +301,9 @@ export default function MovingJourney() {
     } else if (combined.includes('housing') || combined.includes('real estate') || combined.includes('home') || 
                combined.includes('mortgage') || combined.includes('inspection') || combined.includes('property')) {
       targetRoute = '/housing';
+    } else if (combined.includes('address') || combined.includes('documentation') || combined.includes('registration') || 
+               combined.includes('voter') || combined.includes('license') || combined.includes('update')) {
+      targetRoute = '/documentation';
     } else if (combined.includes('pack') || combined.includes('organize') || combined.includes('checklist')) {
       targetRoute = '/moving-checklist';
     }
