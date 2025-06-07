@@ -316,7 +316,7 @@ export default function MovingJourney() {
           if (index === 0) {
             position = { left: '15%', top: '75%' };    // First sign - moving graphic
           } else if (index === 1) {
-            position = { left: '50%', top: '80%' };    // Second sign - utilities graphic
+            position = { left: '65%', top: '70%' };    // Second sign - utilities graphic
           } else if (index === 2) {
             position = { left: '45%', top: '45%' };    // Third sign - address changes graphic
           } else if (index === 3) {
