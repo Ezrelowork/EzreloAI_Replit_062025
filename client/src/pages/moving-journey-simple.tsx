@@ -312,20 +312,13 @@ export default function MovingJourney() {
 
           const customSign = getCustomSign(step.title);
           
-          // Position each sign at its specific pink circle location
+          // Position only the first sign for now
           let position;
           if (index === 0) {
             position = { left: '10%', top: '88%' };    // Pink circle 1 - bottom left
-          } else if (index === 1) {
-            position = { left: '28%', top: '65%' };    // Pink circle 2 - left curve
-          } else if (index === 2) {
-            position = { left: '48%', top: '45%' };    // Pink circle 3 - center
-          } else if (index === 3) {
-            position = { left: '68%', top: '25%' };    // Pink circle 4 - upper right
-          } else if (index === 4) {
-            position = { left: '85%', top: '12%' };    // Pink circle 5 - destination
           } else {
-            position = { left: '50%', top: '50%' };    // Fallback
+            // Hide other signs for now
+            return null;
           }
           
           return (
