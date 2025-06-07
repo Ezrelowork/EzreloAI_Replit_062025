@@ -348,9 +348,14 @@ export default function MovingJourney() {
                 
 
                 
-                {/* Hover Card */}
-                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-                  <div className="bg-white rounded-lg shadow-xl p-3 border min-w-48">
+                {/* Hover Card with Smart Positioning */}
+                <div className={`absolute opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-50 ${
+                  index === 0 ? 'bottom-full left-0 mb-2' :
+                  index === 1 ? 'top-full left-1/2 transform -translate-x-1/2 mt-2' :
+                  index === 2 ? 'bottom-full right-0 mb-2' :
+                  'top-full left-1/2 transform -translate-x-1/2 mt-2'
+                }`}>
+                  <div className="bg-white rounded-lg shadow-xl p-3 border min-w-48 max-w-64">
                     <h4 className="font-semibold text-sm text-gray-900">{step.title}</h4>
                     <p className="text-xs text-gray-600 mt-1">{step.description}</p>
                     <div className="flex gap-1 mt-2">
