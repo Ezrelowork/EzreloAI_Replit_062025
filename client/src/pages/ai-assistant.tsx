@@ -393,18 +393,7 @@ export default function AIAssistant() {
 
 
 
-            {/* Single Action Button */}
-            <div className="text-center">
-              <Link href="/moving-journey">
-                <Button size="lg" className="flex items-center gap-2 mx-auto">
-                  <MapPin className="w-5 h-5" />
-                  Start Your Moving Journey
-                </Button>
-              </Link>
-              <p className="text-sm text-gray-600 mt-3">
-                Navigate your personalized moving roadmap with interactive tasks
-              </p>
-            </div>
+
 
             <div className="text-center mt-6">
               <Link href="/moving-journey">
