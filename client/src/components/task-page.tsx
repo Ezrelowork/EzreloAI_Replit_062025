@@ -538,7 +538,41 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
           <div className="w-full max-w-[40%]">
             <div className="space-y-4">
               
-              {/* Pro Tips - Moved to top */}
+              {/* Moving Estimate Questionnaire */}
+              <div className="bg-white rounded-lg shadow-md border p-4">
+                <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+                  <div className="w-1 h-6 bg-purple-500 rounded-full"></div>
+                  Estimate Questionnaire
+                </h3>
+                <p className="text-sm text-gray-600 mb-3">
+                  Prepare for accurate moving quotes by having these details ready when you call.
+                </p>
+                <div className="space-y-3">
+                  <button
+                    onClick={() => generateMovingQuestionnairePDF()}
+                    className="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded font-medium transition-colors flex items-center justify-center gap-2"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Download PDF Questionnaire
+                  </button>
+                  
+                  <div className="bg-purple-50 p-3 rounded">
+                    <div className="text-sm font-medium text-purple-900 mb-2">Key Information Needed:</div>
+                    <div className="text-xs text-purple-700 space-y-1">
+                      <div>• Current and destination addresses</div>
+                      <div>• Moving date and home size</div>
+                      <div>• Number of floors at each location</div>
+                      <div>• Major items and inventory list</div>
+                      <div>• Packing service preferences</div>
+                      <div>• Special items and storage needs</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Pro Tips - Moved to second */}
               <div className="bg-white rounded-lg shadow-md border p-4">
                 <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
                   <div className="w-1 h-6 bg-blue-500 rounded-full"></div>
