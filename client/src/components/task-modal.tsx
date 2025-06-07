@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { X, ArrowRight, Clock, AlertTriangle, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useLocation } from 'wouter';
 
 interface TaskModalProps {
   isOpen: boolean;
@@ -14,15 +15,18 @@ interface TaskModalProps {
     category: string;
   };
   onStartTask: () => void;
+  onMarkComplete?: () => void;
 }
 
 export const TaskModal: React.FC<TaskModalProps> = ({
   isOpen,
   onClose,
   task,
-  onStartTask
+  onStartTask,
+  onMarkComplete
 }) => {
   const [isVisible, setIsVisible] = useState(false);
+  const [, setLocation] = useLocation();
 
   useEffect(() => {
     if (isOpen) {
@@ -129,10 +133,37 @@ export const TaskModal: React.FC<TaskModalProps> = ({
                 <div className="text-sm text-gray-600">Access tools and resources to complete this step</div>
               </div>
               <Button
-                onClick={onStartTask}
+                onClick={() => {
+                  // Get move data from localStorage
+                  const fromParam = localStorage.getItem('aiFromLocation');
+                  const toParam = localStorage.getItem('aiToLocation');
+                  const dateParam = localStorage.getItem('aiMoveDate');
+                  
+                  // Build route with query params
+                  const params = new URLSearchParams();
+                  if (fromParam) params.set('from', fromParam);
+                  if (toParam) params.set('to', toParam);
+                  if (dateParam) params.set('date', dateParam);
+                  
+                  // Route to appropriate page based on task
+                  const taskLower = task.title.toLowerCase();
+                  let targetRoute = '/dashboard';
+                  
+                  if (taskLower.includes('utility') || taskLower.includes('electric') || taskLower.includes('internet')) {
+                    targetRoute = '/utilities';
+                  } else if (taskLower.includes('pack') || taskLower.includes('checklist')) {
+                    targetRoute = '/moving-checklist';
+                  }
+                  
+                  const queryString = params.toString();
+                  const finalRoute = queryString ? `${targetRoute}?${queryString}` : targetRoute;
+                  
+                  onClose();
+                  setLocation(finalRoute);
+                }}
                 className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-xl flex items-center gap-2"
               >
-                Start Task
+                Find Movers
                 <ArrowRight className="w-4 h-4" />
               </Button>
             </div>
@@ -143,6 +174,10 @@ export const TaskModal: React.FC<TaskModalProps> = ({
                 <div className="text-sm text-gray-600">Already finished? Update your progress</div>
               </div>
               <Button
+                onClick={() => {
+                  onMarkComplete?.();
+                  onClose();
+                }}
                 variant="outline"
                 className="border-gray-300 text-gray-700 hover:bg-gray-100 font-semibold px-6 py-2 rounded-xl"
               >

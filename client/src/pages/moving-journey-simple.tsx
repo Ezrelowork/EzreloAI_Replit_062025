@@ -420,6 +420,15 @@ export default function MovingJourney() {
           }
           closeModal();
         }}
+        onMarkComplete={() => {
+          if (currentTask) {
+            setJourneyData(prev => prev.map(step => 
+              step.title === currentTask.title 
+                ? { ...step, completed: true }
+                : step
+            ));
+          }
+        }}
       />
 
       {/* Zoom Navigation Overlay */}
