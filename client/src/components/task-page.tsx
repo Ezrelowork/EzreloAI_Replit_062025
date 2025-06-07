@@ -554,7 +554,8 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
               projectStatus: "active"
             });
             if (projectResponse.ok) {
-              projectToUse = await projectResponse.json();
+              const projectData = await projectResponse.json();
+              projectToUse = projectData.project; // Extract the project from the response
               console.log('Project created:', projectToUse);
               setMovingProject(projectToUse);
             } else {
@@ -648,7 +649,8 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
             projectStatus: "active"
           });
           if (projectResponse.ok) {
-            projectToUse = await projectResponse.json();
+            const projectData = await projectResponse.json();
+            projectToUse = projectData.project; // Extract the project from the response
             setMovingProject(projectToUse);
           }
         }
