@@ -18,15 +18,7 @@ export default function Landing() {
             Our AI creates your personalized moving plan and shows your progress as an interactive highway experience.
           </p>
 
-          <div className="flex flex-col md:flex-row gap-6 justify-center items-center">
-            <Link href="/ai-assistant">
-              <Button size="lg" className="text-lg px-8 py-4 bg-blue-600 hover:bg-blue-700">
-                Start Your Moving Plan
-                <ArrowRight className="ml-2 w-5 h-5" />
-              </Button>
-            </Link>
-            <p className="text-gray-500">Free • No signup required • 2 minutes to start</p>
-          </div>
+          <p className="text-gray-500">Free • No signup required • 2 minutes to start</p>
         </div>
       </section>
 
@@ -140,9 +132,9 @@ export default function Landing() {
           </p>
           
           <Link href="/ai-assistant">
-            <Button size="lg" variant="secondary" className="text-lg px-8 py-4">
-              Create Your Moving Plan Now
-              <ArrowRight className="ml-2 w-5 h-5" />
+            <Button size="lg" variant="secondary" className="text-lg px-12 py-6 text-xl font-semibold">
+              Start Your Moving Plan
+              <ArrowRight className="ml-3 w-6 h-6" />
             </Button>
           </Link>
           
