@@ -64,16 +64,28 @@ export class DatabaseStorage implements IStorage {
     return newProject;
   }
 
-  async getMovingProject(userId: number, fromAddress: string, toAddress: string): Promise<MovingProject | undefined> {
-    const [project] = await db
-      .select()
-      .from(movingProjects)
-      .where(and(
-        eq(movingProjects.userId, userId),
-        eq(movingProjects.fromAddress, fromAddress),
-        eq(movingProjects.toAddress, toAddress)
-      ));
-    return project;
+  async getMovingProject(userId: number, fromAddress?: string, toAddress?: string): Promise<MovingProject | undefined>;
+  async getMovingProject(projectId: number): Promise<MovingProject | undefined>;
+  async getMovingProject(userIdOrProjectId: number, fromAddress?: string, toAddress?: string): Promise<MovingProject | undefined> {
+    if (fromAddress && toAddress) {
+      // Query by userId, fromAddress, toAddress
+      const [project] = await db
+        .select()
+        .from(movingProjects)
+        .where(and(
+          eq(movingProjects.userId, userIdOrProjectId),
+          eq(movingProjects.fromAddress, fromAddress),
+          eq(movingProjects.toAddress, toAddress)
+        ));
+      return project;
+    } else {
+      // Query by projectId
+      const [project] = await db
+        .select()
+        .from(movingProjects)
+        .where(eq(movingProjects.id, userIdOrProjectId));
+      return project;
+    }
   }
 
   async updateMovingProject(projectId: number, updates: Partial<InsertMovingProject>): Promise<MovingProject> {

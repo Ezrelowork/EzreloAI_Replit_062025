@@ -1172,38 +1172,37 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                   Prepare for accurate moving quotes by having these details ready when you call.
                 </p>
                 <div className="space-y-3">
-                  <button
-                    onClick={() => setShowQuestionnaireForm(true)}
-                    className="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded font-medium transition-colors flex items-center justify-center gap-2"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    Fill Out Questionnaire
-                  </button>
+                  {!currentQuestionnaire ? (
+                    <button
+                      onClick={() => setShowQuestionnaireForm(true)}
+                      className="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded font-medium transition-colors flex items-center justify-center gap-2"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      Fill Out Questionnaire
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => {
+                        setQuestionnaireData(currentQuestionnaire as any);
+                        setShowQuestionnaireForm(true);
+                      }}
+                      className="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-medium transition-colors flex items-center justify-center gap-2"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      Your Questionnaire
+                    </button>
+                  )}
                   
-                  {/* Current Questionnaire Status */}
+                  {/* Questionnaire Summary */}
                   {currentQuestionnaire && (
-                    <div className="mt-3 pt-3 border-t border-gray-200">
-                      <h4 className="text-sm font-bold text-gray-700 mb-2">Your Move Questionnaire</h4>
-                      <div className="p-3 bg-green-50 rounded border border-green-200">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <div className="text-sm font-medium text-green-900">Questionnaire Completed</div>
-                            <div className="text-xs text-green-700">
-                              {Object.keys(currentQuestionnaire.majorItems || {}).length} items • {currentQuestionnaire.homeSize} • Last updated: {new Date(currentQuestionnaire.updatedAt).toLocaleDateString()}
-                            </div>
-                          </div>
-                          <button
-                            onClick={() => {
-                              setQuestionnaireData(currentQuestionnaire);
-                              setShowQuestionnaireForm(true);
-                            }}
-                            className="text-green-700 hover:text-green-900 font-medium text-sm px-3 py-1 bg-green-100 rounded"
-                          >
-                            Edit
-                          </button>
-                        </div>
+                    <div className="p-3 bg-green-50 rounded border border-green-200">
+                      <div className="text-xs text-green-700">
+                        <div className="font-medium">{Object.keys(currentQuestionnaire.majorItems || {}).length} items • {currentQuestionnaire.homeSize}</div>
+                        <div>Last updated: {new Date(currentQuestionnaire.updatedAt).toLocaleDateString()}</div>
                       </div>
                     </div>
                   )}

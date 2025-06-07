@@ -36,6 +36,8 @@ export const movingProjects = pgTable("moving_projects", {
   moveDate: text("move_date"),
   selectedMover: json("selected_mover"),
   projectStatus: text("project_status").notNull().default("searching"), // searching, mover_selected, quote_received, booked, in_progress, completed
+  questionnaireData: json("questionnaire_data"),
+  lastQuestionnaireUpdate: timestamp("last_questionnaire_update"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -97,6 +99,8 @@ export const movingProjectSchema = createInsertSchema(movingProjects).pick({
   moveDate: true,
   selectedMover: true,
   projectStatus: true,
+  questionnaireData: true,
+  lastQuestionnaireUpdate: true,
 });
 
 export const projectTaskSchema = createInsertSchema(projectTasks).pick({
