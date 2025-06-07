@@ -84,7 +84,6 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
   const [utilities, setUtilities] = useState<UtilityService[]>([]);
   const [housingServices, setHousingServices] = useState<HousingService[]>([]);
   const [showResults, setShowResults] = useState(false);
-  const [isAnimating, setIsAnimating] = useState(false);
   const [searchType, setSearchType] = useState<'moving' | 'utilities' | 'housing'>('moving');
   const [moveData, setMoveData] = useState({ from: '', to: '', date: '' });
   const [selectedFont, setSelectedFont] = useState('font-source');
@@ -132,20 +131,12 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
     }
   }, [task.title]);
 
-  // Moving company search mutation
   const movingCompanyMutation = useMutation({
     mutationFn: async () => {
-      const fromParts = moveData.from.split(',');
-      const toParts = moveData.to.split(',');
-      
       const response = await apiRequest("POST", "/api/moving-companies", {
-        fromAddress: "",
-        fromCity: fromParts[0]?.trim() || "Austin",
-        fromState: fromParts[1]?.trim() || "TX",
-        fromZip: fromParts[2]?.trim() || "78701",
-        toCity: toParts[0]?.trim() || "Dallas",
-        toState: toParts[1]?.trim() || "TX",
-        toZip: toParts[2]?.trim() || "75201"
+        from: moveData.from,
+        to: moveData.to,
+        moveDate: moveData.date
       });
       return await response.json();
     },
@@ -167,11 +158,10 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
     },
   });
 
-  // Utilities search mutation
   const utilitiesMutation = useMutation({
     mutationFn: async () => {
       const toParts = moveData.to.split(',');
-      const response = await apiRequest("POST", "/api/utilities-search", {
+      const response = await apiRequest("POST", "/api/utilities", {
         city: toParts[0]?.trim() || "Dallas",
         state: toParts[1]?.trim() || "TX",
         zipCode: toParts[2]?.trim() || "75201"
@@ -179,13 +169,13 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
       return await response.json();
     },
     onSuccess: (data) => {
-      const utilityServices = data?.utilities || [];
-      setUtilities(utilityServices);
+      const services = data?.services || [];
+      setUtilities(services);
       setSearchType('utilities');
       setShowResults(true);
       
       // Cache the results for future visits
-      localStorage.setItem(`utilities_${moveData.to}`, JSON.stringify(utilityServices));
+      localStorage.setItem(`utilities_${moveData.to}`, JSON.stringify(services));
     },
     onError: (error) => {
       toast({
@@ -196,7 +186,6 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
     },
   });
 
-  // Housing services search mutation
   const housingMutation = useMutation({
     mutationFn: async () => {
       const toParts = moveData.to.split(',');
@@ -249,64 +238,47 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
     if (title.includes('moving') || title.includes('mover')) {
       return { icon: Truck, color: 'bg-blue-600' };
     } else if (title.includes('utilities') || title.includes('electric') || title.includes('gas')) {
-      return { icon: Zap, color: 'bg-green-600' };
+      return { icon: Zap, color: 'bg-yellow-600' };
     } else if (title.includes('housing') || title.includes('real estate') || title.includes('home')) {
-      return { icon: Home, color: 'bg-purple-600' };
+      return { icon: Home, color: 'bg-green-600' };
     }
     return { icon: Info, color: 'bg-gray-600' };
+  };
+
+  const getTaskSteps = () => {
+    const taskTitle = task.title.toLowerCase();
+    if (taskTitle.includes('moving') || taskTitle.includes('mover')) {
+      return [
+        { title: "Get Quotes", description: "Compare pricing from multiple providers" },
+        { title: "Check Reviews", description: "Verify company reputation and licensing" },
+        { title: "Book Service", description: "Schedule your preferred moving date" },
+        { title: "Prepare Items", description: "Pack and organize belongings" }
+      ];
+    }
+    return [
+      { title: "Research Options", description: "Compare available services" },
+      { title: "Contact Providers", description: "Get pricing and availability" },
+      { title: "Schedule Setup", description: "Book installation or activation" },
+      { title: "Confirm Details", description: "Verify service requirements" }
+    ];
   };
 
   const config = getTaskConfig();
   const IconComponent = config.icon;
 
-  const getTaskSteps = (taskTitle: string) => {
-    if (taskTitle.toLowerCase().includes('moving') || taskTitle.toLowerCase().includes('mover')) {
-      return [
-        { title: "Get Multiple Quotes", description: "Contact 3-5 moving companies for estimates" },
-        { title: "Check Credentials", description: "Verify licensing and insurance" },
-        { title: "Read Reviews", description: "Check online reviews and references" },
-        { title: "Compare Services", description: "Evaluate pricing and service options" },
-        { title: "Book Your Move", description: "Schedule your preferred moving company" }
-      ];
-    }
-    return [
-      { title: "Research Options", description: "Look into available services in your area" },
-      { title: "Compare Providers", description: "Evaluate different service providers" },
-      { title: "Contact Providers", description: "Reach out for quotes and information" },
-      { title: "Make Decision", description: "Choose the best option for your needs" }
-    ];
-  };
-
-  const getTaskResources = (taskTitle: string) => {
-    if (taskTitle.toLowerCase().includes('moving') || taskTitle.toLowerCase().includes('mover')) {
-      return [
-        { title: "Moving Checklist", description: "Complete timeline for your move" },
-        { title: "Packing Tips", description: "How to pack efficiently and safely" },
-        { title: "Insurance Guide", description: "Understanding moving insurance options" },
-        { title: "Cost Calculator", description: "Estimate your total moving costs" }
-      ];
-    }
-    return [
-      { title: "Service Guide", description: "Understanding your options" },
-      { title: "Cost Information", description: "Typical pricing and fees" },
-      { title: "Setup Process", description: "How to get started" },
-      { title: "Tips & Tricks", description: "Make the most of your service" }
-    ];
-  };
-
   return (
     <div className={`min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 ${selectedFont}`}>
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Header Section */}
-        <div className="bg-white rounded-3xl shadow-2xl p-8 mb-8 border border-gray-100">
+        <div className="bg-white rounded-lg shadow-md p-6 mb-6 border border-gray-100">
           <div className="flex items-center gap-6">
-            <div className={`p-6 rounded-3xl ${config.color} text-white shadow-xl`}>
-              <IconComponent className="w-12 h-12" />
+            <div className={`p-4 rounded-lg ${config.color} text-white shadow-lg`}>
+              <IconComponent className="w-8 h-8" />
             </div>
             <div className="flex-1">
-              <h1 className="text-2xl font-bold text-gray-900 mb-2 tracking-tight">{task.title}</h1>
+              <h1 className="text-xl font-bold text-gray-900 mb-2 tracking-tight">{task.title}</h1>
               <div className="flex items-center gap-3 mb-2">
-                <span className={`px-3 py-1 rounded-full text-xs font-bold text-white ${config.color}`}>
+                <span className={`px-2 py-1 rounded-full text-xs font-bold text-white ${config.color}`}>
                   {task.priority.toUpperCase()}
                 </span>
                 <span className="text-gray-600 text-sm font-medium">Timeline: {task.week}</span>
@@ -320,7 +292,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                   <span>{moveData.to}</span>
                   <span className="text-gray-500 text-xs ml-3">Move Date: {new Date(moveData.date).toLocaleDateString()}</span>
                 </div>
-                {/* Status Information - Reserve space to prevent layout shift */}
+                {/* Status Information */}
                 <div className="min-h-[24px] flex items-center gap-2">
                   {showResults && searchType === 'moving' && movingCompanies.length > 0 && (
                     <div className="flex items-center gap-1 text-xs text-green-700 bg-green-50 px-2 py-1 rounded-md w-fit">
@@ -404,7 +376,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
           <Button
             onClick={() => onBack ? onBack() : setLocation('/moving-journey')}
             variant="outline"
-            className="border border-blue-600 hover:border-blue-700 text-blue-700 hover:text-blue-800 font-medium py-2 px-4 rounded-lg text-sm shadow-sm transform hover:scale-105 transition-all"
+            className="border border-blue-600 hover:border-blue-700 text-blue-700 hover:text-blue-800 font-medium py-2 px-4 rounded-lg text-sm shadow-sm"
           >
             <ArrowLeft className="w-3 h-3 mr-1" />
             Journey
@@ -425,236 +397,85 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
             <CheckCircle className="w-3 h-3 mr-1" />
             Complete
           </Button>
-          
-          <Button
-            variant="outline"
-            className="border border-gray-400 hover:border-gray-500 text-gray-700 hover:text-gray-900 font-medium py-2 px-6 rounded-lg text-sm shadow-sm transition-all"
-          >
-            Help
-          </Button>
         </div>
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Task Overview and Steps */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Service Results */}
-            {showResults && (
-              <div className="mb-6">
-                <div className="bg-white rounded-lg shadow-md border border-blue-100 p-4">
-                  <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-                    <div className="w-1 h-6 bg-blue-600 rounded-full"></div>
-                    {searchType === 'moving' && `Providers: ${moveData.from} → ${moveData.to}`}
-                    {searchType === 'utilities' && `Services: ${moveData.to}`}
-                    {searchType === 'housing' && `Housing Services for ${moveData.to}`}
-                  </h2>
-                  <div className="space-y-4">
-                    {searchType === 'moving' && movingCompanies.length > 0 && 
-                      movingCompanies.map((company, index) => (
-                        <div key={index} className="border border-gray-200 rounded-lg p-3 hover:border-blue-300 hover:shadow-sm transition-all">
-                          <div className="flex items-start justify-between mb-2">
-                            <div className="flex-1">
-                              <div className="flex items-center justify-between mb-1">
-                                <h3 className="text-sm font-bold text-gray-900">{company.provider}</h3>
-                                <span className="text-sm font-bold text-green-600">{company.estimatedCost}</span>
-                              </div>
-                              <div className="flex items-center gap-2 mb-2">
-                                <div className="flex items-center gap-1">
-                                  {[...Array(5)].map((_, i) => (
-                                    <Star
-                                      key={i}
-                                      className={`w-3 h-3 ${
-                                        i < company.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
-                                      }`}
-                                    />
-                                  ))}
-                                  <span className="text-xs text-gray-600">({company.rating})</span>
-                                </div>
-                                <span className="text-xs text-gray-500">•</span>
-                                <span className="text-xs text-gray-600">{company.phone}</span>
-                              </div>
-                              <p className="text-xs text-gray-700 mb-2 line-clamp-2">{company.description}</p>
-                              <div className="flex flex-wrap gap-1 mb-2">
-                                {company.services.slice(0, 4).map((service, idx) => (
-                                  <span key={idx} className="px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs font-medium">
-                                    {service}
-                                  </span>
-                                ))}
-                              </div>
-                            </div>
+        {/* Task Overview - moved from sidebar */}
+        <div className="mb-6">
+          <div className="bg-white rounded-lg shadow-md border p-4">
+            <h2 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+              <div className="w-1 h-6 bg-gray-600 rounded-full"></div>
+              Task Overview
+            </h2>
+            <p className="text-sm text-gray-700 mb-3">{task.description}</p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {getTaskSteps().map((step, index) => (
+                <div key={index} className="bg-gray-50 rounded-lg p-3">
+                  <h4 className="text-xs font-bold text-gray-900 mb-1">{step.title}</h4>
+                  <p className="text-xs text-gray-600">{step.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Main Content - Service Results (55% width) */}
+        <div className="w-full max-w-[55%]">
+          {showResults && (
+            <div className="mb-6">
+              <div className="bg-white rounded-lg shadow-md border border-blue-100 p-4">
+                <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <div className="w-1 h-6 bg-blue-600 rounded-full"></div>
+                  {searchType === 'moving' && `Providers: ${moveData.from} → ${moveData.to}`}
+                  {searchType === 'utilities' && `Services: ${moveData.to}`}
+                  {searchType === 'housing' && `Housing Services for ${moveData.to}`}
+                </h2>
+                <div className="space-y-3">
+                  {searchType === 'moving' && movingCompanies.length > 0 && 
+                    movingCompanies.map((company, index) => (
+                      <div key={index} className="border border-gray-200 rounded-lg p-3 hover:border-blue-300 hover:shadow-sm transition-all relative">
+                        <div className="flex-1 pr-20">
+                          <div className="flex items-center justify-between mb-1">
+                            <h3 className="text-sm font-bold text-gray-900">{company.provider}</h3>
+                            <span className="text-sm font-bold text-green-600">{company.estimatedCost}</span>
                           </div>
-                          <div className="flex gap-2">
-                            <Button
-                              onClick={() => handleReferralClick(company, 'website_visit')}
-                              className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-xs font-medium"
-                            >
-                              Website
-                            </Button>
-                            <Button
-                              onClick={() => window.open(`tel:${company.phone}`, '_self')}
-                              variant="outline"
-                              className="border-green-500 text-green-700 hover:bg-green-50 px-3 py-1 rounded text-xs font-medium"
-                            >
-                              Call
-                            </Button>
-                            <Button
-                              onClick={() => handleReferralClick(company, 'quote_request')}
-                              variant="outline"
-                              className="border-orange-500 text-orange-700 hover:bg-orange-50 px-3 py-1 rounded text-xs font-medium"
-                            >
-                              Quote
-                            </Button>
+                          <div className="flex items-center gap-2 mb-2">
+                            <div className="flex items-center gap-1">
+                              {[...Array(5)].map((_, i) => (
+                                <Star
+                                  key={i}
+                                  className={`w-3 h-3 ${
+                                    i < company.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
+                                  }`}
+                                />
+                              ))}
+                              <span className="text-xs text-gray-600">({company.rating})</span>
+                            </div>
+                            <span className="text-xs text-gray-500">•</span>
+                            <span className="text-xs text-gray-600">{company.phone}</span>
+                          </div>
+                          <p className="text-xs text-gray-700 mb-2 line-clamp-2">{company.description}</p>
+                          <div className="flex flex-wrap gap-1 mb-2">
+                            {company.services.slice(0, 4).map((service, idx) => (
+                              <span key={idx} className="px-2 py-1 bg-blue-50 text-blue-700 rounded text-xs font-medium">
+                                {service}
+                              </span>
+                            ))}
                           </div>
                         </div>
-                      ))}
-                  </div>
-                </div>
-              </div>
-            )}
-            {/* Task Overview */}
-            <div className="bg-white rounded-2xl shadow-lg p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Task Overview</h2>
-              <p className="text-gray-700 leading-relaxed text-lg">{task.description}</p>
-            </div>
-
-            {/* Task Steps */}
-            <div className="bg-white rounded-2xl shadow-lg p-6">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Steps to Complete</h3>
-              <div className="space-y-3">
-                {getTaskSteps(task.title).map((step, index) => (
-                  <div key={index} className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl">
-                    <div className="w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm font-bold mt-1">
-                      {index + 1}
-                    </div>
-                    <div className="flex-1">
-                      <div className="font-semibold text-gray-900">{step.title}</div>
-                      <div className="text-sm text-gray-600">{step.description}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Resources */}
-            <div className="bg-white rounded-2xl shadow-lg p-6">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Helpful Resources</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {getTaskResources(task.title).map((resource, index) => (
-                  <div key={index} className="p-4 border border-gray-200 rounded-xl hover:border-blue-300 transition-colors">
-                    <div className="font-semibold text-blue-600">{resource.title}</div>
-                    <div className="text-sm text-gray-600">{resource.description}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Quick Actions */}
-            <div className="bg-white rounded-2xl shadow-lg p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">Quick Actions</h3>
-              <div className="space-y-3">
-                <Button
-                  onClick={() => window.open('tel:+18007685522', '_self')}
-                  variant="outline"
-                  className="w-full border-green-300 text-green-700 hover:bg-green-50 font-semibold py-3 rounded-xl"
-                >
-                  📞 Call Moving Hotline
-                </Button>
-                <Button
-                  onClick={() => window.open('https://www.moving.org/checklist/', '_blank')}
-                  variant="outline"
-                  className="w-full border-blue-300 text-blue-700 hover:bg-blue-50 font-semibold py-3 rounded-xl"
-                >
-                  📋 Download Checklist
-                </Button>
-                <Button
-                  onClick={() => window.open('https://www.calculator.net/moving-cost-calculator.html', '_blank')}
-                  variant="outline"
-                  className="w-full border-purple-300 text-purple-700 hover:bg-purple-50 font-semibold py-3 rounded-xl"
-                >
-                  💰 Cost Calculator
-                </Button>
-              </div>
-            </div>
-
-            {/* Moving Timeline */}
-            <div className="bg-gradient-to-br from-indigo-50 to-purple-50 border border-indigo-200 rounded-2xl p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">Moving Timeline</h3>
-              <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span className="text-sm text-gray-700">8 weeks before: Start planning</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-                  <span className="text-sm text-gray-700">6 weeks before: Get quotes</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                  <span className="text-sm text-gray-700">4 weeks before: Book movers</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                  <span className="text-sm text-gray-700">2 weeks before: Confirm details</span>
+                        <div className="absolute bottom-3 right-3">
+                          <Button
+                            onClick={() => handleReferralClick(company, 'quote_request')}
+                            className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-xs font-medium"
+                          >
+                            Get Estimate
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
                 </div>
               </div>
             </div>
-
-            {/* Pro Tips */}
-            <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">Pro Tips</h3>
-              <div className="space-y-3 text-sm text-gray-700">
-                <div className="flex items-start gap-2">
-                  <AlertTriangle className="w-4 h-4 text-yellow-600 mt-0.5" />
-                  <span>Get binding estimates in writing</span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <AlertTriangle className="w-4 h-4 text-yellow-600 mt-0.5" />
-                  <span>Check company credentials online</span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <AlertTriangle className="w-4 h-4 text-yellow-600 mt-0.5" />
-                  <span>Read all contracts carefully</span>
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          {/* Task Completion Section */}
-          <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-2xl p-6 mt-8">
-            <div className="text-center">
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Ready to Complete This Task?</h3>
-              <p className="text-gray-600 mb-6">Mark this task as complete to continue your relocation journey</p>
-              
-              <div className="flex gap-3 justify-center">
-                <Button
-                  onClick={() => {
-                    if (onTaskComplete) {
-                      onTaskComplete(task.id);
-                    }
-                    onComplete();
-                  }}
-                  className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
-                >
-                  <CheckCircle className="w-5 h-5 mr-2" />
-                  Mark Task Complete
-                </Button>
-                
-                {onBack && (
-                  <Button
-                    onClick={onBack}
-                    variant="outline"
-                    className="border-gray-300 text-gray-700 hover:bg-gray-50 font-semibold px-8 py-3 rounded-xl"
-                  >
-                    <ArrowLeft className="w-5 h-5 mr-2" />
-                    Back to Journey
-                  </Button>
-                )}
-              </div>
-            </div>
-          </div>
+          )}
         </div>
       </div>
     </div>
