@@ -468,27 +468,19 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                             </span>
                           ))}
                         </div>
-                        <div className="flex gap-2">
-                          <Button
+                        <div className="flex gap-4">
+                          <button
                             onClick={() => handleReferralClick(company, 'website_visit')}
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm font-medium"
+                            className="text-blue-600 hover:text-blue-700 text-sm font-medium underline"
                           >
                             Website
-                          </Button>
-                          <Button
+                          </button>
+                          <button
                             onClick={() => window.open(`tel:${company.phone}`, '_self')}
-                            variant="outline"
-                            className="border-green-500 text-green-700 hover:bg-green-50 px-3 py-1 rounded text-sm font-medium"
+                            className="text-green-600 hover:text-green-700 text-sm font-medium underline"
                           >
                             Call
-                          </Button>
-                          <Button
-                            onClick={() => handleReferralClick(company, 'quote_request')}
-                            variant="outline"
-                            className="border-orange-500 text-orange-700 hover:bg-orange-50 px-3 py-1 rounded text-sm font-medium"
-                          >
-                            Quote
-                          </Button>
+                          </button>
                         </div>
                       </div>
                     ))}
