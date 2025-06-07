@@ -143,11 +143,11 @@ export default function Landing() {
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle className="w-5 h-5" />
-              <span>Free to use</span>
+              <span>AI-powered planning</span>
             </div>
             <div className="flex items-center gap-2">
               <Users className="w-5 h-5" />
-              <span>No account needed</span>
+              <span>Expert guidance</span>
             </div>
           </div>
         </div>
