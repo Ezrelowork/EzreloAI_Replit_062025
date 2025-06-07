@@ -272,6 +272,25 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete }) => {
                 <span className="text-gray-600 font-medium">Category: {task.category}</span>
               </div>
             </div>
+            
+            {/* Task Progress - moved from sidebar */}
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-6 min-w-[280px]">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">Task Progress</h3>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-600 font-medium">Status</span>
+                  <span className="text-orange-600 font-bold">In Progress</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-600 font-medium">Due Date</span>
+                  <span className="font-bold text-gray-900">{task.week}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-gray-600 font-medium">Estimated Time</span>
+                  <span className="font-bold text-gray-900">30-60 min</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -532,24 +551,6 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete }) => {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* Progress Card */}
-            <div className="bg-white rounded-2xl shadow-lg p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">Task Progress</h3>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-600">Status</span>
-                  <span className="text-orange-600 font-semibold">In Progress</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-600">Due Date</span>
-                  <span className="font-semibold">{task.week}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-600">Estimated Time</span>
-                  <span className="font-semibold">30-60 min</span>
-                </div>
-              </div>
-            </div>
 
 
 
