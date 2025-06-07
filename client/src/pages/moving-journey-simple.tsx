@@ -8,14 +8,10 @@ import { TaskModal, useTaskModal } from "@/components/task-modal";
 import { ZoomNavigation, useZoomNavigation } from "@/components/zoom-navigation";
 import { TaskPage } from "@/components/task-page";
 import { useToast } from "@/hooks/use-toast";
+import { DynamicHighwaySign } from "@/components/dynamic-highway-sign";
 
 // Direct imports for highway graphics
 import highwayBackground from "@assets/highway-background.png";
-import sign1 from "@assets/SIgn1.png";
-import sign2 from "@assets/Sign2.png";
-import sign3 from "@assets/Sign3.png";
-import sign4 from "@assets/Sign4.png";
-import sign5 from "@assets/Sign5.png";
 import { 
   ArrowLeft,
   Truck,
@@ -118,13 +114,6 @@ export default function MovingJourney() {
       alt: 'Highway Journey Background',
       width: 1200,
       height: 800
-    },
-    taskIcons: {
-      'moving': { src: sign1, alt: 'Core Moving Tasks', width: 120, height: 80 },
-      'utilities-setup': { src: sign2, alt: 'Set Up Utilities', width: 120, height: 80 },
-      'address-changes': { src: sign3, alt: 'Address Changes', width: 120, height: 80 },
-      'utilities-services': { src: sign4, alt: 'Utilities & Services', width: 120, height: 80 },
-      'essential-services': { src: sign5, alt: 'Essential Services', width: 120, height: 80 }
     }
   };
 
@@ -394,15 +383,10 @@ export default function MovingJourney() {
           const completedSteps = journeyData.filter(s => s.completed).length;
           const isCurrentStep = index === completedSteps && !step.completed;
           
-          // Assign different sign for each position (4 signs total)
-          const signsByIndex = [
-            customGraphics.taskIcons['moving'],           // Sign 1 - Find Moving Company
-            customGraphics.taskIcons['address-changes'],  // Sign 3 - Address Changes 
-            customGraphics.taskIcons['utilities-services'], // Sign 4 - Transfer Services
-            customGraphics.taskIcons['essential-services'] // Sign 5 - Essential Services
-          ];
-
-          const customSign = signsByIndex[index] || customGraphics.taskIcons['moving'];
+          // Show only first 4 tasks as highway signs
+          if (index >= 4) {
+            return null;
+          }
           
           // Position four signs with different graphics
           let position;
@@ -434,51 +418,15 @@ export default function MovingJourney() {
                 transform: 'translate(-50%, -50%)'
               }}
             >
-              {/* Custom Highway Sign */}
-              <div className="relative group">
-                <img 
-                  src={customSign.src}
-                  alt={customSign.alt}
-                  className={`${index === 0 ? 'w-[26rem] h-[17rem]' : index === 1 ? 'w-96 h-64' : index === 2 ? 'w-96 h-64' : index === 3 ? 'w-96 h-64' : 'w-72 h-48'} object-contain cursor-pointer transition-all duration-300 ${
-                    step.completed ? 'opacity-80 saturate-50' : 'hover:brightness-110 hover:scale-105'
-                  }`}
-                  onClick={(e) => handleTaskClick(step, e)}
-                  style={index === 1 ? { clipPath: 'inset(0 0 30% 0)' } : index === 2 ? { clipPath: 'inset(0 0 30% 0)' } : undefined}
-                  onError={(e) => {
-                    console.error(`Sign ${index + 1} failed to load:`, customSign.src);
-                  }}
-                />
-                
-                {/* Completion Check with Animation */}
-                {step.completed && (
-                  <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-r from-green-400 to-green-600 rounded-full flex items-center justify-center shadow-lg animate-pulse">
-                    <CheckCircle className="w-5 h-5 text-white animate-bounce" />
-                  </div>
-                )}
-                
-
-                
-
-                
-                {/* Hover Card with Smart Positioning */}
-                <div className={`absolute opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-50 ${
-                  index === 0 ? 'bottom-full left-1/2 transform -translate-x-1/2 mb-2' :
-                  index === 1 ? 'bottom-full right-3/4 mb-2' :
-                  index === 2 ? 'bottom-full right-0 mb-2' :
-                  'top-1/2 right-3/4 mr-2'
-                }`}>
-                  <div className="bg-white rounded-lg shadow-xl p-3 border min-w-48 max-w-64">
-                    <h4 className="font-semibold text-sm text-gray-900">{step.title}</h4>
-                    <p className="text-xs text-gray-600 mt-1">{step.description}</p>
-                    <div className="flex gap-1 mt-2">
-                      <Badge variant={step.priority === 'high' ? 'destructive' : 'secondary'} className="text-xs">
-                        {step.priority}
-                      </Badge>
-                      <Badge variant="outline" className="text-xs">{step.week}</Badge>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <DynamicHighwaySign
+                title={step.title}
+                description={step.description}
+                week={step.week}
+                priority={step.priority}
+                completed={step.completed}
+                onClick={() => handleTaskClick(step, { target: taskCardRefs.current[step.id] })}
+                className="group"
+              />
             </div>
           );
         })}
