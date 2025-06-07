@@ -395,7 +395,7 @@ export default function MovingJourney() {
           if (index === 0) {
             position = { left: '20%', top: '75%' };    // Sign 1 - moving company (moved 5% right)
           } else if (index === 1) {
-            position = { left: '40%', top: '65%' };    // Sign 3 - address changes (cropped)
+            position = { left: '65%', top: '65%' };    // Sign 2 - moved 25% right to other side of road
           } else if (index === 2) {
             position = { left: '70%', top: '49%' };    // Sign 4 - transfer services (cropped)
           } else if (index === 3) {
