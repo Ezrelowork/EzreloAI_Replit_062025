@@ -277,7 +277,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete }) => {
       {/* Centered Notification Modal */}
       {showNotification && (
         <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
-          <div className="bg-white rounded-2xl shadow-2xl border-2 border-green-200 p-6 max-w-md mx-4 transform transition-all duration-500 ease-out animate-pulse">
+          <div className="bg-white rounded-2xl shadow-2xl border-2 border-green-200 p-6 max-w-md mx-4 transform transition-all duration-500 ease-out opacity-95">
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center">
                 <CheckCircle className="w-6 h-6 text-white" />
