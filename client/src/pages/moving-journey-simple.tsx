@@ -268,10 +268,15 @@ export default function MovingJourney() {
             </div>
             
             {/* Progress Tracker in Header */}
-            <div className="flex items-center">
+            <div className="flex items-center gap-4">
               <ProgressTracker 
                 totalSteps={journeyData.length}
                 completedSteps={journeyData.filter(step => step.completed).length}
+              />
+              <JourneyStats 
+                highPriority={journeyData.filter(step => step.priority === 'high').length}
+                mediumPriority={journeyData.filter(step => step.priority === 'medium').length}
+                lowPriority={journeyData.filter(step => step.priority === 'low').length}
               />
             </div>
           </div>
