@@ -1,5 +1,5 @@
 import React from 'react';
-import blankSignPath from '@assets/AA3AE1F5-3D99-434C-8AE7-89798991FE36_1749333999352.png';
+import blankSignPath from '@assets/9097D925-400E-4B8C-9697-19B7E4BDA0C9_1749334781517.png';
 
 interface DynamicSignProps {
   title: string;
@@ -39,13 +39,10 @@ export const DynamicHighwaySign: React.FC<DynamicSignProps> = ({
     >
       {/* Custom blank sign background */}
       <div className="relative w-48 h-32">
-        <div 
-          className="w-full h-full bg-green-600 rounded-lg border-4 border-white shadow-lg"
-          style={{
-            background: 'linear-gradient(145deg, #059669, #047857)',
-            borderRadius: '12px',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2)'
-          }}
+        <img 
+          src={blankSignPath} 
+          alt="Highway Sign" 
+          className="w-full h-full object-contain"
         />
         
         {/* Dynamic text overlay */}
