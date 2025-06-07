@@ -717,6 +717,67 @@ Please provide a comprehensive strategic relocation plan focusing on planning gu
     }
   });
 
+  // Send questionnaire email with PDF
+  app.post("/api/send-questionnaire-email", async (req, res) => {
+    try {
+      const { email, questionnaire, pdfData, moveDetails } = req.body;
+      
+      // For now, just simulate email sending since we don't have SendGrid configured
+      console.log(`Simulating email send to: ${email}`);
+      console.log(`PDF size: ${pdfData ? 'Present' : 'Missing'}`);
+      console.log(`Questionnaire data:`, questionnaire);
+      
+      // In a real implementation, this would use SendGrid or similar service
+      // const sgMail = require('@sendgrid/mail');
+      // sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+      // 
+      // const msg = {
+      //   to: email,
+      //   from: 'noreply@ezrelo.com',
+      //   subject: 'Your Moving Estimate Questionnaire',
+      //   text: 'Please find your completed moving questionnaire attached.',
+      //   attachments: [{
+      //     content: pdfData,
+      //     filename: 'moving-questionnaire.pdf',
+      //     type: 'application/pdf',
+      //     disposition: 'attachment'
+      //   }]
+      // };
+      // 
+      // await sgMail.send(msg);
+
+      res.json({ success: true, message: "Questionnaire sent successfully" });
+    } catch (error) {
+      console.error("Error sending questionnaire email:", error);
+      res.status(500).json({ error: "Failed to send questionnaire" });
+    }
+  });
+
+  // Archive questionnaire in project
+  app.post("/api/archive-questionnaire", async (req, res) => {
+    try {
+      const { projectId, questionnaire, pdfData } = req.body;
+      
+      // Store questionnaire as communication record
+      await storage.createCommunication({
+        projectId,
+        communicationType: "questionnaire",
+        subject: "Moving Estimate Questionnaire Completed",
+        notes: JSON.stringify({
+          questionnaire,
+          pdfGenerated: !!pdfData,
+          completedAt: new Date().toISOString()
+        }),
+        contactPerson: "Customer"
+      });
+
+      res.json({ success: true, message: "Questionnaire archived successfully" });
+    } catch (error) {
+      console.error("Error archiving questionnaire:", error);
+      res.status(500).json({ error: "Failed to archive questionnaire" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

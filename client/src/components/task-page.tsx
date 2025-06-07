@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
@@ -105,7 +109,8 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
     fragileItems: '',
     storageNeeds: '',
     parkingAccess: '',
-    additionalNotes: ''
+    additionalNotes: '',
+    email: ''
   });
 
   const { toast } = useToast();
@@ -426,6 +431,137 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
     });
   };
 
+  const generateFilledPDF = () => {
+    const doc = new jsPDF();
+    
+    // Header
+    doc.setFontSize(20);
+    doc.setFont(undefined, 'bold');
+    doc.text('Moving Estimate Questionnaire', 20, 30);
+    
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'normal');
+    doc.text('Completed form for accurate moving quotes', 20, 40);
+    doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 20, 50);
+    
+    let yPosition = 70;
+    
+    // User's answers
+    const responses = [
+      { label: 'Current Address:', value: questionnaireData.currentAddress || moveData.from },
+      { label: 'Destination Address:', value: questionnaireData.destinationAddress || moveData.to },
+      { label: 'Moving Date:', value: questionnaireData.movingDate || moveData.date },
+      { label: 'Home Size:', value: questionnaireData.homeSize },
+      { label: 'Square Footage:', value: questionnaireData.squareFootage },
+      { label: 'Current Location Floors:', value: questionnaireData.currentFloors },
+      { label: 'Destination Floors:', value: questionnaireData.destinationFloors },
+      { label: 'Major Items:', value: questionnaireData.majorItems },
+      { label: 'Packing Services:', value: questionnaireData.packingServices },
+      { label: 'Furniture Disassembly:', value: questionnaireData.furnitureDisassembly },
+      { label: 'Fragile Items:', value: questionnaireData.fragileItems },
+      { label: 'Storage Needs:', value: questionnaireData.storageNeeds },
+      { label: 'Parking Access:', value: questionnaireData.parkingAccess },
+      { label: 'Additional Notes:', value: questionnaireData.additionalNotes }
+    ];
+
+    responses.forEach((item) => {
+      if (yPosition > 250) {
+        doc.addPage();
+        yPosition = 30;
+      }
+      
+      doc.setFontSize(12);
+      doc.setFont(undefined, 'bold');
+      doc.text(item.label, 20, yPosition);
+      yPosition += 8;
+      
+      doc.setFont(undefined, 'normal');
+      doc.setFontSize(11);
+      const value = item.value || 'Not specified';
+      const lines = doc.splitTextToSize(value, 170);
+      doc.text(lines, 25, yPosition);
+      yPosition += (lines.length * 6) + 10;
+    });
+
+    return doc;
+  };
+
+  const handleSendPDFToEmail = async () => {
+    if (!questionnaireData.email) {
+      toast({
+        title: "Email Required",
+        description: "Please enter your email address to receive the PDF.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      // Generate PDF with filled data
+      const doc = generateFilledPDF();
+      const pdfBlob = doc.output('blob');
+      
+      // Convert to base64 for sending
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64PDF = reader.result?.toString().split(',')[1];
+        
+        // Send email with PDF attachment
+        const response = await apiRequest("POST", "/api/send-questionnaire-email", {
+          email: questionnaireData.email,
+          questionnaire: questionnaireData,
+          pdfData: base64PDF,
+          moveDetails: moveData
+        });
+
+        if (response.ok) {
+          toast({
+            title: "PDF Sent Successfully",
+            description: `Your moving questionnaire has been sent to ${questionnaireData.email}`,
+          });
+          
+          // Archive in project if exists
+          if (movingProject?.id) {
+            await apiRequest("POST", "/api/archive-questionnaire", {
+              projectId: movingProject.id,
+              questionnaire: questionnaireData,
+              pdfData: base64PDF
+            });
+          }
+          
+          // Close form and reset
+          setShowQuestionnaireForm(false);
+          setQuestionnaireData({
+            currentAddress: '',
+            destinationAddress: '',
+            movingDate: '',
+            homeSize: '',
+            squareFootage: '',
+            currentFloors: '',
+            destinationFloors: '',
+            majorItems: '',
+            packingServices: '',
+            furnitureDisassembly: '',
+            fragileItems: '',
+            storageNeeds: '',
+            parkingAccess: '',
+            additionalNotes: '',
+            email: ''
+          });
+        }
+      };
+      
+      reader.readAsDataURL(pdfBlob);
+      
+    } catch (error) {
+      toast({
+        title: "Failed to Send PDF",
+        description: "Unable to send questionnaire. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const getTaskConfig = () => {
     const title = task.title.toLowerCase();
     if (title.includes('moving') || title.includes('mover')) {
@@ -461,6 +597,216 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
 
   return (
     <div className={`min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 ${selectedFont}`}>
+      {/* Questionnaire Form Modal */}
+      {showQuestionnaireForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">Moving Estimate Questionnaire</h2>
+                <button
+                  onClick={() => setShowQuestionnaireForm(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <form className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="currentAddress">Current Address</Label>
+                    <Input
+                      id="currentAddress"
+                      value={questionnaireData.currentAddress || moveData.from}
+                      onChange={(e) => setQuestionnaireData({...questionnaireData, currentAddress: e.target.value})}
+                      placeholder="Full address with unit number"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="destinationAddress">Destination Address</Label>
+                    <Input
+                      id="destinationAddress"
+                      value={questionnaireData.destinationAddress || moveData.to}
+                      onChange={(e) => setQuestionnaireData({...questionnaireData, destinationAddress: e.target.value})}
+                      placeholder="Full address with unit number"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="movingDate">Moving Date</Label>
+                    <Input
+                      id="movingDate"
+                      type="date"
+                      value={questionnaireData.movingDate || moveData.date}
+                      onChange={(e) => setQuestionnaireData({...questionnaireData, movingDate: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="homeSize">Home Size</Label>
+                    <Select value={questionnaireData.homeSize} onValueChange={(value) => setQuestionnaireData({...questionnaireData, homeSize: value})}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select home size" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="studio">Studio</SelectItem>
+                        <SelectItem value="1br">1 Bedroom</SelectItem>
+                        <SelectItem value="2br">2 Bedroom</SelectItem>
+                        <SelectItem value="3br">3 Bedroom</SelectItem>
+                        <SelectItem value="4br">4+ Bedroom</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="squareFootage">Square Footage (if known)</Label>
+                    <Input
+                      id="squareFootage"
+                      value={questionnaireData.squareFootage}
+                      onChange={(e) => setQuestionnaireData({...questionnaireData, squareFootage: e.target.value})}
+                      placeholder="e.g., 1200"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="currentFloors">Current Location Floors</Label>
+                    <Input
+                      id="currentFloors"
+                      value={questionnaireData.currentFloors}
+                      onChange={(e) => setQuestionnaireData({...questionnaireData, currentFloors: e.target.value})}
+                      placeholder="e.g., 2nd floor, elevator"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="destinationFloors">Destination Floors</Label>
+                    <Input
+                      id="destinationFloors"
+                      value={questionnaireData.destinationFloors}
+                      onChange={(e) => setQuestionnaireData({...questionnaireData, destinationFloors: e.target.value})}
+                      placeholder="e.g., 1st floor, stairs"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="majorItems">Major Items Being Moved</Label>
+                  <Textarea
+                    id="majorItems"
+                    value={questionnaireData.majorItems}
+                    onChange={(e) => setQuestionnaireData({...questionnaireData, majorItems: e.target.value})}
+                    placeholder="List furniture, appliances, piano, safe, etc."
+                    rows={3}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="packingServices">Packing Services Needed</Label>
+                    <Select value={questionnaireData.packingServices} onValueChange={(value) => setQuestionnaireData({...questionnaireData, packingServices: value})}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select packing preference" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="full">Full packing service</SelectItem>
+                        <SelectItem value="partial">Partial packing</SelectItem>
+                        <SelectItem value="self">Self-pack</SelectItem>
+                        <SelectItem value="fragiles">Fragiles only</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="furnitureDisassembly">Furniture Disassembly Needed</Label>
+                    <Input
+                      id="furnitureDisassembly"
+                      value={questionnaireData.furnitureDisassembly}
+                      onChange={(e) => setQuestionnaireData({...questionnaireData, furnitureDisassembly: e.target.value})}
+                      placeholder="List items needing disassembly"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="fragileItems">Fragile or Specialty Items</Label>
+                  <Textarea
+                    id="fragileItems"
+                    value={questionnaireData.fragileItems}
+                    onChange={(e) => setQuestionnaireData({...questionnaireData, fragileItems: e.target.value})}
+                    placeholder="TVs, antiques, artwork, musical instruments, etc."
+                    rows={2}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="storageNeeds">Storage Requirements</Label>
+                    <Input
+                      id="storageNeeds"
+                      value={questionnaireData.storageNeeds}
+                      onChange={(e) => setQuestionnaireData({...questionnaireData, storageNeeds: e.target.value})}
+                      placeholder="Duration and type needed"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="parkingAccess">Parking & Truck Access</Label>
+                    <Input
+                      id="parkingAccess"
+                      value={questionnaireData.parkingAccess}
+                      onChange={(e) => setQuestionnaireData({...questionnaireData, parkingAccess: e.target.value})}
+                      placeholder="Parking, elevators, permits needed?"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="additionalNotes">Additional Notes</Label>
+                  <Textarea
+                    id="additionalNotes"
+                    value={questionnaireData.additionalNotes}
+                    onChange={(e) => setQuestionnaireData({...questionnaireData, additionalNotes: e.target.value})}
+                    placeholder="Any special requirements or concerns"
+                    rows={3}
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="email">Email Address</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={questionnaireData.email}
+                    onChange={(e) => setQuestionnaireData({...questionnaireData, email: e.target.value})}
+                    placeholder="Where to send your PDF questionnaire"
+                    required
+                  />
+                </div>
+
+                <div className="flex gap-3 pt-4">
+                  <Button
+                    type="button"
+                    onClick={handleSendPDFToEmail}
+                    className="flex-1 bg-purple-600 hover:bg-purple-700"
+                  >
+                    Send PDF to My Email
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowQuestionnaireForm(false)}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Header Section */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6 border border-gray-100">
@@ -677,13 +1023,13 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                 </p>
                 <div className="space-y-3">
                   <button
-                    onClick={() => generateMovingQuestionnairePDF()}
+                    onClick={() => setShowQuestionnaireForm(true)}
                     className="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded font-medium transition-colors flex items-center justify-center gap-2"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
-                    Download PDF Questionnaire
+                    Fill Out Questionnaire
                   </button>
                   
                   <div className="bg-purple-50 p-3 rounded">
