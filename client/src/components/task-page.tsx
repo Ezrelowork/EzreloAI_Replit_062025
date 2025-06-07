@@ -1037,24 +1037,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
           </Button>
         </div>
 
-        {/* Task Overview - moved from sidebar */}
-        <div className="mb-6">
-          <div className="bg-white rounded-lg shadow-md border p-4">
-            <h2 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
-              <div className="w-1 h-6 bg-gray-600 rounded-full"></div>
-              Task Overview
-            </h2>
-            <p className="text-sm text-gray-700 mb-3">{task.description}</p>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {getTaskSteps().map((step, index) => (
-                <div key={index} className="bg-gray-50 rounded-lg p-3">
-                  <h4 className="text-xs font-bold text-gray-900 mb-1">{step.title}</h4>
-                  <p className="text-xs text-gray-600">{step.description}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+
 
         {/* Main Content Layout */}
         <div className="flex gap-6">
