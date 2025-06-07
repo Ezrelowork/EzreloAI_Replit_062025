@@ -73,7 +73,7 @@ export const DynamicHighwaySign: React.FC<DynamicSignProps> = ({
             </div>
             
             {/* Main title - larger and more readable */}
-            <div className="text-[12px] font-bold mb-1 leading-tight px-1 drop-shadow-lg">
+            <div className="text-[13px] font-bold mb-1 leading-tight px-1 drop-shadow-lg">
               {title.length > 45 ? title.substring(0, 45) + '...' : title}
             </div>
             
