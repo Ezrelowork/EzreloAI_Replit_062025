@@ -419,8 +419,8 @@ export default function MovingJourney() {
                 
                 {/* Current Task Indicator */}
                 {isCurrentStep && !step.completed && (
-                  <div className="absolute -top-2 -left-2 w-6 h-6 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full flex items-center justify-center shadow-lg animate-pulse">
-                    <div className="w-2 h-2 bg-white rounded-full animate-ping" />
+                  <div className="absolute -top-2 -left-2 w-5 h-5 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center shadow-md">
+                    <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
                   </div>
                 )}
                 
