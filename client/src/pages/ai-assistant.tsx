@@ -11,6 +11,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { Brain, Calendar, MapPin, DollarSign, ArrowRight, ArrowLeft, CheckCircle2, Home, Truck, Wifi, Zap, Phone, CreditCard, FileText, Package, Users, Clock, Search, Building } from "lucide-react";
 import { Link } from "wouter";
+import { DynamicHighwaySign } from "@/components/dynamic-highway-sign";
 
 interface RelocationQuery {
   query: string;
@@ -390,125 +391,7 @@ export default function AIAssistant() {
               </CardContent>
             </Card>
 
-            {/* Moving Journey Road Map */}
-            {aiResponse.timeline && aiResponse.timeline.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <MapPin className="w-5 h-5 text-green-600" />
-                    Your Moving Journey
-                  </CardTitle>
-                  <CardDescription>
-                    Follow the road to your successful relocation
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="relative min-h-80">
-                    {/* Road Path - Larger and more winding */}
-                    <svg className="w-full h-48 mb-4" viewBox="0 0 1000 200" preserveAspectRatio="none">
-                      <defs>
-                        <pattern id="roadDashes" patternUnits="userSpaceOnUse" width="20" height="4">
-                          <rect width="10" height="4" fill="#FFC107" />
-                        </pattern>
-                      </defs>
-                      {/* Road Background - More dramatic curves */}
-                      <path 
-                        d="M 50 100 Q 150 50 250 120 Q 350 180 450 80 Q 550 40 650 140 Q 750 180 850 60 Q 900 40 950 100" 
-                        stroke="#4B5563" 
-                        strokeWidth="28" 
-                        fill="none"
-                      />
-                      {/* Road Centerline */}
-                      <path 
-                        d="M 50 100 Q 150 50 250 120 Q 350 180 450 80 Q 550 40 650 140 Q 750 180 850 60 Q 900 40 950 100" 
-                        stroke="url(#roadDashes)" 
-                        strokeWidth="3" 
-                        fill="none"
-                        strokeDasharray="15,10"
-                      />
-                    </svg>
 
-                    {/* Road Signs positioned along the winding path */}
-                    <div className="absolute inset-0">
-                      {aiResponse.timeline.map((phase, index) => {
-                        const totalStops = aiResponse.timeline.length;
-                        const progress = index / (totalStops - 1 || 1);
-                        
-                        // Calculate position along the curved path
-                        const leftPosition = 5 + (progress * 90);
-                        
-                        // Calculate vertical offset - alternating above/below the road
-                        const isEven = index % 2 === 0;
-                        const baseTopPosition = isEven ? -20 : 60;
-                        
-                        const IconComponent = getTaskIcon(phase.tasks[0] || "");
-                        
-                        return (
-                          <div 
-                            key={index} 
-                            className="absolute flex flex-col items-center" 
-                            style={{ 
-                              left: `${leftPosition}%`,
-                              top: `${baseTopPosition}px`,
-                              transform: 'translateX(-50%)'
-                            }}
-                          >
-                            {/* Road Sign Post */}
-                            <div className="w-1.5 h-12 bg-gray-600 mb-2"></div>
-                            
-                            {/* Road Sign */}
-                            <div className="bg-green-600 text-white px-4 py-3 rounded-lg shadow-lg transform -rotate-2 hover:rotate-0 transition-transform cursor-pointer min-w-24 text-center border-2 border-green-700">
-                              <div className="flex items-center justify-center gap-1 mb-1">
-                                <IconComponent className="w-5 h-5" />
-                                <span className="text-sm font-bold">{index + 1}</span>
-                              </div>
-                              <div className="text-sm font-semibold whitespace-nowrap">
-                                {phase.week.replace('Week ', 'Wk ')}
-                              </div>
-                            </div>
-                            
-                            {/* Tasks positioned to avoid overlap */}
-                            <div 
-                              className="mt-3 bg-white/95 backdrop-blur-sm rounded-lg p-3 shadow-md border border-gray-200 max-w-40"
-                              style={{
-                                // Alternate task boxes above/below to prevent overlap
-                                marginTop: isEven ? '12px' : '12px',
-                                transform: isEven ? 'translateY(0)' : 'translateY(20px)'
-                              }}
-                            >
-                              {phase.tasks.slice(0, 3).map((task, taskIndex) => {
-                                const TaskIcon = getTaskIcon(task);
-                                return (
-                                  <div key={taskIndex} className="text-xs text-gray-700 flex items-center gap-1.5 mb-1.5 last:mb-0">
-                                    <TaskIcon className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" />
-                                    <span className="leading-tight">{task.length > 25 ? task.substring(0, 25) + '...' : task}</span>
-                                  </div>
-                                );
-                              })}
-                              {phase.tasks.length > 3 && (
-                                <div className="text-xs text-gray-500 font-medium">+{phase.tasks.length - 3} more tasks</div>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-
-                    {/* Start and End Markers */}
-                    <div className="flex justify-between mt-8 pt-4">
-                      <div className="flex items-center gap-2 text-sm text-gray-600 font-medium">
-                        <div className="w-4 h-4 bg-blue-500 rounded-full animate-pulse"></div>
-                        Start Journey
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-gray-600 font-medium">
-                        <div className="w-4 h-4 bg-green-500 rounded-full animate-pulse"></div>
-                        New Home!
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
 
             {/* Single Action Button */}
             <div className="text-center">

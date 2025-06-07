@@ -39,10 +39,13 @@ export const DynamicHighwaySign: React.FC<DynamicSignProps> = ({
     >
       {/* Custom blank sign background */}
       <div className="relative w-48 h-32">
-        <img 
-          src={blankSignPath} 
-          alt="Highway Sign" 
-          className="w-full h-full object-contain"
+        <div 
+          className="w-full h-full bg-green-600 rounded-lg border-4 border-white shadow-lg"
+          style={{
+            background: 'linear-gradient(145deg, #059669, #047857)',
+            borderRadius: '12px',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2)'
+          }}
         />
         
         {/* Dynamic text overlay */}
