@@ -300,24 +300,25 @@ export default function MovingJourney() {
           const completedSteps = journeyData.filter(s => s.completed).length;
           const isCurrentStep = index === completedSteps && !step.completed;
           
-          // Get custom sign for this task category
-          const getCustomSign = (stepTitle: string) => {
-            if (stepTitle.includes('Moving') || stepTitle.includes('Truck')) return customGraphics.taskIcons['moving'];
-            if (stepTitle.includes('Utility') && stepTitle.includes('Setup')) return customGraphics.taskIcons['utilities-setup'];
-            if (stepTitle.includes('Address')) return customGraphics.taskIcons['address-changes'];
-            if (stepTitle.includes('Utility') || stepTitle.includes('Service')) return customGraphics.taskIcons['utilities-services'];
-            if (stepTitle.includes('Essential') || stepTitle.includes('Medical')) return customGraphics.taskIcons['essential-services'];
-            return customGraphics.taskIcons['moving']; // Default to first sign
-          };
+          // Assign different sign for each position
+          const signsByIndex = [
+            customGraphics.taskIcons['moving'],           // Sign 1
+            customGraphics.taskIcons['utilities-setup'],  // Sign 2  
+            customGraphics.taskIcons['address-changes'],  // Sign 3
+            customGraphics.taskIcons['utilities-services'], // Sign 4
+            customGraphics.taskIcons['essential-services'] // Sign 5
+          ];
 
-          const customSign = getCustomSign(step.title);
+          const customSign = signsByIndex[index] || customGraphics.taskIcons['moving'];
           
-          // Position only the first sign for now
+          // Position first two signs with different graphics
           let position;
           if (index === 0) {
-            position = { left: '15%', top: '75%' };    // First sign positioned
+            position = { left: '15%', top: '75%' };    // First sign - moving graphic
+          } else if (index === 1) {
+            position = { left: '35%', top: '55%' };    // Second sign - utilities graphic
           } else {
-            // Hide other signs for now
+            // Hide remaining signs for now
             return null;
           }
           
