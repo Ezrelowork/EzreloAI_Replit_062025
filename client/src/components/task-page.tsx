@@ -539,14 +539,12 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
         });
 
         if (response.ok) {
-          toast({
-            title: "PDF Sent Successfully",
-            description: `Your moving questionnaire has been sent to ${questionnaireData.email}`,
-          });
+          console.log('PDF sent successfully, now saving questionnaire...');
           
           // Create or get moving project and save questionnaire
           let projectToUse = movingProject;
           if (!projectToUse?.id) {
+            console.log('Creating new project...');
             // Create a new project for this questionnaire
             const projectResponse = await apiRequest("POST", "/api/moving-project", {
               userId: 1, // Default user for now
@@ -557,23 +555,42 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
             });
             if (projectResponse.ok) {
               projectToUse = await projectResponse.json();
+              console.log('Project created:', projectToUse);
               setMovingProject(projectToUse);
+            } else {
+              console.error('Failed to create project:', projectResponse.status);
             }
           }
           
           if (projectToUse?.id) {
             console.log('Archiving questionnaire for project:', projectToUse.id);
-            const archiveResponse = await apiRequest("POST", "/api/archive-questionnaire", {
-              projectId: projectToUse.id,
-              questionnaire: questionnaireData,
-              pdfData: base64PDF,
-              type: "email_pdf"
-            });
-            console.log('Archive response:', archiveResponse.status);
-            
-            // Refresh current questionnaire
-            refreshCurrentQuestionnaire();
+            try {
+              const archiveResponse = await apiRequest("POST", "/api/archive-questionnaire", {
+                projectId: projectToUse.id,
+                questionnaire: questionnaireData,
+                pdfData: base64PDF,
+                type: "email_pdf"
+              });
+              console.log('Archive response:', archiveResponse.status);
+              
+              if (archiveResponse.ok) {
+                console.log('Questionnaire archived successfully');
+                // Refresh current questionnaire
+                refreshCurrentQuestionnaire();
+              } else {
+                console.error('Failed to archive questionnaire:', archiveResponse.status);
+              }
+            } catch (error) {
+              console.error('Error archiving questionnaire:', error);
+            }
+          } else {
+            console.error('No project available to save questionnaire');
           }
+          
+          toast({
+            title: "PDF Sent Successfully",
+            description: `Your moving questionnaire has been sent to ${questionnaireData.email}`,
+          });
           
           // Close form but keep data
           setShowQuestionnaireForm(false);
