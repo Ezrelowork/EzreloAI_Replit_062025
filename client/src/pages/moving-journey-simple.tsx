@@ -312,13 +312,13 @@ export default function MovingJourney() {
 
           const customSign = getCustomSign(step.title);
           
-          // Position signs exactly where you marked with pink circles
+          // Position signs exactly at each pink circle location
           const roadPositions = [
-            { left: '18%', top: '82%' },   // Bottom left - first pink circle
-            { left: '38%', top: '62%' },   // Second curve - second pink circle  
-            { left: '58%', top: '42%' },   // Middle section - third pink circle
-            { left: '78%', top: '28%' },   // Upper right area - fourth pink circle
-            { left: '88%', top: '18%' }    // Final destination - fifth pink circle
+            { left: '8%', top: '88%' },    // Pink circle 1 - bottom left corner
+            { left: '28%', top: '65%' },   // Pink circle 2 - left side road curve
+            { left: '48%', top: '45%' },   // Pink circle 3 - center of road
+            { left: '68%', top: '25%' },   // Pink circle 4 - upper right area
+            { left: '82%', top: '12%' }    // Pink circle 5 - top right destination
           ];
           
           const position = roadPositions[index] || { left: '50%', top: '50%' };
