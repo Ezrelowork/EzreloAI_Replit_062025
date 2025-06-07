@@ -1268,10 +1268,27 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
               if (canCompleteTask()) {
                 toast({
                   title: "Task Completed!",
-                  description: "Great work! You can continue researching or return to your journey.",
+                  description: "Returning to your moving journey...",
                 });
-                // Optional: Could call onComplete if needed for parent component tracking
-                // onComplete();
+                
+                // Zoom back to journey page with preserved context
+                setTimeout(() => {
+                  const urlParams = new URLSearchParams(window.location.search);
+                  const from = urlParams.get('from');
+                  const to = urlParams.get('to');
+                  const date = urlParams.get('date');
+                  
+                  let journeyUrl = '/moving-journey';
+                  if (from || to || date) {
+                    const params = new URLSearchParams();
+                    if (from) params.set('from', from);
+                    if (to) params.set('to', to);
+                    if (date) params.set('date', date);
+                    journeyUrl += `?${params.toString()}`;
+                  }
+                  
+                  setLocation(journeyUrl);
+                }, 1000); // Brief delay for cinematic effect
               }
             }}
             disabled={!canCompleteTask()}

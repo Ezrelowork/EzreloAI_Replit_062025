@@ -64,6 +64,13 @@ export default function Utilities() {
     zip: "",
     moveDate: ""
   });
+  const [hasCompletedActions, setHasCompletedActions] = useState(false);
+  const [selectedProviders, setSelectedProviders] = useState<UtilityProvider[]>([]);
+
+  // Determine if task can be marked complete based on user actions
+  const canCompleteTask = () => {
+    return providers.length > 0 && (hasCompletedActions || selectedProviders.length > 0);
+  };
 
   // Extract utility type from URL parameters
   useEffect(() => {
@@ -125,6 +132,7 @@ export default function Utilities() {
       });
 
       window.open(provider.referralUrl, '_blank');
+      setHasCompletedActions(true); // Mark progress for provider contact
       
       toast({
         title: "Opening Provider",
@@ -132,7 +140,20 @@ export default function Utilities() {
       });
     } catch (error) {
       window.open(provider.website, '_blank');
+      setHasCompletedActions(true); // Mark progress even for direct website visits
     }
+  };
+
+  const handleSelectProvider = (provider: UtilityProvider) => {
+    setSelectedProviders(prev => {
+      const isSelected = prev.find(p => p.provider === provider.provider);
+      if (isSelected) {
+        return prev.filter(p => p.provider !== provider.provider);
+      } else {
+        setHasCompletedActions(true); // Mark progress for provider selection
+        return [...prev, provider];
+      }
+    });
   };
 
   const utilityTypes = {
@@ -422,7 +443,10 @@ export default function Utilities() {
                             <Button 
                               variant="outline" 
                               size="sm"
-                              onClick={() => window.open(`tel:${provider.phone}`, '_self')}
+                              onClick={() => {
+                                window.open(`tel:${provider.phone}`, '_self');
+                                setHasCompletedActions(true); // Mark progress for phone calls
+                              }}
                             >
                               Call Now
                             </Button>
@@ -459,6 +483,74 @@ export default function Utilities() {
             </Button>
           </div>
         )}
+
+        {/* Task Completion Bar */}
+        <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50">
+          <div className="bg-white rounded-lg shadow-lg border p-4 flex items-center gap-4">
+            <Button
+              onClick={() => {
+                if (canCompleteTask()) {
+                  toast({
+                    title: "Utilities Task Completed!",
+                    description: "Returning to your moving journey...",
+                  });
+                  
+                  // Zoom back to journey page with preserved context
+                  setTimeout(() => {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const from = urlParams.get('from');
+                    const to = urlParams.get('to');
+                    const date = urlParams.get('date');
+                    
+                    let journeyUrl = '/moving-journey';
+                    if (from || to || date) {
+                      const params = new URLSearchParams();
+                      if (from) params.set('from', from);
+                      if (to) params.set('to', to);
+                      if (date) params.set('date', date);
+                      journeyUrl += `?${params.toString()}`;
+                    }
+                    
+                    window.location.href = journeyUrl;
+                  }, 1000);
+                }
+              }}
+              disabled={!canCompleteTask()}
+              className={`font-medium py-2 px-6 rounded-lg text-sm shadow-sm transition-all ${
+                canCompleteTask() 
+                  ? "bg-green-600 hover:bg-green-700 text-white" 
+                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              }`}
+            >
+              <CheckCircle className="w-4 h-4 mr-2" />
+              {canCompleteTask() ? "Complete Utilities Setup" : "Research Providers First"}
+            </Button>
+            
+            <Button
+              onClick={() => {
+                const urlParams = new URLSearchParams(window.location.search);
+                const from = urlParams.get('from');
+                const to = urlParams.get('to');
+                const date = urlParams.get('date');
+                
+                let journeyUrl = '/moving-journey';
+                if (from || to || date) {
+                  const params = new URLSearchParams();
+                  if (from) params.set('from', from);
+                  if (to) params.set('to', to);
+                  if (date) params.set('date', date);
+                  journeyUrl += `?${params.toString()}`;
+                }
+                
+                window.location.href = journeyUrl;
+              }}
+              variant="outline"
+              className="border-blue-300 text-blue-700 hover:bg-blue-50 font-medium py-2 px-4 rounded-lg text-sm shadow-sm transition-all"
+            >
+              Return to Journey
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   );
