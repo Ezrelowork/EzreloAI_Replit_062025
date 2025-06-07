@@ -11,6 +11,7 @@ import MovingChecklist from "@/pages/moving-checklist";
 import RelocationHub from "@/pages/relocation-hub-simple";
 import Dashboard from "@/pages/dashboard";
 import Utilities from "@/pages/utilities";
+import Housing from "@/pages/housing";
 import AIAssistant from "@/pages/ai-assistant";
 import MovingJourneySimple from "@/pages/moving-journey-simple";
 import MovingCompanies from "@/pages/moving-companies";
@@ -52,6 +53,7 @@ function Router() {
           <Route path="/moving-journey" component={MovingJourneySimple} />
           <Route path="/moving-companies" component={MovingCompanies} />
           <Route path="/utilities" component={Utilities} />
+          <Route path="/housing" component={Housing} />
           <Route path="/moving-checklist" component={MovingChecklist} />
           <Route path="/analytics" component={Analytics} />
           <Route path="/logo-showcase" component={LogoShowcase} />
