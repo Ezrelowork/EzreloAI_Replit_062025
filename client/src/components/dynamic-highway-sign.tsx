@@ -58,7 +58,7 @@ export const DynamicHighwaySign: React.FC<DynamicSignProps> = ({
         
         {/* Dynamic text overlay - contained within sign bounds */}
         <div 
-          className="absolute flex flex-col justify-center items-center p-2"
+          className="absolute flex flex-col justify-center items-center p-2 pointer-events-none"
           style={{
             left: '15%',
             top: '14%', 
@@ -101,10 +101,7 @@ export const DynamicHighwaySign: React.FC<DynamicSignProps> = ({
 
       </div>
 
-      {/* Hover tooltip with description */}
-      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-10">
-        {description.length > 50 ? description.substring(0, 50) + '...' : description}
-      </div>
+
     </div>
   );
 };
