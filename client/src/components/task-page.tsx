@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { apiRequest } from '@/lib/queryClient';
+import jsPDF from 'jspdf';
 import { 
   ArrowLeft, 
   Truck, 
@@ -89,6 +90,23 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
   const [selectedFont, setSelectedFont] = useState('font-inter');
   const [selectedMover, setSelectedMover] = useState<MovingCompany | null>(null);
   const [movingProject, setMovingProject] = useState<any>(null);
+  const [showQuestionnaireForm, setShowQuestionnaireForm] = useState(false);
+  const [questionnaireData, setQuestionnaireData] = useState({
+    currentAddress: '',
+    destinationAddress: '',
+    movingDate: '',
+    homeSize: '',
+    squareFootage: '',
+    currentFloors: '',
+    destinationFloors: '',
+    majorItems: '',
+    packingServices: '',
+    furnitureDisassembly: '',
+    fragileItems: '',
+    storageNeeds: '',
+    parkingAccess: '',
+    additionalNotes: ''
+  });
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -296,6 +314,116 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
         variant: "destructive",
       });
     }
+  };
+
+  const generateMovingQuestionnairePDF = () => {
+    const doc = new jsPDF();
+    
+    // Header
+    doc.setFontSize(20);
+    doc.setFont(undefined, 'bold');
+    doc.text('Moving Estimate Questionnaire', 20, 30);
+    
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'normal');
+    doc.text('Complete this form to get accurate moving quotes from professionals', 20, 40);
+    
+    let yPosition = 60;
+    
+    // Pre-filled information from moveData
+    if (moveData.from || moveData.to || moveData.date) {
+      doc.setFontSize(14);
+      doc.setFont(undefined, 'bold');
+      doc.text('Your Moving Details:', 20, yPosition);
+      yPosition += 15;
+      
+      doc.setFontSize(12);
+      doc.setFont(undefined, 'normal');
+      
+      if (moveData.from) {
+        doc.text(`Current Location: ${moveData.from}`, 25, yPosition);
+        yPosition += 10;
+      }
+      if (moveData.to) {
+        doc.text(`Destination: ${moveData.to}`, 25, yPosition);
+        yPosition += 10;
+      }
+      if (moveData.date) {
+        doc.text(`Moving Date: ${moveData.date}`, 25, yPosition);
+        yPosition += 15;
+      }
+    }
+    
+    // Questions section
+    const questions = [
+      { q: '1. Current Address:', detail: 'Include full address with unit/apartment number' },
+      { q: '2. Destination Address:', detail: 'Include full address with unit/apartment number' },
+      { q: '3. Desired Moving Date:', detail: 'Include preferred time of day if flexible' },
+      { q: '4. Home Size:', detail: 'Studio / 1BR / 2BR / 3BR / 4BR+ or square footage' },
+      { q: '5. Number of Floors:', detail: 'At current location: ___ At destination: ___' },
+      { q: '6. Major Items Being Moved:', detail: 'List furniture, appliances, piano, safe, etc.' },
+      { q: '7. Packing Services Needed:', detail: 'Full packing / Partial / Self-pack / Fragiles only' },
+      { q: '8. Furniture Disassembly/Reassembly:', detail: 'List items that need disassembly' },
+      { q: '9. Fragile or Specialty Items:', detail: 'TVs, antiques, artwork, musical instruments' },
+      { q: '10. Storage Requirements:', detail: 'Temporary storage needed? Duration: ___' },
+      { q: '11. Parking & Access:', detail: 'Truck access, elevators, stairs, permits needed?' }
+    ];
+    
+    doc.setFontSize(14);
+    doc.setFont(undefined, 'bold');
+    doc.text('Questions for Moving Companies:', 20, yPosition);
+    yPosition += 15;
+    
+    questions.forEach((item) => {
+      // Check if we need a new page
+      if (yPosition > 250) {
+        doc.addPage();
+        yPosition = 30;
+      }
+      
+      doc.setFontSize(12);
+      doc.setFont(undefined, 'bold');
+      doc.text(item.q, 20, yPosition);
+      yPosition += 8;
+      
+      doc.setFont(undefined, 'normal');
+      doc.setFontSize(10);
+      doc.text(item.detail, 25, yPosition);
+      yPosition += 15;
+      
+      // Add lines for writing
+      doc.setDrawColor(200, 200, 200);
+      for (let i = 0; i < 3; i++) {
+        doc.line(25, yPosition + (i * 5), 190, yPosition + (i * 5));
+      }
+      yPosition += 20;
+    });
+    
+    // Add new page for additional notes
+    doc.addPage();
+    doc.setFontSize(14);
+    doc.setFont(undefined, 'bold');
+    doc.text('Additional Notes & Special Requirements:', 20, 30);
+    
+    // Add lines for notes
+    doc.setDrawColor(200, 200, 200);
+    for (let i = 0; i < 20; i++) {
+      doc.line(20, 50 + (i * 10), 190, 50 + (i * 10));
+    }
+    
+    // Footer
+    yPosition = 270;
+    doc.setFontSize(10);
+    doc.setFont(undefined, 'italic');
+    doc.text('Tip: Having this information ready will help you get more accurate quotes faster!', 20, yPosition);
+    
+    // Save the PDF
+    doc.save('moving-estimate-questionnaire.pdf');
+    
+    toast({
+      title: "PDF Downloaded",
+      description: "Your moving questionnaire has been saved as a PDF.",
+    });
   };
 
   const getTaskConfig = () => {
