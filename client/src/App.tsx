@@ -5,7 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Button } from "@/components/ui/button";
 import { PageTransition } from "@/components/page-transition";
-import Home from "@/pages/home";
+import Landing from "@/pages/landing";
 import Analytics from "@/pages/analytics";
 import MovingChecklist from "@/pages/moving-checklist";
 import RelocationHub from "@/pages/relocation-hub-simple";
@@ -45,7 +45,8 @@ function Router() {
       <Navigation />
       <PageTransition>
         <Switch>
-          <Route path="/" component={RelocationHub} />
+          <Route path="/" component={Landing} />
+          <Route path="/hub" component={RelocationHub} />
           <Route path="/dashboard" component={Dashboard} />
           <Route path="/ai-assistant" component={AIAssistant} />
           <Route path="/moving-journey" component={MovingJourneySimple} />

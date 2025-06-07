@@ -110,9 +110,12 @@ export default function AIAssistant() {
         localStorage.setItem('aiMoveDate', relocationDetails.moveDate);
         
         toast({
-          title: "Moving Project Created",
+          title: "Moving Project Created", 
           description: "Your AI-powered relocation plan is now active in your journey!",
         });
+        
+        // Show success message with journey link
+        setShowJourneyButton(true);
       } catch (error) {
         console.error('Failed to create moving project:', error);
         // Fallback to localStorage only
