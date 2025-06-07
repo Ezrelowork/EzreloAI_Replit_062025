@@ -74,9 +74,10 @@ interface TaskPageProps {
     category: string;
   };
   onComplete: () => void;
+  onBack?: () => void;
 }
 
-export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete }) => {
+export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack }) => {
   const [, setLocation] = useLocation();
   const [movingCompanies, setMovingCompanies] = useState<MovingCompany[]>([]);
   const [utilities, setUtilities] = useState<UtilityService[]>([]);
@@ -332,7 +333,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete }) => {
         {/* Action Buttons */}
         <div className="flex gap-4 mb-8">
           <Button
-            onClick={() => setLocation('/moving-journey')}
+            onClick={() => onBack ? onBack() : setLocation('/moving-journey')}
             variant="outline"
             className="border-2 border-blue-600 hover:border-blue-700 text-blue-700 hover:text-blue-800 font-bold py-4 px-8 rounded-xl text-lg shadow-lg transform hover:scale-105 transition-all"
           >

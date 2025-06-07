@@ -449,6 +449,7 @@ export default function MovingJourney() {
               ));
               zoomOut();
             }}
+            onBack={zoomOut}
           />
         )}
       </ZoomNavigation>
