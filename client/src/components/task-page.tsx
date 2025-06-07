@@ -461,26 +461,28 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                           <span className="text-sm text-gray-600">{company.phone}</span>
                         </div>
                         <p className="text-sm text-gray-700 mb-2">{company.description}</p>
-                        <div className="flex flex-wrap gap-1 mb-3">
-                          {company.services.slice(0, 4).map((service, idx) => (
-                            <span key={idx} className="px-2 py-1 bg-blue-50 text-blue-700 rounded text-sm font-medium">
-                              {service}
-                            </span>
-                          ))}
-                        </div>
-                        <div className="flex gap-4">
-                          <button
-                            onClick={() => handleReferralClick(company, 'website_visit')}
-                            className="text-blue-600 hover:text-blue-700 text-sm font-medium underline"
-                          >
-                            Website
-                          </button>
-                          <button
-                            onClick={() => window.open(`tel:${company.phone}`, '_self')}
-                            className="text-green-600 hover:text-green-700 text-sm font-medium underline"
-                          >
-                            Call
-                          </button>
+                        <div className="flex items-center justify-between">
+                          <div className="flex flex-wrap gap-1">
+                            {company.services.slice(0, 4).map((service, idx) => (
+                              <span key={idx} className="px-2 py-1 bg-blue-50 text-blue-700 rounded text-sm font-medium">
+                                {service}
+                              </span>
+                            ))}
+                          </div>
+                          <div className="flex gap-4">
+                            <button
+                              onClick={() => handleReferralClick(company, 'website_visit')}
+                              className="text-blue-600 hover:text-blue-700 text-sm font-medium underline"
+                            >
+                              Website
+                            </button>
+                            <button
+                              onClick={() => window.open(`tel:${company.phone}`, '_self')}
+                              className="text-green-600 hover:text-green-700 text-sm font-medium underline"
+                            >
+                              Call
+                            </button>
+                          </div>
                         </div>
                       </div>
                     ))}
