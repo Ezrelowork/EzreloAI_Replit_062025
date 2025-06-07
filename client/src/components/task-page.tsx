@@ -441,7 +441,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                       <div key={index} className="border border-gray-200 rounded-lg p-3 hover:border-blue-300 hover:shadow-sm transition-all">
                         <div className="flex items-center justify-between mb-1">
                           <h3 className="text-sm font-bold text-gray-900">{company.provider}</h3>
-                          {company.estimatedCost && !company.estimatedCost.includes('Contact for estimate') && (
+                          {company.estimatedCost && !company.estimatedCost.includes('Contact for') && (
                             <span className="text-sm font-bold text-green-600">{company.estimatedCost}</span>
                           )}
                         </div>
