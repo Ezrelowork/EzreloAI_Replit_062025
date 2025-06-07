@@ -1120,7 +1120,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                 <div className="relative">
                   <div className="w-full bg-gray-200 rounded-full h-3 relative">
                     {/* Progress Fill */}
-                    <div className="bg-blue-600 h-3 rounded-full transition-all duration-500" style={{ width: `${currentQuestionnaire ? '50' : '25'}%` }}></div>
+                    <div className="bg-blue-600 h-3 rounded-full transition-all duration-500" style={{ width: `${selectedMover ? '75' : currentQuestionnaire ? '50' : '25'}%` }}></div>
                     
                     {/* Milestone Markers - Quarters */}
                     <div className="absolute top-0 left-1/4 w-0.5 h-3 bg-gray-400 transform -translate-x-0.5"></div>
@@ -1128,15 +1128,24 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                     <div className="absolute top-0 left-3/4 w-0.5 h-3 bg-gray-400 transform -translate-x-0.5"></div>
                   </div>
                   
-                  {/* Milestone Labels */}
-                  <div className="grid grid-cols-4 gap-1 text-xs text-gray-500 mt-1">
-                    <span className="flex items-center gap-1 text-left">
-                      <CheckCircle className="w-3 h-3 text-green-500" />
+                  {/* Milestone Labels with Dynamic Status */}
+                  <div className="grid grid-cols-4 gap-1 text-xs mt-1">
+                    <span className={`flex items-center gap-1 text-left ${movingCompanies.length > 0 ? 'text-green-600 font-medium' : 'text-gray-500'}`}>
+                      {movingCompanies.length > 0 ? <CheckCircle className="w-3 h-3 text-green-500" /> : <div className="w-3 h-3" />}
                       Research
                     </span>
-                    <span className="text-center">Quote</span>
-                    <span className="text-center">Book</span>
-                    <span className="text-right">Complete</span>
+                    <span className={`text-center flex items-center justify-center gap-1 ${currentQuestionnaire ? 'text-green-600 font-medium' : 'text-gray-500'}`}>
+                      {currentQuestionnaire ? <CheckCircle className="w-3 h-3 text-green-500" /> : <div className="w-3 h-3" />}
+                      Quote
+                    </span>
+                    <span className={`text-center flex items-center justify-center gap-1 ${selectedMover ? 'text-green-600 font-medium' : 'text-gray-500'}`}>
+                      {selectedMover ? <CheckCircle className="w-3 h-3 text-green-500" /> : <div className="w-3 h-3" />}
+                      Book
+                    </span>
+                    <span className="text-right flex items-center justify-end gap-1 text-gray-500">
+                      <div className="w-3 h-3" />
+                      Complete
+                    </span>
                   </div>
                 </div>
               </div>
@@ -1165,13 +1174,46 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
             Journey
           </Button>
           
-          <Button
-            onClick={() => movingCompanyMutation.mutate()}
-            disabled={movingCompanyMutation.isPending}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg text-sm shadow-sm transition-all"
-          >
-            {movingCompanyMutation.isPending ? 'Searching...' : 'Find Providers'}
-          </Button>
+          {/* Stage-based primary action button */}
+          {!currentQuestionnaire ? (
+            <Button
+              onClick={() => setShowQuestionnaireForm(true)}
+              className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-6 rounded-lg text-sm shadow-sm transition-all"
+            >
+              Fill Out Questionnaire
+            </Button>
+          ) : !selectedMover ? (
+            <Button
+              onClick={() => movingCompanyMutation.mutate()}
+              disabled={movingCompanyMutation.isPending}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg text-sm shadow-sm transition-all"
+            >
+              {movingCompanyMutation.isPending ? 'Searching...' : 'Get Quotes'}
+            </Button>
+          ) : (
+            <Button
+              onClick={() => {
+                toast({
+                  title: "Ready to Book",
+                  description: "Contact your selected mover to finalize booking details.",
+                });
+              }}
+              className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-6 rounded-lg text-sm shadow-sm transition-all"
+            >
+              Book Mover
+            </Button>
+          )}
+          
+          {/* Secondary action - questionnaire button when completed */}
+          {currentQuestionnaire && (
+            <Button
+              onClick={() => setShowQuestionnaireForm(true)}
+              variant="outline"
+              className="border-gray-300 text-gray-700 hover:bg-gray-50 font-medium py-2 px-4 rounded-lg text-sm shadow-sm transition-all"
+            >
+              View Questionnaire
+            </Button>
+          )}
           
           <Button
             onClick={onComplete}
