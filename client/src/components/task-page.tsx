@@ -1053,53 +1053,56 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Header Section */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6 border border-gray-100">
-          <div className="flex items-center gap-6">
-            <div className={`p-4 rounded-lg ${config.color} text-white shadow-lg`}>
-              <IconComponent className="w-8 h-8" />
-            </div>
-            <div className="flex-1">
-              <h1 className="text-xl font-bold text-gray-900 mb-2 tracking-tight">{task.title}</h1>
-              <div className="flex items-center gap-3 mb-2">
-                <span className={`px-2 py-1 rounded-full text-xs font-bold text-white ${config.color}`}>
-                  {task.priority.toUpperCase()}
-                </span>
-                <span className="text-gray-600 text-sm font-medium">Timeline: {task.week}</span>
-                <span className="text-gray-600 text-sm font-medium">Category: {task.category}</span>
+          <div className="flex items-center justify-between">
+            {/* Left Section - 2/3 width */}
+            <div className="flex items-center gap-6 flex-1 mr-8">
+              <div className={`p-4 rounded-lg ${config.color} text-white shadow-lg`}>
+                <IconComponent className="w-8 h-8" />
               </div>
-              <div className="space-y-1">
-                <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
-                  <MapPin className="w-4 h-4 text-blue-600" />
-                  <span>{moveData.from}</span>
-                  <span className="text-blue-600">→</span>
-                  <span>{moveData.to}</span>
-                  <span className="text-gray-500 text-xs ml-3">Move Date: {new Date(moveData.date).toLocaleDateString()}</span>
+              <div className="flex-1">
+                <h1 className="text-xl font-bold text-gray-900 mb-2 tracking-tight">{task.title}</h1>
+                <div className="flex items-center gap-3 mb-2">
+                  <span className={`px-2 py-1 rounded-full text-xs font-bold text-white ${config.color}`}>
+                    {task.priority.toUpperCase()}
+                  </span>
+                  <span className="text-gray-600 text-sm font-medium">Timeline: {task.week}</span>
+                  <span className="text-gray-600 text-sm font-medium">Category: {task.category}</span>
                 </div>
-                {/* Status Information */}
-                <div className="min-h-[24px] flex items-center gap-2">
-                  {showResults && searchType === 'moving' && movingCompanies.length > 0 && (
-                    <div className="flex items-center gap-1 text-xs text-green-700 bg-green-50 px-2 py-1 rounded-md w-fit">
-                      <CheckCircle className="w-3 h-3" />
-                      <span>{movingCompanies.length} providers (cached)</span>
-                    </div>
-                  )}
-                  {showResults && searchType === 'utilities' && utilities.length > 0 && (
-                    <div className="flex items-center gap-1 text-xs text-green-700 bg-green-50 px-2 py-1 rounded-md w-fit">
-                      <CheckCircle className="w-3 h-3" />
-                      <span>{utilities.length} services (cached)</span>
-                    </div>
-                  )}
-                  {showResults && searchType === 'housing' && housingServices.length > 0 && (
-                    <div className="flex items-center gap-1 text-xs text-green-700 bg-green-50 px-2 py-1 rounded-md w-fit">
-                      <CheckCircle className="w-3 h-3" />
-                      <span>{housingServices.length} services (cached)</span>
-                    </div>
-                  )}
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                    <MapPin className="w-4 h-4 text-blue-600" />
+                    <span>{moveData.from}</span>
+                    <span className="text-blue-600">→</span>
+                    <span>{moveData.to}</span>
+                    <span className="text-gray-500 text-xs ml-3">Move Date: {new Date(moveData.date).toLocaleDateString()}</span>
+                  </div>
+                  {/* Status Information */}
+                  <div className="min-h-[24px] flex items-center gap-2">
+                    {showResults && searchType === 'moving' && movingCompanies.length > 0 && (
+                      <div className="flex items-center gap-1 text-xs text-green-700 bg-green-50 px-2 py-1 rounded-md w-fit">
+                        <CheckCircle className="w-3 h-3" />
+                        <span>{movingCompanies.length} providers (cached)</span>
+                      </div>
+                    )}
+                    {showResults && searchType === 'utilities' && utilities.length > 0 && (
+                      <div className="flex items-center gap-1 text-xs text-green-700 bg-green-50 px-2 py-1 rounded-md w-fit">
+                        <CheckCircle className="w-3 h-3" />
+                        <span>{utilities.length} services (cached)</span>
+                      </div>
+                    )}
+                    {showResults && searchType === 'housing' && housingServices.length > 0 && (
+                      <div className="flex items-center gap-1 text-xs text-green-700 bg-green-50 px-2 py-1 rounded-md w-fit">
+                        <CheckCircle className="w-3 h-3" />
+                        <span>{housingServices.length} services (cached)</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
             
-            {/* Task Progress - compact version */}
-            <div className="bg-white/80 backdrop-blur-sm rounded-lg shadow-md p-4 min-w-[220px]">
+            {/* Right Section - Progress (1/3 width) */}
+            <div className="w-1/3 text-right">
               <h3 className="text-sm font-bold text-gray-900 mb-3">Progress</h3>
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
@@ -1109,7 +1112,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div className="bg-blue-600 h-2 rounded-full" style={{ width: '25%' }}></div>
                 </div>
-                <div className="flex items-center gap-1 text-xs text-gray-600">
+                <div className="flex items-center justify-end gap-1 text-xs text-gray-600">
                   <CheckCircle className="w-3 h-3 text-green-500" />
                   <span>Research done</span>
                 </div>
