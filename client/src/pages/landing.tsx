@@ -120,15 +120,12 @@ export default function Landing() {
       </section>
 
       {/* Call to Action */}
-      <section className="relative px-6 py-20 bg-blue-600 overflow-hidden">
-        {/* Highway Background */}
-        <div 
-          className="absolute inset-0 opacity-50 bg-cover bg-center bg-no-repeat"
-          style={{
-            backgroundImage: `url('/attached_assets/highway-background.png')`,
-            filter: 'blur(4px)'
-          }}
-        />
+      <section className="relative px-6 py-20 overflow-hidden" style={{
+        background: `linear-gradient(rgba(37, 99, 235, 0.7), rgba(37, 99, 235, 0.7)), url('/attached_assets/highway-background.png')`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}>
         <div className="relative max-w-4xl mx-auto text-center">
           <h2 className="text-4xl font-bold text-white mb-6">
             Ready to Transform Your Move?
