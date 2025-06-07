@@ -6,6 +6,7 @@ import { ProgressTracker, JourneyStats } from "@/components/progress-tracker";
 import { TaskModal, useTaskModal } from "@/components/task-modal";
 import { ZoomNavigation, useZoomNavigation } from "@/components/zoom-navigation";
 import { TaskPage } from "@/components/task-page";
+import { useToast } from "@/hooks/use-toast";
 
 // Direct imports for highway graphics
 import highwayBackground from "@assets/highway-background.png";
@@ -78,6 +79,7 @@ export default function MovingJourney() {
   const [journeyData, setJourneyData] = useState<JourneyStep[]>([]);
   const { isOpen, currentTask, openModal, closeModal } = useTaskModal();
   const { isZoomed, zoomOrigin, currentTaskData, zoomIntoTask, zoomOut } = useZoomNavigation();
+  const { toast } = useToast();
   const taskCardRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const signPositionsRef = useRef<{ [key: string]: { left: string; top: string } }>({});
   
@@ -244,6 +246,9 @@ export default function MovingJourney() {
   };
 
   const handleCompleteTask = (taskId: string) => {
+    // Find the completed task
+    const completedTask = journeyData.find(step => step.id === taskId);
+    
     // Mark task as completed with celebration
     setJourneyData(prev => 
       prev.map(step => 
@@ -252,6 +257,15 @@ export default function MovingJourney() {
           : step
       )
     );
+    
+    // Show success notification
+    if (completedTask) {
+      toast({
+        title: "Task Completed!",
+        description: `${completedTask.title} has been marked as complete`,
+        duration: 3000,
+      });
+    }
     
     // Visual celebration effect
     const taskElement = taskCardRefs.current[taskId];
@@ -388,22 +402,22 @@ export default function MovingJourney() {
               key={step.id}
               ref={el => taskCardRefs.current[step.id] = el}
               data-step-id={step.id}
-              className="absolute cursor-pointer transition-all duration-300 hover:scale-110 z-20"
+              className="absolute z-20"
               style={{
                 left: position.left,
                 top: position.top,
                 transform: 'translate(-50%, -50%)'
               }}
-              onClick={(e) => handleTaskClick(step, e)}
             >
               {/* Custom Highway Sign */}
               <div className="relative group">
                 <img 
                   src={customSign.src}
                   alt={customSign.alt}
-                  className={`${index === 0 ? 'w-[26rem] h-[17rem]' : index === 1 ? 'w-96 h-64' : index === 2 ? 'w-96 h-64' : index === 3 ? 'w-96 h-64' : 'w-72 h-48'} object-contain transition-all duration-300 ${
-                    step.completed ? 'opacity-80 saturate-50' : 'hover:brightness-110'
+                  className={`${index === 0 ? 'w-[26rem] h-[17rem]' : index === 1 ? 'w-96 h-64' : index === 2 ? 'w-96 h-64' : index === 3 ? 'w-96 h-64' : 'w-72 h-48'} object-contain cursor-pointer transition-all duration-300 ${
+                    step.completed ? 'opacity-80 saturate-50' : 'hover:brightness-110 hover:scale-105'
                   }`}
+                  onClick={(e) => handleTaskClick(step, e)}
                   style={index === 1 ? { clipPath: 'inset(0 0 30% 0)' } : index === 2 ? { clipPath: 'inset(0 0 30% 0)' } : undefined}
                   onError={(e) => {
                     console.error(`Sign ${index + 1} failed to load:`, customSign.src);
@@ -417,12 +431,7 @@ export default function MovingJourney() {
                   </div>
                 )}
                 
-                {/* Current Task Indicator */}
-                {isCurrentStep && !step.completed && (
-                  <div className="absolute -top-2 -left-2 w-5 h-5 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center shadow-md">
-                    <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
-                  </div>
-                )}
+
                 
 
                 
