@@ -23,7 +23,7 @@ export const DynamicHighwaySign: React.FC<DynamicSignProps> = ({
   const priorityColors = {
     high: 'text-red-600',
     medium: 'text-yellow-600', 
-    low: 'text-blue-600'
+    low: 'text-white'
   };
 
   const priorityBorders = {
