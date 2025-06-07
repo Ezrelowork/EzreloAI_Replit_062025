@@ -1376,13 +1376,13 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                     <div className="text-sm font-medium text-blue-900">Best Booking Time</div>
                     <div className="text-xs text-blue-700">Book 8+ weeks ahead for summer moves, 4+ weeks for off-season</div>
                   </div>
-                  <div className="bg-yellow-50 p-3 rounded">
-                    <div className="text-sm font-medium text-yellow-900">Save Money</div>
-                    <div className="text-xs text-yellow-700">Move mid-month, mid-week, and avoid summer peak season</div>
-                  </div>
                   <div className="bg-green-50 p-3 rounded">
-                    <div className="text-sm font-medium text-green-900">Red Flags</div>
-                    <div className="text-xs text-green-700">Avoid companies requiring large deposits or door-to-door sales</div>
+                    <div className="text-sm font-medium text-green-900">Save Money</div>
+                    <div className="text-xs text-green-700">Move mid-month, mid-week, and avoid summer peak season</div>
+                  </div>
+                  <div className="bg-red-50 p-3 rounded">
+                    <div className="text-sm font-medium text-red-900">Red Flags</div>
+                    <div className="text-xs text-red-700">Avoid companies requiring large deposits or door-to-door sales</div>
                   </div>
                 </div>
               </div>
