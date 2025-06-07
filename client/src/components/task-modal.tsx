@@ -127,48 +127,98 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 
           {/* Quick Actions */}
           <div className="space-y-3">
-            <div className="flex items-center justify-between p-4 bg-blue-50 rounded-2xl border border-blue-200">
-              <div>
-                <div className="font-semibold text-gray-900">Ready to start this task?</div>
-                <div className="text-sm text-gray-600">Access tools and resources to complete this step</div>
+            {/* Moving Company Actions */}
+            {task.title.toLowerCase().includes('moving') && (
+              <>
+                <div className="flex items-center justify-between p-4 bg-blue-50 rounded-2xl border border-blue-200">
+                  <div>
+                    <div className="font-semibold text-gray-900">Find & Book Moving Companies</div>
+                    <div className="text-sm text-gray-600">Get quotes from professional movers</div>
+                  </div>
+                  <Button
+                    onClick={() => {
+                      const fromParam = localStorage.getItem('aiFromLocation');
+                      const toParam = localStorage.getItem('aiToLocation');
+                      const dateParam = localStorage.getItem('aiMoveDate');
+                      
+                      const params = new URLSearchParams();
+                      if (fromParam) params.set('from', fromParam);
+                      if (toParam) params.set('to', toParam);
+                      if (dateParam) params.set('date', dateParam);
+                      
+                      const queryString = params.toString();
+                      const finalRoute = queryString ? `/moving-companies?${queryString}` : '/moving-companies';
+                      
+                      onClose();
+                      setLocation(finalRoute);
+                    }}
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-xl flex items-center gap-2"
+                  >
+                    Find Movers
+                    <ArrowRight className="w-4 h-4" />
+                  </Button>
+                </div>
+
+                <div className="flex items-center justify-between p-4 bg-green-50 rounded-2xl border border-green-200">
+                  <div>
+                    <div className="font-semibold text-gray-900">Packing & Organization</div>
+                    <div className="text-sm text-gray-600">Moving checklist and packing guides</div>
+                  </div>
+                  <Button
+                    onClick={() => {
+                      onClose();
+                      setLocation('/moving-checklist');
+                    }}
+                    variant="outline"
+                    className="border-green-300 text-green-700 hover:bg-green-100 font-semibold px-6 py-2 rounded-xl flex items-center gap-2"
+                  >
+                    View Checklist
+                    <ArrowRight className="w-4 h-4" />
+                  </Button>
+                </div>
+              </>
+            )}
+
+            {/* Default Action for Other Tasks */}
+            {!task.title.toLowerCase().includes('moving') && (
+              <div className="flex items-center justify-between p-4 bg-blue-50 rounded-2xl border border-blue-200">
+                <div>
+                  <div className="font-semibold text-gray-900">Ready to start this task?</div>
+                  <div className="text-sm text-gray-600">Access tools and resources to complete this step</div>
+                </div>
+                <Button
+                  onClick={() => {
+                    const fromParam = localStorage.getItem('aiFromLocation');
+                    const toParam = localStorage.getItem('aiToLocation');
+                    const dateParam = localStorage.getItem('aiMoveDate');
+                    
+                    const params = new URLSearchParams();
+                    if (fromParam) params.set('from', fromParam);
+                    if (toParam) params.set('to', toParam);
+                    if (dateParam) params.set('date', dateParam);
+                    
+                    const taskLower = task.title.toLowerCase();
+                    let targetRoute = '/dashboard';
+                    
+                    if (taskLower.includes('utility') || taskLower.includes('electric') || taskLower.includes('internet')) {
+                      targetRoute = '/utilities';
+                    } else if (taskLower.includes('pack') || taskLower.includes('checklist')) {
+                      targetRoute = '/moving-checklist';
+                    }
+                    
+                    const queryString = params.toString();
+                    const finalRoute = queryString ? `${targetRoute}?${queryString}` : targetRoute;
+                    
+                    onClose();
+                    setLocation(finalRoute);
+                  }}
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-xl flex items-center gap-2"
+                >
+                  Start Task
+                  <ArrowRight className="w-4 h-4" />
+                </Button>
               </div>
-              <Button
-                onClick={() => {
-                  // Get move data from localStorage
-                  const fromParam = localStorage.getItem('aiFromLocation');
-                  const toParam = localStorage.getItem('aiToLocation');
-                  const dateParam = localStorage.getItem('aiMoveDate');
-                  
-                  // Build route with query params
-                  const params = new URLSearchParams();
-                  if (fromParam) params.set('from', fromParam);
-                  if (toParam) params.set('to', toParam);
-                  if (dateParam) params.set('date', dateParam);
-                  
-                  // Route to appropriate page based on task
-                  const taskLower = task.title.toLowerCase();
-                  let targetRoute = '/moving-companies';
-                  
-                  if (taskLower.includes('utility') || taskLower.includes('electric') || taskLower.includes('internet')) {
-                    targetRoute = '/utilities';
-                  } else if (taskLower.includes('pack') || taskLower.includes('checklist')) {
-                    targetRoute = '/moving-checklist';
-                  } else if (taskLower.includes('moving') || taskLower.includes('mover') || taskLower.includes('truck')) {
-                    targetRoute = '/moving-companies';
-                  }
-                  
-                  const queryString = params.toString();
-                  const finalRoute = queryString ? `${targetRoute}?${queryString}` : targetRoute;
-                  
-                  onClose();
-                  setLocation(finalRoute);
-                }}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-xl flex items-center gap-2"
-              >
-                Find Movers
-                <ArrowRight className="w-4 h-4" />
-              </Button>
-            </div>
+            )}
 
             <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl">
               <div>
