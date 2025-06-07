@@ -75,9 +75,10 @@ interface TaskPageProps {
   };
   onComplete: () => void;
   onBack?: () => void;
+  onTaskComplete?: (taskId: string) => void;
 }
 
-export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack }) => {
+export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, onTaskComplete }) => {
   const [, setLocation] = useLocation();
   const [movingCompanies, setMovingCompanies] = useState<MovingCompany[]>([]);
   const [utilities, setUtilities] = useState<UtilityService[]>([]);
@@ -545,6 +546,40 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack }) 
                   <AlertTriangle className="w-4 h-4 text-yellow-600 mt-0.5" />
                   <span>Read all contracts carefully</span>
                 </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Task Completion Section */}
+          <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-2xl p-6 mt-8">
+            <div className="text-center">
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Ready to Complete This Task?</h3>
+              <p className="text-gray-600 mb-6">Mark this task as complete to continue your relocation journey</p>
+              
+              <div className="flex gap-3 justify-center">
+                <Button
+                  onClick={() => {
+                    if (onTaskComplete) {
+                      onTaskComplete(task.id);
+                    }
+                    onComplete();
+                  }}
+                  className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-semibold px-8 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+                >
+                  <CheckCircle className="w-5 h-5 mr-2" />
+                  Mark Task Complete
+                </Button>
+                
+                {onBack && (
+                  <Button
+                    onClick={onBack}
+                    variant="outline"
+                    className="border-gray-300 text-gray-700 hover:bg-gray-50 font-semibold px-8 py-3 rounded-xl"
+                  >
+                    <ArrowLeft className="w-5 h-5 mr-2" />
+                    Back to Journey
+                  </Button>
+                )}
               </div>
             </div>
           </div>

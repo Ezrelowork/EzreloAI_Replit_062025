@@ -243,6 +243,28 @@ export default function MovingJourney() {
     }
   };
 
+  const handleCompleteTask = (taskId: string) => {
+    // Mark task as completed with celebration
+    setJourneyData(prev => 
+      prev.map(step => 
+        step.id === taskId 
+          ? { ...step, completed: true }
+          : step
+      )
+    );
+    
+    // Visual celebration effect
+    const taskElement = taskCardRefs.current[taskId];
+    if (taskElement) {
+      taskElement.style.transform = 'scale(1.1)';
+      taskElement.style.filter = 'brightness(1.3)';
+      setTimeout(() => {
+        taskElement.style.transform = 'scale(1)';
+        taskElement.style.filter = 'brightness(1)';
+      }, 500);
+    }
+  };
+
   const handleStartTask = (step: JourneyStep) => {
     // Smart routing with address data preservation
     const fromParam = localStorage.getItem('aiFromLocation');
@@ -388,10 +410,17 @@ export default function MovingJourney() {
                   }}
                 />
                 
-                {/* Completion Check */}
+                {/* Completion Check with Animation */}
                 {step.completed && (
-                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center shadow-lg">
-                    <CheckCircle className="w-4 h-4 text-white" />
+                  <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-r from-green-400 to-green-600 rounded-full flex items-center justify-center shadow-lg animate-pulse">
+                    <CheckCircle className="w-5 h-5 text-white animate-bounce" />
+                  </div>
+                )}
+                
+                {/* Current Task Indicator */}
+                {isCurrentStep && !step.completed && (
+                  <div className="absolute -top-2 -left-2 w-6 h-6 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full flex items-center justify-center shadow-lg animate-pulse">
+                    <div className="w-2 h-2 bg-white rounded-full animate-ping" />
                   </div>
                 )}
                 
@@ -475,16 +504,9 @@ export default function MovingJourney() {
         {currentTaskData && (
           <TaskPage 
             task={currentTaskData} 
-            onComplete={() => {
-              // Mark task as completed
-              setJourneyData(prev => prev.map(step => 
-                step.id === currentTaskData.id 
-                  ? { ...step, completed: true }
-                  : step
-              ));
-              zoomOut();
-            }}
+            onComplete={zoomOut}
             onBack={zoomOut}
+            onTaskComplete={handleCompleteTask}
           />
         )}
       </ZoomNavigation>
