@@ -1,7 +1,30 @@
-import React from 'react';
-import { Truck, Zap, Package, Home, Phone, Building, Heart, Users } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Truck, Zap, Package, Home, Phone, Building, Heart, Users, Star, MapPin, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useLocation } from 'wouter';
+import { useMutation } from '@tanstack/react-query';
+import { apiRequest } from '@/lib/queryClient';
+import { useToast } from '@/hooks/use-toast';
+
+interface MovingCompany {
+  category: string;
+  provider: string;
+  phone: string;
+  description: string;
+  website: string;
+  referralUrl: string;
+  affiliateCode: string;
+  hours: string;
+  rating: number;
+  services: string[];
+  estimatedCost: string;
+  availability?: string;
+  licenseInfo?: string;
+  specialties?: string[];
+  insuranceOptions?: string[];
+  estimatedTimeframe?: string;
+  notes?: string;
+}
 
 interface TaskPageProps {
   task: {
@@ -17,17 +40,65 @@ interface TaskPageProps {
 
 export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete }) => {
   const [, setLocation] = useLocation();
+  const [movingCompanies, setMovingCompanies] = useState<MovingCompany[]>([]);
+  const [showMovers, setShowMovers] = useState(false);
+  const { toast } = useToast();
   
-  const handleFindServices = () => {
-    // Navigate to the appropriate service page based on task type
-    const taskType = task.title.toLowerCase();
-    if (taskType.includes('mover') || taskType.includes('moving') || taskType.includes('quote')) {
-      setLocation('/moving-companies?from=Austin,%20TX&to=Dallas,%20TX&date=2024-07-15');
-    } else if (taskType.includes('pack') || taskType.includes('organize') || taskType.includes('checklist')) {
-      setLocation('/moving-checklist?from=Austin,%20TX&to=Dallas,%20TX&date=2024-07-15');
+  // Moving company search mutation
+  const movingCompanyMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("POST", "/api/moving-companies", {
+        fromAddress: "",
+        fromCity: "Austin",
+        fromState: "TX",
+        fromZip: "78701",
+        toCity: "Dallas",
+        toState: "TX",
+        toZip: "75201"
+      });
+      return await response.json();
+    },
+    onSuccess: (data) => {
+      const companies = data?.companies || [];
+      setMovingCompanies(companies);
+      setShowMovers(true);
+      toast({
+        title: "Moving Companies Found",
+        description: `Found ${companies.length} qualified moving companies for your route`,
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Search Error",
+        description: "Unable to find moving companies. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleFindMovers = () => {
+    if (showMovers) {
+      // Already showing movers, toggle off
+      setShowMovers(false);
     } else {
-      // Default to moving companies for other tasks
-      setLocation('/moving-companies?from=Austin,%20TX&to=Dallas,%20TX&date=2024-07-15');
+      // Search for movers
+      movingCompanyMutation.mutate();
+    }
+  };
+
+  const handleReferralClick = async (company: MovingCompany, action: string) => {
+    try {
+      await apiRequest("POST", "/api/referral-click", {
+        provider: company.provider,
+        category: company.category,
+        action: action,
+        userAddress: "Austin, TX → Dallas, TX"
+      });
+      
+      window.open(company.referralUrl, '_blank');
+    } catch (error) {
+      console.error('Error tracking referral click:', error);
+      window.open(company.referralUrl, '_blank');
     }
   };
 
@@ -56,7 +127,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete }) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className={`${config.bgColor} ${config.borderColor} border-2 rounded-3xl p-8 mb-6`}>
           <div className="flex items-center gap-6">
@@ -79,10 +150,11 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete }) => {
         {/* Prominent Action Buttons */}
         <div className="flex items-center justify-center gap-6 mb-8">
           <Button
-            onClick={handleFindServices}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-xl text-lg shadow-lg transform hover:scale-105 transition-all"
+            onClick={handleFindMovers}
+            disabled={movingCompanyMutation.isPending}
+            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-xl text-lg shadow-lg transform hover:scale-105 transition-all disabled:opacity-70"
           >
-            Find Services
+            {movingCompanyMutation.isPending ? 'Searching...' : showMovers ? 'Hide Movers' : 'Find Movers'}
           </Button>
           <Button
             onClick={onComplete}
@@ -100,12 +172,89 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete }) => {
 
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Task Details */}
+          {/* Moving Companies or Task Details */}
           <div className="lg:col-span-2 space-y-6">
-            <div className="bg-white rounded-2xl shadow-lg p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Task Overview</h2>
-              <p className="text-gray-700 leading-relaxed text-lg">{task.description}</p>
-            </div>
+            {showMovers ? (
+              <div className="bg-white rounded-2xl shadow-lg p-6">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">Moving Companies for Austin → Dallas</h2>
+                {movingCompanies.length > 0 ? (
+                  <div className="space-y-4">
+                    {movingCompanies.map((company, index) => (
+                      <div key={index} className="border border-gray-200 rounded-xl p-6 hover:border-blue-300 hover:shadow-md transition-all">
+                        <div className="flex items-start justify-between mb-4">
+                          <div className="flex-1">
+                            <h3 className="text-xl font-bold text-gray-900 mb-2">{company.provider}</h3>
+                            <div className="flex items-center gap-4 mb-3">
+                              <div className="flex items-center gap-1">
+                                {[...Array(5)].map((_, i) => (
+                                  <Star
+                                    key={i}
+                                    className={`w-4 h-4 ${
+                                      i < company.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
+                                    }`}
+                                  />
+                                ))}
+                                <span className="text-sm text-gray-600 ml-1">({company.rating})</span>
+                              </div>
+                              <span className="text-lg font-bold text-green-600">{company.estimatedCost}</span>
+                            </div>
+                            <p className="text-gray-700 mb-3">{company.description}</p>
+                            <div className="flex flex-wrap gap-2 mb-4">
+                              {company.services.slice(0, 3).map((service, idx) => (
+                                <span key={idx} className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                                  {service}
+                                </span>
+                              ))}
+                            </div>
+                            <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
+                              <div className="flex items-center gap-2">
+                                <Clock className="w-4 h-4" />
+                                <span>{company.hours}</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Phone className="w-4 h-4" />
+                                <span>{company.phone}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex gap-3 pt-4 border-t border-gray-100">
+                          <Button
+                            onClick={() => handleReferralClick(company, 'get_quote')}
+                            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-xl flex-1"
+                          >
+                            Get Quote
+                          </Button>
+                          <Button
+                            onClick={() => handleReferralClick(company, 'call_now')}
+                            variant="outline"
+                            className="border-green-300 text-green-700 hover:bg-green-50 font-semibold px-6 py-2 rounded-xl flex-1"
+                          >
+                            Call Now
+                          </Button>
+                          <Button
+                            onClick={() => handleReferralClick(company, 'view_website')}
+                            variant="outline"
+                            className="border-gray-300 text-gray-700 hover:bg-gray-50 font-semibold px-6 py-2 rounded-xl"
+                          >
+                            Website
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <p className="text-gray-500">No moving companies found. Please try again.</p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="bg-white rounded-2xl shadow-lg p-6">
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">Task Overview</h2>
+                <p className="text-gray-700 leading-relaxed text-lg">{task.description}</p>
+              </div>
+            )}
 
             {/* Task Steps */}
             <div className="bg-white rounded-2xl shadow-lg p-6">
