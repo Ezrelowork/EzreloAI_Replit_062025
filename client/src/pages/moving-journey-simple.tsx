@@ -268,15 +268,10 @@ export default function MovingJourney() {
             </div>
             
             {/* Progress Tracker in Header */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center">
               <ProgressTracker 
                 totalSteps={journeyData.length}
                 completedSteps={journeyData.filter(step => step.completed).length}
-              />
-              <JourneyStats 
-                highPriority={journeyData.filter(step => step.priority === 'high').length}
-                mediumPriority={journeyData.filter(step => step.priority === 'medium').length}
-                lowPriority={journeyData.filter(step => step.priority === 'low').length}
               />
             </div>
           </div>
@@ -317,13 +312,13 @@ export default function MovingJourney() {
 
           const customSign = getCustomSign(step.title);
           
-          // Position signs along the winding road path - precisely following curves
+          // Position signs along the winding road path - following actual road curves
           const roadPositions = [
-            { left: '25%', top: '70%' },   // Bottom left curve entry
-            { left: '38%', top: '55%' },   // Rising through first curve
-            { left: '52%', top: '42%' },   // Center S-curve section
-            { left: '68%', top: '28%' },   // Upper curve progression
-            { left: '82%', top: '15%' }    // Final destination point
+            { left: '15%', top: '75%' },   // Road entry point bottom left
+            { left: '30%', top: '58%' },   // First curve rising
+            { left: '50%', top: '40%' },   // Center S-curve peak
+            { left: '70%', top: '25%' },   // Upper curve continuation
+            { left: '85%', top: '12%' }    // Final destination with truck
           ];
           
           const position = roadPositions[index] || { left: '50%', top: '50%' };
@@ -379,6 +374,15 @@ export default function MovingJourney() {
       </div>
 
 
+
+      {/* Priority Stats Box - Lower Right */}
+      <div className="fixed bottom-6 right-6 z-30">
+        <JourneyStats 
+          highPriority={journeyData.filter(step => step.priority === 'high').length}
+          mediumPriority={journeyData.filter(step => step.priority === 'medium').length}
+          lowPriority={journeyData.filter(step => step.priority === 'low').length}
+        />
+      </div>
 
       {/* Cinematic Journey Info */}
       <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-30">
