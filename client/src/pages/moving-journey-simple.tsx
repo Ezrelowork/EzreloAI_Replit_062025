@@ -399,7 +399,7 @@ export default function MovingJourney() {
           } else if (index === 2) {
             position = { left: '37%', top: '29%' };    // Sign 3 - moved left 33% total and up 20% total
           } else if (index === 3) {
-            position = { left: '80%', top: '20%' };    // Sign 4 - moved right 30% total
+            position = { left: '78%', top: '23%' };    // Sign 4 - moved right 28% total and down 3%
           } else {
             // Hide remaining signs for now
             return null;
