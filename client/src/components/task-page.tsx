@@ -58,7 +58,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete }) => {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-6">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className={`${config.bgColor} ${config.borderColor} border-2 rounded-3xl p-8 mb-8`}>
+        <div className={`${config.bgColor} ${config.borderColor} border-2 rounded-3xl p-8 mb-6`}>
           <div className="flex items-center gap-6">
             <div className={`p-6 rounded-3xl ${config.color} text-white shadow-xl`}>
               <IconComponent className="w-12 h-12" />
@@ -74,6 +74,28 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete }) => {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Prominent Action Buttons */}
+        <div className="flex items-center justify-center gap-6 mb-8">
+          <Button
+            onClick={handleFindServices}
+            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-8 rounded-xl text-lg shadow-lg transform hover:scale-105 transition-all"
+          >
+            Find Services
+          </Button>
+          <Button
+            onClick={onComplete}
+            className="bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-8 rounded-xl text-lg shadow-lg transform hover:scale-105 transition-all"
+          >
+            Mark Complete
+          </Button>
+          <Button
+            variant="outline"
+            className="border-2 border-gray-400 hover:border-gray-500 text-gray-700 hover:text-gray-900 font-bold py-4 px-8 rounded-xl text-lg shadow-lg transform hover:scale-105 transition-all"
+          >
+            Need Help?
+          </Button>
         </div>
 
         {/* Main Content */}
@@ -138,28 +160,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete }) => {
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="space-y-3">
-              <Button
-                onClick={onComplete}
-                className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-xl text-lg"
-              >
-                Mark as Complete
-              </Button>
-              <Button
-                variant="outline"
-                className="w-full border-2 border-gray-300 hover:border-gray-400 font-bold py-4 rounded-xl text-lg"
-              >
-                Need Help?
-              </Button>
-              <Button
-                variant="outline"
-                onClick={handleFindServices}
-                className="w-full border-2 border-blue-300 hover:border-blue-400 text-blue-600 font-bold py-4 rounded-xl text-lg"
-              >
-                Find Services
-              </Button>
-            </div>
+
 
             {/* Tips */}
             <div className="bg-blue-50 border border-blue-200 rounded-2xl p-6">
