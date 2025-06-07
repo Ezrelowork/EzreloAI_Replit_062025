@@ -318,7 +318,7 @@ export default function MovingJourney() {
           } else if (index === 1) {
             position = { left: '65%', top: '70%' };    // Second sign - utilities graphic
           } else if (index === 2) {
-            position = { left: '45%', top: '45%' };    // Third sign - address changes graphic
+            position = { left: '30%', top: '55%' };    // Third sign - address changes graphic
           } else if (index === 3) {
             position = { left: '60%', top: '40%' };    // Fourth sign - Sign4.png graphic
           } else {
