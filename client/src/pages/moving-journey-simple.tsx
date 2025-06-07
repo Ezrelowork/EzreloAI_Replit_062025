@@ -130,7 +130,7 @@ export default function MovingJourney() {
       
       setJourneyData(steps);
     } else {
-      // Sample data for testing highway graphics
+      // Sample data for testing highway graphics (4 signs only)
       const sampleSteps: JourneyStep[] = [
         {
           id: 'step-1',
@@ -141,18 +141,6 @@ export default function MovingJourney() {
           route: '/dashboard',
           position: { x: 15, y: 80 },
           signType: 'warning',
-          completed: false,
-          priority: 'high'
-        },
-        {
-          id: 'step-2',
-          title: 'Set Up Utilities',
-          description: 'Schedule power, water, and internet installation',
-          week: 'Week 4-2',
-          tasks: ['Contact utility companies', 'Schedule installations'],
-          route: '/utilities',
-          position: { x: 25, y: 65 },
-          signType: 'highway',
           completed: false,
           priority: 'high'
         },
@@ -301,13 +289,12 @@ export default function MovingJourney() {
           const completedSteps = journeyData.filter(s => s.completed).length;
           const isCurrentStep = index === completedSteps && !step.completed;
           
-          // Assign different sign for each position
+          // Assign different sign for each position (4 signs total)
           const signsByIndex = [
-            customGraphics.taskIcons['moving'],           // Sign 1
-            customGraphics.taskIcons['utilities-setup'],  // Sign 2  
-            customGraphics.taskIcons['address-changes'],  // Sign 3
-            customGraphics.taskIcons['utilities-services'], // Sign 4
-            customGraphics.taskIcons['essential-services'] // Sign 5
+            customGraphics.taskIcons['moving'],           // Sign 1 - Find Moving Company
+            customGraphics.taskIcons['address-changes'],  // Sign 3 - Address Changes 
+            customGraphics.taskIcons['utilities-services'], // Sign 4 - Transfer Services
+            customGraphics.taskIcons['essential-services'] // Sign 5 - Essential Services
           ];
 
           const customSign = signsByIndex[index] || customGraphics.taskIcons['moving'];
@@ -317,18 +304,16 @@ export default function MovingJourney() {
             console.log('Fifth sign data:', { index, customSign, step: step.title });
           }
           
-          // Position first four signs with different graphics
+          // Position four signs with different graphics
           let position;
           if (index === 0) {
-            position = { left: '15%', top: '75%' };    // First sign - moving graphic
+            position = { left: '15%', top: '75%' };    // Sign 1 - moving company (largest)
           } else if (index === 1) {
-            position = { left: '65%', top: '75%' };    // Second sign - utilities graphic
+            position = { left: '40%', top: '55%' };    // Sign 3 - address changes (cropped)
           } else if (index === 2) {
-            position = { left: '40%', top: '55%' };    // Third sign - address changes graphic
+            position = { left: '60%', top: '40%' };    // Sign 4 - transfer services (cropped)
           } else if (index === 3) {
-            position = { left: '60%', top: '40%' };    // Fourth sign - Sign4.png graphic
-          } else if (index === 4) {
-            position = { left: '50%', top: '20%' };    // Fifth sign - top center
+            position = { left: '50%', top: '20%' };    // Sign 5 - essential services (top center)
           } else {
             // Hide remaining signs for now
             return null;
@@ -351,10 +336,10 @@ export default function MovingJourney() {
                 <img 
                   src={customSign.src}
                   alt={customSign.alt}
-                  className={`${index === 0 ? 'w-[26rem] h-[17rem]' : index === 2 ? 'w-96 h-64' : index === 3 ? 'w-96 h-64' : index === 4 ? 'w-80 h-52' : 'w-72 h-48'} object-contain transition-all duration-300 ${
+                  className={`${index === 0 ? 'w-[26rem] h-[17rem]' : index === 1 ? 'w-96 h-64' : index === 2 ? 'w-96 h-64' : index === 3 ? 'w-80 h-52' : 'w-72 h-48'} object-contain transition-all duration-300 ${
                     step.completed ? 'opacity-80 saturate-50' : 'hover:brightness-110'
                   }`}
-                  style={index === 2 ? { clipPath: 'inset(0 0 30% 0)' } : index === 3 ? { clipPath: 'inset(0 0 30% 0)' } : undefined}
+                  style={index === 1 ? { clipPath: 'inset(0 0 30% 0)' } : index === 2 ? { clipPath: 'inset(0 0 30% 0)' } : undefined}
                   onError={(e) => {
                     console.error(`Sign ${index + 1} failed to load:`, customSign.src);
                     console.log('Available signs:', Object.keys(customGraphics.taskIcons));
