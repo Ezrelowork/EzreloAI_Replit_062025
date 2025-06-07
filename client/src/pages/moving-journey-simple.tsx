@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useQuery } from '@tanstack/react-query';
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -127,45 +128,93 @@ export default function MovingJourney() {
     }
   };
 
+  // Load project data from database
+  const projectQuery = useQuery({
+    queryKey: ['/api/current-project'],
+    retry: false,
+  });
+
+  const tasksQuery = useQuery({
+    queryKey: ['/api/project-tasks', projectQuery.data?.id],
+    enabled: !!projectQuery.data?.id,
+    retry: false,
+  });
+
   useEffect(() => {
-    // Set up sample move data for testing
-    localStorage.setItem('aiFromLocation', 'Austin, TX 78701');
-    localStorage.setItem('aiToLocation', 'Dallas, TX 75201');
-    localStorage.setItem('aiMoveDate', '2024-08-15');
+    // Check for AI-generated project first
+    const currentProjectId = localStorage.getItem('currentProjectId');
     
-    // Get action plan data from localStorage (from AI assistant)
-    const savedActionPlan = localStorage.getItem('aiActionPlan');
-    
-    if (savedActionPlan) {
-      const actionPlan = JSON.parse(savedActionPlan);
+    if (projectQuery.data && tasksQuery.data) {
+      // Use database project and tasks data
+      const project = projectQuery.data;
+      const tasks = tasksQuery.data || [];
       
-      // Convert action plan to journey steps
-      const steps: JourneyStep[] = actionPlan.map((action: any, index: number) => {
+      // Convert database tasks to journey steps
+      const steps: JourneyStep[] = tasks.map((task: any, index: number) => {
         // Create curved path positions
         const baseX = 20 + (index * 15);
         const curveY = 50 + Math.sin(index * 0.8) * 20;
         
         // Determine sign type based on priority
-        const signType = action.priority === 'high' ? 'warning' : 
-                        action.priority === 'medium' ? 'highway' : 'info';
+        const signType = task.priority === 'high' ? 'warning' : 
+                        task.priority === 'medium' ? 'highway' : 'info';
         
         return {
-          id: `action-${index}`,
-          title: action.title,
-          description: action.description,
-          week: action.timeframe,
-          tasks: [action.description],
-          route: action.route,
+          id: `task-${task.id}`,
+          title: task.title,
+          description: task.description,
+          week: task.timeframe || 'Week 1',
+          tasks: [task.description],
+          route: `/${task.taskType}` || '/dashboard',
           position: { x: baseX, y: curveY },
           signType: signType,
-          completed: false,
-          priority: action.priority || 'medium'
+          completed: task.status === 'completed',
+          priority: task.priority || 'medium'
         };
       });
       
       setJourneyData(steps);
+      
+      // Update localStorage for routing
+      if (project.fromAddress && project.toAddress) {
+        localStorage.setItem('aiFromLocation', project.fromAddress);
+        localStorage.setItem('aiToLocation', project.toAddress);
+        localStorage.setItem('aiMoveDate', project.moveDate || '');
+      }
     } else {
-      // Sample data for testing highway graphics (4 signs only)
+      // Fallback to localStorage data (legacy support)
+      const savedActionPlan = localStorage.getItem('aiActionPlan');
+      
+      if (savedActionPlan) {
+        const actionPlan = JSON.parse(savedActionPlan);
+        
+        // Convert action plan to journey steps
+        const steps: JourneyStep[] = actionPlan.map((action: any, index: number) => {
+          // Create curved path positions
+          const baseX = 20 + (index * 15);
+          const curveY = 50 + Math.sin(index * 0.8) * 20;
+          
+          // Determine sign type based on priority
+          const signType = action.priority === 'high' ? 'warning' : 
+                          action.priority === 'medium' ? 'highway' : 'info';
+          
+          return {
+            id: `action-${index}`,
+            title: action.title,
+            description: action.description,
+            week: action.timeframe,
+            tasks: [action.description],
+            route: action.route,
+            position: { x: baseX, y: curveY },
+            signType: signType,
+            completed: false,
+            priority: action.priority || 'medium'
+          };
+        });
+        
+        setJourneyData(steps);
+      } else {
+        // Sample data for testing highway graphics (4 signs only)
       const sampleSteps: JourneyStep[] = [
         {
           id: 'step-1',
@@ -217,9 +266,10 @@ export default function MovingJourney() {
         }
       ];
       
-      setJourneyData(sampleSteps);
+        setJourneyData(sampleSteps);
+      }
     }
-  }, []);
+  }, [projectQuery.data, tasksQuery.data]);
 
   const handleTaskClick = (step: JourneyStep, event: React.MouseEvent) => {
     // Visual feedback - sign click animation

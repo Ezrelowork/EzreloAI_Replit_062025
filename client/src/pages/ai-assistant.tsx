@@ -66,19 +66,66 @@ export default function AIAssistant() {
       const response = await apiRequest("POST", "/api/ai-recommendations", queryData);
       return await response.json();
     },
-    onSuccess: (data: AIResponse) => {
+    onSuccess: async (data: AIResponse) => {
       setAiResponse(data);
-      // Save timeline and action plan for the journey page
-      localStorage.setItem('aiTimeline', JSON.stringify(data.timeline));
-      localStorage.setItem('aiActionPlan', JSON.stringify(data.actionPlan));
-      // Save move addresses for routing
-      localStorage.setItem('aiFromLocation', relocationDetails.fromLocation);
-      localStorage.setItem('aiToLocation', relocationDetails.toLocation);
-      localStorage.setItem('aiMoveDate', relocationDetails.moveDate);
-      toast({
-        title: "Plan Generated",
-        description: "Your personalized relocation strategy is ready!",
-      });
+      
+      // Create moving project with AI data
+      try {
+        const projectData = {
+          fromAddress: relocationDetails.fromLocation,
+          toAddress: relocationDetails.toLocation,
+          moveDate: relocationDetails.moveDate,
+          homeSize: relocationDetails.familySize,
+          budget: relocationDetails.budget,
+          priorities: relocationDetails.priorities.join(', '),
+          aiGenerated: true,
+          aiSummary: data.summary,
+          aiTimeline: JSON.stringify(data.timeline),
+          aiActionPlan: JSON.stringify(data.actionPlan)
+        };
+
+        const projectResponse = await apiRequest("POST", "/api/moving-project", projectData);
+        const project = await projectResponse.json();
+        
+        // Create project tasks from AI action plan
+        for (const action of data.actionPlan) {
+          await apiRequest("POST", "/api/project-task", {
+            projectId: project.project.id,
+            title: action.title,
+            description: action.description,
+            priority: action.priority,
+            status: action.status,
+            timeframe: action.timeframe,
+            taskType: action.route.replace('/', '') || 'general'
+          });
+        }
+
+        // Save data for journey integration
+        localStorage.setItem('currentProjectId', project.project.id.toString());
+        localStorage.setItem('aiTimeline', JSON.stringify(data.timeline));
+        localStorage.setItem('aiActionPlan', JSON.stringify(data.actionPlan));
+        localStorage.setItem('aiFromLocation', relocationDetails.fromLocation);
+        localStorage.setItem('aiToLocation', relocationDetails.toLocation);
+        localStorage.setItem('aiMoveDate', relocationDetails.moveDate);
+        
+        toast({
+          title: "Moving Project Created",
+          description: "Your AI-powered relocation plan is now active in your journey!",
+        });
+      } catch (error) {
+        console.error('Failed to create moving project:', error);
+        // Fallback to localStorage only
+        localStorage.setItem('aiTimeline', JSON.stringify(data.timeline));
+        localStorage.setItem('aiActionPlan', JSON.stringify(data.actionPlan));
+        localStorage.setItem('aiFromLocation', relocationDetails.fromLocation);
+        localStorage.setItem('aiToLocation', relocationDetails.toLocation);
+        localStorage.setItem('aiMoveDate', relocationDetails.moveDate);
+        
+        toast({
+          title: "Plan Generated",
+          description: "Your personalized relocation strategy is ready!",
+        });
+      }
     },
     onError: (error) => {
       console.error("Error generating plan:", error);
