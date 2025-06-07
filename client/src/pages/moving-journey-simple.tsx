@@ -272,7 +272,6 @@ export default function MovingJourney() {
               <ProgressTracker 
                 totalSteps={journeyData.length}
                 completedSteps={journeyData.filter(step => step.completed).length}
-                className="scale-75"
               />
             </div>
           </div>

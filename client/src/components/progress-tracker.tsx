@@ -17,35 +17,22 @@ export const ProgressTracker: React.FC<ProgressTrackerProps> = ({
   const progressPercentage = (completedSteps / totalSteps) * 100;
 
   return (
-    <div className={`bg-white/90 backdrop-blur-sm rounded-2xl p-4 shadow-xl border-2 border-blue-200 ${className}`}>
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-          <CheckCircle className="w-5 h-5 text-green-600" />
-          Journey Progress
-        </h3>
-        <div className="text-sm font-bold text-blue-600">
-          {completedSteps}/{totalSteps} Tasks
-        </div>
+    <div className={`flex items-center gap-3 ${className}`}>
+      <div className="text-sm font-bold text-gray-600">
+        {completedSteps}/{totalSteps}
       </div>
       
-      {/* Progress bar */}
-      <div className="w-full bg-gray-200 rounded-full h-3 mb-3">
+      {/* Minimal progress bar */}
+      <div className="w-32 bg-gray-200 rounded-full h-2">
         <div 
-          className="bg-gradient-to-r from-green-500 to-blue-500 h-3 rounded-full transition-all duration-500 ease-out"
+          className="bg-gradient-to-r from-green-500 to-blue-500 h-2 rounded-full transition-all duration-500 ease-out"
           style={{ width: `${progressPercentage}%` }}
         ></div>
       </div>
       
-      <div className="flex justify-between text-sm">
-        <span className="text-green-600 font-semibold">
-          {progressPercentage.toFixed(0)}% Complete
-        </span>
-        {currentStep && (
-          <span className="text-gray-600">
-            Current: Step {currentStep}
-          </span>
-        )}
-      </div>
+      <span className="text-sm text-green-600 font-medium">
+        {progressPercentage.toFixed(0)}%
+      </span>
     </div>
   );
 };
