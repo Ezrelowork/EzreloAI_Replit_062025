@@ -229,15 +229,17 @@ export default function MovingJourney() {
     }
   }, [projectQuery.data, tasksQuery.data]);
 
-  const handleTaskClick = (step: JourneyStep, event: React.MouseEvent) => {
+  const handleTaskClick = (step: JourneyStep, event?: any) => {
     // Visual feedback - sign click animation
-    const element = event.currentTarget as HTMLElement;
-    element.style.transform = 'scale(0.95)';
-    element.style.transition = 'transform 0.2s ease';
-    
-    setTimeout(() => {
-      element.style.transform = 'scale(1)';
-    }, 200);
+    if (event?.target) {
+      const element = event.target as HTMLElement;
+      element.style.transform = 'scale(0.95)';
+      element.style.transition = 'transform 0.2s ease';
+      
+      setTimeout(() => {
+        element.style.transform = 'scale(1)';
+      }, 200);
+    }
     
     const cardElement = taskCardRefs.current[step.id];
     if (cardElement) {
@@ -424,7 +426,7 @@ export default function MovingJourney() {
                 week={step.week}
                 priority={step.priority}
                 completed={step.completed}
-                onClick={() => handleTaskClick(step, { target: taskCardRefs.current[step.id] })}
+                onClick={() => handleTaskClick(step)}
                 className="group"
               />
             </div>
