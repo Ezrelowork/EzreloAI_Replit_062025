@@ -147,12 +147,14 @@ export const TaskModal: React.FC<TaskModalProps> = ({
                   
                   // Route to appropriate page based on task
                   const taskLower = task.title.toLowerCase();
-                  let targetRoute = '/dashboard';
+                  let targetRoute = '/moving-companies';
                   
                   if (taskLower.includes('utility') || taskLower.includes('electric') || taskLower.includes('internet')) {
                     targetRoute = '/utilities';
                   } else if (taskLower.includes('pack') || taskLower.includes('checklist')) {
                     targetRoute = '/moving-checklist';
+                  } else if (taskLower.includes('moving') || taskLower.includes('mover') || taskLower.includes('truck')) {
+                    targetRoute = '/moving-companies';
                   }
                   
                   const queryString = params.toString();

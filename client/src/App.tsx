@@ -13,6 +13,7 @@ import Dashboard from "@/pages/dashboard";
 import Utilities from "@/pages/utilities";
 import AIAssistant from "@/pages/ai-assistant";
 import MovingJourneySimple from "@/pages/moving-journey-simple";
+import MovingCompanies from "@/pages/moving-companies";
 import LogoShowcase from "@/pages/logo-showcase";
 import NotFound from "@/pages/not-found";
 
@@ -48,6 +49,7 @@ function Router() {
           <Route path="/dashboard" component={Dashboard} />
           <Route path="/ai-assistant" component={AIAssistant} />
           <Route path="/moving-journey" component={MovingJourneySimple} />
+          <Route path="/moving-companies" component={MovingCompanies} />
           <Route path="/utilities" component={Utilities} />
           <Route path="/moving-checklist" component={MovingChecklist} />
           <Route path="/analytics" component={Analytics} />
