@@ -63,6 +63,24 @@ export const useZoomNavigation = () => {
   const [currentTaskData, setCurrentTaskData] = useState<any>(null);
 
   const zoomIntoTask = (element: HTMLElement, taskData: any) => {
+    // Store original positions of all signs before zoom starts
+    const signs = document.querySelectorAll('[data-step-id]');
+    const originalPositions: { [key: string]: { left: string; top: string } } = {};
+    
+    signs.forEach((sign) => {
+      const htmlSign = sign as HTMLElement;
+      const stepId = htmlSign.getAttribute('data-step-id');
+      if (stepId && htmlSign.style) {
+        originalPositions[stepId] = {
+          left: htmlSign.style.left,
+          top: htmlSign.style.top
+        };
+      }
+    });
+    
+    // Store positions globally for restoration
+    (window as any).originalSignPositions = originalPositions;
+    
     // Get the element's position relative to the viewport
     const rect = element.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
@@ -80,7 +98,23 @@ export const useZoomNavigation = () => {
     setIsZoomed(false);
     document.body.style.overflow = 'auto';
     
-    // Clear data after transition and reset any transform effects
+    // Immediately restore positions to prevent jump
+    const originalPositions = (window as any).originalSignPositions;
+    if (originalPositions) {
+      const signs = document.querySelectorAll('[data-step-id]');
+      signs.forEach((sign) => {
+        const htmlSign = sign as HTMLElement;
+        const stepId = htmlSign.getAttribute('data-step-id');
+        if (stepId && originalPositions[stepId] && htmlSign.style) {
+          htmlSign.style.left = originalPositions[stepId].left;
+          htmlSign.style.top = originalPositions[stepId].top;
+          htmlSign.style.transform = 'translate(-50%, -50%)';
+          htmlSign.style.transformOrigin = 'center';
+        }
+      });
+    }
+    
+    // Clear data after transition
     setTimeout(() => {
       setZoomOrigin(null);
       setCurrentTaskData(null);
@@ -90,24 +124,15 @@ export const useZoomNavigation = () => {
       body.style.transform = '';
       body.style.transformOrigin = '';
       
-      // Reset all highway signs to their original positions
-      const signs = document.querySelectorAll('[data-step-id]');
-      signs.forEach((sign) => {
-        const htmlSign = sign as HTMLElement;
-        if (htmlSign.style) {
-          // Force recalculation of positions
-          htmlSign.style.position = 'absolute';
-          htmlSign.style.transform = 'translate(-50%, -50%)';
-          htmlSign.style.transformOrigin = 'center';
-        }
-      });
-      
       // Reset highway container
       const container = document.querySelector('.relative.max-w-7xl') as HTMLElement;
       if (container && container.style) {
         container.style.transform = 'none';
         container.style.transformOrigin = 'initial';
       }
+      
+      // Clean up stored positions
+      (window as any).originalSignPositions = null;
       
       // Force a reflow to ensure positions are reset
       window.scrollTo(0, 0);
