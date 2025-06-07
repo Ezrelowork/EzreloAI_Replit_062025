@@ -127,13 +127,17 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
   const [loadingReviews, setLoadingReviews] = useState<{[key: string]: boolean}>({});
 
   // Function to fetch Google reviews for a specific company
-  const fetchGoogleReviews = async (companyName: string, location: string) => {
+  const fetchGoogleReviews = async (companyName: string, location: string, countOnly = false) => {
     if (googleReviewsData[companyName] || loadingReviews[companyName]) return;
     
     setLoadingReviews(prev => ({ ...prev, [companyName]: true }));
     
     try {
-      const response = await apiRequest('GET', `/api/google-reviews/${encodeURIComponent(companyName)}?location=${encodeURIComponent(location || '')}`);
+      const endpoint = countOnly ? 
+        `/api/google-reviews/${encodeURIComponent(companyName)}?location=${encodeURIComponent(location || '')}&countOnly=true` :
+        `/api/google-reviews/${encodeURIComponent(companyName)}?location=${encodeURIComponent(location || '')}`;
+      
+      const response = await apiRequest('GET', endpoint);
       const data = await response.json();
       setGoogleReviewsData(prev => ({ ...prev, [companyName]: data }));
     } catch (error) {
@@ -142,6 +146,17 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
       setLoadingReviews(prev => ({ ...prev, [companyName]: false }));
     }
   };
+
+  // Auto-fetch review counts when moving companies are loaded
+  useEffect(() => {
+    if (movingCompanies.length > 0 && moveData.to) {
+      movingCompanies.forEach(company => {
+        if (!googleReviewsData[company.provider] && !loadingReviews[company.provider]) {
+          fetchGoogleReviews(company.provider, moveData.to, true);
+        }
+      });
+    }
+  }, [movingCompanies.length, moveData.to]);
 
   const queryClient = useQueryClient();
 
