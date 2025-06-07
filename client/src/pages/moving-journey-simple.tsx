@@ -312,13 +312,13 @@ export default function MovingJourney() {
 
           const customSign = getCustomSign(step.title);
           
-          // Position signs exactly at each pink circle location
+          // Position signs above the wooden posts (pink circles are post locations)
           const roadPositions = [
-            { left: '8%', top: '88%' },    // Pink circle 1 - bottom left corner
-            { left: '28%', top: '65%' },   // Pink circle 2 - left side road curve
-            { left: '48%', top: '45%' },   // Pink circle 3 - center of road
-            { left: '68%', top: '25%' },   // Pink circle 4 - upper right area
-            { left: '82%', top: '12%' }    // Pink circle 5 - top right destination
+            { left: '8%', top: '78%' },    // Above post 1 - bottom left
+            { left: '28%', top: '55%' },   // Above post 2 - left curve  
+            { left: '48%', top: '35%' },   // Above post 3 - center
+            { left: '68%', top: '15%' },   // Above post 4 - upper right
+            { left: '82%', top: '2%' }     // Above post 5 - destination
           ];
           
           const position = roadPositions[index] || { left: '50%', top: '50%' };
