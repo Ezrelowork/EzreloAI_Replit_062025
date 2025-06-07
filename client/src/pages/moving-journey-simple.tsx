@@ -98,6 +98,11 @@ export default function MovingJourney() {
   };
 
   useEffect(() => {
+    // Set up sample move data for testing
+    localStorage.setItem('aiFromLocation', 'Austin, TX 78701');
+    localStorage.setItem('aiToLocation', 'Dallas, TX 75201');
+    localStorage.setItem('aiMoveDate', '2024-08-15');
+    
     // Get action plan data from localStorage (from AI assistant)
     const savedActionPlan = localStorage.getItem('aiActionPlan');
     
