@@ -41,15 +41,86 @@ export default function MovingChecklist() {
   const { toast } = useToast();
   const [movingCompanies, setMovingCompanies] = useState<MovingCompany[]>([]);
   const [showMovingDialog, setShowMovingDialog] = useState(false);
-  const [moveAddresses, setMoveAddresses] = useState({
-    fromAddress: "",
-    fromCity: "",
-    fromState: "",
-    fromZip: "",
-    toAddress: "",
-    toCity: "",
-    toState: "",
-    toZip: ""
+  const [moveAddresses, setMoveAddresses] = useState(() => {
+    // Get addresses from URL parameters or localStorage
+    const urlParams = new URLSearchParams(window.location.search);
+    const fromParam = urlParams.get('from');
+    const toParam = urlParams.get('to');
+    
+    if (fromParam && toParam) {
+      const parseAddress = (address: string) => {
+        const parts = address.split(',').map(part => part.trim());
+        if (parts.length >= 3) {
+          const street = parts[0] || '';
+          const city = parts[1] || '';
+          const stateZip = parts[2] || '';
+          const stateZipParts = stateZip.split(' ');
+          const state = stateZipParts[0] || '';
+          const zip = stateZipParts[1] || '';
+          return { street, city, state, zip };
+        }
+        return { street: address, city: '', state: '', zip: '' };
+      };
+      
+      const fromParsed = parseAddress(fromParam);
+      const toParsed = parseAddress(toParam);
+      
+      return {
+        fromAddress: fromParsed.street,
+        fromCity: fromParsed.city,
+        fromState: fromParsed.state,
+        fromZip: fromParsed.zip,
+        toAddress: toParsed.street,
+        toCity: toParsed.city,
+        toState: toParsed.state,
+        toZip: toParsed.zip
+      };
+    }
+    
+    // Fallback to localStorage
+    const aiFromLocation = localStorage.getItem('aiFromLocation');
+    const aiToLocation = localStorage.getItem('aiToLocation');
+    
+    if (aiFromLocation && aiToLocation) {
+      const fromParsed = parseAddress(aiFromLocation);
+      const toParsed = parseAddress(aiToLocation);
+      
+      return {
+        fromAddress: fromParsed.street,
+        fromCity: fromParsed.city,
+        fromState: fromParsed.state,
+        fromZip: fromParsed.zip,
+        toAddress: toParsed.street,
+        toCity: toParsed.city,
+        toState: toParsed.state,
+        toZip: toParsed.zip
+      };
+    }
+    
+    return {
+      fromAddress: "",
+      fromCity: "",
+      fromState: "",
+      fromZip: "",
+      toAddress: "",
+      toCity: "",
+      toState: "",
+      toZip: ""
+    };
+    
+    function parseAddress(address: string) {
+      const parts = address.split(',').map(part => part.trim());
+      if (parts.length >= 3) {
+        const street = parts[0] || '';
+        const city = parts[1] || '';
+        const stateZip = parts[2] || '';
+        const stateZipParts = stateZip.split(' ');
+        const state = stateZipParts[0] || '';
+        const zip = stateZipParts[1] || '';
+        return { street, city, state, zip };
+      }
+      return { street: address, city: '', state: '', zip: '' };
+    }
   });
 
   const searchMutation = useMutation({
@@ -180,6 +251,13 @@ export default function MovingChecklist() {
   const getItemsByTimeframe = (timeframe: string) => {
     return checklist.filter(item => item.timeframe === timeframe);
   };
+
+  // Auto-trigger moving company search when addresses are available
+  useEffect(() => {
+    if (moveAddresses.fromCity && moveAddresses.toCity && movingCompanies.length === 0) {
+      searchMutation.mutate(moveAddresses);
+    }
+  }, [moveAddresses.fromCity, moveAddresses.toCity]);
 
   // Handle smooth scrolling to anchor on page load
   useEffect(() => {
