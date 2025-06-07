@@ -46,18 +46,7 @@ export const ZoomNavigation: React.FC<ZoomNavigationProps> = ({
         opacity: isZoomed ? 1 : 0,
       }}
     >
-      {/* Zoom Out Navigation */}
-      <div className="absolute top-6 left-6 z-10">
-        <Button
-          onClick={onZoomOut}
-          variant="outline"
-          size="sm"
-          className="bg-white/90 backdrop-blur-sm border-2 border-gray-300 shadow-lg hover:shadow-xl transition-all duration-200"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Journey
-        </Button>
-      </div>
+
 
       {/* Zoomed Content */}
       <div className="w-full h-full overflow-auto">
