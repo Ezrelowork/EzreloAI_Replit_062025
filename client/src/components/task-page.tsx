@@ -314,6 +314,15 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete }) => {
         {/* Action Buttons */}
         <div className="flex gap-4 mb-8">
           <Button
+            onClick={() => setLocation('/moving-journey')}
+            variant="outline"
+            className="border-2 border-blue-600 hover:border-blue-700 text-blue-700 hover:text-blue-800 font-bold py-4 px-8 rounded-xl text-lg shadow-lg transform hover:scale-105 transition-all"
+          >
+            <ArrowLeft className="w-5 h-5 mr-2" />
+            Back to Journey
+          </Button>
+          
+          <Button
             onClick={() => movingCompanyMutation.mutate()}
             disabled={movingCompanyMutation.isPending}
             className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-bold py-4 px-8 rounded-xl text-lg shadow-lg transform hover:scale-105 transition-all"
