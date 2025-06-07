@@ -166,8 +166,20 @@ export const TaskModal: React.FC<TaskModalProps> = ({
                   </div>
                   <Button
                     onClick={() => {
+                      const fromParam = localStorage.getItem('aiFromLocation');
+                      const toParam = localStorage.getItem('aiToLocation');
+                      const dateParam = localStorage.getItem('aiMoveDate');
+                      
+                      const params = new URLSearchParams();
+                      if (fromParam) params.set('from', fromParam);
+                      if (toParam) params.set('to', toParam);
+                      if (dateParam) params.set('date', dateParam);
+                      
+                      const queryString = params.toString();
+                      const finalRoute = queryString ? `/moving-checklist?${queryString}` : '/moving-checklist';
+                      
                       onClose();
-                      setLocation('/moving-checklist');
+                      setLocation(finalRoute);
                     }}
                     variant="outline"
                     className="border-green-300 text-green-700 hover:bg-green-100 font-semibold px-6 py-2 rounded-xl flex items-center gap-2"

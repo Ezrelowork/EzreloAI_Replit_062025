@@ -1,6 +1,7 @@
 import React from 'react';
 import { Truck, Zap, Package, Home, Phone, Building, Heart, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useLocation } from 'wouter';
 
 interface TaskPageProps {
   task: {
@@ -15,6 +16,21 @@ interface TaskPageProps {
 }
 
 export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete }) => {
+  const [, setLocation] = useLocation();
+  
+  const handleFindServices = () => {
+    // Navigate to the appropriate service page based on task type
+    const taskType = task.title.toLowerCase();
+    if (taskType.includes('mover') || taskType.includes('moving') || taskType.includes('quote')) {
+      setLocation('/moving-companies?from=Austin,%20TX&to=Dallas,%20TX&date=2024-07-15');
+    } else if (taskType.includes('pack') || taskType.includes('organize') || taskType.includes('checklist')) {
+      setLocation('/moving-checklist?from=Austin,%20TX&to=Dallas,%20TX&date=2024-07-15');
+    } else {
+      // Default to moving companies for other tasks
+      setLocation('/moving-companies?from=Austin,%20TX&to=Dallas,%20TX&date=2024-07-15');
+    }
+  };
+
   const getTaskIcon = (title: string) => {
     const taskLower = title.toLowerCase();
     if (taskLower.includes('mover') || taskLower.includes('moving')) return Truck;
@@ -138,6 +154,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete }) => {
               </Button>
               <Button
                 variant="outline"
+                onClick={handleFindServices}
                 className="w-full border-2 border-blue-300 hover:border-blue-400 text-blue-600 font-bold py-4 rounded-xl text-lg"
               >
                 Find Services
