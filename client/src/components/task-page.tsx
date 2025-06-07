@@ -346,80 +346,79 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete }) => {
           </Button>
         </div>
 
-        {/* Animated Service Results - slides down from header */}
-        {showResults && (
-          <div className="transform transition-all duration-700 ease-in-out animate-in slide-in-from-top-4 mb-8">
-            <div className="bg-white rounded-2xl shadow-xl border-2 border-blue-100 p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
-                <div className="w-1 h-8 bg-blue-600 rounded-full"></div>
-                {searchType === 'moving' && `Moving Companies for ${moveData.from} → ${moveData.to}`}
-                {searchType === 'utilities' && `Utilities & Services for ${moveData.to}`}
-                {searchType === 'housing' && `Housing Services for ${moveData.to}`}
-              </h2>
-              <div className="space-y-4">
-                {searchType === 'moving' && movingCompanies.length > 0 && 
-                  movingCompanies.map((company, index) => (
-                    <div key={index} className="border border-gray-200 rounded-xl p-6 hover:border-blue-300 hover:shadow-md transition-all">
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex-1">
-                          <h3 className="text-xl font-bold text-gray-900 mb-2">{company.provider}</h3>
-                          <div className="flex items-center gap-4 mb-3">
-                            <div className="flex items-center gap-1">
-                              {[...Array(5)].map((_, i) => (
-                                <Star
-                                  key={i}
-                                  className={`w-4 h-4 ${
-                                    i < company.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
-                                  }`}
-                                />
-                              ))}
-                              <span className="text-sm text-gray-600 ml-1">({company.rating})</span>
-                            </div>
-                            <span className="text-lg font-bold text-green-600">{company.estimatedCost}</span>
-                          </div>
-                          <p className="text-gray-700 mb-3">{company.description}</p>
-                          <div className="flex flex-wrap gap-2 mb-4">
-                            {company.services.slice(0, 3).map((service, idx) => (
-                              <span key={idx} className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
-                                {service}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex gap-3">
-                        <Button
-                          onClick={() => handleReferralClick(company, 'website_visit')}
-                          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold"
-                        >
-                          Visit Website
-                        </Button>
-                        <Button
-                          onClick={() => window.open(`tel:${company.phone}`, '_self')}
-                          variant="outline"
-                          className="border-green-500 text-green-700 hover:bg-green-50 px-6 py-2 rounded-lg font-semibold"
-                        >
-                          Call {company.phone}
-                        </Button>
-                        <Button
-                          onClick={() => handleReferralClick(company, 'quote_request')}
-                          variant="outline"
-                          className="border-orange-500 text-orange-700 hover:bg-orange-50 px-6 py-2 rounded-lg font-semibold"
-                        >
-                          Get Quote
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Main Content Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Task Overview and Steps */}
           <div className="lg:col-span-2 space-y-6">
+            {/* Animated Service Results - slides down from header, constrained to task overview width */}
+            {showResults && (
+              <div className="transform transition-all duration-700 ease-in-out animate-in slide-in-from-top-4 mb-6">
+                <div className="bg-white rounded-2xl shadow-xl border-2 border-blue-100 p-6">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-3">
+                    <div className="w-1 h-8 bg-blue-600 rounded-full"></div>
+                    {searchType === 'moving' && `Moving Companies for ${moveData.from} → ${moveData.to}`}
+                    {searchType === 'utilities' && `Utilities & Services for ${moveData.to}`}
+                    {searchType === 'housing' && `Housing Services for ${moveData.to}`}
+                  </h2>
+                  <div className="space-y-4">
+                    {searchType === 'moving' && movingCompanies.length > 0 && 
+                      movingCompanies.map((company, index) => (
+                        <div key={index} className="border border-gray-200 rounded-xl p-6 hover:border-blue-300 hover:shadow-md transition-all">
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex-1">
+                              <h3 className="text-xl font-bold text-gray-900 mb-2">{company.provider}</h3>
+                              <div className="flex items-center gap-4 mb-3">
+                                <div className="flex items-center gap-1">
+                                  {[...Array(5)].map((_, i) => (
+                                    <Star
+                                      key={i}
+                                      className={`w-4 h-4 ${
+                                        i < company.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'
+                                      }`}
+                                    />
+                                  ))}
+                                  <span className="text-sm text-gray-600 ml-1">({company.rating})</span>
+                                </div>
+                                <span className="text-lg font-bold text-green-600">{company.estimatedCost}</span>
+                              </div>
+                              <p className="text-gray-700 mb-3">{company.description}</p>
+                              <div className="flex flex-wrap gap-2 mb-4">
+                                {company.services.slice(0, 3).map((service, idx) => (
+                                  <span key={idx} className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">
+                                    {service}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex gap-3">
+                            <Button
+                              onClick={() => handleReferralClick(company, 'website_visit')}
+                              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold"
+                            >
+                              Visit Website
+                            </Button>
+                            <Button
+                              onClick={() => window.open(`tel:${company.phone}`, '_self')}
+                              variant="outline"
+                              className="border-green-500 text-green-700 hover:bg-green-50 px-6 py-2 rounded-lg font-semibold"
+                            >
+                              Call {company.phone}
+                            </Button>
+                            <Button
+                              onClick={() => handleReferralClick(company, 'quote_request')}
+                              variant="outline"
+                              className="border-orange-500 text-orange-700 hover:bg-orange-50 px-6 py-2 rounded-lg font-semibold"
+                            >
+                              Get Quote
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              </div>
+            )}
             {/* Task Overview */}
             <div className="bg-white rounded-2xl shadow-lg p-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-4">Task Overview</h2>
