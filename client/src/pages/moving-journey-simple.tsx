@@ -284,7 +284,6 @@ export default function MovingJourney() {
 
         {/* Highway Signs Positioned Along Road */}
         {journeyData.map((step, index) => {
-          console.log(`Rendering step ${index}: ${step.title}`);
           const IconComponent = getTaskIcon(step.title);
           const completedSteps = journeyData.filter(s => s.completed).length;
           const isCurrentStep = index === completedSteps && !step.completed;
@@ -298,11 +297,6 @@ export default function MovingJourney() {
           ];
 
           const customSign = signsByIndex[index] || customGraphics.taskIcons['moving'];
-          
-          // Debug logging for fifth sign
-          if (index === 4) {
-            console.log('Fifth sign data:', { index, customSign, step: step.title });
-          }
           
           // Position four signs with different graphics
           let position;
@@ -342,9 +336,7 @@ export default function MovingJourney() {
                   style={index === 1 ? { clipPath: 'inset(0 0 30% 0)' } : index === 2 ? { clipPath: 'inset(0 0 30% 0)' } : undefined}
                   onError={(e) => {
                     console.error(`Sign ${index + 1} failed to load:`, customSign.src);
-                    console.log('Available signs:', Object.keys(customGraphics.taskIcons));
                   }}
-                  onLoad={() => console.log(`Sign ${index + 1} loaded successfully:`, step.title)}
                 />
                 
                 {/* Completion Check */}
