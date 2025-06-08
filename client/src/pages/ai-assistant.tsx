@@ -383,9 +383,34 @@ export default function AIAssistant() {
                 <div className="bg-blue-50 p-6 rounded-lg mb-6">
                   <h4 className="font-semibold text-blue-900 mb-3">Strategic Overview</h4>
                   <p className="text-blue-900 leading-relaxed mb-4">{aiResponse.summary}</p>
+                  
+                  {/* Move Details Grid */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                    <div className="text-center">
+                      <MapPin className="w-5 h-5 text-blue-600 mx-auto mb-1" />
+                      <div className="text-xs text-blue-700 font-medium">From</div>
+                      <div className="text-sm text-blue-900 truncate">{relocationDetails.fromLocation}</div>
+                    </div>
+                    <div className="text-center">
+                      <MapPin className="w-5 h-5 text-green-600 mx-auto mb-1" />
+                      <div className="text-xs text-blue-700 font-medium">To</div>
+                      <div className="text-sm text-blue-900 truncate">{relocationDetails.toLocation}</div>
+                    </div>
+                    <div className="text-center">
+                      <Calendar className="w-5 h-5 text-purple-600 mx-auto mb-1" />
+                      <div className="text-xs text-blue-700 font-medium">Move Date</div>
+                      <div className="text-sm text-blue-900">{relocationDetails.moveDate || 'Flexible'}</div>
+                    </div>
+                    <div className="text-center">
+                      <DollarSign className="w-5 h-5 text-green-600 mx-auto mb-1" />
+                      <div className="text-xs text-blue-700 font-medium">Budget</div>
+                      <div className="text-sm text-blue-900">{relocationDetails.budget || 'Not specified'}</div>
+                    </div>
+                  </div>
+                  
                   <div className="flex items-center gap-2 text-lg font-bold text-blue-800">
                     <DollarSign className="w-5 h-5" />
-                    {aiResponse.estimatedTotalCost}
+                    Estimated Total Cost: {aiResponse.estimatedTotalCost}
                   </div>
                 </div>
               </CardContent>
