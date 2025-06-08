@@ -98,6 +98,8 @@ function getServiceDescription(category: string, location: string): string {
       return `Modern fitness facility with equipment and classes`;
     case 'Bank':
       return `Full-service banking and financial services`;
+    case 'Storage Facility':
+      return `Secure self-storage units and moving storage solutions in ${location}`;
     default:
       return `Professional services in ${location}`;
   }
@@ -117,6 +119,8 @@ function getLocalServicesByCategory(category: string): string[] {
       return ['Cardio Equipment', 'Weight Training', 'Group Classes', 'Personal Training'];
     case 'Bank':
       return ['Checking Accounts', 'Savings Accounts', 'Loans', 'Investment Services'];
+    case 'Storage Facility':
+      return ['Self Storage Units', 'Climate Controlled', 'Vehicle Storage', 'Moving Supplies'];
     default:
       return ['Professional Services'];
   }
@@ -217,22 +221,34 @@ function getPrograms(category: string): string[] {
 }
 
 // Google Places API functions for live reviews
-async function searchGooglePlaces(companyName: string, location?: string): Promise<any> {
+async function searchGooglePlaces(searchQuery: string, location?: string): Promise<any> {
   const baseUrl = 'https://maps.googleapis.com/maps/api/place/textsearch/json';
-  const query = `${companyName} moving company ${location || ''}`.trim();
+  const query = location ? `${searchQuery} ${location}` : searchQuery;
   const params = new URLSearchParams({
-    query,
-    key: process.env.GOOGLE_API_KEY!,
-    type: 'moving_company'
+    query: query.trim(),
+    key: process.env.GOOGLE_API_KEY!
   });
 
   try {
+    console.log('Making Google Places API request:', `${baseUrl}?${params}`);
     const response = await fetch(`${baseUrl}?${params}`);
     const data = await response.json();
-    return data.results?.[0] || null;
+    
+    console.log('Google Places API response status:', data.status);
+    if (data.error_message) {
+      console.log('Google Places API error message:', data.error_message);
+    }
+    
+    if (data.status !== 'OK') {
+      console.error('Google Places API error:', data.status, data.error_message);
+      return [];
+    }
+    
+    console.log('Google Places API results count:', data.results?.length || 0);
+    return data.results || [];
   } catch (error) {
     console.error('Google Places search error:', error);
-    return null;
+    return [];
   }
 }
 
@@ -1277,12 +1293,18 @@ Please provide a comprehensive strategic relocation plan focusing on planning gu
             searchQuery = `banks credit unions in ${location}`;
             category = 'Bank';
             break;
+          case 'storage':
+            searchQuery = `self storage facilities in ${location}`;
+            category = 'Storage Facility';
+            break;
           default:
             continue;
         }
 
         try {
+          console.log(`Searching for: ${searchQuery} in ${location}`);
           const places = await searchGooglePlaces(searchQuery, location);
+          console.log(`Found ${places?.length || 0} places for ${category}`);
           
           if (places && places.length > 0) {
             const limitedPlaces = places.slice(0, 3); // Limit to 3 per category

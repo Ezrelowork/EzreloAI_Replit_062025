@@ -67,7 +67,7 @@ export default function LocalServices() {
     try {
       const response = await apiRequest('POST', '/api/search-local-services', {
         location: location.trim(),
-        serviceTypes: ['schools', 'healthcare', 'pharmacies', 'veterinary', 'gyms', 'banks']
+        serviceTypes: ['schools', 'healthcare', 'pharmacies', 'veterinary', 'gyms', 'banks', 'storage']
       });
       
       if (response.ok) {
@@ -114,6 +114,7 @@ export default function LocalServices() {
     if (cat.includes('veterinary') || cat.includes('vet')) return Heart;
     if (cat.includes('gym') || cat.includes('fitness')) return Dumbbell;
     if (cat.includes('bank') || cat.includes('credit')) return DollarSign;
+    if (cat.includes('storage') || cat.includes('warehouse')) return Building;
     if (cat.includes('grocery') || cat.includes('shopping')) return ShoppingBag;
     return Building;
   };
@@ -126,6 +127,7 @@ export default function LocalServices() {
     if (cat.includes('veterinary') || cat.includes('vet')) return 'bg-purple-100 text-purple-800';
     if (cat.includes('gym') || cat.includes('fitness')) return 'bg-orange-100 text-orange-800';
     if (cat.includes('bank') || cat.includes('credit')) return 'bg-yellow-100 text-yellow-800';
+    if (cat.includes('storage') || cat.includes('warehouse')) return 'bg-indigo-100 text-indigo-800';
     if (cat.includes('grocery') || cat.includes('shopping')) return 'bg-pink-100 text-pink-800';
     return 'bg-gray-100 text-gray-800';
   };
@@ -216,6 +218,7 @@ export default function LocalServices() {
                 <Badge variant="outline">Veterinarians</Badge>
                 <Badge variant="outline">Gyms & Fitness</Badge>
                 <Badge variant="outline">Banks & Credit Unions</Badge>
+                <Badge variant="outline">Storage Facilities</Badge>
               </div>
             </div>
           </CardContent>
