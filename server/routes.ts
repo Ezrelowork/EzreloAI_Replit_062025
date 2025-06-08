@@ -1352,6 +1352,37 @@ Please provide a comprehensive strategic relocation plan focusing on planning gu
     }
   });
 
+  // Mover selection endpoint
+  app.post('/api/select-mover', async (req, res) => {
+    try {
+      const { provider, category, phone, estimatedCost, moveRoute } = req.body;
+      
+      console.log('Mover selected:', {
+        provider,
+        category,
+        phone,
+        estimatedCost,
+        moveRoute,
+        selectedAt: new Date().toISOString()
+      });
+
+      res.json({ 
+        success: true, 
+        message: `${provider} has been selected as your moving company`,
+        selection: {
+          provider,
+          category,
+          phone,
+          estimatedCost,
+          moveRoute
+        }
+      });
+    } catch (error) {
+      console.error('Error saving mover selection:', error);
+      res.status(500).json({ error: 'Failed to save mover selection' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

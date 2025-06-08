@@ -211,12 +211,31 @@ export default function MovingCompanies() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-4">
-              <Link href="/">
-                <Button variant="ghost" size="sm" className="gap-2">
-                  <ArrowLeft className="w-4 h-4" />
-                  Back to Journey
-                </Button>
-              </Link>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="gap-2"
+                onClick={() => {
+                  const urlParams = new URLSearchParams(window.location.search);
+                  const from = urlParams.get('from');
+                  const to = urlParams.get('to');
+                  const date = urlParams.get('date');
+                  
+                  let journeyUrl = '/moving-journey';
+                  if (from || to || date) {
+                    const params = new URLSearchParams();
+                    if (from) params.set('from', from);
+                    if (to) params.set('to', to);
+                    if (date) params.set('date', date);
+                    journeyUrl += `?${params.toString()}`;
+                  }
+                  
+                  window.location.href = journeyUrl;
+                }}
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back to Journey
+              </Button>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Find Moving Companies</h1>
                 <p className="text-sm text-gray-600">Professional movers for your relocation</p>

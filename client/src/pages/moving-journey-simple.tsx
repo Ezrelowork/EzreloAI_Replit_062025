@@ -334,12 +334,23 @@ export default function MovingJourney() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-4">
-              <Link href="/">
-                <Button variant="ghost" size="sm" className="gap-2">
-                  <ArrowLeft className="w-4 h-4" />
-                  Back to Hub
-                </Button>
-              </Link>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="gap-2"
+                onClick={() => {
+                  // Only go to hub if we don't have journey data, otherwise stay on journey
+                  if (journeyData.length === 0) {
+                    window.location.href = '/';
+                  } else {
+                    // Refresh journey page to reset any zoom state
+                    window.location.reload();
+                  }
+                }}
+              >
+                <ArrowLeft className="w-4 h-4" />
+                {journeyData.length === 0 ? 'Back to Hub' : 'Reset Journey'}
+              </Button>
               <span className="text-gray-300">|</span>
               <Link href="/ai-assistant">
                 <Button variant="ghost" size="sm" className="gap-2 text-blue-600 hover:text-blue-700">
@@ -440,7 +451,7 @@ export default function MovingJourney() {
 
 
       {/* Priority Stats Box - In Grass Area Lower Right */}
-      <div className="absolute bottom-28 right-8 z-30">
+      <div className="absolute bottom-16 right-8 z-30">
         <JourneyStats 
           highPriority={journeyData.filter(step => step.priority === 'high').length}
           mediumPriority={journeyData.filter(step => step.priority === 'medium').length}
@@ -449,7 +460,7 @@ export default function MovingJourney() {
       </div>
 
       {/* Cinematic Journey Info */}
-      <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-30">
+      <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 z-30">
         <div className="bg-gray-900 text-white px-6 py-3 rounded-full shadow-2xl border border-gray-700">
           <div className="flex items-center gap-3">
             <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
