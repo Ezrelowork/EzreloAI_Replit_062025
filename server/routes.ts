@@ -140,6 +140,8 @@ function getLocalServiceCost(category: string): string {
       return '$30-$80/month';
     case 'Bank':
       return 'Free checking available';
+    case 'Storage Facility':
+      return '$25-$150/month';
     default:
       return 'Contact for pricing';
   }
@@ -159,6 +161,8 @@ function getLocalServiceSpecialties(category: string): string[] {
       return ['Yoga Classes', 'HIIT Training', 'Senior Fitness', 'Youth Programs'];
     case 'Bank':
       return ['Home Loans', 'Small Business', 'Investment Planning', 'Online Banking'];
+    case 'Storage Facility':
+      return ['Climate Control', 'Security Systems', 'Drive-Up Access', 'Moving Truck Rental'];
     default:
       return ['General Services'];
   }
@@ -178,6 +182,8 @@ function getServiceHours(category: string): string {
       return 'Daily 5:00 AM - 11:00 PM';
     case 'Bank':
       return 'Mon-Fri 9:00 AM - 5:00 PM, Sat 9:00 AM - 1:00 PM';
+    case 'Storage Facility':
+      return 'Daily 6:00 AM - 10:00 PM';
     default:
       return 'Call for hours';
   }
