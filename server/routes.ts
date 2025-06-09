@@ -48,14 +48,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const location = zip ? `${city}, ${state} ${zip}` : `${city}, ${state}`;
       
-      // API DISABLED FOR DEVELOPMENT - Return empty response
-      console.log('OpenAI API DISABLED for location:', location);
-      
       // Check known territories first
       let providersData: ServiceProvidersData = {};
       const knownData = getKnownServiceTerritories(city, state, zip || "");
       if (knownData) {
         providersData = knownData as ServiceProvidersData;
+      }
+
+      // If no known data and API key available, use OpenAI
+      if (Object.keys(providersData).length === 0 && process.env.OPENAI_API_KEY) {
+        try {
+          const OpenAI = (await import('openai')).default;
+          const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+          const completion = await openai.chat.completions.create({
+            model: "gpt-4o",
+            messages: [{
+              role: "system",
+              content: "You are a relocation specialist. Provide accurate utility and service provider information for the specified location."
+            }, {
+              role: "user", 
+              content: `Find utility providers and essential services for ${city}, ${state}. Include electric, gas, water, internet, waste management. Provide real company names, phone numbers, and websites.`
+            }],
+            response_format: { type: "json_object" }
+          });
+
+          const response = completion.choices[0].message.content;
+          if (response) {
+            const aiData = JSON.parse(response);
+            providersData = { ...providersData, ...aiData };
+          }
+        } catch (error) {
+          console.error("OpenAI API error:", error);
+        }
       }
 
       res.json({
@@ -165,9 +190,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Origin and destination cities and states are required" });
       }
 
-      // API DISABLED FOR DEVELOPMENT - Return static data
-      console.log('OpenAI API DISABLED: Would search moving companies from', fromCity, fromState, 'to', toCity, toState);
-
+      // First provide static companies, then enhance with API data if available
       const staticCompanies = [
         {
           category: "National Moving Companies",
@@ -226,35 +249,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Both current and destination locations are required" });
       }
 
-      // API DISABLED FOR DEVELOPMENT - Return static response
-      console.log('OpenAI API DISABLED: Would analyze move from', fromLocation, 'to', toLocation);
+      // Use OpenAI if API key is available, otherwise return static response
+      let response;
+      
+      if (process.env.OPENAI_API_KEY) {
+        try {
+          const OpenAI = (await import('openai')).default;
+          const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-      const staticResponse = {
-        summary: `Strategic relocation plan for your move from ${fromLocation} to ${toLocation}. Budget range: ${budget || '$8,000-$15,000'}`,
-        recommendations: [
-          {
-            category: "Cost Optimization",
-            advice: "Consider timing and seasonal factors",
-            week: "8 weeks before move",
-            tasks: ["Compare quotes", "Book early for discounts"]
+          const completion = await openai.chat.completions.create({
+            model: "gpt-4o",
+            messages: [{
+              role: "system",
+              content: "You are an expert relocation concierge AI assistant specializing in comprehensive moving and relocation planning."
+            }, {
+              role: "user",
+              content: `Create a detailed moving plan from ${fromLocation} to ${toLocation}. Move date: ${moveDate || 'Not specified'}. Family size: ${familySize || 'Not specified'}. Budget: ${budget || 'Not specified'}. Priorities: ${priorities || 'Standard relocation'}. Provide strategic recommendations and actionable timeline in JSON format.`
+            }],
+            response_format: { type: "json_object" }
+          });
+
+          const aiResponse = completion.choices[0].message.content;
+          if (aiResponse) {
+            response = JSON.parse(aiResponse);
           }
-        ],
-        actionPlan: [
-          {
-            title: "Get Moving Quotes",
-            description: "Find and compare local moving companies for your relocation",
-            route: "/dashboard",
-            priority: "high",
-            timeframe: "6-8 weeks before",
-            status: "pending"
-          },
-          {
-            title: "Set Up Utilities",
-            description: "Transfer or establish internet, electric, gas, and water services",
-            route: "/utilities",
-            priority: "high", 
-            timeframe: "4-6 weeks before",
-            status: "pending"
+        } catch (error) {
+          console.error("OpenAI API error:", error);
+        }
+      }
+
+      // Fallback to static response if no AI response
+      if (!response) {
+        response = {
+          summary: `Strategic relocation plan for your move from ${fromLocation} to ${toLocation}. Budget range: ${budget || '$8,000-$15,000'}`,
+          recommendations: [
+            {
+              category: "Cost Optimization",
+              advice: "Consider timing and seasonal factors",
+              week: "8 weeks before move",
+              tasks: ["Compare quotes", "Book early for discounts"]
+            }
+          ],
+          actionPlan: [
+            {
+              title: "Get Moving Quotes",
+              description: "Find and compare local moving companies for your relocation",
+              route: "/dashboard",
+              priority: "high",
+              timeframe: "6-8 weeks before",
+              status: "pending"
+            },
+            {
+              title: "Set Up Utilities",
+              description: "Transfer or establish internet, electric, gas, and water services",
+              route: "/utilities",
+              priority: "high", 
+              timeframe: "4-6 weeks before",
+              status: "pending"
           }
         ],
         timeline: [
@@ -269,8 +320,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         ],
         estimatedTotalCost: budget || "$8,000 - $15,000"
       };
+      }
 
-      res.json(staticResponse);
+      res.json(response);
 
     } catch (error) {
       console.error("AI Recommendations error:", error);
@@ -296,27 +348,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const location = zipCode ? `${city}, ${state} ${zipCode}` : `${city}, ${state}`;
       
-      // API DISABLED FOR DEVELOPMENT - Return static data
-      console.log('OpenAI API DISABLED for utility search:', utilityType, 'in', location);
+      // Use OpenAI if available, otherwise provide basic static data
+      let utilities = [];
+      
+      if (process.env.OPENAI_API_KEY) {
+        try {
+          const OpenAI = (await import('openai')).default;
+          const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-      const staticUtilities = [
-        {
-          category: "Internet",
-          provider: "AT&T Fiber",
-          phone: "1-800-288-2020",
-          description: "High-speed fiber internet with up to 5 Gig speeds",
-          website: "att.com",
-          referralUrl: "https://www.att.com/internet/fiber/",
-          services: ["Fiber Internet", "Streaming TV", "Phone Service"],
-          estimatedCost: "$55-80/month",
-          rating: 4.2,
-          availability: "Available in most areas"
+          const completion = await openai.chat.completions.create({
+            model: "gpt-4o",
+            messages: [{
+              role: "system",
+              content: "You are a utility service specialist. Provide accurate, real utility provider information for the specified location."
+            }, {
+              role: "user",
+              content: `Find ${utilityType || 'all utility'} providers for ${location}. Include electric, gas, water, internet, cable TV, and waste management. Provide real company names, accurate phone numbers, and official websites.`
+            }],
+            response_format: { type: "json_object" }
+          });
+
+          const response = completion.choices[0].message.content;
+          if (response) {
+            const aiData = JSON.parse(response);
+            utilities = aiData.utilities || aiData.providers || [];
+          }
+        } catch (error) {
+          console.error("OpenAI API error:", error);
         }
-      ];
+      }
+
+      // Provide minimal fallback only if no AI data
+      if (utilities.length === 0) {
+        utilities = [
+          {
+            category: "Internet",
+            provider: "Local Internet Provider",
+            phone: "Contact local directory",
+            description: "Contact local directory assistance for internet providers in your area",
+            website: "N/A",
+            referralUrl: "N/A",
+            services: ["Internet Service"],
+            estimatedCost: "Contact for pricing",
+            rating: 0,
+            availability: "Contact for availability"
+          }
+        ];
+      }
 
       res.json({
         success: true,
-        utilities: staticUtilities
+        utilities: utilities
       });
 
     } catch (error) {
