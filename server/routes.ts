@@ -228,52 +228,15 @@ function getPrograms(category: string): string[] {
 
 // Google Places API functions for live reviews
 async function searchGooglePlaces(searchQuery: string, location?: string): Promise<any> {
-  const baseUrl = 'https://maps.googleapis.com/maps/api/place/textsearch/json';
-  const query = location ? `${searchQuery} ${location}` : searchQuery;
-  const params = new URLSearchParams({
-    query: query.trim(),
-    key: process.env.GOOGLE_API_KEY!
-  });
-
-  try {
-    console.log('Making Google Places API request:', `${baseUrl}?${params}`);
-    const response = await fetch(`${baseUrl}?${params}`);
-    const data = await response.json();
-    
-    console.log('Google Places API response status:', data.status);
-    if (data.error_message) {
-      console.log('Google Places API error message:', data.error_message);
-    }
-    
-    if (data.status !== 'OK') {
-      console.error('Google Places API error:', data.status, data.error_message);
-      return [];
-    }
-    
-    console.log('Google Places API results count:', data.results?.length || 0);
-    return data.results || [];
-  } catch (error) {
-    console.error('Google Places search error:', error);
-    return [];
-  }
+  // API DISABLED FOR DEVELOPMENT - Using cached data
+  console.log('API DISABLED: Would search for:', searchQuery, location || '');
+  return [];
 }
 
 async function getPlaceDetails(placeId: string): Promise<any> {
-  const baseUrl = 'https://maps.googleapis.com/maps/api/place/details/json';
-  const params = new URLSearchParams({
-    place_id: placeId,
-    key: process.env.GOOGLE_API_KEY!,
-    fields: 'name,rating,reviews,formatted_phone_number,website,formatted_address,business_status,opening_hours,price_level,user_ratings_total'
-  });
-
-  try {
-    const response = await fetch(`${baseUrl}?${params}`);
-    const data = await response.json();
-    return data.result || null;
-  } catch (error) {
-    console.error('Google Places details error:', error);
-    return null;
-  }
+  // API DISABLED FOR DEVELOPMENT - Using cached data
+  console.log('API DISABLED: Would get details for place:', placeId);
+  return null;
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -326,15 +289,9 @@ Return response in JSON format:
 
 Focus on accuracy and specificity - include availability percentages, exact speeds/rates, connection technologies, and service limitations. Only include providers with actual infrastructure in ${location}.`;
 
-      const completion = await openai.chat.completions.create({
-        model: "gpt-4o",
-        messages: [{ role: "user", content: prompt }],
-        response_format: { type: "json_object" },
-        temperature: 0.3,
-        max_tokens: 3000
-      });
-
-      const aiResponse = JSON.parse(completion.choices[0].message.content || '{}');
+      // API DISABLED FOR DEVELOPMENT - Return empty response
+      console.log('OpenAI API DISABLED: Would call for location:', location);
+      const aiResponse = {};
       
       // Process and enhance the response
       let processedData: any = {};
@@ -420,56 +377,8 @@ Focus on accuracy and specificity - include availability percentages, exact spee
 
       let allCompanies: any[] = [];
 
-      // Find local moving companies using Google Places API
-      if (process.env.GOOGLE_API_KEY) {
-        const searchQueries = [
-          `moving companies ${fromCity} ${fromState}`,
-          `movers ${fromCity} ${fromState}`,
-          `interstate moving ${fromCity} ${fromState}`,
-          `moving services near ${fromCity} ${fromState}`
-        ];
-
-        for (const query of searchQueries) {
-          try {
-            const placesUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(query)}&key=${process.env.GOOGLE_API_KEY}`;
-            const placesResponse = await fetch(placesUrl);
-            const placesData = await placesResponse.json();
-            
-            if (placesData.results) {
-              for (const place of placesData.results.slice(0, 4)) {
-                const detailsUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${place.place_id}&fields=name,formatted_phone_number,website,rating,reviews,formatted_address,business_status&key=${process.env.GOOGLE_API_KEY}`;
-                const detailsResponse = await fetch(detailsUrl);
-                const detailsData = await detailsResponse.json();
-                
-                if (detailsData.result && detailsData.result.business_status === 'OPERATIONAL') {
-                  const company = {
-                    category: "Local Moving Companies",
-                    provider: detailsData.result.name,
-                    phone: detailsData.result.formatted_phone_number || "Contact for details",
-                    description: `Local moving company in ${fromCity}, ${fromState}`,
-                    website: detailsData.result.website || `https://www.google.com/search?q=${encodeURIComponent(detailsData.result.name)} moving company`,
-                    referralUrl: detailsData.result.website || `https://www.google.com/search?q=${encodeURIComponent(detailsData.result.name)} moving company`,
-                    affiliateCode: "",
-                    hours: "Contact for hours",
-                    rating: detailsData.result.rating || 0,
-                    services: ["Local Moving", "Interstate Moving"],
-                    estimatedCost: "Contact for estimate",
-                    availability: `Serves ${fromCity} area`,
-                    specialties: ["Local Moving", "Interstate Moving"],
-                    notes: `Google rating: ${detailsData.result.rating || 'Not rated'} | Address: ${detailsData.result.formatted_address || 'Contact for address'}`
-                  };
-                  
-                  if (!allCompanies.find(c => c.provider.toLowerCase() === company.provider.toLowerCase())) {
-                    allCompanies.push(company);
-                  }
-                }
-              }
-            }
-          } catch (error) {
-            console.error(`Error searching for: ${query}`, error);
-          }
-        }
-      }
+      // API DISABLED FOR DEVELOPMENT - Using cached data only
+      console.log('Google Places API DISABLED: Would search for moving companies in', fromCity, fromState);
 
       // Add major national carriers
       const nationalCarriers = [
