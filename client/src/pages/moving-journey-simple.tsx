@@ -124,69 +124,109 @@ export default function MovingJourney() {
   });
 
   const tasksQuery = useQuery({
-    queryKey: ['/api/project-tasks', (projectQuery.data as any)?.id],
-    enabled: !!(projectQuery.data as any)?.id,
+    queryKey: ['/api/project-tasks', projectQuery.data?.id],
+    enabled: !!projectQuery.data?.id,
     retry: false,
   });
 
   useEffect(() => {
-    // Clear any existing localStorage action plan to show the 4 core signs
-    localStorage.removeItem('aiActionPlan');
+    // Check for AI-generated project first
+    const currentProjectId = localStorage.getItem('currentProjectId');
     
-    // Always show the 4 core journey steps
-    const coreSteps: JourneyStep[] = [
-      {
-        id: 'moving-companies',
-        title: 'Find Moving Companies',
-        description: 'Get quotes from professional movers in your area',
-        week: 'Week 1-2',
-        tasks: ['Research moving companies', 'Get quotes', 'Compare services'],
-        route: '/moving-companies',
-        position: { x: 25, y: 45 },
-        signType: 'highway',
-        completed: (projectQuery.data as any)?.selectedMover ? true : false,
-        priority: 'high'
-      },
-      {
-        id: 'setup-utilities',
-        title: 'Setup Utilities',
-        description: 'Transfer or setup utilities at your new home',
-        week: 'Week 2-3',
-        tasks: ['Contact utility providers', 'Schedule transfers', 'Setup new services'],
-        route: '/utilities',
-        position: { x: 50, y: 35 },
-        signType: 'warning',
-        completed: false,
-        priority: 'high'
-      },
-      {
-        id: 'housing-services',
-        title: 'Housing & Local Services',
-        description: 'Find essential services in your new area',
-        week: 'Week 3-4',
-        tasks: ['Find local services', 'Register with providers', 'Update addresses'],
-        route: '/local-services',
-        position: { x: 75, y: 55 },
-        signType: 'info',
-        completed: false,
-        priority: 'medium'
-      },
-      {
-        id: 'final-preparations',
-        title: 'Final Preparations',
-        description: 'Complete your moving checklist and preparations',
-        week: 'Moving Week',
-        tasks: ['Final packing', 'Address changes', 'Moving day coordination'],
-        route: '/ai-assistant',
-        position: { x: 90, y: 40 },
-        signType: 'highway',
-        completed: false,
-        priority: 'high'
+    if (projectQuery.data && tasksQuery.data) {
+      // Use database project and tasks data
+      const project = projectQuery.data;
+      const tasks = tasksQuery.data || [];
+      
+      // Convert database tasks to journey steps
+      const steps: JourneyStep[] = tasks.map((task: any, index: number) => {
+        // Create curved path positions
+        const baseX = 20 + (index * 15);
+        const curveY = 50 + Math.sin(index * 0.8) * 20;
+        
+        // Determine sign type based on priority
+        const signType = task.priority === 'high' ? 'warning' : 
+                        task.priority === 'medium' ? 'highway' : 'info';
+        
+        return {
+          id: `task-${task.id}`,
+          title: task.title,
+          description: task.description,
+          week: task.timeframe || 'Week 1',
+          tasks: [task.description],
+          route: `/${task.taskType}` || '/dashboard',
+          position: { x: baseX, y: curveY },
+          signType: signType,
+          completed: task.status === 'completed',
+          priority: task.priority || 'medium'
+        };
+      });
+      
+      setJourneyData(steps);
+      
+      // Update localStorage for routing
+      if (project.fromAddress && project.toAddress) {
+        localStorage.setItem('aiFromLocation', project.fromAddress);
+        localStorage.setItem('aiToLocation', project.toAddress);
+        localStorage.setItem('aiMoveDate', project.moveDate || '');
       }
-    ];
-    
-    console.log('Setting all 4 core journey signs:', coreSteps);
-    setJourneyData(coreSteps);
+    } else {
+      // Fallback to localStorage data (legacy support)
+      const savedActionPlan = localStorage.getItem('aiActionPlan');
+      
+      if (savedActionPlan) {
+        const actionPlan = JSON.parse(savedActionPlan);
+        
+        // Convert action plan to journey steps
+        const steps: JourneyStep[] = actionPlan.map((action: any, index: number) => {
+          // Create curved path positions
+          const baseX = 20 + (index * 15);
+          const curveY = 50 + Math.sin(index * 0.8) * 20;
+          
+          // Determine sign type based on priority
+          const signType = action.priority === 'high' ? 'warning' : 
+                          action.priority === 'medium' ? 'highway' : 'info';
+          
+          return {
+            id: `action-${index}`,
+            title: action.title,
+            description: action.description,
+            week: action.timeframe,
+            tasks: [action.description],
+            route: action.route,
+            position: { x: baseX, y: curveY },
+            signType: signType,
+            completed: false,
+            priority: action.priority || 'medium'
+          };
+        });
+        
+        setJourneyData(steps);
+      } else {
+        // Create blank highway signs that await AI-generated content
+        const blankSignPositions = [
+          { x: 25, y: 45 },
+          { x: 45, y: 35 },
+          { x: 65, y: 55 },
+          { x: 85, y: 40 }
+        ];
+        
+        const blankSigns: JourneyStep[] = blankSignPositions.map((position, index) => ({
+          id: `blank-sign-${index + 1}`,
+          title: 'Generate Your Plan',
+          description: 'Use the AI Assistant to create your personalized moving timeline',
+          week: 'AI Planning',
+          tasks: ['Start with AI Assistant to populate this sign with your custom plan'],
+          route: '/ai-assistant',
+          position,
+          signType: 'info',
+          completed: false,
+          priority: 'medium'
+        }));
+        
+        setJourneyData(blankSigns);
+      }
+    }
   }, [projectQuery.data, tasksQuery.data]);
 
   const handleTaskClick = (step: JourneyStep, event?: any) => {
@@ -359,24 +399,25 @@ export default function MovingJourney() {
           const completedSteps = journeyData.filter(s => s.completed).length;
           const isCurrentStep = index === completedSteps && !step.completed;
           
-          console.log(`Rendering sign ${index}:`, step.title, step.id);
-          
-          // Show all signs (removed limit)
-          if (index >= 6) {
+          // Show only first 4 tasks as highway signs
+          if (index >= 4) {
             return null;
           }
           
-          // Position signs based on predefined locations
-          const signPositions = [
-            { left: '22%', top: '73%' },    // Sign 1 - Get Moving Quotes
-            { left: '75%', top: '65%' },    // Sign 2 - Set Up Utilities  
-            { left: '38%', top: '29%' },    // Sign 3 - Housing & Local Services
-            { left: '78%', top: '23%' },    // Sign 4 - Final Preparations
-            { left: '50%', top: '15%' },    // Sign 5 - Additional if needed
-            { left: '25%', top: '15%' }     // Sign 6 - Additional if needed
-          ];
-          
-          const position = signPositions[index] || { left: '50%', top: '50%' };
+          // Position four signs with different graphics
+          let position;
+          if (index === 0) {
+            position = { left: '22%', top: '73%' };    // Sign 1 - moved right 7% total and up 2%
+          } else if (index === 1) {
+            position = { left: '75%', top: '65%' };    // Sign 2 - moved 35% total right to other side of road
+          } else if (index === 2) {
+            position = { left: '38%', top: '29%' };    // Sign 3 - moved left 32% total and up 20% total
+          } else if (index === 3) {
+            position = { left: '78%', top: '23%' };    // Sign 4 - moved right 28% total and down 3%
+          } else {
+            // Hide remaining signs for now
+            return null;
+          }
           
           // Store original position
           signPositionsRef.current[step.id] = { left: position.left, top: position.top };

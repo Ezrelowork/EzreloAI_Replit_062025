@@ -439,11 +439,11 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
     
     // Header
     doc.setFontSize(20);
-    doc.setFont('helvetica', 'bold');
+    doc.setFont(undefined, 'bold');
     doc.text('Moving Estimate Questionnaire', 20, 30);
     
     doc.setFontSize(12);
-    doc.setFont('helvetica', 'normal');
+    doc.setFont(undefined, 'normal');
     doc.text('Complete this form to get accurate moving quotes from professionals', 20, 40);
     
     let yPosition = 60;
@@ -451,12 +451,12 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
     // Pre-filled information from moveData
     if (moveData.from || moveData.to || moveData.date) {
       doc.setFontSize(14);
-      doc.setFont('helvetica', 'bold');
+      doc.setFont(undefined, 'bold');
       doc.text('Your Moving Details:', 20, yPosition);
       yPosition += 15;
       
       doc.setFontSize(12);
-      doc.setFont('helvetica', 'normal');
+      doc.setFont(undefined, 'normal');
       
       if (moveData.from) {
         doc.text(`Current Location: ${moveData.from}`, 25, yPosition);
@@ -488,7 +488,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
     ];
     
     doc.setFontSize(14);
-    doc.setFont('helvetica', 'bold');
+    doc.setFont(undefined, 'bold');
     doc.text('Questions for Moving Companies:', 20, yPosition);
     yPosition += 15;
     
@@ -500,11 +500,11 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
       }
       
       doc.setFontSize(12);
-      doc.setFont('helvetica', 'bold');
+      doc.setFont(undefined, 'bold');
       doc.text(item.q, 20, yPosition);
       yPosition += 8;
       
-      doc.setFont('helvetica', 'normal');
+      doc.setFont(undefined, 'normal');
       doc.setFontSize(10);
       doc.text(item.detail, 25, yPosition);
       yPosition += 15;
@@ -520,7 +520,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
     // Add new page for additional notes
     doc.addPage();
     doc.setFontSize(14);
-    doc.setFont('helvetica', 'bold');
+    doc.setFont(undefined, 'bold');
     doc.text('Additional Notes & Special Requirements:', 20, 30);
     
     // Add lines for notes
@@ -532,7 +532,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
     // Footer
     yPosition = 270;
     doc.setFontSize(10);
-    doc.setFont('helvetica', 'italic');
+    doc.setFont(undefined, 'italic');
     doc.text('Tip: Having this information ready will help you get more accurate quotes faster!', 20, yPosition);
     
     // Save the PDF
@@ -549,11 +549,11 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
     
     // Header
     doc.setFontSize(20);
-    doc.setFont('helvetica', 'bold');
+    doc.setFont(undefined, 'bold');
     doc.text('Moving Estimate Questionnaire', 20, 30);
     
     doc.setFontSize(12);
-    doc.setFont('helvetica', 'normal');
+    doc.setFont(undefined, 'normal');
     doc.text('Completed form for accurate moving quotes', 20, 40);
     doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 20, 50);
     
@@ -584,11 +584,11 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
       }
       
       doc.setFontSize(12);
-      doc.setFont('helvetica', 'bold');
+      doc.setFont(undefined, 'bold');
       doc.text(item.label, 20, yPosition);
       yPosition += 8;
       
-      doc.setFont('helvetica', 'normal');
+      doc.setFont(undefined, 'normal');
       doc.setFontSize(11);
       const value = item.value || 'Not specified';
       const lines = doc.splitTextToSize(value, 170);
@@ -1302,7 +1302,29 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
             {canCompleteTask() ? "Complete" : "Complete Task First"}
           </Button>
           
-
+          <Button
+            onClick={() => {
+              const urlParams = new URLSearchParams(window.location.search);
+              const from = urlParams.get('from');
+              const to = urlParams.get('to');
+              const date = urlParams.get('date');
+              
+              let journeyUrl = '/moving-journey';
+              if (from || to || date) {
+                const params = new URLSearchParams();
+                if (from) params.set('from', from);
+                if (to) params.set('to', to);
+                if (date) params.set('date', date);
+                journeyUrl += `?${params.toString()}`;
+              }
+              
+              setLocation(journeyUrl);
+            }}
+            variant="outline"
+            className="border-blue-300 text-blue-700 hover:bg-blue-50 font-medium py-2 px-4 rounded-lg text-sm shadow-sm transition-all"
+          >
+            Return to Journey
+          </Button>
         </div>
 
 
@@ -1511,14 +1533,14 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                   )}
                   
                   {/* Questionnaire Summary */}
-                  {currentQuestionnaire ? (
+                  {currentQuestionnaire && (
                     <div className="p-3 bg-green-50 rounded border border-green-200">
                       <div className="text-xs text-green-700">
-                        <div className="font-medium">{Object.keys((currentQuestionnaire as any)?.majorItems || {}).length} items • {String((currentQuestionnaire as any)?.homeSize || '')}</div>
+                        <div className="font-medium">{Object.keys((currentQuestionnaire as any)?.majorItems || {}).length} items • {(currentQuestionnaire as any)?.homeSize}</div>
                         <div>Last updated: {new Date((currentQuestionnaire as any)?.updatedAt).toLocaleDateString()}</div>
                       </div>
                     </div>
-                  ) : null}
+                  )}
                   
                   <div className="bg-purple-50 p-3 rounded">
                     <div className="text-sm font-medium text-purple-900 mb-2">Key Information Needed:</div>

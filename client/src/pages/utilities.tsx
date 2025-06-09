@@ -67,40 +67,6 @@ export default function Utilities() {
   const [hasCompletedActions, setHasCompletedActions] = useState(false);
   const [selectedProviders, setSelectedProviders] = useState<UtilityProvider[]>([]);
 
-  // Get current project data to auto-fill destination address
-  const { data: currentProject } = useQuery({
-    queryKey: ["/api/current-project"],
-  });
-
-  // Auto-fill destination address from project data
-  useEffect(() => {
-    if (currentProject && typeof currentProject === 'object' && userAddress.address === "") {
-      const project = currentProject as any;
-      console.log('Current project data:', project);
-      
-      if (project?.toAddress && typeof project.toAddress === 'string') {
-        // Parse the destination address
-        const addressParts = project.toAddress.split(',');
-        if (addressParts.length >= 2) {
-          const street = addressParts[0]?.trim() || "";
-          const city = addressParts[1]?.trim() || "";
-          const stateZip = addressParts[2]?.trim() || "";
-          const [state, zip] = stateZip.split(' ');
-          
-          setUserAddress({
-            address: street,
-            city: city,
-            state: state || "",
-            zip: zip || "",
-            moveDate: project.moveDate || ""
-          });
-          
-          console.log('Auto-filled address from project:', { street, city, state, zip });
-        }
-      }
-    }
-  }, [currentProject, userAddress.address]);
-
   // Determine if task can be marked complete based on user actions
   const canCompleteTask = () => {
     return providers.length > 0 && (hasCompletedActions || selectedProviders.length > 0);
@@ -118,32 +84,18 @@ export default function Utilities() {
   // Search for utility providers
   const providerMutation = useMutation({
     mutationFn: async (request: UtilityRequest) => {
-      console.log('Searching for providers with request:', request);
       const response = await apiRequest("POST", "/api/utility-providers", request);
-      const data = await response.json();
-      console.log('Provider search response:', data);
-      return data;
+      return await response.json();
     },
     onSuccess: (data) => {
-      console.log('Provider search success:', data);
       const providerList = data?.providers || [];
       setProviders(providerList);
-      
-      if (providerList.length > 0) {
-        toast({
-          title: "Providers Found",
-          description: `Found ${providerList.length} ${selectedTab} providers in your area`,
-        });
-      } else {
-        toast({
-          title: "No Providers Found",
-          description: "No providers returned for this location. Try a different search or contact support.",
-          variant: "destructive",
-        });
-      }
+      toast({
+        title: "Providers Found",
+        description: `Found ${providerList.length} ${selectedTab} providers in your area`,
+      });
     },
     onError: (error) => {
-      console.error('Provider search error:', error);
       toast({
         title: "Search Error",
         description: "Unable to find providers. Please check your address and try again.",
