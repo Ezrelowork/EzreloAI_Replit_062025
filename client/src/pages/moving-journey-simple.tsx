@@ -130,10 +130,10 @@ export default function MovingJourney() {
   });
 
   useEffect(() => {
-    // Check for AI-generated project first
-    const currentProjectId = localStorage.getItem('currentProjectId');
+    // Clear any existing localStorage action plan to show the 4 core signs
+    localStorage.removeItem('aiActionPlan');
     
-    // Always show the 4 core journey steps regardless of data source
+    // Always show the 4 core journey steps
     const coreSteps: JourneyStep[] = [
       {
         id: 'moving-companies',
@@ -185,101 +185,8 @@ export default function MovingJourney() {
       }
     ];
     
-    if (projectQuery.data) {
-      // Use database project data for additional tasks
-      const project = projectQuery.data as any;
-      const tasks = (tasksQuery.data as any) || [];
-      
-      // Add any additional database tasks as extra signs
-      const additionalSteps: JourneyStep[] = Array.isArray(tasks) ? tasks
-        .filter((task: any) => !['moving-companies', 'setup-utilities', 'housing-services', 'final-preparations'].includes(task.taskType))
-        .map((task: any, index: number) => {
-          const baseX = 25 + ((index + 4) * 15);
-          const curveY = 45 + Math.sin((index + 4) * 0.8) * 15;
-          
-          const signType = task.priority === 'high' ? 'warning' : 
-                          task.priority === 'medium' ? 'highway' : 'info';
-          
-          return {
-            id: `task-${task.id}`,
-            title: task.title,
-            description: task.description,
-            week: task.timeframe || 'Week 4+',
-            tasks: [task.description],
-            route: `/${task.taskType}` || '/dashboard',
-            position: { x: Math.min(baseX, 90), y: curveY },
-            signType: signType,
-            completed: task.status === 'completed',
-            priority: task.priority || 'medium'
-          };
-        }) : [];
-      
-      console.log('Setting journey data with project:', [...coreSteps, ...additionalSteps]);
-      setJourneyData([...coreSteps, ...additionalSteps]);
-      
-      // Update localStorage for routing
-      if (project?.fromAddress && project?.toAddress) {
-        localStorage.setItem('aiFromLocation', project.fromAddress);
-        localStorage.setItem('aiToLocation', project.toAddress);
-        localStorage.setItem('aiMoveDate', project.moveDate || '');
-      }
-    } else {
-      // Fallback to localStorage data (legacy support)
-      const savedActionPlan = localStorage.getItem('aiActionPlan');
-      
-      if (savedActionPlan) {
-        const actionPlan = JSON.parse(savedActionPlan);
-        
-        // Convert action plan to journey steps
-        const steps: JourneyStep[] = actionPlan.map((action: any, index: number) => {
-          // Create curved path positions
-          const baseX = 20 + (index * 15);
-          const curveY = 50 + Math.sin(index * 0.8) * 20;
-          
-          // Determine sign type based on priority
-          const signType = action.priority === 'high' ? 'warning' : 
-                          action.priority === 'medium' ? 'highway' : 'info';
-          
-          return {
-            id: `action-${index}`,
-            title: action.title,
-            description: action.description,
-            week: action.timeframe,
-            tasks: [action.description],
-            route: action.route,
-            position: { x: baseX, y: curveY },
-            signType: signType,
-            completed: false,
-            priority: action.priority || 'medium'
-          };
-        });
-        
-        setJourneyData(steps);
-      } else {
-        // Create blank highway signs that await AI-generated content
-        const blankSignPositions = [
-          { x: 25, y: 45 },
-          { x: 45, y: 35 },
-          { x: 65, y: 55 },
-          { x: 85, y: 40 }
-        ];
-        
-        const blankSigns: JourneyStep[] = blankSignPositions.map((position, index) => ({
-          id: `blank-sign-${index + 1}`,
-          title: 'Generate Your Plan',
-          description: 'Use the AI Assistant to create your personalized moving timeline',
-          week: 'AI Planning',
-          tasks: ['Start with AI Assistant to populate this sign with your custom plan'],
-          route: '/ai-assistant',
-          position,
-          signType: 'info',
-          completed: false,
-          priority: 'medium'
-        }));
-        
-        setJourneyData(blankSigns);
-      }
-    }
+    console.log('Setting all 4 core journey signs:', coreSteps);
+    setJourneyData(coreSteps);
   }, [projectQuery.data, tasksQuery.data]);
 
   const handleTaskClick = (step: JourneyStep, event?: any) => {
