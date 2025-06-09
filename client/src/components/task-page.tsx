@@ -1302,29 +1302,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
             {canCompleteTask() ? "Complete" : "Complete Task First"}
           </Button>
           
-          <Button
-            onClick={() => {
-              const urlParams = new URLSearchParams(window.location.search);
-              const from = urlParams.get('from');
-              const to = urlParams.get('to');
-              const date = urlParams.get('date');
-              
-              let journeyUrl = '/moving-journey';
-              if (from || to || date) {
-                const params = new URLSearchParams();
-                if (from) params.set('from', from);
-                if (to) params.set('to', to);
-                if (date) params.set('date', date);
-                journeyUrl += `?${params.toString()}`;
-              }
-              
-              setLocation(journeyUrl);
-            }}
-            variant="outline"
-            className="border-blue-300 text-blue-700 hover:bg-blue-50 font-medium py-2 px-4 rounded-lg text-sm shadow-sm transition-all"
-          >
-            Return to Journey
-          </Button>
+
         </div>
 
 
