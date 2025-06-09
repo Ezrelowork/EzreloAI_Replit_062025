@@ -410,6 +410,100 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Utility providers endpoint (used by utilities page)
+  app.post("/api/utility-providers", async (req, res) => {
+    try {
+      const { city, state, zip, utilityType } = req.body;
+      
+      if (!city || !state) {
+        return res.status(400).json({ error: "City and state are required" });
+      }
+
+      const fullAddress = zip ? `${city}, ${state} ${zip}` : `${city}, ${state}`;
+      let providers = [];
+
+      // Use OpenAI if available for real provider data
+      if (process.env.OPENAI_API_KEY) {
+        try {
+          const OpenAI = (await import('openai')).default;
+          const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+          const prompt = `What ${utilityType || 'utility'} providers are available at this specific address: ${fullAddress}?
+
+Please provide a comprehensive list of actual ${utilityType || 'utility'} providers that serve this exact location. Include only real companies that actually provide service to this area.
+
+Return the response in JSON format with this structure:
+{
+  "providers": [
+    {
+      "provider": "Company Name",
+      "phone": "Phone number", 
+      "website": "Official website URL",
+      "description": "Brief description of services and coverage",
+      "estimatedCost": "Cost range",
+      "availability": "Service availability details",
+      "setupFee": "Setup/installation fees if any",
+      "connectionTime": "How long to get service",
+      "services": ["Service 1", "Service 2", "Service 3"]
+    }
+  ]
+}
+
+Focus on accuracy - only include providers that actually serve this specific location.`;
+
+          const completion = await openai.chat.completions.create({
+            model: "gpt-4o",
+            messages: [
+              { 
+                role: "system", 
+                content: "You are an expert on utility and service providers with comprehensive knowledge of service areas, coverage maps, and availability by location. Provide only accurate, real provider information for specific addresses." 
+              },
+              { role: "user", content: prompt }
+            ],
+            response_format: { type: "json_object" },
+            temperature: 0.1,
+            max_tokens: 2000
+          });
+
+          const aiResponse = JSON.parse(completion.choices[0].message.content || '{}');
+          
+          providers = (aiResponse.providers || []).map((provider: any) => ({
+            ...provider,
+            referralUrl: provider.website || `https://www.google.com/search?q=${encodeURIComponent(provider.provider)}`,
+            affiliateCode: "",
+            rating: provider.rating || 4.0
+          }));
+
+        } catch (error) {
+          console.error("OpenAI API error:", error);
+        }
+      }
+
+      // If no providers found, return informative message
+      if (providers.length === 0) {
+        return res.json({
+          providers: [],
+          location: fullAddress,
+          utilityType,
+          message: "Please ensure you have valid API access configured, or contact support for assistance finding providers in your area."
+        });
+      }
+
+      res.json({ 
+        providers,
+        location: fullAddress,
+        utilityType 
+      });
+
+    } catch (error) {
+      console.error("Error finding utility providers:", error);
+      res.status(500).json({ 
+        error: "Failed to find utility providers",
+        providers: []
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
