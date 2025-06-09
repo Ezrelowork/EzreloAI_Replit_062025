@@ -439,11 +439,11 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
     
     // Header
     doc.setFontSize(20);
-    doc.setFont(undefined, 'bold');
+    doc.setFont('helvetica', 'bold');
     doc.text('Moving Estimate Questionnaire', 20, 30);
     
     doc.setFontSize(12);
-    doc.setFont(undefined, 'normal');
+    doc.setFont('helvetica', 'normal');
     doc.text('Complete this form to get accurate moving quotes from professionals', 20, 40);
     
     let yPosition = 60;
@@ -451,12 +451,12 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
     // Pre-filled information from moveData
     if (moveData.from || moveData.to || moveData.date) {
       doc.setFontSize(14);
-      doc.setFont(undefined, 'bold');
+      doc.setFont('helvetica', 'bold');
       doc.text('Your Moving Details:', 20, yPosition);
       yPosition += 15;
       
       doc.setFontSize(12);
-      doc.setFont(undefined, 'normal');
+      doc.setFont('helvetica', 'normal');
       
       if (moveData.from) {
         doc.text(`Current Location: ${moveData.from}`, 25, yPosition);
@@ -488,7 +488,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
     ];
     
     doc.setFontSize(14);
-    doc.setFont(undefined, 'bold');
+    doc.setFont('helvetica', 'bold');
     doc.text('Questions for Moving Companies:', 20, yPosition);
     yPosition += 15;
     
@@ -500,11 +500,11 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
       }
       
       doc.setFontSize(12);
-      doc.setFont(undefined, 'bold');
+      doc.setFont('helvetica', 'bold');
       doc.text(item.q, 20, yPosition);
       yPosition += 8;
       
-      doc.setFont(undefined, 'normal');
+      doc.setFont('helvetica', 'normal');
       doc.setFontSize(10);
       doc.text(item.detail, 25, yPosition);
       yPosition += 15;
@@ -520,7 +520,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
     // Add new page for additional notes
     doc.addPage();
     doc.setFontSize(14);
-    doc.setFont(undefined, 'bold');
+    doc.setFont('helvetica', 'bold');
     doc.text('Additional Notes & Special Requirements:', 20, 30);
     
     // Add lines for notes
@@ -532,7 +532,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
     // Footer
     yPosition = 270;
     doc.setFontSize(10);
-    doc.setFont(undefined, 'italic');
+    doc.setFont('helvetica', 'italic');
     doc.text('Tip: Having this information ready will help you get more accurate quotes faster!', 20, yPosition);
     
     // Save the PDF
@@ -549,11 +549,11 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
     
     // Header
     doc.setFontSize(20);
-    doc.setFont(undefined, 'bold');
+    doc.setFont('helvetica', 'bold');
     doc.text('Moving Estimate Questionnaire', 20, 30);
     
     doc.setFontSize(12);
-    doc.setFont(undefined, 'normal');
+    doc.setFont('helvetica', 'normal');
     doc.text('Completed form for accurate moving quotes', 20, 40);
     doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 20, 50);
     
@@ -584,11 +584,11 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
       }
       
       doc.setFontSize(12);
-      doc.setFont(undefined, 'bold');
+      doc.setFont('helvetica', 'bold');
       doc.text(item.label, 20, yPosition);
       yPosition += 8;
       
-      doc.setFont(undefined, 'normal');
+      doc.setFont('helvetica', 'normal');
       doc.setFontSize(11);
       const value = item.value || 'Not specified';
       const lines = doc.splitTextToSize(value, 170);
@@ -1514,7 +1514,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                   {currentQuestionnaire && (
                     <div className="p-3 bg-green-50 rounded border border-green-200">
                       <div className="text-xs text-green-700">
-                        <div className="font-medium">{Object.keys((currentQuestionnaire as any)?.majorItems || {}).length} items • {(currentQuestionnaire as any)?.homeSize}</div>
+                        <div className="font-medium">{Object.keys((currentQuestionnaire as any)?.majorItems || {}).length} items • {String((currentQuestionnaire as any)?.homeSize || '')}</div>
                         <div>Last updated: {new Date((currentQuestionnaire as any)?.updatedAt).toLocaleDateString()}</div>
                       </div>
                     </div>
