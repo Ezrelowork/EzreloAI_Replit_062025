@@ -133,36 +133,76 @@ export default function MovingJourney() {
     // Check for AI-generated project first
     const currentProjectId = localStorage.getItem('currentProjectId');
     
-    if (projectQuery.data && tasksQuery.data) {
-      // Use database project and tasks data
+    if (projectQuery.data) {
+      // Use database project data
       const project = projectQuery.data;
       const tasks = tasksQuery.data || [];
       
-      // Convert database tasks to journey steps
-      const steps: JourneyStep[] = tasks.map((task: any, index: number) => {
-        // Create curved path positions
-        const baseX = 20 + (index * 15);
-        const curveY = 50 + Math.sin(index * 0.8) * 20;
-        
-        // Determine sign type based on priority
-        const signType = task.priority === 'high' ? 'warning' : 
-                        task.priority === 'medium' ? 'highway' : 'info';
-        
-        return {
-          id: `task-${task.id}`,
-          title: task.title,
-          description: task.description,
-          week: task.timeframe || 'Week 1',
-          tasks: [task.description],
-          route: `/${task.taskType}` || '/dashboard',
-          position: { x: baseX, y: curveY },
-          signType: signType,
-          completed: task.status === 'completed',
-          priority: task.priority || 'medium'
-        };
-      });
+      // Always show core journey steps
+      const coreSteps: JourneyStep[] = [
+        {
+          id: 'moving-companies',
+          title: 'Find Moving Companies',
+          description: 'Get quotes from professional movers in your area',
+          week: 'Week 1-2',
+          tasks: ['Research moving companies', 'Get quotes', 'Compare services'],
+          route: '/moving-companies',
+          position: { x: 25, y: 45 },
+          signType: 'highway',
+          completed: project.selectedMover ? true : false,
+          priority: 'high'
+        },
+        {
+          id: 'setup-utilities',
+          title: 'Setup Utilities',
+          description: 'Transfer or setup utilities at your new home',
+          week: 'Week 2-3',
+          tasks: ['Contact utility providers', 'Schedule transfers', 'Setup new services'],
+          route: '/utilities',
+          position: { x: 50, y: 35 },
+          signType: 'warning',
+          completed: false,
+          priority: 'high'
+        },
+        {
+          id: 'housing-services',
+          title: 'Housing & Local Services',
+          description: 'Find essential services in your new area',
+          week: 'Week 3-4',
+          tasks: ['Find local services', 'Register with providers', 'Update addresses'],
+          route: '/local-services',
+          position: { x: 75, y: 55 },
+          signType: 'info',
+          completed: false,
+          priority: 'medium'
+        }
+      ];
       
-      setJourneyData(steps);
+      // Add any additional database tasks as extra signs
+      const additionalSteps: JourneyStep[] = tasks
+        .filter((task: any) => !['moving-companies', 'setup-utilities', 'housing-services'].includes(task.taskType))
+        .map((task: any, index: number) => {
+          const baseX = 25 + ((index + 3) * 15);
+          const curveY = 45 + Math.sin((index + 3) * 0.8) * 15;
+          
+          const signType = task.priority === 'high' ? 'warning' : 
+                          task.priority === 'medium' ? 'highway' : 'info';
+          
+          return {
+            id: `task-${task.id}`,
+            title: task.title,
+            description: task.description,
+            week: task.timeframe || 'Week 4+',
+            tasks: [task.description],
+            route: `/${task.taskType}` || '/dashboard',
+            position: { x: Math.min(baseX, 90), y: curveY },
+            signType: signType,
+            completed: task.status === 'completed',
+            priority: task.priority || 'medium'
+          };
+        });
+      
+      setJourneyData([...coreSteps, ...additionalSteps]);
       
       // Update localStorage for routing
       if (project.fromAddress && project.toAddress) {
