@@ -175,6 +175,18 @@ export default function MovingJourney() {
           signType: 'info',
           completed: false,
           priority: 'medium'
+        },
+        {
+          id: 'final-preparations',
+          title: 'Final Preparations',
+          description: 'Complete your moving checklist and preparations',
+          week: 'Moving Week',
+          tasks: ['Final packing', 'Address changes', 'Moving day coordination'],
+          route: '/ai-assistant',
+          position: { x: 90, y: 40 },
+          signType: 'highway',
+          completed: false,
+          priority: 'high'
         }
       ];
       
