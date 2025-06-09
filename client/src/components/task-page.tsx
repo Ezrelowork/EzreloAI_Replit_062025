@@ -1511,14 +1511,14 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                   )}
                   
                   {/* Questionnaire Summary */}
-                  {currentQuestionnaire && (
+                  {currentQuestionnaire ? (
                     <div className="p-3 bg-green-50 rounded border border-green-200">
                       <div className="text-xs text-green-700">
                         <div className="font-medium">{Object.keys((currentQuestionnaire as any)?.majorItems || {}).length} items • {String((currentQuestionnaire as any)?.homeSize || '')}</div>
                         <div>Last updated: {new Date((currentQuestionnaire as any)?.updatedAt).toLocaleDateString()}</div>
                       </div>
                     </div>
-                  )}
+                  ) : null}
                   
                   <div className="bg-purple-50 p-3 rounded">
                     <div className="text-sm font-medium text-purple-900 mb-2">Key Information Needed:</div>
