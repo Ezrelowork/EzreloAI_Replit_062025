@@ -440,28 +440,11 @@ export default function MovingCompanies() {
                 onClick={() => {
                   if (canCompleteTask()) {
                     toast({
-                      title: "Moving Company Task Completed!",
-                      description: "Returning to your moving journey...",
+                      title: "Moving Company Search Complete",
+                      description: selectedMover 
+                        ? "Moving company selected and ready to proceed" 
+                        : "Moving quotes requested from selected companies",
                     });
-                    
-                    // Navigate back to journey with preserved context
-                    setTimeout(() => {
-                      const urlParams = new URLSearchParams(window.location.search);
-                      const from = urlParams.get('from');
-                      const to = urlParams.get('to');
-                      const date = urlParams.get('date');
-                      
-                      let journeyUrl = '/moving-journey';
-                      if (from || to || date) {
-                        const params = new URLSearchParams();
-                        if (from) params.set('from', from);
-                        if (to) params.set('to', to);
-                        if (date) params.set('date', date);
-                        journeyUrl += `?${params.toString()}`;
-                      }
-                      
-                      window.location.href = journeyUrl;
-                    }, 1000);
                   }
                 }}
                 disabled={!canCompleteTask()}
@@ -475,29 +458,7 @@ export default function MovingCompanies() {
                 {canCompleteTask() ? "Complete Moving Company Search" : "Request Quotes or Select Mover First"}
               </Button>
               
-              <Button
-                onClick={() => {
-                  const urlParams = new URLSearchParams(window.location.search);
-                  const from = urlParams.get('from');
-                  const to = urlParams.get('to');
-                  const date = urlParams.get('date');
-                  
-                  let journeyUrl = '/moving-journey';
-                  if (from || to || date) {
-                    const params = new URLSearchParams();
-                    if (from) params.set('from', from);
-                    if (to) params.set('to', to);
-                    if (date) params.set('date', date);
-                    journeyUrl += `?${params.toString()}`;
-                  }
-                  
-                  window.location.href = journeyUrl;
-                }}
-                variant="outline"
-                className="border-blue-300 text-blue-700 hover:bg-blue-50 font-medium py-2 px-4 rounded-lg text-sm shadow-sm transition-all"
-              >
-                Return to Journey
-              </Button>
+
             </div>
           </div>
         )}
