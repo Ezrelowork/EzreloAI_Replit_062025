@@ -143,7 +143,7 @@ export default function MovingJourney() {
 
   useEffect(() => {
     console.log('Journey data setup running...');
-    
+
     try {
       // Always check localStorage first for AI-generated action plan
       const savedActionPlan = localStorage.getItem('aiActionPlan');
@@ -189,7 +189,7 @@ export default function MovingJourney() {
       // Fallback to default signs if no saved data or parsing failed
       console.log('Using default highway signs');
       setJourneyData(getDefaultSigns());
-      
+
     } catch (error) {
       console.error('Error in journey data setup:', error);
       // Ensure we always have some journey data
@@ -678,3 +678,5 @@ export default function MovingJourney() {
     </div>
   );
 }
+
+const handleTaskClick replacement updates routing logic to include '/change-of-address' for Sign 3 related tasks.

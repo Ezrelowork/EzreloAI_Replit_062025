@@ -8,6 +8,7 @@ import { PageTransition } from "@/components/page-transition";
 import Landing from "@/pages/landing";
 import Analytics from "@/pages/analytics";
 import MovingChecklist from "@/pages/moving-checklist";
+import ChangeOfAddress from "@/pages/change-of-address";
 import RelocationHub from "@/pages/relocation-hub-simple";
 import Dashboard from "@/pages/dashboard";
 import Utilities from "@/pages/utilities";
@@ -22,7 +23,7 @@ import { TaskPage } from "@/components/task-page";
 
 function Navigation() {
   const [location] = useLocation();
-  
+
   return (
     <nav className="bg-white border-b border-gray-200 px-6 py-4">
       <div className="flex justify-center items-center max-w-7xl mx-auto">
@@ -57,6 +58,7 @@ function Router() {
           <Route path="/local-services" component={LocalServices} />
           <Route path="/documentation" component={Documentation} />
           <Route path="/moving-checklist" component={MovingChecklist} />
+          <Route path="/change-of-address" component={ChangeOfAddress} />
           <Route path="/analytics" component={Analytics} />
           <Route path="/logo-showcase" component={LogoShowcase} />
           <Route path="/task" component={() => {
