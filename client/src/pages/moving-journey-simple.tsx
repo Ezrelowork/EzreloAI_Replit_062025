@@ -43,7 +43,7 @@ interface JourneyStep {
 // Helper function to get task icon
 const getTaskIcon = (taskTitle: string) => {
   const title = taskTitle.toLowerCase();
-  
+
   if (title.includes('moving') || title.includes('truck') || title.includes('mover')) return Truck;
   if (title.includes('pack') || title.includes('box') || title.includes('organization')) return Package;
   if (title.includes('home') || title.includes('house') || title.includes('real estate')) return Home;
@@ -52,13 +52,13 @@ const getTaskIcon = (taskTitle: string) => {
   if (title.includes('medical') || title.includes('health') || title.includes('doctor') || title.includes('prescription')) return Heart;
   if (title.includes('school') || title.includes('education') || title.includes('kids') || title.includes('children')) return GraduationCap;
   if (title.includes('bank') || title.includes('financial') || title.includes('credit') || title.includes('loan')) return DollarSign;
-  
+
   return CheckCircle;
 };
 
 const getCategoryFromTask = (taskTitle: string): string => {
   const title = taskTitle.toLowerCase();
-  
+
   if (title.includes('moving') || title.includes('truck') || title.includes('mover')) return 'moving';
   if (title.includes('pack') || title.includes('box') || title.includes('organization')) return 'packing';
   if (title.includes('home') || title.includes('house') || title.includes('real estate')) return 'housing';
@@ -67,7 +67,7 @@ const getCategoryFromTask = (taskTitle: string): string => {
   if (title.includes('medical') || title.includes('health') || title.includes('doctor') || title.includes('prescription')) return 'medical';
   if (title.includes('school') || title.includes('education') || title.includes('kids') || title.includes('children')) return 'education';
   if (title.includes('bank') || title.includes('financial') || title.includes('credit') || title.includes('loan')) return 'financial';
-  
+
   return 'general';
 };
 
@@ -79,7 +79,7 @@ export default function MovingJourney() {
   const { toast } = useToast();
   const taskCardRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const signPositionsRef = useRef<{ [key: string]: { left: string; top: string } }>({});
-  
+
   // Store original sign positions and force reset after zoom out
   useEffect(() => {
     if (!isZoomed && !zoomOrigin) {
@@ -96,7 +96,7 @@ export default function MovingJourney() {
             signElement.style.transformOrigin = 'center';
           }
         });
-        
+
         // Reset container
         const container = document.querySelector('.relative.max-w-7xl') as HTMLElement;
         if (container) {
@@ -132,22 +132,22 @@ export default function MovingJourney() {
   useEffect(() => {
     // Check for AI-generated project first
     const currentProjectId = localStorage.getItem('currentProjectId');
-    
+
     if (projectQuery.data && tasksQuery.data) {
       // Use database project and tasks data
       const project = projectQuery.data;
       const tasks = tasksQuery.data || [];
-      
+
       // Convert database tasks to journey steps
       const steps: JourneyStep[] = tasks.map((task: any, index: number) => {
         // Create curved path positions
         const baseX = 20 + (index * 15);
         const curveY = 50 + Math.sin(index * 0.8) * 20;
-        
+
         // Determine sign type based on priority
         const signType = task.priority === 'high' ? 'warning' : 
                         task.priority === 'medium' ? 'highway' : 'info';
-        
+
         return {
           id: `task-${task.id}`,
           title: task.title,
@@ -161,9 +161,9 @@ export default function MovingJourney() {
           priority: task.priority || 'medium'
         };
       });
-      
+
       setJourneyData(steps);
-      
+
       // Update localStorage for routing
       if (project.fromAddress && project.toAddress) {
         localStorage.setItem('aiFromLocation', project.fromAddress);
@@ -173,34 +173,34 @@ export default function MovingJourney() {
     } else {
       // Fallback to localStorage data (legacy support)
       const savedActionPlan = localStorage.getItem('aiActionPlan');
-      
+
       if (savedActionPlan) {
         const actionPlan = JSON.parse(savedActionPlan);
-        
-        // Convert action plan to journey steps
+
+        // Transform action plan into journey steps with road positions
         const steps: JourneyStep[] = actionPlan.map((action: any, index: number) => {
-          // Create curved path positions
-          const baseX = 20 + (index * 15);
-          const curveY = 50 + Math.sin(index * 0.8) * 20;
-          
-          // Determine sign type based on priority
-          const signType = action.priority === 'high' ? 'warning' : 
-                          action.priority === 'medium' ? 'highway' : 'info';
-          
+          let title = action.task || action.title || `Task ${index + 1}`;
+          let description = action.details || action.description || 'Complete this moving task';
+
+          // Customize the first sign to be "Moving and Storage"
+          if (index === 0) {
+            title = "Moving and Storage";
+            description = "Find moving companies and storage solutions for your relocation";
+          }
+
           return {
             id: `action-${index}`,
-            title: action.title,
-            description: action.description,
-            week: action.timeframe,
-            tasks: [action.description],
-            route: action.route,
-            position: { x: baseX, y: curveY },
-            signType: signType,
+            title: title,
+            description: description,
+            week: action.timeframe || action.week || `Week ${Math.floor(index / 2) + 1}`,
+            priority: action.priority || (index < 2 ? 'high' : index < 4 ? 'medium' : 'low'),
             completed: false,
-            priority: action.priority || 'medium'
+            route: action.route,
+            position: { x: 20 + (index * 15), y: 50 + Math.sin(index * 0.8) * 20 }, // Replicated position logic
+            signType: action.priority === 'high' ? 'warning' : action.priority === 'medium' ? 'highway' : 'info', // Replicated signType logic
           };
         });
-        
+
         setJourneyData(steps);
       } else {
         // Create blank highway signs that await AI-generated content
@@ -210,7 +210,7 @@ export default function MovingJourney() {
           { x: 65, y: 55 },
           { x: 85, y: 40 }
         ];
-        
+
         const blankSigns: JourneyStep[] = blankSignPositions.map((position, index) => ({
           id: `blank-sign-${index + 1}`,
           title: 'Generate Your Plan',
@@ -223,7 +223,7 @@ export default function MovingJourney() {
           completed: false,
           priority: 'medium'
         }));
-        
+
         setJourneyData(blankSigns);
       }
     }
@@ -235,12 +235,12 @@ export default function MovingJourney() {
       const element = event.target as HTMLElement;
       element.style.transform = 'scale(0.95)';
       element.style.transition = 'transform 0.2s ease';
-      
+
       setTimeout(() => {
         element.style.transform = 'scale(1)';
       }, 200);
     }
-    
+
     // Direct navigation to task page instead of modal
     handleStartTask(step);
   };
@@ -248,7 +248,7 @@ export default function MovingJourney() {
   const handleCompleteTask = (taskId: string) => {
     // Find the completed task
     const completedTask = journeyData.find(step => step.id === taskId);
-    
+
     // Mark task as completed with celebration
     setJourneyData(prev => 
       prev.map(step => 
@@ -257,7 +257,7 @@ export default function MovingJourney() {
           : step
       )
     );
-    
+
     // Show success notification
     if (completedTask) {
       toast({
@@ -266,7 +266,7 @@ export default function MovingJourney() {
         duration: 3000,
       });
     }
-    
+
     // Visual celebration effect
     const taskElement = taskCardRefs.current[taskId];
     if (taskElement) {
@@ -284,14 +284,14 @@ export default function MovingJourney() {
     const fromParam = localStorage.getItem('aiFromLocation');
     const toParam = localStorage.getItem('aiToLocation');
     const dateParam = localStorage.getItem('aiMoveDate');
-    
+
     // Intelligent routing based on task content
     const taskLower = step.title.toLowerCase();
     const descLower = step.description.toLowerCase();
     const combined = `${taskLower} ${descLower}`;
-    
+
     let targetRoute = step.route;
-    
+
     // Override route based on task content for better UX
     if (combined.includes('mover') || combined.includes('moving') || combined.includes('truck') || combined.includes('quote')) {
       targetRoute = '/task';
@@ -307,23 +307,23 @@ export default function MovingJourney() {
     } else if (combined.includes('pack') || combined.includes('organize') || combined.includes('checklist')) {
       targetRoute = '/moving-checklist';
     }
-    
+
     // Build query params for context preservation
     const params = new URLSearchParams();
     if (fromParam) params.set('from', fromParam);
     if (toParam) params.set('to', toParam);
     if (dateParam) params.set('date', dateParam);
-    
+
     // Add task details for the task page
     params.set('taskId', step.id);
     params.set('taskTitle', step.title);
     params.set('taskDescription', step.description);
     params.set('taskPriority', step.priority);
     params.set('taskWeek', step.week);
-    
+
     const queryString = params.toString();
     const finalRoute = queryString ? `${targetRoute}?${queryString}` : targetRoute;
-    
+
     setLocation(finalRoute);
   };
 
@@ -362,7 +362,7 @@ export default function MovingJourney() {
                 <p className="text-sm text-gray-600">Your personalized step-by-step relocation roadmap</p>
               </div>
             </div>
-            
+
             {/* Progress Tracker in Header */}
             <div className="flex items-center">
               <ProgressTracker 
@@ -398,12 +398,12 @@ export default function MovingJourney() {
           const IconComponent = getTaskIcon(step.title);
           const completedSteps = journeyData.filter(s => s.completed).length;
           const isCurrentStep = index === completedSteps && !step.completed;
-          
+
           // Show only first 4 tasks as highway signs
           if (index >= 4) {
             return null;
           }
-          
+
           // Position four signs with different graphics
           let position;
           if (index === 0) {
@@ -418,10 +418,10 @@ export default function MovingJourney() {
             // Hide remaining signs for now
             return null;
           }
-          
+
           // Store original position
           signPositionsRef.current[step.id] = { left: position.left, top: position.top };
-          
+
           return (
             <div
               key={step.id}
