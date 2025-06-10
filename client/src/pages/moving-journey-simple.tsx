@@ -122,124 +122,80 @@ export default function MovingJourney() {
     }
   };
 
-  // Load project data from database
+  // Load project data from database with simplified error handling
   const projectQuery = useQuery({
     queryKey: ['/api/current-project'],
     retry: false,
-    staleTime: 30000, // 30 seconds
+    staleTime: 30000,
     refetchOnWindowFocus: false,
     onError: (error) => {
-      console.error('Project query error:', error);
+      console.log('Database project query failed, will use localStorage fallback:', error);
     }
   });
 
   const tasksQuery = useQuery({
     queryKey: ['/api/project-tasks', projectQuery.data?.id],
-    enabled: !!projectQuery.data?.id && !projectQuery.error && !projectQuery.isError && projectQuery.isSuccess,
+    enabled: false, // Disable this query for now to prevent cascading errors
     retry: false,
-    staleTime: 30000, // 30 seconds
-    refetchOnWindowFocus: false,
-    onError: (error) => {
-      console.error('Tasks query error:', error);
-      // Don't crash the app, just log and continue
-    }
+    staleTime: 30000,
+    refetchOnWindowFocus: false
   });
 
   useEffect(() => {
+    console.log('Journey data setup running...');
+    
     try {
-      // Check for AI-generated project first
-      const currentProjectId = localStorage.getItem('currentProjectId');
+      // Always check localStorage first for AI-generated action plan
+      const savedActionPlan = localStorage.getItem('aiActionPlan');
 
-      // Only proceed with database data if both queries succeeded and have actual data
-      if (projectQuery.data && tasksQuery.data && !projectQuery.error && !projectQuery.isError && !tasksQuery.isError && projectQuery.data.id) {
-        // Use database project and tasks data
-        const project = projectQuery.data;
-        const tasks = tasksQuery.data || [];
+      if (savedActionPlan) {
+        try {
+          console.log('Using saved AI action plan from localStorage');
+          const actionPlan = JSON.parse(savedActionPlan);
 
-        // Convert database tasks to journey steps
-        const steps: JourneyStep[] = tasks.map((task: any, index: number) => {
-          // Create curved path positions
-          const baseX = 20 + (index * 15);
-          const curveY = 50 + Math.sin(index * 0.8) * 20;
+          // Transform action plan into journey steps with road positions
+          const steps: JourneyStep[] = actionPlan.map((action: any, index: number) => {
+            let title = action.task || action.title || `Task ${index + 1}`;
+            let description = action.details || action.description || 'Complete this moving task';
 
-          // Determine sign type based on priority
-          const signType = task.priority === 'high' ? 'warning' : 
-                          task.priority === 'medium' ? 'highway' : 'info';
+            // Customize the first sign to be "Moving and Storage"
+            if (index === 0) {
+              title = "Moving and Storage";
+              description = "Find moving companies and storage solutions for your relocation";
+            }
 
-          return {
-            id: `task-${task.id}`,
-            title: task.title || 'Moving Task',
-            description: task.description || 'Complete this moving task',
-            week: task.timeframe || 'Week 1',
-            tasks: [task.description || 'Complete this moving task'],
-            route: `/${task.taskType}` || '/dashboard',
-            position: { x: baseX, y: curveY },
-            signType: signType,
-            completed: task.status === 'completed',
-            priority: task.priority || 'medium'
-          };
-        });
+            return {
+              id: `action-${index}`,
+              title: title,
+              description: description,
+              week: action.timeframe || action.week || `Week ${Math.floor(index / 2) + 1}`,
+              tasks: [description],
+              priority: action.priority || (index < 2 ? 'high' : index < 4 ? 'medium' : 'low'),
+              completed: false,
+              route: action.route || '/dashboard',
+              position: { x: 20 + (index * 15), y: 50 + Math.sin(index * 0.8) * 20 },
+              signType: action.priority === 'high' ? 'warning' : action.priority === 'medium' ? 'highway' : 'info',
+            };
+          });
 
-        setJourneyData(steps);
-
-        // Update localStorage for routing
-        if (project.fromAddress && project.toAddress) {
-          localStorage.setItem('aiFromLocation', project.fromAddress);
-          localStorage.setItem('aiToLocation', project.toAddress);
-          localStorage.setItem('aiMoveDate', project.moveDate || '');
-        }
-      } else {
-        // Database query failed or returned empty data - fall back to localStorage or defaults
-        console.log('Database queries failed or returned no data, using localStorage or defaults');
-
-        // Always fallback to localStorage data or default signs
-        const savedActionPlan = localStorage.getItem('aiActionPlan');
-
-        if (savedActionPlan) {
-          try {
-            const actionPlan = JSON.parse(savedActionPlan);
-
-            // Transform action plan into journey steps with road positions
-            const steps: JourneyStep[] = actionPlan.map((action: any, index: number) => {
-              let title = action.task || action.title || `Task ${index + 1}`;
-              let description = action.details || action.description || 'Complete this moving task';
-
-              // Customize the first sign to be "Moving and Storage"
-              if (index === 0) {
-                title = "Moving and Storage";
-                description = "Find moving companies and storage solutions for your relocation";
-              }
-
-              return {
-                id: `action-${index}`,
-                title: title,
-                description: description,
-                week: action.timeframe || action.week || `Week ${Math.floor(index / 2) + 1}`,
-                priority: action.priority || (index < 2 ? 'high' : index < 4 ? 'medium' : 'low'),
-                completed: false,
-                route: action.route || '/dashboard',
-                position: { x: 20 + (index * 15), y: 50 + Math.sin(index * 0.8) * 20 },
-                signType: action.priority === 'high' ? 'warning' : action.priority === 'medium' ? 'highway' : 'info',
-              };
-            });
-
-            setJourneyData(steps);
-          } catch (parseError) {
-            console.error('Failed to parse action plan:', parseError);
-            // Fall back to default signs
-            setJourneyData(getDefaultSigns());
-          }
-        } else {
-          // Create default highway signs
-          setJourneyData(getDefaultSigns());
+          console.log('Setting journey data from action plan:', steps.length, 'steps');
+          setJourneyData(steps);
+          return; // Exit early if we successfully loaded from localStorage
+        } catch (parseError) {
+          console.error('Failed to parse action plan:', parseError);
         }
       }
+
+      // Fallback to default signs if no saved data or parsing failed
+      console.log('Using default highway signs');
+      setJourneyData(getDefaultSigns());
+      
     } catch (error) {
       console.error('Error in journey data setup:', error);
       // Ensure we always have some journey data
       setJourneyData(getDefaultSigns());
     }
-  }, [projectQuery.data, tasksQuery.data, projectQuery.error, tasksQuery.error, projectQuery.isError, tasksQuery.isSuccess, tasksQuery.isFetching]);
+  }, []); // Remove all dependencies to prevent infinite re-renders
 
   // Helper function for default signs
   const getDefaultSigns = (): JourneyStep[] => {
