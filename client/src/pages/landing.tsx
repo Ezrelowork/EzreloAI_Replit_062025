@@ -1,111 +1,154 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowRight, MapPin, Zap, Users, CheckCircle } from "lucide-react";
+import { ArrowRight, MapPin, Clock, Users, CheckCircle } from "lucide-react";
 
 export default function Landing() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-gray-900">Ezrelo</h1>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Link href="/ai-assistant">
-                <Button variant="outline">Get Started</Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
-
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
       {/* Hero Section */}
-      <section className="py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-4xl font-extrabold text-gray-900 sm:text-5xl md:text-6xl">
-            Your AI-Powered
-            <span className="text-blue-600"> Relocation Concierge</span>
+      <section className="px-6 py-20">
+        <div className="max-w-6xl mx-auto text-center">
+          <h1 className="text-5xl md:text-7xl font-bold text-gray-900 mb-6">
+            Your Moving Journey,
+            <span className="block text-blue-600">Reimagined</span>
+          </h1>
+          
+          <p className="text-xl md:text-2xl text-gray-600 mb-6 max-w-3xl mx-auto leading-relaxed">
+            Transform your relocation from overwhelming chaos into a guided, visual journey. 
+            Our AI creates your personalized moving plan and shows your progress as an interactive highway experience.
+          </p>
+        </div>
+      </section>
+
+      {/* How It Works */}
+      <section className="px-6 py-8 bg-white">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-4xl font-bold text-center text-gray-900 mb-12">
+            How Ezrelo Works
           </h2>
-          <p className="mt-6 max-w-2xl mx-auto text-xl text-gray-500">
-            Transform your moving experience with intelligent planning, personalized recommendations, 
-            and seamless project management. Let AI guide your journey to a new home.
-          </p>
-          <div className="mt-10">
-            <Link href="/ai-assistant">
-              <Button size="lg" className="inline-flex items-center px-8 py-3 text-lg">
-                Start Your Journey
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            </Link>
+          
+          <div className="grid md:grid-cols-3 gap-12">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Users className="w-8 h-8 text-blue-600" />
+              </div>
+              <h3 className="text-xl font-semibold mb-4">1. Tell Us About Your Move</h3>
+              <p className="text-gray-600">
+                Share your moving details - where you're going, family size, budget, and priorities. 
+                Our AI understands your unique situation.
+              </p>
+            </div>
+
+            <div className="text-center">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <MapPin className="w-8 h-8 text-green-600" />
+              </div>
+              <h3 className="text-xl font-semibold mb-4">2. Get Your Visual Journey</h3>
+              <p className="text-gray-600">
+                Watch as your personalized moving plan transforms into an interactive highway. 
+                Each task becomes a milestone on your road to success.
+              </p>
+            </div>
+
+            <div className="text-center">
+              <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <CheckCircle className="w-8 h-8 text-purple-600" />
+              </div>
+              <h3 className="text-xl font-semibold mb-4">3. Complete & Track Progress</h3>
+              <p className="text-gray-600">
+                Click highway signs to access providers, get quotes, and complete tasks. 
+                Watch your journey progress as you move forward.
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h3 className="text-3xl font-extrabold text-gray-900">
-              Everything You Need for a Seamless Move
-            </h3>
-            <p className="mt-4 text-lg text-gray-500">
-              Powered by AI and designed for simplicity
-            </p>
-          </div>
+      {/* Features */}
+      <section className="px-6 py-8 bg-gray-50">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-4xl font-bold text-center text-gray-900 mb-12">
+            Why Choose Ezrelo
+          </h2>
+          
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div>
+              <h3 className="text-2xl font-semibold mb-6">AI-Powered Planning</h3>
+              <div className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <CheckCircle className="w-5 h-5 text-green-500 mt-1 flex-shrink-0" />
+                  <p className="text-gray-700">Personalized timeline based on your specific move</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <CheckCircle className="w-5 h-5 text-green-500 mt-1 flex-shrink-0" />
+                  <p className="text-gray-700">Smart task prioritization and scheduling</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <CheckCircle className="w-5 h-5 text-green-500 mt-1 flex-shrink-0" />
+                  <p className="text-gray-700">Budget-conscious recommendations</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <CheckCircle className="w-5 h-5 text-green-500 mt-1 flex-shrink-0" />
+                  <p className="text-gray-700">Local service provider connections</p>
+                </div>
+              </div>
+            </div>
 
-          <div className="mt-16 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            <Card>
-              <CardHeader>
-                <MapPin className="h-8 w-8 text-blue-600" />
-                <CardTitle>Smart Planning</CardTitle>
-                <CardDescription>
-                  AI-generated moving timelines and checklists personalized to your specific needs
-                </CardDescription>
-              </CardHeader>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <Zap className="h-8 w-8 text-blue-600" />
-                <CardTitle>Service Discovery</CardTitle>
-                <CardDescription>
-                  Find vetted moving companies, utilities, and local services with real-time availability
-                </CardDescription>
-              </CardHeader>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <Users className="h-8 w-8 text-blue-600" />
-                <CardTitle>Project Management</CardTitle>
-                <CardDescription>
-                  Track progress, manage communications, and stay organized throughout your move
-                </CardDescription>
-              </CardHeader>
-            </Card>
+            <div>
+              <h3 className="text-2xl font-semibold mb-6">Visual Journey Experience</h3>
+              <div className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <CheckCircle className="w-5 h-5 text-green-500 mt-1 flex-shrink-0" />
+                  <p className="text-gray-700">Interactive highway visualization of your move</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <CheckCircle className="w-5 h-5 text-green-500 mt-1 flex-shrink-0" />
+                  <p className="text-gray-700">Progress tracking with milestone celebrations</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <CheckCircle className="w-5 h-5 text-green-500 mt-1 flex-shrink-0" />
+                  <p className="text-gray-700">Cinematic transitions between tasks</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <CheckCircle className="w-5 h-5 text-green-500 mt-1 flex-shrink-0" />
+                  <p className="text-gray-700">Mobile-friendly design for on-the-go planning</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-16 bg-blue-600">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h3 className="text-3xl font-extrabold text-white">
-            Ready to Make Moving Simple?
-          </h3>
-          <p className="mt-4 text-xl text-blue-100">
-            Join thousands who have transformed their relocation experience
+      {/* Call to Action */}
+      <section className="px-6 py-20 bg-blue-600">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-4xl font-bold text-white mb-6">
+            Ready to Transform Your Move?
+          </h2>
+          <p className="text-xl text-blue-100 mb-8">
+            Join thousands who've made their relocation stress-free with Ezrelo's AI-powered guidance.
           </p>
-          <div className="mt-8">
-            <Link href="/ai-assistant">
-              <Button size="lg" variant="secondary" className="inline-flex items-center px-8 py-3 text-lg">
-                Get Started Now
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            </Link>
+          
+          <Link href="/ai-assistant">
+            <Button size="lg" variant="secondary" className="text-lg px-12 py-6 text-xl font-semibold">
+              Start Your Moving Plan
+              <ArrowRight className="ml-3 w-6 h-6" />
+            </Button>
+          </Link>
+          
+          <div className="mt-8 flex items-center justify-center gap-8 text-blue-200">
+            <div className="flex items-center gap-2">
+              <Clock className="w-5 h-5" />
+              <span>2-minute setup</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="w-5 h-5" />
+              <span>AI-powered planning</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Users className="w-5 h-5" />
+              <span>Expert guidance</span>
+            </div>
           </div>
         </div>
       </section>
