@@ -79,6 +79,80 @@ export default function Utilities() {
     if (type) {
       setSelectedTab(type);
     }
+
+    // Auto-fill destination address from AI questionnaire data
+    const aiToLocation = localStorage.getItem('aiToLocation');
+    const aiMoveDate = localStorage.getItem('aiMoveDate');
+
+    if (aiToLocation && aiToLocation !== 'undefined' && aiToLocation !== '') {
+      console.log('Loading AI destination address:', aiToLocation);
+
+      // Parse the destination address to extract components
+      const addressParts = aiToLocation.split(',').map(part => part.trim());
+
+      let streetAddress = '';
+      let city = '';
+      let state = '';
+      let zip = '';
+
+      if (addressParts.length >= 2) {
+        // Last part usually contains city, state, and possibly ZIP
+        const lastPart = addressParts[addressParts.length - 1];
+
+        // Check if last part has ZIP code pattern
+        const zipMatch = lastPart.match(/\b(\d{5}(-\d{4})?)\b/);
+        if (zipMatch) {
+          zip = zipMatch[1];
+          // Remove ZIP from last part
+          const withoutZip = lastPart.replace(zipMatch[0], '').trim();
+          const stateCityParts = withoutZip.split(' ').filter(p => p.length > 0);
+
+          if (stateCityParts.length >= 2) {
+            state = stateCityParts[stateCityParts.length - 1];
+            city = stateCityParts.slice(0, -1).join(' ');
+          } else if (stateCityParts.length === 1) {
+            state = stateCityParts[0];
+            // Try to get city from second-to-last address part
+            if (addressParts.length >= 2) {
+              city = addressParts[addressParts.length - 2];
+            }
+          }
+        } else {
+          // No ZIP code, split city and state
+          const stateCityParts = lastPart.split(' ').filter(p => p.length > 0);
+          if (stateCityParts.length >= 2) {
+            state = stateCityParts[stateCityParts.length - 1];
+            city = stateCityParts.slice(0, -1).join(' ');
+          } else if (stateCityParts.length === 1) {
+            // Assume it's state, get city from previous part
+            state = stateCityParts[0];
+            if (addressParts.length >= 2) {
+              city = addressParts[addressParts.length - 2];
+            }
+          }
+        }
+
+        // Street address is everything except the last part
+        streetAddress = addressParts.slice(0, -1).join(', ');
+      } else if (addressParts.length === 1) {
+        // Only one part, assume it's city, state
+        const parts = addressParts[0].split(' ').filter(p => p.length > 0);
+        if (parts.length >= 2) {
+          state = parts[parts.length - 1];
+          city = parts.slice(0, -1).join(' ');
+        }
+      }
+
+      setUserAddress({
+        address: streetAddress,
+        city: city,
+        state: state,
+        zip: zip,
+        moveDate: aiMoveDate || ""
+      });
+
+      console.log('Parsed address:', { streetAddress, city, state, zip });
+    }
   }, [location]);
 
   // Search for utility providers
@@ -133,7 +207,7 @@ export default function Utilities() {
 
       window.open(provider.referralUrl, '_blank');
       setHasCompletedActions(true); // Mark progress for provider contact
-      
+
       toast({
         title: "Opening Provider",
         description: `Redirecting to ${provider.provider}`,
@@ -194,7 +268,7 @@ export default function Utilities() {
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Dashboard
           </Button>
-          
+
           <div className="text-center">
             <div className="flex items-center justify-center gap-3 mb-2">
               <currentUtility.icon className="w-8 h-8 text-blue-600" />
@@ -437,7 +511,7 @@ export default function Utilities() {
                             </div>
                           )}
                         </div>
-                        
+
                         <div className="flex gap-2">
                           {provider.phone && (
                             <Button 
@@ -494,14 +568,14 @@ export default function Utilities() {
                     title: "Utilities Task Completed!",
                     description: "Returning to your moving journey...",
                   });
-                  
+
                   // Zoom back to journey page with preserved context
                   setTimeout(() => {
                     const urlParams = new URLSearchParams(window.location.search);
                     const from = urlParams.get('from');
                     const to = urlParams.get('to');
                     const date = urlParams.get('date');
-                    
+
                     let journeyUrl = '/moving-journey';
                     if (from || to || date) {
                       const params = new URLSearchParams();
@@ -510,7 +584,7 @@ export default function Utilities() {
                       if (date) params.set('date', date);
                       journeyUrl += `?${params.toString()}`;
                     }
-                    
+
                     window.location.href = journeyUrl;
                   }, 1000);
                 }
@@ -525,14 +599,14 @@ export default function Utilities() {
               <CheckCircle className="w-4 h-4 mr-2" />
               {canCompleteTask() ? "Complete Utilities Setup" : "Research Providers First"}
             </Button>
-            
+
             <Button
               onClick={() => {
                 const urlParams = new URLSearchParams(window.location.search);
                 const from = urlParams.get('from');
                 const to = urlParams.get('to');
                 const date = urlParams.get('date');
-                
+
                 let journeyUrl = '/moving-journey';
                 if (from || to || date) {
                   const params = new URLSearchParams();
@@ -541,7 +615,7 @@ export default function Utilities() {
                   if (date) params.set('date', date);
                   journeyUrl += `?${params.toString()}`;
                 }
-                
+
                 window.location.href = journeyUrl;
               }}
               variant="outline"

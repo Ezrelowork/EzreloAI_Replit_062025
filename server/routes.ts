@@ -239,17 +239,17 @@ async function searchGooglePlaces(searchQuery: string, location?: string): Promi
     console.log('Making Google Places API request:', `${baseUrl}?${params}`);
     const response = await fetch(`${baseUrl}?${params}`);
     const data = await response.json();
-    
+
     console.log('Google Places API response status:', data.status);
     if (data.error_message) {
       console.log('Google Places API error message:', data.error_message);
     }
-    
+
     if (data.status !== 'OK') {
       console.error('Google Places API error:', data.status, data.error_message);
       return [];
     }
-    
+
     console.log('Google Places API results count:', data.results?.length || 0);
     return data.results || [];
   } catch (error) {
@@ -281,7 +281,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/service-providers", async (req, res) => {
     try {
       const { address, city, state, zip } = req.body;
-      
+
       if (!city || !state) {
         return res.status(400).json({ error: "City and state are required" });
       }
@@ -294,7 +294,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
       const location = zip ? `${city}, ${state} ${zip}` : `${city}, ${state}`;
-      
+
       const prompt = `Provide comprehensive service provider information for someone moving to ${location}.
 
 Include specific availability percentages, connection types, speeds, pricing, and service limitations for each provider.
@@ -335,10 +335,10 @@ Focus on accuracy and specificity - include availability percentages, exact spee
       });
 
       const aiResponse = JSON.parse(completion.choices[0].message.content || '{}');
-      
+
       // Process and enhance the response
       let processedData: any = {};
-      
+
       for (const [category, providers] of Object.entries(aiResponse)) {
         if (Array.isArray(providers)) {
           processedData[category] = await Promise.all(
@@ -366,16 +366,16 @@ Focus on accuracy and specificity - include availability percentages, exact spee
                 try {
                   const searchQuery = `${provider.provider} ${category} ${city} ${state}`;
                   const placesUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(searchQuery)}&key=${process.env.GOOGLE_API_KEY}`;
-                  
+
                   const placesResponse = await fetch(placesUrl);
                   const placesData = await placesResponse.json();
-                  
+
                   if (placesData.results && placesData.results.length > 0) {
                     const place = placesData.results[0];
                     const detailsUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${place.place_id}&fields=formatted_phone_number,website,rating&key=${process.env.GOOGLE_API_KEY}`;
                     const detailsResponse = await fetch(detailsUrl);
                     const detailsData = await detailsResponse.json();
-                    
+
                     if (detailsData.result) {
                       enhancedProvider.phone = detailsData.result.formatted_phone_number || enhancedProvider.phone;
                       enhancedProvider.website = detailsData.result.website || enhancedProvider.website;
@@ -402,7 +402,7 @@ Focus on accuracy and specificity - include availability percentages, exact spee
         zipCode: zip || "",
         providers: processedData
       });
-      
+
     } catch (error) {
       console.error("Service providers search error:", error);
       return res.status(500).json({ error: "Search failed" });
@@ -413,7 +413,7 @@ Focus on accuracy and specificity - include availability percentages, exact spee
   app.post("/api/moving-companies", async (req, res) => {
     try {
       const { fromCity, fromState, fromZip, toCity, toState, toZip, fromAddress } = req.body;
-      
+
       if (!fromCity || !fromState || !toCity || !toState) {
         return res.status(400).json({ error: "Origin and destination are required" });
       }
@@ -434,13 +434,13 @@ Focus on accuracy and specificity - include availability percentages, exact spee
             const placesUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(query)}&key=${process.env.GOOGLE_API_KEY}`;
             const placesResponse = await fetch(placesUrl);
             const placesData = await placesResponse.json();
-            
+
             if (placesData.results) {
               for (const place of placesData.results.slice(0, 4)) {
                 const detailsUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${place.place_id}&fields=name,formatted_phone_number,website,rating,reviews,formatted_address,business_status&key=${process.env.GOOGLE_API_KEY}`;
                 const detailsResponse = await fetch(detailsUrl);
                 const detailsData = await detailsResponse.json();
-                
+
                 if (detailsData.result && detailsData.result.business_status === 'OPERATIONAL') {
                   const company = {
                     category: "Local Moving Companies",
@@ -458,7 +458,7 @@ Focus on accuracy and specificity - include availability percentages, exact spee
                     specialties: ["Local Moving", "Interstate Moving"],
                     notes: `Google rating: ${detailsData.result.rating || 'Not rated'} | Address: ${detailsData.result.formatted_address || 'Contact for address'}`
                   };
-                  
+
                   if (!allCompanies.find(c => c.provider.toLowerCase() === company.provider.toLowerCase())) {
                     allCompanies.push(company);
                   }
@@ -545,7 +545,7 @@ Focus on accuracy and specificity - include availability percentages, exact spee
         success: true,
         companies: allCompanies
       });
-      
+
     } catch (error) {
       console.error("Moving companies search error:", error);
       res.status(500).json({ 
@@ -559,7 +559,7 @@ Focus on accuracy and specificity - include availability percentages, exact spee
   app.post("/api/ai-recommendations", async (req, res) => {
     try {
       const { query, fromLocation, toLocation, moveDate, familySize, budget, priorities } = req.body;
-      
+
       if (!fromLocation || !toLocation) {
         return res.status(400).json({ error: "Both current and destination locations are required" });
       }
@@ -698,7 +698,7 @@ Please provide a comprehensive strategic relocation plan focusing on planning gu
 
     } catch (error) {
       console.error("AI Recommendations error:", error);
-      
+
       // Provide a helpful error response
       if (error instanceof Error && error.message.includes('API key')) {
         return res.status(503).json({ 
@@ -709,7 +709,7 @@ Please provide a comprehensive strategic relocation plan focusing on planning gu
           estimatedTotalCost: "Service temporarily unavailable"
         });
       }
-      
+
       return res.status(500).json({ 
         error: "AI analysis temporarily unavailable. Please try again or contact support.",
         recommendations: [],
@@ -720,78 +720,183 @@ Please provide a comprehensive strategic relocation plan focusing on planning gu
     }
   });
 
-  // Utilities setup endpoint
-  app.post("/api/utilities-search", async (req, res) => {
+  // Utility providers endpoint using ChatGPT
+  app.post("/api/utility-providers", async (req, res) => {
     try {
-      const { city, state, zipCode } = req.body;
-      
+      const { address, city, state, zip, utilityType } = req.body;
+
+      console.log("Utility providers request:", { address, city, state, zip, utilityType });
+
       if (!city || !state) {
         return res.status(400).json({ error: "City and state are required" });
       }
 
-      const utilities = [
-        {
-          category: "Internet",
-          provider: "AT&T Fiber",
-          phone: "1-800-288-2020",
-          description: "High-speed fiber internet with up to 5 Gig speeds",
-          website: "att.com",
-          referralUrl: "https://www.att.com/internet/fiber/",
-          services: ["Fiber Internet", "Streaming TV", "Phone Service"],
-          estimatedCost: "$55-80/month",
-          rating: 4.2,
-          availability: "Available in most areas"
-        },
-        {
-          category: "Internet", 
-          provider: "Spectrum",
-          phone: "1-855-243-8892",
-          description: "Cable internet with speeds up to 1 Gig",
-          website: "spectrum.com",
-          referralUrl: "https://www.spectrum.com/internet",
-          services: ["Cable Internet", "TV", "Mobile"],
-          estimatedCost: "$49.99-79.99/month",
-          rating: 3.8,
-          availability: "Widely available"
-        },
-        {
-          category: "Electric",
-          provider: "TXU Energy",
-          phone: "1-800-242-9113", 
-          description: "Reliable electricity service with green energy options",
-          website: "txu.com",
-          referralUrl: "https://www.txu.com/",
-          services: ["Electricity", "Solar Plans", "Smart Home"],
-          estimatedCost: "$0.10-0.15/kWh",
-          rating: 4.0,
-          availability: "Texas service area"
-        },
-        {
-          category: "Gas",
-          provider: "Atmos Energy",
-          phone: "1-888-286-6700",
-          description: "Natural gas service for heating and cooking",
-          website: "atmosenergy.com", 
-          referralUrl: "https://www.atmosenergy.com/",
-          services: ["Natural Gas", "Gas Appliances", "Safety Services"],
-          estimatedCost: "$40-80/month",
-          rating: 4.1,
-          availability: "Texas and other states"
-        }
-      ];
+      // Return mock data if OpenAI isn't available
+      if (!process.env.OPENAI_API_KEY) {
+        console.log("No OpenAI key, returning mock data");
+        const mockProviders = getMockUtilityProviders(utilityType, city, state);
+        return res.json({ 
+          providers: mockProviders,
+          location: `${city}, ${state}`,
+          utilityType 
+        });
+      }
 
-      res.json({ success: true, utilities });
+      const OpenAI = (await import('openai')).default;
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+      const fullAddress = zip ? `${city}, ${state} ${zip}` : `${city}, ${state}`;
+
+      const prompt = `What ${utilityType} providers are available at ${fullAddress}?
+
+Provide comprehensive list of actual providers that serve this exact location. Include specific availability percentages, connection types, and detailed service information.
+
+Return the response in JSON format with this structure:
+{
+  "providers": [
+    {
+      "provider": "Company Name",
+      "phone": "Phone number",
+      "website": "Official website URL",
+      "description": "Brief description of services and coverage",
+      "estimatedCost": "Cost range",
+      "availability": "Service availability details",
+      "setupFee": "Setup/installation fees if any",
+      "connectionTime": "How long to get service connected",
+      "connectionType": "Type of connection (for internet/cable)",
+      "maxSpeed": "Maximum speed available (for internet)",
+      "services": ["Service 1", "Service 2", "Service 3"],
+      "notes": "Any special notes or requirements"
+    }
+  ]
+}
+
+Focus on accuracy - only include providers that actually serve this specific location. For internet providers, be especially precise about which companies actually have infrastructure in this area.`;
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          { 
+            role: "system", 
+            content: "You are an expert on utility and service providers with comprehensive knowledge of service areas, coverage maps, and availability by location. Provide only accurate, real provider information for specific addresses." 
+          },
+          { role: "user", content: prompt }
+        ],
+        response_format: { type: "json_object" },
+        temperature: 0.1,
+        max_tokens: 2000
+      });
+
+      const aiResponse = JSON.parse(completion.choices[0].message.content || '{}');
+
+      // Format providers with additional fields for our interface
+      const formattedProviders = (aiResponse.providers || []).map((provider: any) => ({
+        ...provider,
+        referralUrl: provider.website || `https://www.google.com/search?q=${encodeURIComponent(provider.provider)}`,
+        affiliateCode: "",
+        rating: provider.rating || 0
+      }));
+
+      console.log("Returning providers:", formattedProviders.length);
+
+      res.json({ 
+        providers: formattedProviders,
+        location: fullAddress,
+        utilityType 
+      });
+
     } catch (error) {
-      console.error("Error in utilities search:", error);
-      res.status(500).json({ error: "Failed to fetch utilities" });
+      console.error("Error finding utility providers:", error);
+
+      // Fallback to mock data on error
+      const mockProviders = getMockUtilityProviders(req.body.utilityType, req.body.city, req.body.state);
+      res.json({ 
+        providers: mockProviders,
+        location: `${req.body.city}, ${req.body.state}`,
+        utilityType: req.body.utilityType 
+      });
     }
   });
+
+  // Helper function to generate mock utility providers
+  function getMockUtilityProviders(utilityType: string, city: string, state: string) {
+    const mockData: any = {
+      electricity: [
+        {
+          provider: "Local Electric Company",
+          phone: "1-800-ELECTRIC",
+          website: "https://www.localelectric.com",
+          referralUrl: "https://www.localelectric.com/signup",
+          description: "Local electricity provider serving the area",
+          estimatedCost: "$0.12-0.18/kWh",
+          availability: "Available in most areas",
+          setupFee: "$25",
+          connectionTime: "1-3 business days",
+          services: ["Residential Electric", "Green Energy Options"],
+          affiliateCode: "",
+          rating: 4.1
+        }
+      ],
+      internet: [
+        {
+          provider: "High Speed Internet Co",
+          phone: "1-800-INTERNET",
+          website: "https://www.highspeedinternet.com",
+          referralUrl: "https://www.highspeedinternet.com/plans",
+          description: "High-speed internet service provider",
+          estimatedCost: "$50-80/month",
+          availability: "Available in most areas",
+          setupFee: "$99",
+          connectionTime: "3-7 business days",
+          connectionType: "Cable/Fiber",
+          maxSpeed: "1 Gig",
+          services: ["Internet", "WiFi Equipment"],
+          affiliateCode: "",
+          rating: 4.3
+        }
+      ],
+      water: [
+        {
+          provider: `${city} Water Authority`,
+          phone: "1-800-WATER",
+          website: `https://www.${city.toLowerCase()}water.gov`,
+          referralUrl: `https://www.${city.toLowerCase()}water.gov/new-service`,
+          description: "Municipal water and sewer services",
+          estimatedCost: "$30-60/month",
+          availability: "Available citywide",
+          setupFee: "$50",
+          connectionTime: "2-5 business days",
+          services: ["Water", "Sewer", "Trash Collection"],
+          affiliateCode: "",
+          rating: 4.0
+        }
+      ],
+      waste: [
+        {
+          provider: "City Waste Management",
+          phone: "1-800-WASTE",
+          website: "https://www.citywaste.com",
+          referralUrl: "https://www.citywaste.com/signup",
+          description: "Trash and recycling collection services",
+          estimatedCost: "$25-40/month",
+          availability: "Available citywide",
+          setupFee: "$0",
+          connectionTime: "Next pickup day",
+          services: ["Trash Collection", "Recycling", "Yard Waste"],
+          affiliateCode: "",
+          rating: 3.8
+        }
+      ]
+    };
+
+    return mockData[utilityType] || [];
+  }
 
   // Housing services endpoint
   app.post("/api/housing-services", async (req, res) => {
     try {
       const { city, state, zipCode } = req.body;
-      
+
       if (!city || !state) {
         return res.status(400).json({ error: "City and state are required" });
       }
@@ -846,7 +951,7 @@ Please provide a comprehensive strategic relocation plan focusing on planning gu
   app.post("/api/track-referral", async (req, res) => {
     try {
       const { provider, category, action, userAddress } = req.body;
-      
+
       const timestamp = new Date().toISOString();
       const ipAddress = req.ip || 'unknown';
 
@@ -873,11 +978,11 @@ Please provide a comprehensive strategic relocation plan focusing on planning gu
     try {
       // For now, get the most recent project (user ID 1)
       const project = await storage.getMovingProject(1);
-      
+
       if (!project) {
         return res.status(404).json({ error: 'No project found' });
       }
-      
+
       res.json(project);
     } catch (error) {
       console.error('Error fetching current project:', error);
@@ -908,7 +1013,7 @@ Please provide a comprehensive strategic relocation plan focusing on planning gu
         status: req.body.status || 'pending',
         dueDate: req.body.timeframe || req.body.dueDate
       };
-      
+
       const task = await storage.createProjectTask(taskData);
       res.json(task);
     } catch (error) {
@@ -921,10 +1026,10 @@ Please provide a comprehensive strategic relocation plan focusing on planning gu
   app.post("/api/moving-project", async (req, res) => {
     try {
       const { userId, fromAddress, toAddress, moveDate } = req.body;
-      
+
       // Check if project already exists
       let project = await storage.getMovingProject(userId, fromAddress, toAddress);
-      
+
       if (!project) {
         // Create new project
         project = await storage.createMovingProject({
@@ -964,7 +1069,7 @@ Please provide a comprehensive strategic relocation plan focusing on planning gu
   app.post("/api/select-mover", async (req, res) => {
     try {
       const { projectId, moverData } = req.body;
-      
+
       const updatedProject = await storage.updateMovingProject(projectId, {
         selectedMover: moverData,
         projectStatus: "mover_selected"
@@ -990,7 +1095,7 @@ Please provide a comprehensive strategic relocation plan focusing on planning gu
   app.get("/api/moving-project/:projectId", async (req, res) => {
     try {
       const projectId = parseInt(req.params.projectId);
-      
+
       const [tasks, communications] = await Promise.all([
         storage.getProjectTasks(projectId),
         storage.getProjectCommunications(projectId)
@@ -1008,7 +1113,7 @@ Please provide a comprehensive strategic relocation plan focusing on planning gu
     try {
       const taskId = parseInt(req.params.taskId);
       const { status } = req.body;
-      
+
       const updatedTask = await storage.updateTaskStatus(taskId, status);
       res.json({ task: updatedTask });
     } catch (error) {
@@ -1032,12 +1137,12 @@ Please provide a comprehensive strategic relocation plan focusing on planning gu
   app.post("/api/send-questionnaire-email", async (req, res) => {
     try {
       const { email, questionnaire, pdfData, moveDetails } = req.body;
-      
+
       // For now, just simulate email sending since we don't have SendGrid configured
       console.log(`Simulating email send to: ${email}`);
       console.log(`PDF size: ${pdfData ? 'Present' : 'Missing'}`);
       console.log(`Questionnaire data:`, questionnaire);
-      
+
       // In a real implementation, this would use SendGrid or similar service
       // const sgMail = require('@sendgrid/mail');
       // sgMail.setApiKey(process.env.SENDGRID_API_KEY);
@@ -1068,7 +1173,7 @@ Please provide a comprehensive strategic relocation plan focusing on planning gu
   app.post("/api/archive-questionnaire", async (req, res) => {
     try {
       const { projectId, questionnaire, pdfData, type } = req.body;
-      
+
       // Update the project with current questionnaire data
       console.log('Updating project', projectId, 'with questionnaire data');
       const updatedProject = await storage.updateMovingProject(projectId, {
@@ -1076,7 +1181,7 @@ Please provide a comprehensive strategic relocation plan focusing on planning gu
         lastQuestionnaireUpdate: new Date() as any
       });
       console.log('Project updated:', updatedProject.id, 'questionnaire saved:', !!updatedProject.questionnaireData);
-      
+
       // Log the activity as communication record
       await storage.createCommunication({
         projectId,
@@ -1103,13 +1208,13 @@ Please provide a comprehensive strategic relocation plan focusing on planning gu
     try {
       const { projectId } = req.params;
       const project = await storage.getMovingProject(parseInt(projectId));
-      
+
       if (project && project.questionnaireData) {
         let questionnaire;
         try {
           console.log('Raw questionnaire data type:', typeof project.questionnaireData);
           console.log('Raw questionnaire data:', project.questionnaireData);
-          
+
           // Handle both string and object types
           if (typeof project.questionnaireData === 'string') {
             questionnaire = JSON.parse(project.questionnaireData);
@@ -1138,13 +1243,13 @@ Please provide a comprehensive strategic relocation plan focusing on planning gu
   app.post("/api/share-with-movers", async (req, res) => {
     try {
       const { projectId, questionnaire, moveDetails, selectedMovers } = req.body;
-      
+
       console.log("Ezrelo AI initiating professional mover outreach...");
       console.log(`Move: ${moveDetails.from} → ${moveDetails.to}`);
       console.log(`Date: ${moveDetails.date}`);
       console.log(`Inventory items: ${Object.keys(questionnaire.majorItems).length}`);
       console.log(`Contacting ${selectedMovers.length} premium moving companies`);
-      
+
       // Generate AI-crafted professional outreach emails
       const aiOutreachData = {
         subject: `Premium Moving Lead from Ezrelo - ${moveDetails.from} to ${moveDetails.to}`,
@@ -1202,14 +1307,14 @@ Please provide a comprehensive strategic relocation plan focusing on planning gu
     try {
       const { companyName } = req.params;
       const { location } = req.query;
-      
+
       if (!process.env.GOOGLE_API_KEY) {
         return res.status(503).json({ error: "Google API service temporarily unavailable" });
       }
 
       // Search for the company in Google Places
       const place = await searchGooglePlaces(companyName, location as string);
-      
+
       if (!place || !place.place_id) {
         return res.json({ 
           reviews: [], 
@@ -1221,7 +1326,7 @@ Please provide a comprehensive strategic relocation plan focusing on planning gu
 
       // Get detailed place information including reviews
       const details = await getPlaceDetails(place.place_id);
-      
+
       if (!details) {
         return res.json({ 
           reviews: [], 
@@ -1262,7 +1367,7 @@ Please provide a comprehensive strategic relocation plan focusing on planning gu
   app.post("/api/search-local-services", async (req, res) => {
     try {
       const { location, serviceTypes } = req.body;
-      
+
       if (!location || !serviceTypes) {
         return res.status(400).json({ error: "Location and service types are required" });
       }
@@ -1273,7 +1378,7 @@ Please provide a comprehensive strategic relocation plan focusing on planning gu
       for (const serviceType of serviceTypes) {
         let searchQuery = '';
         let category = '';
-        
+
         switch (serviceType) {
           case 'schools':
             searchQuery = `elementary schools in ${location}`;
@@ -1311,13 +1416,13 @@ Please provide a comprehensive strategic relocation plan focusing on planning gu
           console.log(`Searching for: ${searchQuery} in ${location}`);
           const places = await searchGooglePlaces(searchQuery, location);
           console.log(`Found ${places?.length || 0} places for ${category}`);
-          
+
           if (places && places.length > 0) {
             const limitedPlaces = places.slice(0, 3); // Limit to 3 per category
-            
+
             for (const place of limitedPlaces) {
               const details = await getPlaceDetails(place.place_id);
-              
+
               if (details) {
                 localServices.push({
                   category,
@@ -1356,7 +1461,7 @@ Please provide a comprehensive strategic relocation plan focusing on planning gu
   app.post('/api/select-mover', async (req, res) => {
     try {
       const { provider, category, phone, estimatedCost, moveRoute } = req.body;
-      
+
       console.log('Mover selected:', {
         provider,
         category,
