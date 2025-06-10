@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { useQuery } from '@tanstack/react-query';
 import { Link, useLocation } from "wouter";
@@ -7,8 +8,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ProgressTracker, JourneyStats } from "@/components/progress-tracker";
 import { TaskModal, useTaskModal } from "@/components/task-modal";
-import { ZoomNavigation, useZoomNavigation } from "@/components/zoom-navigation";
-import { TaskPage } from "@/components/task-page";
 import { useToast } from "@/hooks/use-toast";
 import { DynamicHighwaySign } from "@/components/dynamic-highway-sign";
 
@@ -80,37 +79,8 @@ export default function MovingJourney() {
   const [editingData, setEditingData] = useState<{ title: string; description: string } | null>(null);
   const [showEditPanel, setShowEditPanel] = useState(false);
   const { isOpen, currentTask, openModal, closeModal } = useTaskModal();
-  const { isZoomed, zoomOrigin, currentTaskData, zoomIntoTask, zoomOut } = useZoomNavigation();
   const { toast } = useToast();
   const taskCardRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
-  const signPositionsRef = useRef<{ [key: string]: { left: string; top: string } }>({});
-
-  // Store original sign positions and force reset after zoom out
-  useEffect(() => {
-    if (!isZoomed && !zoomOrigin) {
-      // Small delay to ensure zoom animation completes
-      setTimeout(() => {
-        // Reset all sign positions to their stored originals
-        Object.keys(signPositionsRef.current).forEach(stepId => {
-          const signElement = document.querySelector(`[data-step-id="${stepId}"]`) as HTMLElement;
-          if (signElement && signElement.style) {
-            const originalPos = signPositionsRef.current[stepId];
-            signElement.style.left = originalPos.left;
-            signElement.style.top = originalPos.top;
-            signElement.style.transform = 'translate(-50%, -50%)';
-            signElement.style.transformOrigin = 'center';
-          }
-        });
-
-        // Reset container
-        const container = document.querySelector('.relative.max-w-7xl') as HTMLElement;
-        if (container) {
-          container.style.transform = 'none';
-          container.style.transformOrigin = 'initial';
-        }
-      }, 100);
-    }
-  }, [isZoomed, zoomOrigin]);
 
   // Highway graphics
   const customGraphics = {
@@ -230,7 +200,7 @@ export default function MovingJourney() {
         description: 'USPS official address change. Update banks, insurance, subscriptions, etc.',
         week: 'Week 3',
         tasks: ['File USPS change of address', 'Update banks', 'Update insurance', 'Update subscriptions'],
-        route: '/documentation',
+        route: '/change-of-address',
         position: { x: 65, y: 55 },
         signType: 'info',
         completed: false,
@@ -252,27 +222,30 @@ export default function MovingJourney() {
   };
 
   const handleTaskClick = (step: JourneyStep, event: React.MouseEvent, stepIndex: number) => {
-    const cardElement = taskCardRefs.current[step.id];
-    if (cardElement) {
-      // Override Sign 3 content for task modal
-      let taskTitle = step.title;
-      let taskDescription = step.description;
-
-      if (stepIndex === 2) {
-        taskTitle = "Change of Address";
-        taskDescription = "USPS official address change. Update banks, insurance, subscriptions, etc.";
-      }
-
-      // Cinematic zoom into the task card
-      zoomIntoTask(cardElement, {
-        id: step.id,
-        title: taskTitle,
-        description: taskDescription,
-        priority: step.priority,
-        week: step.week,
-        category: getCategoryFromTask(taskTitle)
-      });
+    // Check if shift key is held for editing
+    if (event.shiftKey) {
+      handleEditTask(step);
+      return;
     }
+
+    // Override Sign 3 content for task modal
+    let taskTitle = step.title;
+    let taskDescription = step.description;
+
+    if (stepIndex === 2) {
+      taskTitle = "Change of Address";
+      taskDescription = "USPS official address change. Update banks, insurance, subscriptions, etc.";
+    }
+
+    // Open modal instead of zooming
+    openModal({
+      id: step.id,
+      title: taskTitle,
+      description: taskDescription,
+      priority: step.priority,
+      week: step.week,
+      category: getCategoryFromTask(taskTitle)
+    });
   };
 
   const handleEditTask = (step: JourneyStep) => {
@@ -388,7 +361,7 @@ export default function MovingJourney() {
       targetRoute = '/local-services';
     } else if (combined.includes('address') || combined.includes('documentation') || combined.includes('registration') || 
                combined.includes('voter') || combined.includes('license') || combined.includes('update')) {
-      targetRoute = '/documentation';
+      targetRoute = '/change-of-address';
     } else if (combined.includes('pack') || combined.includes('organize') || combined.includes('checklist')) {
       targetRoute = '/moving-checklist';
     }
@@ -469,10 +442,7 @@ export default function MovingJourney() {
       </div>
 
       {/* Highway Timeline Container */}
-      <div 
-        className="relative max-w-7xl mx-auto p-6 min-h-[600px] z-10"
-        style={{ transform: 'none', transformOrigin: 'initial' }}
-      >
+      <div className="relative max-w-7xl mx-auto p-6 min-h-[600px] z-10">
         {/* Highway Background */}
         <div className="absolute inset-0 w-full h-full rounded-3xl overflow-hidden z-0">
           <img 
@@ -513,9 +483,6 @@ export default function MovingJourney() {
             return null;
           }
 
-          // Store original position
-          signPositionsRef.current[step.id] = { left: position.left, top: position.top };
-
           // Override Sign 3 content specifically
           let displayTitle = step.title;
           let displayDescription = step.description;
@@ -548,24 +515,22 @@ export default function MovingJourney() {
               />
 
               {/* Hover Card */}
-                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-                    <div className="bg-white rounded-lg shadow-xl p-3 border min-w-48">
-                      <h4 className="font-semibold text-sm text-gray-900">{displayTitle}</h4>
-                      <p className="text-xs text-gray-600 mt-1">{displayDescription}</p>
-                      <div className="flex gap-1 mt-2">
-                        <Badge variant={step.priority === 'high' ? 'destructive' : 'secondary'} className="text-xs">
-                          {step.priority}
-                        </Badge>
-                        <Badge variant="outline" className="text-xs">{step.week}</Badge>
-                      </div>
-                    </div>
+              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                <div className="bg-white rounded-lg shadow-xl p-3 border min-w-48">
+                  <h4 className="font-semibold text-sm text-gray-900">{displayTitle}</h4>
+                  <p className="text-xs text-gray-600 mt-1">{displayDescription}</p>
+                  <div className="flex gap-1 mt-2">
+                    <Badge variant={step.priority === 'high' ? 'destructive' : 'secondary'} className="text-xs">
+                      {step.priority}
+                    </Badge>
+                    <Badge variant="outline" className="text-xs">{step.week}</Badge>
                   </div>
+                </div>
+              </div>
             </div>
           );
         })}
       </div>
-
-
 
       {/* Priority Stats Box - In Grass Area Lower Right */}
       <div className="absolute bottom-16 right-8 z-30">
@@ -626,13 +591,13 @@ export default function MovingJourney() {
         </div>
       )}
 
-      {/* Cinematic Journey Info */}
+      {/* Simple Journey Info */}
       <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 z-30">
         <div className="bg-gray-900 text-white px-6 py-3 rounded-full shadow-2xl border border-gray-700">
           <div className="flex items-center gap-3">
             <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
-            <span className="text-sm font-medium">🎬 Cinematic Journey</span>
-            <span className="text-xs text-gray-300">Click any task • Hold Shift + Click to edit • Stay on this page</span>
+            <span className="text-sm font-medium">🛣️ Highway Journey</span>
+            <span className="text-xs text-gray-300">Click any task • Hold Shift + Click to edit</span>
           </div>
         </div>
       </div>
@@ -659,22 +624,6 @@ export default function MovingJourney() {
           }
         }}
       />
-
-      {/* Zoom Navigation Overlay */}
-      <ZoomNavigation 
-        isZoomed={isZoomed}
-        onZoomOut={zoomOut}
-        zoomOrigin={zoomOrigin}
-      >
-        {currentTaskData && (
-          <TaskPage 
-            task={currentTaskData} 
-            onComplete={zoomOut}
-            onBack={zoomOut}
-            onTaskComplete={handleCompleteTask}
-          />
-        )}
-      </ZoomNavigation>
     </div>
   );
 }
