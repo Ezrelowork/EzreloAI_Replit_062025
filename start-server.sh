@@ -1,26 +1,24 @@
 #!/bin/bash
 
-echo "Starting Ezrelo server..."
+# Kill any existing processes
+pkill -f "node.*minimal-server" 2>/dev/null || true
+pkill -f "node.*server-runner" 2>/dev/null || true
 
-# Kill any existing processes on port 5000
-pkill -f "simple-start.js" 2>/dev/null
-pkill -f "tsx server" 2>/dev/null
+# Start the server
+echo "Starting Ezrelo platform..."
+node minimal-server.cjs &
 
-# Start the simple server in background
-nohup node simple-start.js > server.log 2>&1 &
+# Get the PID and wait a moment
 SERVER_PID=$!
+sleep 2
 
-echo "Server started with PID: $SERVER_PID"
-echo "Waiting for server to initialize..."
-
-sleep 3
-
-# Check if server is running
-if ps -p $SERVER_PID > /dev/null; then
-    echo "✅ Server is running on port 5000"
-    echo "📋 PID: $SERVER_PID"
-    tail -5 server.log
+# Check if server is responding
+if curl -s http://localhost:5000/api/status > /dev/null 2>&1; then
+    echo "✅ Server is running and responding on port 5000"
+    echo "PID: $SERVER_PID"
 else
-    echo "❌ Server failed to start"
-    cat server.log
+    echo "❌ Server may not be responding properly"
 fi
+
+# Keep the script running to maintain the process
+wait $SERVER_PID
