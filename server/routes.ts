@@ -720,7 +720,7 @@ Please provide a comprehensive strategic relocation plan focusing on planning gu
     }
   });
 
-  // Utility providers endpoint using ChatGPT
+  // Utility providers endpoint using ChatGPT and Google Gemini
   app.post("/api/utility-providers", async (req, res) => {
     try {
       const { address, city, state, zip, utilityType } = req.body;
@@ -731,23 +731,16 @@ Please provide a comprehensive strategic relocation plan focusing on planning gu
         return res.status(400).json({ error: "City and state are required" });
       }
 
-      // Return mock data if OpenAI isn't available
-      if (!process.env.OPENAI_API_KEY) {
-        console.log("No OpenAI key, returning mock data");
-        const mockProviders = getMockUtilityProviders(utilityType, city, state);
-        return res.json({ 
-          providers: mockProviders,
-          location: `${city}, ${state}`,
-          utilityType 
-        });
-      }
-
-      const OpenAI = (await import('openai')).default;
-      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
       const fullAddress = zip ? `${city}, ${state} ${zip}` : `${city}, ${state}`;
+      let allProviders: any[] = [];
 
-      const prompt = `What ${utilityType} providers are available at ${fullAddress}?
+      // Try OpenAI first
+      if (process.env.OPENAI_API_KEY) {
+        try {
+          const OpenAI = (await import('openai')).default;
+          const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+          const openaiPrompt = `What ${utilityType} providers are available at ${fullAddress}?
 
 Provide comprehensive list of actual providers that serve this exact location. Include specific availability percentages, connection types, and detailed service information.
 
@@ -771,44 +764,119 @@ Return the response in JSON format with this structure:
   ]
 }
 
-Focus on accuracy - only include providers that actually serve this specific location. For internet providers, be especially precise about which companies actually have infrastructure in this area.`;
+Focus on accuracy - only include providers that actually serve this specific location.`;
 
-      const completion = await openai.chat.completions.create({
-        model: "gpt-4o",
-        messages: [
-          { 
-            role: "system", 
-            content: "You are an expert on utility and service providers with comprehensive knowledge of service areas, coverage maps, and availability by location. Provide only accurate, real provider information for specific addresses." 
-          },
-          { role: "user", content: prompt }
-        ],
-        response_format: { type: "json_object" },
-        temperature: 0.1,
-        max_tokens: 2000
-      });
+          const openaiCompletion = await openai.chat.completions.create({
+            model: "gpt-4o",
+            messages: [
+              { 
+                role: "system", 
+                content: "You are an expert on utility and service providers with comprehensive knowledge of service areas, coverage maps, and availability by location. Provide only accurate, real provider information for specific addresses." 
+              },
+              { role: "user", content: openaiPrompt }
+            ],
+            response_format: { type: "json_object" },
+            temperature: 0.1,
+            max_tokens: 2000
+          });
 
-      const aiResponse = JSON.parse(completion.choices[0].message.content || '{}');
+          const openaiResponse = JSON.parse(openaiCompletion.choices[0].message.content || '{}');
+          if (openaiResponse.providers) {
+            allProviders = [...openaiResponse.providers];
+            console.log(`OpenAI found ${openaiResponse.providers.length} providers`);
+          }
+        } catch (error) {
+          console.error("OpenAI error:", error);
+        }
+      }
+
+      // Try Google Gemini as enhancement/fallback
+      if (process.env.GOOGLE_AI_API_KEY) {
+        try {
+          const { GoogleGenerativeAI } = await import('@google/generative-ai');
+          const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY);
+          const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+
+          const geminiPrompt = `Find ${utilityType} providers that serve ${fullAddress}. Focus on local and regional providers that might be missed by other sources.
+
+Return JSON format:
+{
+  "providers": [
+    {
+      "provider": "Company Name",
+      "phone": "Phone number",
+      "website": "Website URL",
+      "description": "Service description",
+      "estimatedCost": "Cost range",
+      "availability": "Availability details",
+      "setupFee": "Setup fees",
+      "connectionTime": "Connection timeframe",
+      "connectionType": "Connection type",
+      "maxSpeed": "Max speed (if applicable)",
+      "services": ["Service list"],
+      "notes": "Special notes"
+    }
+  ]
+}
+
+Only include real providers that actually serve this location.`;
+
+          const geminiResult = await model.generateContent(geminiPrompt);
+          const geminiText = geminiResult.response.text();
+          
+          // Extract JSON from Gemini response
+          const jsonMatch = geminiText.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            const geminiResponse = JSON.parse(jsonMatch[0]);
+            if (geminiResponse.providers) {
+              // Merge with OpenAI results, avoiding duplicates
+              for (const geminiProvider of geminiResponse.providers) {
+                const isDuplicate = allProviders.some(existing => 
+                  existing.provider.toLowerCase().includes(geminiProvider.provider.toLowerCase()) ||
+                  geminiProvider.provider.toLowerCase().includes(existing.provider.toLowerCase())
+                );
+                if (!isDuplicate) {
+                  allProviders.push(geminiProvider);
+                }
+              }
+              console.log(`Gemini added ${geminiResponse.providers.length} additional providers`);
+            }
+          }
+        } catch (error) {
+          console.error("Google Gemini error:", error);
+        }
+      }
+
+      // If no providers found from APIs, use mock data
+      if (allProviders.length === 0) {
+        console.log("No API providers found, using mock data");
+        allProviders = getMockUtilityProviders(utilityType, city, state);
+      }
 
       // Format providers with additional fields for our interface
-      const formattedProviders = (aiResponse.providers || []).map((provider: any) => ({
+      const formattedProviders = allProviders.map((provider: any) => ({
         ...provider,
         referralUrl: provider.website || `https://www.google.com/search?q=${encodeURIComponent(provider.provider)}`,
         affiliateCode: "",
         rating: provider.rating || 0
       }));
 
-      console.log("Returning providers:", formattedProviders.length);
+      console.log("Returning total providers:", formattedProviders.length);
 
       res.json({ 
         providers: formattedProviders,
         location: fullAddress,
-        utilityType 
+        utilityType,
+        sources: {
+          openai: process.env.OPENAI_API_KEY ? "available" : "unavailable",
+          gemini: process.env.GOOGLE_AI_API_KEY ? "available" : "unavailable"
+        }
       });
 
     } catch (error) {
       console.error("Error finding utility providers:", error);
 
-      // Fallback to mock data on error
+      // Final fallback to mock data
       const mockProviders = getMockUtilityProviders(req.body.utilityType, req.body.city, req.body.state);
       res.json({ 
         providers: mockProviders,
