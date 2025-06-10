@@ -516,29 +516,14 @@ export default function MovingJourney() {
           // Store original position
           signPositionsRef.current[step.id] = { left: position.left, top: position.top };
 
-          // Get custom sign for this task category with specific Sign 3 override
-          const getCustomSign = (stepTitle: string, stepIndex: number) => {
-            // Override Sign 3 specifically
-            if (stepIndex === 2) return customGraphics.taskIcons['address-changes'];
-
-            if (stepTitle.includes('Moving') || stepTitle.includes('Truck')) return customGraphics.taskIcons['moving'];
-            if (stepTitle.includes('Utility') && stepTitle.includes('Setup')) return customGraphics.taskIcons['utilities-setup'];
-            if (stepTitle.includes('Address')) return customGraphics.taskIcons['address-changes'];
-            if (stepTitle.includes('Utility') || stepTitle.includes('Service')) return customGraphics.taskIcons['utilities-services'];
-            if (stepTitle.includes('Essential') || stepTitle.includes('Medical')) return customGraphics.taskIcons['essential-services'];
-            return customGraphics.taskIcons['moving']; // Default to first sign
-          };
-
           // Override Sign 3 content specifically
-            let displayTitle = step.title;
-            let displayDescription = step.description;
+          let displayTitle = step.title;
+          let displayDescription = step.description;
 
-            if (index === 2) {
-              displayTitle = "Change of Address";
-              displayDescription = "USPS official address change. Update banks, insurance, subscriptions, etc.";
-            }
-
-            const customSign = getCustomSign(step.title, index);
+          if (index === 2) {
+            displayTitle = "Change of Address";
+            displayDescription = "USPS official address change. Update banks, insurance, subscriptions, etc.";
+          }
 
           return (
             <div
