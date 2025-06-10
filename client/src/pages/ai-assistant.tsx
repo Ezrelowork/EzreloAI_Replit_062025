@@ -52,6 +52,7 @@ export default function AIAssistant() {
     priorities: [] as string[]
   });
   const [aiResponse, setAiResponse] = useState<AIResponse | null>(null);
+  const [showJourneyButton, setShowJourneyButton] = useState(false);
 
   const priorityOptions = [
     "Cost savings",
