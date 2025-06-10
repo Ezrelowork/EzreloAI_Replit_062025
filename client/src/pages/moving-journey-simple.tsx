@@ -234,24 +234,27 @@ export default function MovingJourney() {
     }
   }, [projectQuery.data, tasksQuery.data]);
 
-  const handleTaskClick = (step: JourneyStep, event?: any) => {
-    // Visual feedback - sign click animation
-    if (event?.target) {
-      const element = event.target as HTMLElement;
-      element.style.transform = 'scale(0.95)';
-      element.style.transition = 'transform 0.2s ease';
+  const handleTaskClick = (step: JourneyStep, event: React.MouseEvent, stepIndex: number) => {
+    const cardElement = taskCardRefs.current[step.id];
+    if (cardElement) {
+      // Override Sign 3 content for task modal
+      let taskTitle = step.title;
+      let taskDescription = step.description;
 
-      setTimeout(() => {
-        element.style.transform = 'scale(1)';
-      }, 200);
-    }
+      if (stepIndex === 2) {
+        taskTitle = "Change of Address";
+        taskDescription = "USPS official address change. Update banks, insurance, subscriptions, etc.";
+      }
 
-    // Check if shift key is held for editing mode
-    if (event?.shiftKey) {
-      handleEditTask(step);
-    } else {
-      // Direct navigation to task page instead of modal
-      handleStartTask(step);
+      // Cinematic zoom into the task card
+      zoomIntoTask(cardElement, {
+        id: step.id,
+        title: taskTitle,
+        description: taskDescription,
+        priority: step.priority,
+        week: step.week,
+        category: getCategoryFromTask(taskTitle)
+      });
     }
   };
 
@@ -262,7 +265,7 @@ export default function MovingJourney() {
       description: step.description
     });
     setShowEditPanel(true);
-    
+
     toast({
       title: "Edit Mode",
       description: "You can now edit the task details inline",
@@ -496,6 +499,30 @@ export default function MovingJourney() {
           // Store original position
           signPositionsRef.current[step.id] = { left: position.left, top: position.top };
 
+          // Get custom sign for this task category with specific Sign 3 override
+          const getCustomSign = (stepTitle: string, stepIndex: number) => {
+            // Override Sign 3 specifically
+            if (stepIndex === 2) return customGraphics.taskIcons['address-changes'];
+
+            if (stepTitle.includes('Moving') || stepTitle.includes('Truck')) return customGraphics.taskIcons['moving'];
+            if (stepTitle.includes('Utility') && stepTitle.includes('Setup')) return customGraphics.taskIcons['utilities-setup'];
+            if (stepTitle.includes('Address')) return customGraphics.taskIcons['address-changes'];
+            if (stepTitle.includes('Utility') || stepTitle.includes('Service')) return customGraphics.taskIcons['utilities-services'];
+            if (stepTitle.includes('Essential') || stepTitle.includes('Medical')) return customGraphics.taskIcons['essential-services'];
+            return customGraphics.taskIcons['moving']; // Default to first sign
+          };
+
+          // Override Sign 3 content specifically
+            let displayTitle = step.title;
+            let displayDescription = step.description;
+
+            if (index === 2) {
+              displayTitle = "Change of Address";
+              displayDescription = "USPS official address change. Update banks, insurance, subscriptions, etc.";
+            }
+
+            const customSign = getCustomSign(step.title, index);
+
           return (
             <div
               key={step.id}
@@ -509,14 +536,28 @@ export default function MovingJourney() {
               }}
             >
               <DynamicHighwaySign
-                title={step.title}
-                description={step.description}
+                title={displayTitle}
+                description={displayDescription}
                 week={step.week}
                 priority={step.priority}
                 completed={step.completed}
-                onClick={() => handleTaskClick(step)}
+                onClick={(e) => handleTaskClick(step, e, index)}
                 className="group"
               />
+
+              {/* Hover Card */}
+                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                    <div className="bg-white rounded-lg shadow-xl p-3 border min-w-48">
+                      <h4 className="font-semibold text-sm text-gray-900">{displayTitle}</h4>
+                      <p className="text-xs text-gray-600 mt-1">{displayDescription}</p>
+                      <div className="flex gap-1 mt-2">
+                        <Badge variant={step.priority === 'high' ? 'destructive' : 'secondary'} className="text-xs">
+                          {step.priority}
+                        </Badge>
+                        <Badge variant="outline" className="text-xs">{step.week}</Badge>
+                      </div>
+                    </div>
+                  </div>
             </div>
           );
         })}
@@ -538,7 +579,7 @@ export default function MovingJourney() {
         <div className="fixed inset-0 bg-black bg-opacity-50 z-40 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg shadow-2xl max-w-md w-full p-6">
             <h3 className="text-lg font-bold mb-4">Edit Task</h3>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -550,7 +591,7 @@ export default function MovingJourney() {
                   placeholder="Enter task title"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Description
