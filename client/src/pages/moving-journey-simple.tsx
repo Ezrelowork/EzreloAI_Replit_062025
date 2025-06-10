@@ -3,6 +3,8 @@ import { useQuery } from '@tanstack/react-query';
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { ProgressTracker, JourneyStats } from "@/components/progress-tracker";
 import { TaskModal, useTaskModal } from "@/components/task-modal";
 import { ZoomNavigation, useZoomNavigation } from "@/components/zoom-navigation";
@@ -74,6 +76,9 @@ const getCategoryFromTask = (taskTitle: string): string => {
 export default function MovingJourney() {
   const [, setLocation] = useLocation();
   const [journeyData, setJourneyData] = useState<JourneyStep[]>([]);
+  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
+  const [editingData, setEditingData] = useState<{ title: string; description: string } | null>(null);
+  const [showEditPanel, setShowEditPanel] = useState(false);
   const { isOpen, currentTask, openModal, closeModal } = useTaskModal();
   const { isZoomed, zoomOrigin, currentTaskData, zoomIntoTask, zoomOut } = useZoomNavigation();
   const { toast } = useToast();
@@ -241,8 +246,68 @@ export default function MovingJourney() {
       }, 200);
     }
 
-    // Direct navigation to task page instead of modal
-    handleStartTask(step);
+    // Check if shift key is held for editing mode
+    if (event?.shiftKey) {
+      handleEditTask(step);
+    } else {
+      // Direct navigation to task page instead of modal
+      handleStartTask(step);
+    }
+  };
+
+  const handleEditTask = (step: JourneyStep) => {
+    setEditingTaskId(step.id);
+    setEditingData({
+      title: step.title,
+      description: step.description
+    });
+    setShowEditPanel(true);
+    
+    toast({
+      title: "Edit Mode",
+      description: "You can now edit the task details inline",
+      duration: 2000,
+    });
+  };
+
+  const handleSaveEdit = () => {
+    if (!editingTaskId || !editingData) return;
+
+    setJourneyData(prev => 
+      prev.map(step => 
+        step.id === editingTaskId 
+          ? { ...step, title: editingData.title, description: editingData.description }
+          : step
+      )
+    );
+
+    // Update localStorage if using AI action plan
+    const savedActionPlan = localStorage.getItem('aiActionPlan');
+    if (savedActionPlan) {
+      const actionPlan = JSON.parse(savedActionPlan);
+      const updatedPlan = actionPlan.map((action: any, index: number) => 
+        `action-${index}` === editingTaskId 
+          ? { ...action, task: editingData.title, details: editingData.description }
+          : action
+      );
+      localStorage.setItem('aiActionPlan', JSON.stringify(updatedPlan));
+    }
+
+    setEditingTaskId(null);
+    setEditingData(null);
+    setShowEditPanel(false);
+
+    toast({
+      title: "Task Updated",
+      description: "Your changes have been saved successfully",
+      duration: 2000,
+    });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingTaskId(null);
+    setEditingData(null);
+    setShowEditPanel(false);
   };
 
   const handleCompleteTask = (taskId: string) => {
@@ -357,9 +422,18 @@ export default function MovingJourney() {
                   AI Assistant
                 </Button>
               </Link>
+              <span className="text-gray-300">|</span>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="gap-2 text-green-600 hover:text-green-700"
+                onClick={() => setShowEditPanel(true)}
+              >
+                Edit Mode
+              </Button>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Interactive Moving Journey</h1>
-                <p className="text-sm text-gray-600">Your personalized step-by-step relocation roadmap</p>
+                <p className="text-sm text-gray-600">Your personalized step-by-step relocation roadmap • Hold Shift + Click signs to edit</p>
               </div>
             </div>
 
@@ -459,13 +533,63 @@ export default function MovingJourney() {
         />
       </div>
 
+      {/* Inline Editing Panel */}
+      {showEditPanel && editingData && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-40 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg shadow-2xl max-w-md w-full p-6">
+            <h3 className="text-lg font-bold mb-4">Edit Task</h3>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Task Title
+                </label>
+                <Input
+                  value={editingData.title}
+                  onChange={(e) => setEditingData(prev => prev ? { ...prev, title: e.target.value } : null)}
+                  placeholder="Enter task title"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Description
+                </label>
+                <Textarea
+                  value={editingData.description}
+                  onChange={(e) => setEditingData(prev => prev ? { ...prev, description: e.target.value } : null)}
+                  placeholder="Enter task description"
+                  rows={3}
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <Button 
+                onClick={handleSaveEdit}
+                className="flex-1 bg-blue-600 hover:bg-blue-700"
+              >
+                Save Changes
+              </Button>
+              <Button 
+                onClick={handleCancelEdit}
+                variant="outline"
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Cinematic Journey Info */}
       <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 z-30">
         <div className="bg-gray-900 text-white px-6 py-3 rounded-full shadow-2xl border border-gray-700">
           <div className="flex items-center gap-3">
             <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
             <span className="text-sm font-medium">🎬 Cinematic Journey</span>
-            <span className="text-xs text-gray-300">Click any task card to zoom in • Experience immersive task management</span>
+            <span className="text-xs text-gray-300">Click any task • Hold Shift + Click to edit • Stay on this page</span>
           </div>
         </div>
       </div>
