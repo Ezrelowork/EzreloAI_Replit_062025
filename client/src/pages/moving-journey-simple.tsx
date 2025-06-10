@@ -678,5 +678,3 @@ export default function MovingJourney() {
     </div>
   );
 }
-
-const handleTaskClick replacement updates routing logic to include '/change-of-address' for Sign 3 related tasks.
