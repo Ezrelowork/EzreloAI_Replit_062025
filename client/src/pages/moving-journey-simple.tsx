@@ -135,12 +135,13 @@ export default function MovingJourney() {
 
   const tasksQuery = useQuery({
     queryKey: ['/api/project-tasks', projectQuery.data?.id],
-    enabled: !!projectQuery.data?.id,
+    enabled: !!projectQuery.data?.id && !projectQuery.error && !projectQuery.isError && projectQuery.isSuccess,
     retry: false,
     staleTime: 30000, // 30 seconds
     refetchOnWindowFocus: false,
     onError: (error) => {
       console.error('Tasks query error:', error);
+      // Don't crash the app, just log and continue
     }
   });
 
@@ -149,7 +150,8 @@ export default function MovingJourney() {
       // Check for AI-generated project first
       const currentProjectId = localStorage.getItem('currentProjectId');
 
-      if (projectQuery.data && tasksQuery.data && !projectQuery.error && !tasksQuery.error) {
+      // Only proceed with database data if both queries succeeded and have actual data
+      if (projectQuery.data && tasksQuery.data && !projectQuery.error && !projectQuery.isError && !tasksQuery.isError && projectQuery.data.id) {
         // Use database project and tasks data
         const project = projectQuery.data;
         const tasks = tasksQuery.data || [];
@@ -187,6 +189,9 @@ export default function MovingJourney() {
           localStorage.setItem('aiMoveDate', project.moveDate || '');
         }
       } else {
+        // Database query failed or returned empty data - fall back to localStorage or defaults
+        console.log('Database queries failed or returned no data, using localStorage or defaults');
+
         // Always fallback to localStorage data or default signs
         const savedActionPlan = localStorage.getItem('aiActionPlan');
 
@@ -234,7 +239,7 @@ export default function MovingJourney() {
       // Ensure we always have some journey data
       setJourneyData(getDefaultSigns());
     }
-  }, [projectQuery.data, tasksQuery.data, projectQuery.error, tasksQuery.error]);
+  }, [projectQuery.data, tasksQuery.data, projectQuery.error, tasksQuery.error, projectQuery.isError, tasksQuery.isSuccess, tasksQuery.isFetching]);
 
   // Helper function for default signs
   const getDefaultSigns = (): JourneyStep[] => {
