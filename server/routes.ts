@@ -409,7 +409,7 @@ Focus on accuracy and specificity - include availability percentages, exact spee
     }
   });
 
-  // Moving companies endpoint - Google Places for local companies + national carriers
+  // Moving companies endpoint - Enhanced with ChatGPT, Google Gemini, and Google Places API
   app.post("/api/moving-companies", async (req, res) => {
     try {
       const { fromCity, fromState, fromZip, toCity, toState, toZip, fromAddress } = req.body;
@@ -418,9 +418,123 @@ Focus on accuracy and specificity - include availability percentages, exact spee
         return res.status(400).json({ error: "Origin and destination are required" });
       }
 
+      const fromLocation = fromZip ? `${fromCity}, ${fromState} ${fromZip}` : `${fromCity}, ${fromState}`;
+      const toLocation = toZip ? `${toCity}, ${toState} ${toZip}` : `${toCity}, ${toState}`;
+      const isLocalMove = fromState.toUpperCase() === toState.toUpperCase();
+      const moveType = isLocalMove ? "local" : "interstate";
+
       let allCompanies: any[] = [];
 
-      // Find local moving companies using Google Places API
+      // 1. ChatGPT for comprehensive moving company recommendations
+      if (process.env.OPENAI_API_KEY) {
+        try {
+          const OpenAI = (await import('openai')).default;
+          const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+          const chatgptPrompt = `Find moving companies for a ${moveType} move from ${fromLocation} to ${toLocation}.
+
+Include both local specialists and national carriers that serve this route. Provide realistic pricing for this specific distance and move type.
+
+Return JSON format:
+{
+  "companies": [
+    {
+      "provider": "Company Name",
+      "phone": "Phone number",
+      "website": "Official website URL",
+      "description": "Brief description including specialties and service area",
+      "estimatedCost": "Realistic cost range for this route",
+      "services": ["Service 1", "Service 2"],
+      "category": "Local Moving Companies" or "National Moving Companies",
+      "specialties": ["Specialty 1", "Specialty 2"],
+      "availability": "Service area coverage"
+    }
+  ]
+}
+
+Focus on companies that actually serve the ${fromLocation} area with accurate pricing for ${moveType} moves.`;
+
+          const chatgptCompletion = await openai.chat.completions.create({
+            model: "gpt-4o",
+            messages: [
+              { 
+                role: "system", 
+                content: "You are an expert on moving companies with comprehensive knowledge of service areas, pricing, and availability. Provide only accurate, real company information." 
+              },
+              { role: "user", content: chatgptPrompt }
+            ],
+            response_format: { type: "json_object" },
+            temperature: 0.1,
+            max_tokens: 2500
+          });
+
+          const chatgptResponse = JSON.parse(chatgptCompletion.choices[0].message.content || '{}');
+          if (chatgptResponse.companies) {
+            allCompanies = [...chatgptResponse.companies];
+            console.log(`ChatGPT found ${chatgptResponse.companies.length} companies`);
+          }
+        } catch (error) {
+          console.error("ChatGPT error:", error);
+        }
+      }
+
+      // 2. Google Gemini for additional local/regional companies
+      if (process.env.GOOGLE_AI_API_KEY) {
+        try {
+          const { GoogleGenerativeAI } = await import('@google/generative-ai');
+          const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY);
+          const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+
+          const geminiPrompt = `Find moving companies for ${moveType} move from ${fromLocation} to ${toLocation}. Focus on local and regional movers that might be missed by other sources.
+
+Include companies that specifically serve this route, especially smaller local operations with good reputations.
+
+Return JSON format:
+{
+  "companies": [
+    {
+      "provider": "Company Name",
+      "phone": "Phone number",
+      "website": "Website URL",
+      "description": "Service description",
+      "estimatedCost": "Cost range for this route",
+      "services": ["Service list"],
+      "category": "Local Moving Companies" or "Regional Moving Companies",
+      "specialties": ["Specialties"],
+      "availability": "Service coverage"
+    }
+  ]
+}
+
+Only include real companies that actually serve ${fromLocation} to ${toLocation} routes.`;
+
+          const geminiResult = await model.generateContent(geminiPrompt);
+          const geminiText = geminiResult.response.text();
+          
+          // Extract JSON from Gemini response
+          const jsonMatch = geminiText.match(/\{[\s\S]*\}/);
+          if (jsonMatch) {
+            const geminiResponse = JSON.parse(jsonMatch[0]);
+            if (geminiResponse.companies) {
+              // Merge with existing results, avoiding duplicates
+              for (const geminiCompany of geminiResponse.companies) {
+                const isDuplicate = allCompanies.some(existing => 
+                  existing.provider.toLowerCase().includes(geminiCompany.provider.toLowerCase()) ||
+                  geminiCompany.provider.toLowerCase().includes(existing.provider.toLowerCase())
+                );
+                if (!isDuplicate) {
+                  allCompanies.push(geminiCompany);
+                }
+              }
+              console.log(`Gemini added ${geminiResponse.companies.length} additional companies`);
+            }
+          }
+        } catch (error) {
+          console.error("Google Gemini error:", error);
+        }
+      }
+
+      // 3. Google Places API for local companies with real reviews and ratings
       if (process.env.GOOGLE_API_KEY) {
         const searchQueries = [
           `moving companies ${fromCity} ${fromState}`,
@@ -443,10 +557,10 @@ Focus on accuracy and specificity - include availability percentages, exact spee
 
                 if (detailsData.result && detailsData.result.business_status === 'OPERATIONAL') {
                   const company = {
-                    category: "Local Moving Companies",
+                    category: "Local Moving Companies (Google Verified)",
                     provider: detailsData.result.name,
                     phone: detailsData.result.formatted_phone_number || "Contact for details",
-                    description: `Local moving company in ${fromCity}, ${fromState}`,
+                    description: `Local moving company in ${fromCity}, ${fromState} - Google verified`,
                     website: detailsData.result.website || `https://www.google.com/search?q=${encodeURIComponent(detailsData.result.name)} moving company`,
                     referralUrl: detailsData.result.website || `https://www.google.com/search?q=${encodeURIComponent(detailsData.result.name)} moving company`,
                     affiliateCode: "",
@@ -459,7 +573,23 @@ Focus on accuracy and specificity - include availability percentages, exact spee
                     notes: `Google rating: ${detailsData.result.rating || 'Not rated'} | Address: ${detailsData.result.formatted_address || 'Contact for address'}`
                   };
 
-                  if (!allCompanies.find(c => c.provider.toLowerCase() === company.provider.toLowerCase())) {
+                  // Check if this company is already in our list (merge if found)
+                  const existingIndex = allCompanies.findIndex(c => 
+                    c.provider.toLowerCase().includes(company.provider.toLowerCase()) ||
+                    company.provider.toLowerCase().includes(c.provider.toLowerCase())
+                  );
+
+                  if (existingIndex >= 0) {
+                    // Enhance existing company with Google data
+                    allCompanies[existingIndex] = {
+                      ...allCompanies[existingIndex],
+                      phone: company.phone,
+                      website: company.website,
+                      referralUrl: company.referralUrl,
+                      rating: company.rating,
+                      notes: `${allCompanies[existingIndex].notes || ''} | Google verified: ${company.rating} stars`
+                    };
+                  } else {
                     allCompanies.push(company);
                   }
                 }
@@ -471,79 +601,129 @@ Focus on accuracy and specificity - include availability percentages, exact spee
         }
       }
 
-      // Add major national carriers
-      const nationalCarriers = [
-        {
-          category: "National Moving Companies",
-          provider: "United Van Lines",
-          phone: "1-800-995-1000",
-          description: "Major national moving company with interstate services",
-          website: "https://www.unitedvanlines.com",
-          referralUrl: "https://www.unitedvanlines.com",
-          affiliateCode: "",
-          hours: "Contact for hours",
-          rating: 4.1,
-          services: ["Interstate Moving", "Packing", "Storage"],
-          estimatedCost: "Contact for estimate",
-          availability: "Nationwide service",
-          specialties: ["Long Distance", "Interstate", "Full Service"],
-          notes: "Major national carrier with agents nationwide"
-        },
-        {
-          category: "National Moving Companies", 
-          provider: "Atlas Van Lines",
-          phone: "1-800-638-9797",
-          description: "National moving company specializing in long-distance moves",
-          website: "https://www.atlasvanlines.com",
-          referralUrl: "https://www.atlasvanlines.com",
-          affiliateCode: "",
-          hours: "Contact for hours", 
-          rating: 4.0,
-          services: ["Interstate Moving", "Packing", "Storage"],
-          estimatedCost: "Contact for estimate",
-          availability: "Nationwide service",
-          specialties: ["Long Distance", "Interstate", "Corporate Moves"],
-          notes: "Established national carrier"
-        },
-        {
-          category: "Alternative Moving Solutions",
-          provider: "U-Pack",
-          phone: "1-800-413-4799", 
-          description: "You pack, they drive moving service",
-          website: "https://www.upack.com",
-          referralUrl: "https://www.upack.com",
-          affiliateCode: "",
-          hours: "Contact for hours",
-          rating: 4.2,
-          services: ["Interstate Moving", "Moving Containers"],
-          estimatedCost: "Contact for estimate",
-          availability: "Nationwide service",
-          specialties: ["Hybrid Moving", "Cost-Effective", "Flexible"],
-          notes: "You pack, they drive - cost-effective option"
-        },
-        {
-          category: "Alternative Moving Solutions",
-          provider: "PODS",
-          phone: "1-855-706-4758",
-          description: "Portable storage and moving containers",
-          website: "https://www.pods.com", 
-          referralUrl: "https://www.pods.com",
-          affiliateCode: "",
-          hours: "Contact for hours",
-          rating: 4.0,
-          services: ["Portable Storage", "Moving Containers"],
-          estimatedCost: "Contact for estimate", 
-          availability: "Nationwide service",
-          specialties: ["Storage", "Flexible Moving", "Containers"],
-          notes: "Portable storage containers delivered to your location"
-        }
-      ];
+      // 4. Add comprehensive national carriers for interstate moves
+      if (!isLocalMove) {
+        const nationalCarriers = [
+          {
+            category: "National Moving Companies",
+            provider: "United Van Lines",
+            phone: "1-800-995-1000",
+            description: "Major national moving company with interstate services and local agents",
+            website: "https://www.unitedvanlines.com",
+            referralUrl: "https://www.unitedvanlines.com",
+            affiliateCode: "",
+            hours: "Contact for hours",
+            rating: 4.1,
+            services: ["Interstate Moving", "Packing", "Storage", "Auto Transport"],
+            estimatedCost: "Contact for estimate",
+            availability: "Nationwide service",
+            specialties: ["Long Distance", "Interstate", "Full Service"],
+            notes: "Major national carrier with agents nationwide"
+          },
+          {
+            category: "National Moving Companies", 
+            provider: "Atlas Van Lines",
+            phone: "1-800-638-9797",
+            description: "National moving company specializing in long-distance moves",
+            website: "https://www.atlasvanlines.com",
+            referralUrl: "https://www.atlasvanlines.com",
+            affiliateCode: "",
+            hours: "Contact for hours", 
+            rating: 4.0,
+            services: ["Interstate Moving", "Packing", "Storage"],
+            estimatedCost: "Contact for estimate",
+            availability: "Nationwide service",
+            specialties: ["Long Distance", "Interstate", "Corporate Moves"],
+            notes: "Established national carrier"
+          },
+          {
+            category: "National Moving Companies",
+            provider: "Mayflower Transit",
+            phone: "1-800-428-1234",
+            description: "Premium national moving company with white-glove service",
+            website: "https://www.mayflower.com",
+            referralUrl: "https://www.mayflower.com",
+            affiliateCode: "",
+            hours: "Contact for hours",
+            rating: 4.0,
+            services: ["Interstate Moving", "Premium Packing", "Storage", "Specialty Items"],
+            estimatedCost: "Contact for estimate",
+            availability: "Nationwide service",
+            specialties: ["Premium Service", "Corporate Relocation", "Specialty Items"],
+            notes: "Premium carrier with white-glove service options"
+          },
+          {
+            category: "Alternative Moving Solutions",
+            provider: "U-Pack",
+            phone: "1-800-413-4799", 
+            description: "You pack, they drive moving service - cost-effective hybrid solution",
+            website: "https://www.upack.com",
+            referralUrl: "https://www.upack.com",
+            affiliateCode: "",
+            hours: "Contact for hours",
+            rating: 4.2,
+            services: ["Interstate Moving", "Moving Containers", "Storage"],
+            estimatedCost: "Contact for estimate",
+            availability: "Nationwide service",
+            specialties: ["Hybrid Moving", "Cost-Effective", "Flexible"],
+            notes: "You pack, they drive - cost-effective option for long distance"
+          },
+          {
+            category: "Alternative Moving Solutions",
+            provider: "PODS",
+            phone: "1-855-706-4758",
+            description: "Portable storage and moving containers with flexible timing",
+            website: "https://www.pods.com", 
+            referralUrl: "https://www.pods.com",
+            affiliateCode: "",
+            hours: "Contact for hours",
+            rating: 4.0,
+            services: ["Portable Storage", "Moving Containers", "Self-Paced Moving"],
+            estimatedCost: "Contact for estimate", 
+            availability: "Nationwide service",
+            specialties: ["Storage", "Flexible Moving", "Containers"],
+            notes: "Portable storage containers delivered to your location"
+          }
+        ];
 
-      allCompanies.push(...nationalCarriers);
+        // Only add national carriers if not already present
+        for (const carrier of nationalCarriers) {
+          const isDuplicate = allCompanies.some(existing => 
+            existing.provider.toLowerCase().includes(carrier.provider.toLowerCase())
+          );
+          if (!isDuplicate) {
+            allCompanies.push(carrier);
+          }
+        }
+      }
+
+      // Format all companies with consistent structure
+      const formattedCompanies = allCompanies.map(company => ({
+        ...company,
+        referralUrl: company.referralUrl || company.website || `https://www.google.com/search?q=${encodeURIComponent(company.provider)}`,
+        affiliateCode: company.affiliateCode || "",
+        rating: company.rating || 0,
+        hours: company.hours || "Contact for hours",
+        services: company.services || ["Moving Services"],
+        specialties: company.specialties || ["Professional Moving"],
+        availability: company.availability || "Contact for availability"
+      }));
+
+      console.log(`Total companies found: ${formattedCompanies.length}`);
 
       res.json({
         success: true,
-        companies: allCompanies
+        companies: formattedCompanies,
+        searchInfo: {
+          from: fromLocation,
+          to: toLocation,
+          moveType: moveType,
+          sources: {
+            chatgpt: process.env.OPENAI_API_KEY ? "available" : "unavailable",
+            gemini: process.env.GOOGLE_AI_API_KEY ? "available" : "unavailable",
+            googlePlaces: process.env.GOOGLE_API_KEY ? "available" : "unavailable"
+          }
+        }
       });
 
     } catch (error) {
