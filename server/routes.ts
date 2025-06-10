@@ -232,7 +232,9 @@ async function searchGooglePlaces(searchQuery: string, location?: string): Promi
   const query = location ? `${searchQuery} ${location}` : searchQuery;
   const params = new URLSearchParams({
     query: query.trim(),
-    key: process.env.GOOGLE_API_KEY!
+    key: process.env.GOOGLE_API_KEY!,
+    // Add timestamp for cache busting
+    timestamp: Date.now().toString()
   });
 
   try {
@@ -263,7 +265,9 @@ async function getPlaceDetails(placeId: string): Promise<any> {
   const params = new URLSearchParams({
     place_id: placeId,
     key: process.env.GOOGLE_API_KEY!,
-    fields: 'name,rating,reviews,formatted_phone_number,website,formatted_address,business_status,opening_hours,price_level,user_ratings_total'
+    fields: 'name,rating,reviews,formatted_phone_number,website,formatted_address,business_status,opening_hours,price_level,user_ratings_total',
+    // Add timestamp for cache busting
+    timestamp: Date.now().toString()
   });
 
   try {
@@ -412,6 +416,11 @@ Focus on accuracy and specificity - include availability percentages, exact spee
   // Moving companies endpoint - Enhanced with ChatGPT, Google Gemini, and Google Places API
   app.post("/api/moving-companies", async (req, res) => {
     try {
+      // Disable caching for fresh results each time
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+
       const { fromCity, fromState, fromZip, toCity, toState, toZip, fromAddress } = req.body;
 
       if (!fromCity || !fromState || !toCity || !toState) {
@@ -1553,6 +1562,11 @@ Only include real providers that actually serve this location.`;
   // Google Reviews endpoint
   app.get("/api/google-reviews/:companyName", async (req, res) => {
     try {
+      // Disable caching for fresh results each time
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Pragma', 'no-cache');
+      res.setHeader('Expires', '0');
+
       const { companyName } = req.params;
       const { location } = req.query;
 
