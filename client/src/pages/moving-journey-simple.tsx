@@ -359,8 +359,10 @@ export default function MovingJourney() {
     } else if (combined.includes('local') || combined.includes('school') || combined.includes('doctor') || 
                combined.includes('healthcare') || combined.includes('community') || combined.includes('services')) {
       targetRoute = '/local-services';
-    } else if (combined.includes('address') || combined.includes('documentation') || combined.includes('registration') || 
-               combined.includes('voter') || combined.includes('license') || combined.includes('update')) {
+    } else if (combined.includes('address') || combined.includes('change') || combined.includes('usps') || 
+               combined.includes('documentation') || combined.includes('registration') || 
+               combined.includes('voter') || combined.includes('license') || combined.includes('update') ||
+               combined.includes('bank') || combined.includes('insurance') || combined.includes('subscription')) {
       targetRoute = '/change-of-address';
     } else if (combined.includes('pack') || combined.includes('organize') || combined.includes('checklist')) {
       targetRoute = '/moving-checklist';
