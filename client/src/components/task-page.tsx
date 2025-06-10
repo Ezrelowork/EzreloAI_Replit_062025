@@ -312,9 +312,6 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
       setMovingCompanies(companies);
       setSearchType('moving');
       setShowResults(true);
-      
-      // Cache the results for future visits
-      localStorage.setItem(`movingCompanies_${moveData.from}_${moveData.to}`, JSON.stringify(companies));
     },
     onError: (error) => {
       toast({
