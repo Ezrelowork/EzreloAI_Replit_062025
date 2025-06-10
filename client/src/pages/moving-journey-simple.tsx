@@ -204,7 +204,7 @@ export default function MovingJourney() {
         position: { x: 65, y: 55 },
         signType: 'info',
         completed: false,
-        priority: 'medium'
+        priority: 'high'
       },
       {
         id: 'default-sign-4',
@@ -362,7 +362,8 @@ export default function MovingJourney() {
     } else if (combined.includes('address') || combined.includes('change') || combined.includes('usps') || 
                combined.includes('documentation') || combined.includes('registration') || 
                combined.includes('voter') || combined.includes('license') || combined.includes('update') ||
-               combined.includes('bank') || combined.includes('insurance') || combined.includes('subscription')) {
+               combined.includes('bank') || combined.includes('insurance') || combined.includes('subscription') ||
+               combined.includes('mail') || combined.includes('forward') || combined.includes('postal')) {
       targetRoute = '/change-of-address';
     } else if (combined.includes('pack') || combined.includes('organize') || combined.includes('checklist')) {
       targetRoute = '/moving-checklist';
