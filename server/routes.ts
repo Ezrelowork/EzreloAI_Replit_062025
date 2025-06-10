@@ -425,6 +425,9 @@ Focus on accuracy and specificity - include availability percentages, exact spee
 
       let allCompanies: any[] = [];
 
+      // Get companies from ChatGPT
+      let chatGptCompanies: any[] = [];
+
       // 1. ChatGPT for comprehensive moving company recommendations
       if (process.env.OPENAI_API_KEY) {
         try {
@@ -470,7 +473,8 @@ Focus on companies that actually serve the ${fromLocation} area with accurate pr
 
           const chatgptResponse = JSON.parse(chatgptCompletion.choices[0].message.content || '{}');
           if (chatgptResponse.companies) {
-            allCompanies = [...chatgptResponse.companies];
+            chatGptCompanies = [...chatgptResponse.companies];
+            allCompanies = [...chatGptCompanies];
             console.log(`ChatGPT found ${chatgptResponse.companies.length} companies`);
           }
         } catch (error) {
@@ -478,61 +482,56 @@ Focus on companies that actually serve the ${fromLocation} area with accurate pr
         }
       }
 
-      // 2. Google Gemini for additional local/regional companies
-      if (process.env.GOOGLE_AI_API_KEY) {
-        try {
-          const { GoogleGenerativeAI } = await import('@google/generative-ai');
-          const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY);
-          const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      // Enhance with Google Gemini for additional local providers
+        if (process.env.GOOGLE_AI_API_KEY) {
+          try {
+            const { GoogleGenerativeAI } = await import('@google/generative-ai');
+            const genAI = new GoogleGenerativeAI(process.env.GOOGLE_AI_API_KEY);
+            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-          const geminiPrompt = `Find moving companies for ${moveType} move from ${fromLocation} to ${toLocation}. Focus on local and regional movers that might be missed by other sources.
+            const geminiPrompt = `Find additional local moving companies for ${fromCity}, ${fromState} to ${toCity}, ${toState} that might be missed by major search engines. Focus on:
+            - Regional moving companies
+            - Local family-owned businesses
+            - Specialty movers for this route
 
-Include companies that specifically serve this route, especially smaller local operations with good reputations.
+            Return only companies not already in this list: ${chatGptCompanies.map(c => c.provider).join(', ')}
 
-Return JSON format:
-{
-  "companies": [
-    {
-      "provider": "Company Name",
-      "phone": "Phone number",
-      "website": "Website URL",
-      "description": "Service description",
-      "estimatedCost": "Cost range for this route",
-      "services": ["Service list"],
-      "category": "Local Moving Companies" or "Regional Moving Companies",
-      "specialties": ["Specialties"],
-      "availability": "Service coverage"
-    }
-  ]
-}
+            Format as JSON array with: provider, phone, description, website, services[], estimatedCost, rating (must be 3.5-4.8), category
 
-Only include real companies that actually serve ${fromLocation} to ${toLocation} routes.`;
+            Example rating values: 3.8, 4.1, 4.3, 4.5, etc. Do not use 0 or null.`;
 
-          const geminiResult = await model.generateContent(geminiPrompt);
-          const geminiText = geminiResult.response.text();
-          
-          // Extract JSON from Gemini response
-          const jsonMatch = geminiText.match(/\{[\s\S]*\}/);
-          if (jsonMatch) {
-            const geminiResponse = JSON.parse(jsonMatch[0]);
-            if (geminiResponse.companies) {
-              // Merge with existing results, avoiding duplicates
-              for (const geminiCompany of geminiResponse.companies) {
-                const isDuplicate = allCompanies.some(existing => 
-                  existing.provider.toLowerCase().includes(geminiCompany.provider.toLowerCase()) ||
-                  geminiCompany.provider.toLowerCase().includes(existing.provider.toLowerCase())
-                );
-                if (!isDuplicate) {
-                  allCompanies.push(geminiCompany);
-                }
+            const geminiResult = await model.generateContent(geminiPrompt);
+            const geminiText = geminiResult.response.text();
+
+            try {
+              const geminiCompanies = JSON.parse(geminiText.replace(/```json\n?/g, '').replace(/```\n?/g, ''));
+
+              if (Array.isArray(geminiCompanies)) {
+                const formattedGeminiCompanies = geminiCompanies.slice(0, 4).map((company: any, index: number) => ({
+                  category: company.category || "Local Moving Companies",
+                  provider: company.provider || "Local Mover",
+                  phone: company.phone || "Contact via website",
+                  description: company.description || "Professional moving services",
+                  website: company.website || "#",
+                  referralUrl: company.website || "#",
+                  affiliateCode: `EZRELO_GEMINI`,
+                  hours: "Contact for hours",
+                  rating: (company.rating && company.rating > 0) ? company.rating : (4.0 + (index * 0.1)), // Ensure valid rating
+                  services: Array.isArray(company.services) ? company.services : ["Moving Services"],
+                  estimatedCost: company.estimatedCost || "Contact for quote"
+                }));
+
+                // Add Gemini companies to the beginning
+                allCompanies = [...formattedGeminiCompanies, ...allCompanies];
+                console.log(`Gemini added ${formattedGeminiCompanies.length} additional providers`);
               }
-              console.log(`Gemini added ${geminiResponse.companies.length} additional companies`);
+            } catch (parseError) {
+              console.log('Could not parse Gemini response as JSON');
             }
+          } catch (error) {
+            console.log('Gemini enhancement failed:', error);
           }
-        } catch (error) {
-          console.error("Google Gemini error:", error);
         }
-      }
 
       // 3. Google Places API for local companies with real reviews and ratings
       if (process.env.GOOGLE_API_KEY) {
@@ -1003,7 +1002,7 @@ Only include real providers that actually serve this location.`;
 
           const geminiResult = await model.generateContent(geminiPrompt);
           const geminiText = geminiResult.response.text();
-          
+
           // Extract JSON from Gemini response
           const jsonMatch = geminiText.match(/\{[\s\S]*\}/);
           if (jsonMatch) {
@@ -1661,7 +1660,7 @@ Only include real providers that actually serve this location.`;
         }
 
         try {
-          console.log(`Searching for: ${searchQuery} in ${location}`);
+          console.log(`Searching for: `${searchQuery} in ${location}`);
           const places = await searchGooglePlaces(searchQuery, location);
           console.log(`Found ${places?.length || 0} places for ${category}`);
 
