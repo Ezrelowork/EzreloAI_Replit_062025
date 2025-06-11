@@ -165,9 +165,7 @@ export interface GraphicAsset {
 export interface JourneyGraphics {
   roadBackground?: GraphicAsset;
   timelinePath?: GraphicAsset;
-  taskIcons?: {
-    [key: string]: GraphicAsset;
-  };
+  blankSignTemplate?: GraphicAsset;
   decorativeElements?: GraphicAsset[];
 }
 

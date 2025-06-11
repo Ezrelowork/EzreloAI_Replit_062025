@@ -35,33 +35,13 @@ export class GraphicsManager {
           };
         }
 
-        // Individual road signs (SIgn1.png, Sign2.png, etc.)
-        if (fileName.toLowerCase().includes('sign')) {
-          if (!newGraphics.taskIcons) newGraphics.taskIcons = {};
-          
-          // Map specific signs to task categories based on content
-          let signKey = 'default';
-          
-          // Sign1 = Core Moving Tasks
-          if (fileName.includes('SIgn1') || fileName.includes('Sign1')) signKey = 'moving';
-          
-          // Sign2 = Set Up Utilities  
-          if (fileName.includes('Sign2')) signKey = 'utilities-setup';
-          
-          // Sign3 = Address Changes
-          if (fileName.includes('Sign3')) signKey = 'address-changes';
-          
-          // Sign4 = Utilities & Services
-          if (fileName.includes('Sign4')) signKey = 'utilities-services';
-          
-          // Sign5 = Essential Services
-          if (fileName.includes('Sign5')) signKey = 'essential-services';
-          
-          newGraphics.taskIcons[signKey] = {
+        // Blank highway sign template for dynamic text overlay
+        if (fileName.includes('9097D925-400E-4B8C-9697-19B7E4BDA0C9_1749334781517')) {
+          newGraphics.blankSignTemplate = {
             src: assetPath,
-            alt: `Highway Sign ${signKey}`,
-            width: 120,
-            height: 80
+            alt: 'Blank Highway Sign Template',
+            width: 256,
+            height: 176
           };
         }
       } catch (error) {
