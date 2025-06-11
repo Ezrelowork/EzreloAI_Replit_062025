@@ -50,7 +50,6 @@ function Router() {
         <Switch>
           <Route path="/" component={Landing} />
           <Route path="/hub" component={RelocationHub} />
-          <Route path="/dashboard" component={Dashboard} />
           <Route path="/ai-assistant" component={AIAssistant} />
           <Route path="/moving-journey" component={MovingJourneySimple} />
           <Route path="/moving-companies" component={MovingCompanies} />

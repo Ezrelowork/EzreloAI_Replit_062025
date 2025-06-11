@@ -142,7 +142,7 @@ export default function MovingJourney() {
               tasks: [description],
               priority: action.priority || (index < 2 ? 'high' : index < 4 ? 'medium' : 'low'),
               completed: false,
-              route: action.route || '/dashboard',
+              route: '/moving-checklist',
               position: { x: 20 + (index * 15), y: 50 + Math.sin(index * 0.8) * 20 },
               signType: action.priority === 'high' ? 'warning' : action.priority === 'medium' ? 'highway' : 'info',
             };
@@ -327,41 +327,39 @@ export default function MovingJourney() {
     const toParam = localStorage.getItem('aiToLocation');
     const dateParam = localStorage.getItem('aiMoveDate');
 
-    // Intelligent routing based on task content - DIRECT to dedicated pages
-    const taskLower = step.title.toLowerCase();
-    const descLower = step.description.toLowerCase();
-    const combined = `${taskLower} ${descLower}`;
-
+    // FORCE DIRECT ROUTING - No dashboard, no task pages
     let targetRoute = '/moving-checklist'; // Default fallback
 
-    // Direct routing to dedicated pages - NO dashboard/task routes
-    if (combined.includes('mover') || combined.includes('moving') || combined.includes('truck') || combined.includes('quote') || combined.includes('storage')) {
-      targetRoute = '/moving-companies';  // Go to moving companies page
-    } else if (combined.includes('utility') || combined.includes('electric') || combined.includes('internet') || 
-               combined.includes('gas') || combined.includes('water') || combined.includes('cable')) {
-      targetRoute = '/utilities';
-    } else if (combined.includes('local') || combined.includes('school') || combined.includes('doctor') || 
-               combined.includes('healthcare') || combined.includes('community') || combined.includes('services')) {
-      targetRoute = '/local-services';
-    } else if (combined.includes('address') || combined.includes('change') || combined.includes('usps') || 
-               combined.includes('documentation') || combined.includes('registration') || 
-               combined.includes('voter') || combined.includes('license') || combined.includes('update') ||
-               combined.includes('bank') || combined.includes('insurance') || combined.includes('subscription') ||
-               combined.includes('mail') || combined.includes('forward') || combined.includes('postal')) {
-      targetRoute = '/change-of-address';
-    } else if (combined.includes('pack') || combined.includes('organize') || combined.includes('checklist')) {
-      targetRoute = '/moving-checklist';
-    }
-
-    // Force specific signs to their dedicated pages
-    if (step.id === 'default-sign-1' || step.title.toLowerCase().includes('moving and storage')) {
+    // Override by sign ID first (highest priority)
+    if (step.id === 'default-sign-1') {
       targetRoute = '/moving-companies';
-    } else if (step.id === 'default-sign-2' || step.title.toLowerCase().includes('utility setup')) {
+    } else if (step.id === 'default-sign-2') {
       targetRoute = '/utilities';
-    } else if (step.id === 'default-sign-3' || step.title.toLowerCase().includes('change of address')) {
+    } else if (step.id === 'default-sign-3') {
       targetRoute = '/change-of-address';
-    } else if (step.id === 'default-sign-4' || step.title.toLowerCase().includes('local services')) {
+    } else if (step.id === 'default-sign-4') {
       targetRoute = '/local-services';
+    } else {
+      // Fallback content-based routing
+      const taskLower = step.title.toLowerCase();
+      const descLower = step.description.toLowerCase();
+      const combined = `${taskLower} ${descLower}`;
+
+      if (combined.includes('mover') || combined.includes('moving') || combined.includes('truck') || combined.includes('quote') || combined.includes('storage')) {
+        targetRoute = '/moving-companies';
+      } else if (combined.includes('utility') || combined.includes('electric') || combined.includes('internet') || 
+                 combined.includes('gas') || combined.includes('water') || combined.includes('cable')) {
+        targetRoute = '/utilities';
+      } else if (combined.includes('address') || combined.includes('change') || combined.includes('usps') || 
+                 combined.includes('documentation') || combined.includes('registration') || 
+                 combined.includes('voter') || combined.includes('license') || combined.includes('update') ||
+                 combined.includes('bank') || combined.includes('insurance') || combined.includes('subscription') ||
+                 combined.includes('mail') || combined.includes('forward') || combined.includes('postal')) {
+        targetRoute = '/change-of-address';
+      } else if (combined.includes('local') || combined.includes('school') || combined.includes('doctor') || 
+                 combined.includes('healthcare') || combined.includes('community') || combined.includes('services')) {
+        targetRoute = '/local-services';
+      }
     }
 
     // Build query params for context preservation
