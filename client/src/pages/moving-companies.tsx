@@ -281,52 +281,74 @@ export default function MovingCompanies() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-4">
                 <h3 className="font-semibold">Current Location</h3>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-3">
                   <div>
-                    <Label htmlFor="fromCity">City *</Label>
+                    <Label htmlFor="fromAddress">Full Address</Label>
                     <Input
-                      id="fromCity"
-                      value={moveDetails.fromCity}
-                      onChange={(e) => setMoveDetails(prev => ({ ...prev, fromCity: e.target.value }))}
-                      placeholder="Current city"
-                      required
+                      id="fromAddress"
+                      value={moveDetails.fromAddress}
+                      onChange={(e) => setMoveDetails(prev => ({ ...prev, fromAddress: e.target.value }))}
+                      placeholder="Full current address"
                     />
                   </div>
-                  <div>
-                    <Label htmlFor="fromState">State *</Label>
-                    <Input
-                      id="fromState"
-                      value={moveDetails.fromState}
-                      onChange={(e) => setMoveDetails(prev => ({ ...prev, fromState: e.target.value }))}
-                      placeholder="TX"
-                      required
-                    />
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <Label htmlFor="fromCity">City *</Label>
+                      <Input
+                        id="fromCity"
+                        value={moveDetails.fromCity}
+                        onChange={(e) => setMoveDetails(prev => ({ ...prev, fromCity: e.target.value }))}
+                        placeholder="Current city"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="fromState">State *</Label>
+                      <Input
+                        id="fromState"
+                        value={moveDetails.fromState}
+                        onChange={(e) => setMoveDetails(prev => ({ ...prev, fromState: e.target.value }))}
+                        placeholder="TX"
+                        required
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
               
               <div className="space-y-4">
                 <h3 className="font-semibold">Destination</h3>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-3">
                   <div>
-                    <Label htmlFor="toCity">City *</Label>
+                    <Label htmlFor="toAddress">Full Address</Label>
                     <Input
-                      id="toCity"
-                      value={moveDetails.toCity}
-                      onChange={(e) => setMoveDetails(prev => ({ ...prev, toCity: e.target.value }))}
-                      placeholder="Destination city"
-                      required
+                      id="toAddress"
+                      value={moveDetails.toAddress}
+                      onChange={(e) => setMoveDetails(prev => ({ ...prev, toAddress: e.target.value }))}
+                      placeholder="Full destination address"
                     />
                   </div>
-                  <div>
-                    <Label htmlFor="toState">State *</Label>
-                    <Input
-                      id="toState"
-                      value={moveDetails.toState}
-                      onChange={(e) => setMoveDetails(prev => ({ ...prev, toState: e.target.value }))}
-                      placeholder="CA"
-                      required
-                    />
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <Label htmlFor="toCity">City *</Label>
+                      <Input
+                        id="toCity"
+                        value={moveDetails.toCity}
+                        onChange={(e) => setMoveDetails(prev => ({ ...prev, toCity: e.target.value }))}
+                        placeholder="Destination city"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="toState">State *</Label>
+                      <Input
+                        id="toState"
+                        value={moveDetails.toState}
+                        onChange={(e) => setMoveDetails(prev => ({ ...prev, toState: e.target.value }))}
+                        placeholder="CA"
+                        required
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
