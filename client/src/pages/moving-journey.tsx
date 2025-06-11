@@ -88,7 +88,7 @@ export default function MovingJourney() {
       week: "Week 1",
       category: "Core Moving",
       completed: false,
-      position: { x: "20%", y: "80%" }, // Above road, left side
+      position: { x: "25%", y: "75%" }, // Above road, left side
       icon: Truck
     },
     {
@@ -99,7 +99,7 @@ export default function MovingJourney() {
       week: "Week 2",
       category: "Essential Services",
       completed: false,
-      position: { x: "65%", y: "75%" }, // Below road, center-right
+      position: { x: "68%", y: "75%" }, // Below road, center-right
       icon: Zap
     },
     {
@@ -132,7 +132,7 @@ export default function MovingJourney() {
       week: "Week 5",
       category: "Family",
       completed: false,
-      position: { x: "55%", y: "25%" }, // Above road, right side
+      position: { x: "55%", y: "18%" }, // Above road, right side
       icon: GraduationCap
     }
   ];
