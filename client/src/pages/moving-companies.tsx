@@ -75,6 +75,7 @@ export default function MovingCompanies() {
   });
   const [hasCompletedActions, setHasCompletedActions] = useState(false);
   const [quotesRequested, setQuotesRequested] = useState<Set<string>>(new Set());
+  const [showQuestionnaireForm, setShowQuestionnaireForm] = useState(false);
 
   // USPS Address verification function
   const verifyAddress = async (address: string) => {
@@ -523,7 +524,10 @@ export default function MovingCompanies() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white">
+                <Button 
+                  onClick={() => setShowQuestionnaireForm(true)}
+                  className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+                >
                   <Package className="w-4 h-4 mr-2" />
                   Fill Out Questionnaire
                 </Button>
@@ -710,6 +714,139 @@ export default function MovingCompanies() {
               >
                 Return to Journey
               </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Questionnaire Form Modal */}
+        {showQuestionnaireForm && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg shadow-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-bold text-gray-900">Moving Estimate Questionnaire</h2>
+                  <button
+                    onClick={() => setShowQuestionnaireForm(false)}
+                    className="text-gray-400 hover:text-gray-600"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+                
+                <p className="text-gray-600 mb-6">
+                  Fill out this questionnaire to get more accurate quotes from moving companies.
+                </p>
+
+                <form className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="currentAddress">Current Address</Label>
+                      <Input
+                        id="currentAddress"
+                        value={`${moveDetails.fromAddress ? moveDetails.fromAddress + ', ' : ''}${moveDetails.fromCity}${moveDetails.fromState ? ', ' + moveDetails.fromState : ''}${moveDetails.fromZip ? ' ' + moveDetails.fromZip : ''}`}
+                        readOnly
+                        className="bg-gray-50"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="destinationAddress">Destination Address</Label>
+                      <Input
+                        id="destinationAddress"
+                        value={`${moveDetails.toAddress ? moveDetails.toAddress + ', ' : ''}${moveDetails.toCity}${moveDetails.toState ? ', ' + moveDetails.toState : ''}${moveDetails.toZip ? ' ' + moveDetails.toZip : ''}`}
+                        readOnly
+                        className="bg-gray-50"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="homeSize">Home Size</Label>
+                    <select className="w-full p-2 border border-gray-300 rounded-md">
+                      <option value="">Select home size</option>
+                      <option value="studio">Studio</option>
+                      <option value="1br">1 Bedroom</option>
+                      <option value="2br">2 Bedroom</option>
+                      <option value="3br">3 Bedroom</option>
+                      <option value="4br+">4+ Bedroom</option>
+                    </select>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="currentFloors">Floors at Current Location</Label>
+                      <Input id="currentFloors" type="number" min="1" max="10" placeholder="1" />
+                    </div>
+                    <div>
+                      <Label htmlFor="destinationFloors">Floors at Destination</Label>
+                      <Input id="destinationFloors" type="number" min="1" max="10" placeholder="1" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="majorItems">Major Items Being Moved</Label>
+                    <Textarea 
+                      id="majorItems" 
+                      placeholder="List furniture, appliances, piano, safe, etc."
+                      className="min-h-[80px]"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="packingServices">Packing Services Needed</Label>
+                    <select className="w-full p-2 border border-gray-300 rounded-md">
+                      <option value="">Select packing preference</option>
+                      <option value="full">Full packing service</option>
+                      <option value="partial">Partial packing</option>
+                      <option value="self">Self-pack</option>
+                      <option value="fragiles">Fragiles only</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="specialItems">Fragile or Specialty Items</Label>
+                    <Textarea 
+                      id="specialItems" 
+                      placeholder="TVs, antiques, artwork, musical instruments, etc."
+                      className="min-h-[60px]"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="storage">Storage Requirements</Label>
+                    <Textarea 
+                      id="storage" 
+                      placeholder="Temporary storage needed? Duration?"
+                      className="min-h-[60px]"
+                    />
+                  </div>
+
+                  <div className="flex gap-3 pt-4">
+                    <Button 
+                      type="button"
+                      onClick={() => {
+                        toast({
+                          title: "Questionnaire Saved",
+                          description: "Your information has been saved and can be shared with moving companies.",
+                        });
+                        setShowQuestionnaireForm(false);
+                      }}
+                      className="flex-1 bg-purple-600 hover:bg-purple-700"
+                    >
+                      Save Questionnaire
+                    </Button>
+                    <Button 
+                      type="button"
+                      variant="outline"
+                      onClick={() => setShowQuestionnaireForm(false)}
+                      className="px-6"
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </form>
+              </div>
             </div>
           </div>
         )}
