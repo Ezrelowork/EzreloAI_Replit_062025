@@ -214,6 +214,8 @@ export const TaskModal: React.FC<TaskModalProps> = ({
                     
                     if (taskLower.includes('utility') || taskLower.includes('utilities') || taskLower.includes('electric') || taskLower.includes('internet') || taskLower.includes('gas') || taskLower.includes('water')) {
                       targetRoute = '/utilities';
+                    } else if (taskLower.includes('address') || taskLower.includes('change') && taskLower.includes('address')) {
+                      targetRoute = '/change-of-address';
                     } else if (taskLower.includes('pack') || taskLower.includes('checklist')) {
                       targetRoute = '/moving-checklist';
                     }
