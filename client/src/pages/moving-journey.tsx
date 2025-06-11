@@ -58,23 +58,40 @@ export default function MovingJourney() {
 
   // Prevent unwanted navigation during development
   useEffect(() => {
-    const preventNavigation = (e: PopStateEvent) => {
-      if (process.env.NODE_ENV === 'development') {
-        e.preventDefault();
-        window.history.pushState(null, '', '/moving-journey');
+    if (process.env.NODE_ENV === 'development') {
+      // Force stay on journey page
+      const currentPath = window.location.pathname;
+      if (currentPath !== '/moving-journey') {
+        window.history.replaceState(null, '', '/moving-journey');
       }
-    };
 
-    window.addEventListener('popstate', preventNavigation);
-    
-    // Ensure we stay on the journey page during development
-    if (process.env.NODE_ENV === 'development' && window.location.pathname !== '/moving-journey') {
-      window.history.replaceState(null, '', '/moving-journey');
+      // Prevent any navigation attempts
+      const preventNavigation = (e: PopStateEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        window.history.pushState(null, '', '/moving-journey');
+      };
+
+      // Prevent router changes
+      const preventRouterChange = () => {
+        if (window.location.pathname !== '/moving-journey') {
+          window.history.replaceState(null, '', '/moving-journey');
+        }
+      };
+
+      // Set up event listeners
+      window.addEventListener('popstate', preventNavigation, true);
+      window.addEventListener('hashchange', preventRouterChange, true);
+      
+      // Check every 100ms to ensure we stay on the journey page
+      const intervalId = setInterval(preventRouterChange, 100);
+
+      return () => {
+        window.removeEventListener('popstate', preventNavigation, true);
+        window.removeEventListener('hashchange', preventRouterChange, true);
+        clearInterval(intervalId);
+      };
     }
-
-    return () => {
-      window.removeEventListener('popstate', preventNavigation);
-    };
   }, []);
 
   // Define moving tasks with highway positions - alternating above and below the road
@@ -179,7 +196,12 @@ export default function MovingJourney() {
               </div>
               <div className="border-l border-gray-300 pl-4">
                 <h1 className="text-2xl font-bold text-gray-900">Your Moving Journey</h1>
-                <p className="text-sm text-gray-600">Click signs to explore tasks and track progress</p>
+                <p className="text-sm text-gray-600">
+                  Click signs to explore tasks and track progress
+                  {process.env.NODE_ENV === 'development' && (
+                    <span className="ml-2 text-orange-600 font-medium">🔒 Navigation Locked (Dev Mode)</span>
+                  )}
+                </p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
@@ -198,15 +220,16 @@ export default function MovingJourney() {
                 size="sm"
                 onClick={() => {
                   if (process.env.NODE_ENV === 'development') {
-                    console.log('Navigation to home prevented during development');
+                    alert('Navigation locked during development to prevent page resets');
                     return;
                   }
                   setLocation('/');
                 }}
-                className="text-gray-600 hover:text-gray-900"
+                className={`text-gray-600 hover:text-gray-900 ${process.env.NODE_ENV === 'development' ? 'opacity-50 cursor-not-allowed' : ''}`}
+                disabled={process.env.NODE_ENV === 'development'}
               >
                 <Home className="w-4 h-4 mr-2" />
-                {process.env.NODE_ENV === 'development' ? 'Home (Dev Mode)' : 'Home'}
+                {process.env.NODE_ENV === 'development' ? '🔒 Dev Mode' : 'Home'}
               </Button>
             </div>
           </div>
