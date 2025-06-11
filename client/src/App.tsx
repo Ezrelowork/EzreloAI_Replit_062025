@@ -1,3 +1,4 @@
+
 import { Switch, Route, Link, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -81,17 +82,6 @@ function Router() {
               });
               window.dispatchEvent(event);
             }} onBack={() => window.history.back()} />;
-          }} />
-          <Route path="/task/moving" component={() => {
-            const mockTask = {
-              id: "moving-companies",
-              title: "Research Moving Companies",
-              description: "Find and compare moving companies for your relocation. Get quotes, check reviews, and select the best option for your needs.",
-              priority: "high" as const,
-              week: "6-8 weeks before",
-              category: "Moving Services"
-            };
-            return <TaskPage task={mockTask} onComplete={() => {}} />;
           }} />
           <Route component={NotFound} />
         </Switch>

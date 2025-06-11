@@ -1,598 +1,261 @@
-import { useState, useEffect, useRef } from "react";
-import { useQuery } from '@tanstack/react-query';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { ProgressTracker, JourneyStats } from "@/components/progress-tracker";
-import { TaskModal, useTaskModal } from "@/components/task-modal";
-import { useToast } from "@/hooks/use-toast";
+import { Card, CardContent } from "@/components/ui/card";
+import { ArrowLeft, ArrowRight, Home, Zap, MapPin, Building, Truck, Calendar, CheckCircle, Clock, X } from "lucide-react";
 import { DynamicHighwaySign } from "@/components/dynamic-highway-sign";
-
-// Direct imports for highway graphics
-import highwayBackground from "@assets/highway-background.png";
-import { 
-  ArrowLeft,
-  Truck,
-  Package,
-  Home,
-  Zap,
-  FileText,
-  Heart,
-  GraduationCap,
-  DollarSign,
-  CheckCircle,
-  Clock,
-  MapPin
-} from "lucide-react";
 
 interface JourneyStep {
   id: string;
   title: string;
-  description: string;
-  week: string;
-  tasks: string[];
+  subtitle: string;
   route: string;
-  position: { x: number; y: number };
-  signType: "stop" | "warning" | "highway" | "info";
-  completed: boolean;
-  priority: "high" | "medium" | "low";
+  color: string;
+  icon: React.ElementType;
+  description: string;
+  estimatedTime: string;
+  priority: 'high' | 'medium' | 'low';
 }
 
-// Helper function to get task icon
-const getTaskIcon = (taskTitle: string) => {
-  const title = taskTitle.toLowerCase();
+const defaultSteps: JourneyStep[] = [
+  {
+    id: 'default-sign-1',
+    title: 'Moving Companies',
+    subtitle: 'Find & Compare Movers',
+    route: '/moving-companies',
+    color: 'blue',
+    icon: Truck,
+    description: 'Research and get quotes from verified moving companies in your area.',
+    estimatedTime: '2-3 hours',
+    priority: 'high'
+  },
+  {
+    id: 'default-sign-2', 
+    title: 'Moving Checklist',
+    subtitle: 'Step-by-Step Tasks',
+    route: '/moving-checklist',
+    color: 'green',
+    icon: CheckCircle,
+    description: 'Complete essential moving tasks with our comprehensive timeline.',
+    estimatedTime: '1 hour setup',
+    priority: 'medium'
+  },
+  {
+    id: 'default-sign-3',
+    title: 'Change of Address',
+    subtitle: 'Update Your Information',
+    route: '/change-of-address',
+    color: 'purple',
+    icon: MapPin,
+    description: 'Notify USPS, banks, credit cards, and other services of your address change.',
+    estimatedTime: '30-45 minutes',
+    priority: 'high'
+  },
+  {
+    id: 'default-sign-4',
+    title: 'Utilities Setup',
+    subtitle: 'Connect Services',
+    route: '/utilities',
+    color: 'orange',
+    icon: Zap,
+    description: 'Set up electricity, gas, internet, and water at your new home.',
+    estimatedTime: '1-2 hours',
+    priority: 'high'
+  },
+  {
+    id: 'default-sign-5',
+    title: 'Local Services',
+    subtitle: 'Find Healthcare & More',
+    route: '/local-services',
+    color: 'teal',
+    icon: Building,
+    description: 'Locate healthcare providers, schools, and local services near your new home.',
+    estimatedTime: '45 minutes',
+    priority: 'medium'
+  }
+];
 
-  if (title.includes('moving') || title.includes('truck') || title.includes('mover')) return Truck;
-  if (title.includes('pack') || title.includes('box') || title.includes('organization')) return Package;
-  if (title.includes('home') || title.includes('house') || title.includes('real estate')) return Home;
-  if (title.includes('utility') || title.includes('electric') || title.includes('internet') || title.includes('gas')) return Zap;
-  if (title.includes('address') || title.includes('change') || title.includes('update') || title.includes('registration')) return FileText;
-  if (title.includes('medical') || title.includes('health') || title.includes('doctor') || title.includes('prescription')) return Heart;
-  if (title.includes('school') || title.includes('education') || title.includes('kids') || title.includes('children')) return GraduationCap;
-  if (title.includes('bank') || title.includes('financial') || title.includes('credit') || title.includes('loan')) return DollarSign;
+export default function MovingJourneySimple() {
+  const [location, navigate] = useLocation();
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const [steps] = useState<JourneyStep[]>(defaultSteps);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  return CheckCircle;
-};
+  const urlParams = new URLSearchParams(window.location.search);
+  const fromParam = urlParams.get('from');
 
-const getCategoryFromTask = (taskTitle: string): string => {
-  const title = taskTitle.toLowerCase();
+  const currentStep = steps[currentStepIndex];
 
-  if (title.includes('moving') || title.includes('truck') || title.includes('mover')) return 'moving';
-  if (title.includes('pack') || title.includes('box') || title.includes('organization')) return 'packing';
-  if (title.includes('home') || title.includes('house') || title.includes('real estate')) return 'housing';
-  if (title.includes('utility') || title.includes('electric') || title.includes('internet') || title.includes('gas')) return 'utilities';
-  if (title.includes('address') || title.includes('change') || title.includes('update') || title.includes('registration')) return 'documentation';
-  if (title.includes('medical') || title.includes('health') || title.includes('doctor') || title.includes('prescription')) return 'medical';
-  if (title.includes('school') || title.includes('education') || title.includes('kids') || title.includes('children')) return 'education';
-  if (title.includes('bank') || title.includes('financial') || title.includes('credit') || title.includes('loan')) return 'financial';
-
-  return 'general';
-};
-
-export default function MovingJourney() {
-  const [, setLocation] = useLocation();
-  const [journeyData, setJourneyData] = useState<JourneyStep[]>([]);
-  const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
-  const [editingData, setEditingData] = useState<{ title: string; description: string } | null>(null);
-  const [showEditPanel, setShowEditPanel] = useState(false);
-  const { isOpen, currentTask, openModal, closeModal } = useTaskModal();
-  const { toast } = useToast();
-  const taskCardRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
-
-  // Highway graphics
-  const customGraphics = {
-    roadBackground: {
-      src: highwayBackground,
-      alt: 'Highway Journey Background',
-      width: 1200,
-      height: 800
-    }
-  };
-
-  // Load project data from database with simplified error handling
-  const projectQuery = useQuery({
-    queryKey: ['/api/current-project'],
-    retry: false,
-    staleTime: 30000,
-    refetchOnWindowFocus: false,
-    onError: (error) => {
-      console.log('Database project query failed, will use localStorage fallback:', error);
-    }
-  });
-
-  const tasksQuery = useQuery({
-    queryKey: ['/api/project-tasks', projectQuery.data?.id],
-    enabled: false, // Disable this query for now to prevent cascading errors
-    retry: false,
-    staleTime: 30000,
-    refetchOnWindowFocus: false
-  });
-
-  useEffect(() => {
-    console.log('Journey data setup running...');
-
-    try {
-      // Always check localStorage first for AI-generated action plan
-      const savedActionPlan = localStorage.getItem('aiActionPlan');
-
-      if (savedActionPlan) {
-        try {
-          console.log('Using saved AI action plan from localStorage');
-          const actionPlan = JSON.parse(savedActionPlan);
-
-          // Transform action plan into journey steps with road positions
-          const steps: JourneyStep[] = actionPlan.map((action: any, index: number) => {
-            let title = action.task || action.title || `Task ${index + 1}`;
-            let description = action.details || action.description || 'Complete this moving task';
-
-            // Customize the first sign to be "Moving and Storage"
-            if (index === 0) {
-              title = "Moving and Storage";
-              description = "Find moving companies and storage solutions for your relocation";
-            }
-
-            return {
-              id: `action-${index}`,
-              title: title,
-              description: description,
-              week: action.timeframe || action.week || `Week ${Math.floor(index / 2) + 1}`,
-              tasks: [description],
-              priority: action.priority || (index < 2 ? 'high' : index < 4 ? 'medium' : 'low'),
-              completed: false,
-              route: '/moving-checklist',
-              position: { x: 20 + (index * 15), y: 50 + Math.sin(index * 0.8) * 20 },
-              signType: action.priority === 'high' ? 'warning' : action.priority === 'medium' ? 'highway' : 'info',
-            };
-          });
-
-          console.log('Setting journey data from action plan:', steps.length, 'steps');
-          setJourneyData(steps);
-          return; // Exit early if we successfully loaded from localStorage
-        } catch (parseError) {
-          console.error('Failed to parse action plan:', parseError);
-        }
-      }
-
-      // Fallback to default signs if no saved data or parsing failed
-      console.log('Using default highway signs');
-      setJourneyData(getDefaultSigns());
-
-    } catch (error) {
-      console.error('Error in journey data setup:', error);
-      // Ensure we always have some journey data
-      setJourneyData(getDefaultSigns());
-    }
-  }, []); // Remove all dependencies to prevent infinite re-renders
-
-  // Helper function for default signs
-  const getDefaultSigns = (): JourneyStep[] => {
-    return [
-      {
-        id: 'default-sign-1',
-        title: 'Moving and Storage',
-        description: 'Find moving companies and storage solutions for your relocation',
-        week: 'Week 1',
-        tasks: ['Research moving companies', 'Get quotes', 'Compare options'],
-        route: '/moving-companies',
-        position: { x: 25, y: 45 },
-        signType: 'highway',
-        completed: false,
-        priority: 'high'
-      },
-      {
-        id: 'default-sign-2',
-        title: 'Utility Setup',
-        description: 'Set up internet, electric, gas, and water services',
-        week: 'Week 2',
-        tasks: ['Contact utility providers', 'Schedule connections', 'Transfer services'],
-        route: '/utilities',
-        position: { x: 45, y: 35 },
-        signType: 'warning',
-        completed: false,
-        priority: 'high'
-      },
-      {
-        id: 'default-sign-3',
-        title: 'Change of Address',
-        description: 'USPS official address change. Update banks, insurance, subscriptions, etc.',
-        week: 'Week 3',
-        tasks: ['File USPS change of address', 'Update banks', 'Update insurance', 'Update subscriptions'],
-        route: '/change-of-address',
-        position: { x: 65, y: 55 },
-        signType: 'info',
-        completed: false,
-        priority: 'high'
-      },
-      {
-        id: 'default-sign-4',
-        title: 'Local Services',
-        description: 'Find schools, healthcare, and community services in your new area',
-        week: 'Week 4',
-        tasks: ['Research schools', 'Find healthcare providers', 'Locate essential services'],
-        route: '/local-services',
-        position: { x: 85, y: 40 },
-        signType: 'info',
-        completed: false,
-        priority: 'low'
-      }
-    ];
-  };
-
-  const handleTaskClick = (step: JourneyStep, event: React.MouseEvent, stepIndex: number) => {
-    // Check if shift key is held for editing
-    if (event.shiftKey) {
-      handleEditTask(step);
-      return;
-    }
-
-    // Go directly to the page instead of opening modal
-    handleStartTask(step);
-  };
-
-  const handleEditTask = (step: JourneyStep) => {
-    setEditingTaskId(step.id);
-    setEditingData({
-      title: step.title,
-      description: step.description
-    });
-    setShowEditPanel(true);
-
-    toast({
-      title: "Edit Mode",
-      description: "You can now edit the task details inline",
-      duration: 2000,
-    });
-  };
-
-  const handleSaveEdit = () => {
-    if (!editingTaskId || !editingData) return;
-
-    setJourneyData(prev => 
-      prev.map(step => 
-        step.id === editingTaskId 
-          ? { ...step, title: editingData.title, description: editingData.description }
-          : step
-      )
-    );
-
-    // Update localStorage if using AI action plan
-    const savedActionPlan = localStorage.getItem('aiActionPlan');
-    if (savedActionPlan) {
-      const actionPlan = JSON.parse(savedActionPlan);
-      const updatedPlan = actionPlan.map((action: any, index: number) => 
-        `action-${index}` === editingTaskId 
-          ? { ...action, task: editingData.title, details: editingData.description }
-          : action
-      );
-      localStorage.setItem('aiActionPlan', JSON.stringify(updatedPlan));
-    }
-
-    setEditingTaskId(null);
-    setEditingData(null);
-    setShowEditPanel(false);
-
-    toast({
-      title: "Task Updated",
-      description: "Your changes have been saved successfully",
-      duration: 2000,
-    });
-  };
-
-  const handleCancelEdit = () => {
-    setEditingTaskId(null);
-    setEditingData(null);
-    setShowEditPanel(false);
-  };
-
-  const handleCompleteTask = (taskId: string) => {
-    // Find the completed task
-    const completedTask = journeyData.find(step => step.id === taskId);
-
-    // Mark task as completed with celebration
-    setJourneyData(prev => 
-      prev.map(step => 
-        step.id === taskId 
-          ? { ...step, completed: true }
-          : step
-      )
-    );
-
-    // Show success notification
-    if (completedTask) {
-      toast({
-        title: "Task Completed!",
-        description: `${completedTask.title} has been marked as complete`,
-        duration: 3000,
-      });
-    }
-
-    // Visual celebration effect
-    const taskElement = taskCardRefs.current[taskId];
-    if (taskElement) {
-      taskElement.style.transform = 'scale(1.1)';
-      taskElement.style.filter = 'brightness(1.3)';
-      setTimeout(() => {
-        taskElement.style.transform = 'scale(1)';
-        taskElement.style.filter = 'brightness(1)';
-      }, 500);
-    }
-  };
-
-  const handleStartTask = (step: JourneyStep) => {
-    // Smart routing with address data preservation
-    const fromParam = localStorage.getItem('aiFromLocation');
-    const toParam = localStorage.getItem('aiToLocation');
-    const dateParam = localStorage.getItem('aiMoveDate');
-
-    // SIMPLE DIRECT ROUTING - Only to verified pages
-    let targetRoute = '/moving-checklist'; // Safe default fallback
-
-    // Simple sign-based routing (highest priority)
-    if (step.id === 'default-sign-1') {
-      targetRoute = '/moving-companies';
-    } else if (step.id === 'default-sign-2') {
-      targetRoute = '/utilities';
-    } else if (step.id === 'default-sign-3') {
-      targetRoute = '/change-of-address';
-    } else if (step.id === 'default-sign-4') {
-      targetRoute = '/local-services';
-    }
+  const handleSignClick = (step: JourneyStep) => {
+    let targetRoute = step.route;
 
     // Build query params for context preservation
     const params = new URLSearchParams();
     if (fromParam) params.set('from', fromParam);
-    if (toParam) params.set('to', toParam);
-    if (dateParam) params.set('date', dateParam);
 
     const queryString = params.toString();
     const finalRoute = queryString ? `${targetRoute}?${queryString}` : targetRoute;
 
-    // Close modal first, then navigate
-    closeModal();
-    setLocation(finalRoute);
+    navigate(finalRoute);
+  };
+
+  const nextStep = () => {
+    if (currentStepIndex < steps.length - 1) {
+      setCurrentStepIndex(currentStepIndex + 1);
+    }
+  };
+
+  const prevStep = () => {
+    if (currentStepIndex > 0) {
+      setCurrentStepIndex(currentStepIndex - 1);
+    }
+  };
+
+  const goToStep = (index: number) => {
+    setCurrentStepIndex(index);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
       {/* Header */}
       <div className="bg-white shadow-sm border-b sticky top-0 z-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-4">
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="gap-2"
-                onClick={() => {
-                  // Only go to hub if we don't have journey data, otherwise stay on journey
-                  if (journeyData.length === 0) {
-                    window.location.href = '/';
-                  } else {
-                    // Refresh journey page to reset any zoom state
-                    window.location.reload();
-                  }
-                }}
-              >
-                <ArrowLeft className="w-4 h-4" />
-                {journeyData.length === 0 ? 'Back to Hub' : 'Reset Journey'}
-              </Button>
-              <span className="text-gray-300">|</span>
-              <Link href="/ai-assistant">
-                <Button variant="ghost" size="sm" className="gap-2 text-blue-600 hover:text-blue-700">
-                  AI Assistant
+              <Link href={fromParam || "/hub"}>
+                <Button variant="ghost" size="sm" className="gap-2">
+                  <ArrowLeft className="w-4 h-4" />
+                  Back to Hub
                 </Button>
               </Link>
               <span className="text-gray-300">|</span>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="gap-2 text-green-600 hover:text-green-700"
-                onClick={() => setShowEditPanel(true)}
-              >
-                Edit Mode
-              </Button>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Interactive Moving Journey</h1>
-                <p className="text-sm text-gray-600">Your personalized step-by-step relocation roadmap • Hold Shift + Click signs to edit</p>
+                <h1 className="text-2xl font-bold text-gray-900">Moving Journey</h1>
+                <p className="text-sm text-gray-600">Interactive relocation roadmap</p>
               </div>
-            </div>
-
-            {/* Progress Tracker in Header */}
-            <div className="flex items-center">
-              <ProgressTracker 
-                totalSteps={journeyData.length}
-                completedSteps={journeyData.filter(step => step.completed).length}
-              />
             </div>
           </div>
         </div>
       </div>
 
-      {/* Highway Timeline Container */}
-      <div className="relative max-w-7xl mx-auto p-6 min-h-[600px] z-10">
-        {/* Highway Background */}
-        <div className="absolute inset-0 w-full h-full rounded-3xl overflow-hidden z-0">
-          <img 
-            src={highwayBackground}
-            alt="Highway Background"
-            className="w-full h-full object-cover opacity-95"
-            onError={(e) => {
-              console.error('Background image failed to load:', highwayBackground);
-              e.currentTarget.style.display = 'none';
-            }}
-            onLoad={() => {}}
-          />
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">Your Moving Journey</h2>
+          <p className="text-gray-600 max-w-2xl mx-auto">
+            Navigate through your relocation step-by-step. Each sign represents an important phase of your move.
+          </p>
         </div>
 
-        {/* Highway Signs Positioned Along Road */}
-        {journeyData.map((step, index) => {
-          const IconComponent = getTaskIcon(step.title);
-          const completedSteps = journeyData.filter(s => s.completed).length;
-          const isCurrentStep = index === completedSteps && !step.completed;
+        {/* Journey Timeline */}
+        <div className="mb-12">
+          <div className="flex items-center justify-center mb-6">
+            <div className="flex items-center space-x-2">
+              {steps.map((_, index) => (
+                <React.Fragment key={index}>
+                  <button
+                    onClick={() => goToStep(index)}
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-all ${
+                      index === currentStepIndex
+                        ? 'bg-blue-600 text-white'
+                        : index < currentStepIndex
+                        ? 'bg-green-500 text-white'
+                        : 'bg-gray-200 text-gray-600'
+                    }`}
+                  >
+                    {index < currentStepIndex ? <CheckCircle className="w-4 h-4" /> : index + 1}
+                  </button>
+                  {index < steps.length - 1 && (
+                    <div className={`w-12 h-0.5 ${index < currentStepIndex ? 'bg-green-500' : 'bg-gray-200'}`} />
+                  )}
+                </React.Fragment>
+              ))}
+            </div>
+          </div>
+        </div>
 
-          // Show only first 4 tasks as highway signs
-          if (index >= 4) {
-            return null;
-          }
-
-          // Position four signs with different graphics
-          let position;
-          if (index === 0) {
-            position = { left: '22%', top: '73%' };    // Sign 1 - moved right 7% total and up 2%
-          } else if (index === 1) {
-            position = { left: '75%', top: '65%' };    // Sign 2 - moved 35% total right to other side of road
-          } else if (index === 2) {
-            position = { left: '38%', top: '29%' };    // Sign 3 - moved left 32% total and up 20% total
-          } else if (index === 3) {
-            position = { left: '78%', top: '23%' };    // Sign 4 - moved right 28% total and down 3%
-          } else {
-            // Hide remaining signs for now
-            return null;
-          }
-
-          // Override Sign 3 content specifically
-          let displayTitle = step.title;
-          let displayDescription = step.description;
-
-          if (index === 2) {
-            displayTitle = "Change of Address";
-            displayDescription = "USPS official address change. Update banks, insurance, subscriptions, etc.";
-          }
-
-          return (
-            <div
-              key={step.id}
-              ref={el => taskCardRefs.current[step.id] = el}
-              data-step-id={step.id}
-              className="absolute z-20"
-              style={{
-                left: position.left,
-                top: position.top,
-                transform: 'translate(-50%, -50%)'
-              }}
-            >
-              <DynamicHighwaySign
-                title={displayTitle}
-                description={displayDescription}
-                week={step.week}
-                priority={step.priority}
-                completed={step.completed}
-                onClick={(e) => handleTaskClick(step, e, index)}
-                className="group"
-              />
-
-              {/* Hover Card */}
-              <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-                <div className="bg-white rounded-lg shadow-xl p-3 border min-w-48">
-                  <h4 className="font-semibold text-sm text-gray-900">{displayTitle}</h4>
-                  <p className="text-xs text-gray-600 mt-1">{displayDescription}</p>
-                  <div className="flex gap-1 mt-2">
-                    <Badge variant={step.priority === 'high' ? 'destructive' : 'secondary'} className="text-xs">
-                      {step.priority}
-                    </Badge>
-                    <Badge variant="outline" className="text-xs">{step.week}</Badge>
+        {/* Current Step Display */}
+        <div className="max-w-4xl mx-auto" ref={containerRef}>
+          <Card className="mb-8 shadow-lg">
+            <CardContent className="p-8">
+              <div className="text-center mb-8">
+                <div className={`inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 bg-${currentStep.color}-100`}>
+                  <currentStep.icon className={`w-8 h-8 text-${currentStep.color}-600`} />
+                </div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">{currentStep.title}</h3>
+                <p className="text-gray-600 mb-4">{currentStep.description}</p>
+                <div className="flex items-center justify-center gap-4 text-sm text-gray-500">
+                  <div className="flex items-center gap-1">
+                    <Clock className="w-4 h-4" />
+                    {currentStep.estimatedTime}
+                  </div>
+                  <div className={`px-2 py-1 rounded-full text-xs font-medium ${
+                    currentStep.priority === 'high' ? 'bg-red-100 text-red-800' :
+                    currentStep.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+                    'bg-gray-100 text-gray-800'
+                  }`}>
+                    {currentStep.priority} priority
                   </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
 
-      {/* Priority Stats Box - In Grass Area Lower Right */}
-      <div className="absolute bottom-16 right-8 z-30">
-        <JourneyStats 
-          highPriority={journeyData.filter(step => step.priority === 'high').length}
-          mediumPriority={journeyData.filter(step => step.priority === 'medium').length}
-          lowPriority={journeyData.filter(step => step.priority === 'low').length}
-        />
-      </div>
-
-      {/* Inline Editing Panel */}
-      {showEditPanel && editingData && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-40 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg shadow-2xl max-w-md w-full p-6">
-            <h3 className="text-lg font-bold mb-4">Edit Task</h3>
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Task Title
-                </label>
-                <Input
-                  value={editingData.title}
-                  onChange={(e) => setEditingData(prev => prev ? { ...prev, title: e.target.value } : null)}
-                  placeholder="Enter task title"
-                />
+              {/* Highway Sign */}
+              <div className="flex justify-center mb-8">
+                <div className="cursor-pointer transform hover:scale-105 transition-transform duration-200">
+                  <DynamicHighwaySign
+                    key={currentStep.id}
+                    text={currentStep.title}
+                    subtitle={currentStep.subtitle}
+                    onClick={() => handleSignClick(currentStep)}
+                    className="w-80 h-48"
+                  />
+                </div>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Description
-                </label>
-                <Textarea
-                  value={editingData.description}
-                  onChange={(e) => setEditingData(prev => prev ? { ...prev, description: e.target.value } : null)}
-                  placeholder="Enter task description"
-                  rows={3}
-                />
+              <div className="text-center">
+                <Button 
+                  onClick={() => handleSignClick(currentStep)}
+                  size="lg"
+                  className="px-8 py-3"
+                >
+                  Start {currentStep.title}
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* Navigation Controls */}
+          <div className="flex items-center justify-between">
+            <Button
+              onClick={prevStep}
+              disabled={currentStepIndex === 0}
+              variant="outline"
+              className="gap-2"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Previous
+            </Button>
+
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-600">
+                Step {currentStepIndex + 1} of {steps.length}
+              </span>
             </div>
 
-            <div className="flex gap-3 mt-6">
-              <Button 
-                onClick={handleSaveEdit}
-                className="flex-1 bg-blue-600 hover:bg-blue-700"
-              >
-                Save Changes
-              </Button>
-              <Button 
-                onClick={handleCancelEdit}
-                variant="outline"
-                className="flex-1"
-              >
-                Cancel
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Simple Journey Info */}
-      <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 z-30">
-        <div className="bg-gray-900 text-white px-6 py-3 rounded-full shadow-2xl border border-gray-700">
-          <div className="flex items-center gap-3">
-            <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
-            <span className="text-sm font-medium">🛣️ Highway Journey</span>
-            <span className="text-xs text-gray-300">Click any task • Hold Shift + Click to edit</span>
+            <Button
+              onClick={nextStep}
+              disabled={currentStepIndex === steps.length - 1}
+              variant="outline"
+              className="gap-2"
+            >
+              Next
+              <ArrowRight className="w-4 h-4" />
+            </Button>
           </div>
         </div>
       </div>
-
-      {/* Task Modal */}
-      <TaskModal 
-        isOpen={isOpen}
-        onClose={closeModal}
-        task={currentTask}
-        onStartTask={() => {
-          if (currentTask) {
-            const step = journeyData.find(s => s.title === currentTask.title);
-            if (step) handleStartTask(step);
-          }
-          closeModal();
-        }}
-        onMarkComplete={() => {
-          if (currentTask) {
-            setJourneyData(prev => prev.map(step => 
-              step.title === currentTask.title 
-                ? { ...step, completed: true }
-                : step
-            ));
-          }
-        }}
-      />
     </div>
   );
 }
