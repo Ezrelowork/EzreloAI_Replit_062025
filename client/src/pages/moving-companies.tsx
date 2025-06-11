@@ -1,8 +1,11 @@
-
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -18,7 +21,8 @@ import {
   DollarSign,
   Home,
   Search,
-  Loader2
+  Loader2,
+  X
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -55,6 +59,25 @@ export default function MovingCompanies() {
     moveDate: ""
   });
   const [hasSearched, setHasSearched] = useState(false);
+  const [showQuestionnaireForm, setShowQuestionnaireForm] = useState(false);
+  const [formProgress, setFormProgress] = useState(0);
+  const [questionnaireData, setQuestionnaireData] = useState({
+    currentAddress: '',
+    destinationAddress: '',
+    movingDate: '',
+    homeSize: '',
+    squareFootage: '',
+    currentFloors: '',
+    destinationFloors: '',
+    majorItems: {} as Record<string, number>,
+    packingServices: '',
+    furnitureDisassembly: '',
+    fragileItems: '',
+    storageNeeds: '',
+    parkingAccess: '',
+    additionalNotes: '',
+    email: ''
+  });
 
   // Check for URL parameters on component mount
   useEffect(() => {
@@ -67,12 +90,12 @@ export default function MovingCompanies() {
       // Parse the from and to addresses
       const [fromCity, fromStateZip] = fromParam.split(', ');
       const [toCity, toStateZip] = toParam.split(', ');
-      
+
       // Extract state and zip from state/zip combo
       const fromStateParts = fromStateZip?.trim().split(' ');
       const fromState = fromStateParts?.[0] || '';
       const fromZip = fromStateParts?.[1] || '';
-      
+
       const toStateParts = toStateZip?.trim().split(' ');
       const toState = toStateParts?.[0] || '';
       const toZip = toStateParts?.[1] || '';
@@ -149,7 +172,7 @@ export default function MovingCompanies() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!searchFormData.fromCity || !searchFormData.fromState || !searchFormData.toCity || !searchFormData.toState) {
       toast({
         title: "Missing Information",
@@ -222,8 +245,310 @@ export default function MovingCompanies() {
     window.open(company.referralUrl || company.website, '_blank');
   };
 
+    // Calculate form progress
+    useEffect(() => {
+      const totalFields = 12; // Total number of fields in the questionnaire
+      const filledFields = [
+        questionnaireData.currentAddress,
+        questionnaireData.destinationAddress,
+        questionnaireData.movingDate,
+        questionnaireData.homeSize,
+        questionnaireData.squareFootage,
+        questionnaireData.currentFloors,
+        questionnaireData.destinationFloors,
+        Object.keys(questionnaireData.majorItems).length > 0 ? 'filled' : '',
+        questionnaireData.packingServices,
+        questionnaireData.furnitureDisassembly,
+        questionnaireData.fragileItems,
+        questionnaireData.email
+      ].filter(field => field).length;
+  
+      setFormProgress((filledFields / totalFields) * 100);
+    }, [questionnaireData]);
+
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Questionnaire Form Modal */}
+      {showQuestionnaireForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-50 p-4 pt-8">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[85vh] overflow-y-auto mt-4">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-2xl font-bold text-gray-900">Moving Estimate Questionnaire</h2>
+                <button
+                  onClick={() => setShowQuestionnaireForm(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              {/* Progress Bar */}
+              <div className="mb-6">
+                <div className="flex justify-between text-sm text-gray-600 mb-2">
+                  <span>Progress</span>
+                  <span>{Math.round(formProgress)}% Complete</span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div 
+                    className="bg-gradient-to-r from-purple-500 to-blue-500 h-2 rounded-full transition-all duration-300 ease-out"
+                    style={{ width: `${formProgress}%` }}
+                  ></div>
+                </div>
+              </div>
+
+              <form className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="currentAddress">Current Address</Label>
+                    <Input
+                      id="currentAddress"
+                      value={questionnaireData.currentAddress || searchFormData.fromCity + ", " + searchFormData.fromState}
+                      onChange={(e) => setQuestionnaireData({...questionnaireData, currentAddress: e.target.value})}
+                      placeholder="Full address with unit number"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="destinationAddress">Destination Address</Label>
+                    <Input
+                      id="destinationAddress"
+                      value={questionnaireData.destinationAddress || searchFormData.toCity + ", " + searchFormData.toState}
+                      onChange={(e) => setQuestionnaireData({...questionnaireData, destinationAddress: e.target.value})}
+                      placeholder="Full address with unit number"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="movingDate">Moving Date</Label>
+                    <Input
+                      id="movingDate"
+                      type="date"
+                      value={questionnaireData.movingDate || searchFormData.moveDate}
+                      onChange={(e) => setQuestionnaireData({...questionnaireData, movingDate: e.target.value})}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="homeSize">Home Size</Label>
+                    <Select value={questionnaireData.homeSize} onValueChange={(value) => setQuestionnaireData({...questionnaireData, homeSize: value})}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select home size" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="studio">Studio</SelectItem>
+                        <SelectItem value="1br">1 Bedroom</SelectItem>
+                        <SelectItem value="2br">2 Bedroom</SelectItem>
+                        <SelectItem value="3br">3 Bedroom</SelectItem>
+                        <SelectItem value="4br">4+ Bedroom</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="squareFootage">Square Footage (if known)</Label>
+                    <Input
+                      id="squareFootage"
+                      value={questionnaireData.squareFootage}
+                      onChange={(e) => setQuestionnaireData({...questionnaireData, squareFootage: e.target.value})}
+                      placeholder="e.g., 1200"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="currentFloors">Current Location Floors</Label>
+                    <Input
+                      id="currentFloors"
+                      value={questionnaireData.currentFloors}
+                      onChange={(e) => setQuestionnaireData({...questionnaireData, currentFloors: e.target.value})}
+                      placeholder="e.g., 2nd floor, elevator"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="destinationFloors">Destination Floors</Label>
+                    <Input
+                      id="destinationFloors"
+                      value={questionnaireData.destinationFloors}
+                      onChange={(e) => setQuestionnaireData({...questionnaireData, destinationFloors: e.target.value})}
+                      placeholder="e.g., 1st floor, stairs"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label>Major Items Being Moved</Label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2 p-4 border rounded-lg bg-gray-50 max-h-80 overflow-y-auto">
+                    {[
+                      // Living Room
+                      { category: 'Living Room', items: ['Sofa/Couch', 'Coffee Table', 'End Tables', 'TV Stand', 'Entertainment Center', 'Recliner', 'Bookshelf', 'Armchair'] },
+                      // Bedroom
+                      { category: 'Bedroom', items: ['Queen Bed', 'King Bed', 'Twin Bed', 'Dresser', 'Nightstand', 'Wardrobe', 'Mattress'] },
+                      // Dining Room
+                      { category: 'Dining Room', items: ['Dining Table', 'Dining Chairs', 'China Cabinet', 'Bar Stools'] },
+                      // Kitchen
+                      { category: 'Kitchen', items: ['Refrigerator', 'Dishwasher', 'Microwave', 'Washer', 'Dryer'] },
+                      // Electronics
+                      { category: 'Electronics', items: ['Large TV (55"+)', 'Medium TV (32-54")', 'Computer/Desk', 'Piano', 'Exercise Equipment'] },
+                      // Storage & Misc
+                      { category: 'Storage & Misc', items: ['Filing Cabinet', 'Safe', 'Tool Chest', 'Outdoor Furniture', 'Lawn Mower', 'Bicycles'] }
+                    ].map((category) => (
+                      <div key={category.category} className="space-y-2">
+                        <h4 className="font-semibold text-sm text-gray-800 border-b pb-1">{category.category}</h4>
+                        {category.items.map((item) => (
+                          <div key={item} className="flex items-center justify-between gap-2">
+                            <label className="flex items-center gap-2 text-sm flex-1">
+                              <input
+                                type="checkbox"
+                                checked={(questionnaireData.majorItems[item] || 0) > 0}
+                                onChange={(e) => {
+                                  const newItems = { ...questionnaireData.majorItems };
+                                  if (e.target.checked) {
+                                    newItems[item] = 1;
+                                  } else {
+                                    delete newItems[item];
+                                  }
+                                  setQuestionnaireData({...questionnaireData, majorItems: newItems});
+                                }}
+                                className="w-4 h-4"
+                              />
+                              <span className="text-gray-700">{item}</span>
+                            </label>
+                            {(questionnaireData.majorItems[item] || 0) > 0 && (
+                              <input
+                                type="number"
+                                min="1"
+                                max="20"
+                                value={questionnaireData.majorItems[item] || 1}
+                                onChange={(e) => {
+                                  const quantity = parseInt(e.target.value) || 1;
+                                  setQuestionnaireData({
+                                    ...questionnaireData, 
+                                    majorItems: { ...questionnaireData.majorItems, [item]: quantity }
+                                  });
+                                }}
+                                className="w-16 px-2 py-1 text-sm border rounded"
+                                placeholder="1"
+                              />
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="packingServices">Packing Services Needed</Label>
+                    <Select value={questionnaireData.packingServices} onValueChange={(value) => setQuestionnaireData({...questionnaireData, packingServices: value})}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select packing preference" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="full">Full packing service</SelectItem>
+                        <SelectItem value="partial">Partial packing</SelectItem>
+                        <SelectItem value="self">Self-pack</SelectItem>
+                        <SelectItem value="fragiles">Fragiles only</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="furnitureDisassembly">Furniture Disassembly Needed</Label>
+                    <Input
+                      id="furnitureDisassembly"
+                      value={questionnaireData.furnitureDisassembly}
+                      onChange={(e) => setQuestionnaireData({...questionnaireData, furnitureDisassembly: e.target.value})}
+                      placeholder="List items needing disassembly"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="fragileItems">Fragile or Specialty Items</Label>
+                  <Textarea
+                    id="fragileItems"
+                    value={questionnaireData.fragileItems}
+                    onChange={(e) => setQuestionnaireData({...questionnaireData, fragileItems: e.target.value})}
+                    placeholder="TVs, antiques, artwork, musical instruments, etc."
+                    rows={2}
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="storageNeeds">Storage Requirements</Label>
+                    <Input
+                      id="storageNeeds"
+                      value={questionnaireData.storageNeeds}
+                      onChange={(e) => setQuestionnaireData({...questionnaireData, storageNeeds: e.target.value})}
+                      placeholder="Duration and type needed"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="parkingAccess">Parking & Truck Access</Label>
+                    <Input
+                      id="parkingAccess"
+                      value={questionnaireData.parkingAccess}
+                      onChange={(e) => setQuestionnaireData({...questionnaireData, parkingAccess: e.target.value})}
+                      placeholder="Parking, elevators, permits needed?"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="additionalNotes">Additional Notes</Label>
+                  <Textarea
+                    id="additionalNotes"
+                    value={questionnaireData.additionalNotes}
+                    onChange={(e) => setQuestionnaireData({...questionnaireData, additionalNotes: e.target.value})}
+                    placeholder="Any special requirements or concerns"
+                    rows={3}
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="email">Email Address</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={questionnaireData.email}
+                    onChange={(e) => setQuestionnaireData({...questionnaireData, email: e.target.value})}
+                    placeholder="Where to send your PDF questionnaire"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-3 pt-4">
+                  <div className="flex gap-3">
+                    <Button
+                      type="button"
+                      onClick={() => {
+                        toast({
+                          title: "Questionnaire Saved",
+                          description: "Your moving details have been saved for getting accurate quotes.",
+                        });
+                        setShowQuestionnaireForm(false);
+                      }}
+                      className="flex-1 bg-purple-600 hover:bg-purple-700"
+                    >
+                      Save Questionnaire
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setShowQuestionnaireForm(false)}
+                    >
+                      Cancel
+                    </Button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="bg-white shadow-sm border-b sticky top-0 z-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -259,7 +584,7 @@ export default function MovingCompanies() {
                 </div>
               </div>
             </div>
-            
+
             {/* Progress Section */}
             <div className="text-right">
               <div className="text-sm font-medium text-gray-900 mb-2">Progress</div>
@@ -301,7 +626,7 @@ export default function MovingCompanies() {
                     Journey
                   </Button>
                 </Link>
-                <Button className="bg-purple-600 hover:bg-purple-700 text-white">
+                <Button className="bg-purple-600 hover:bg-purple-700 text-white" onClick={() => setShowQuestionnaireForm(true)}>
                   Fill Out Questionnaire
                 </Button>
                 <Button variant="ghost" size="sm" className="text-gray-400">
@@ -327,14 +652,14 @@ export default function MovingCompanies() {
           <p className="text-lg text-gray-600 max-w-3xl">
             Professional movers for your relocation
           </p>
-          
+
           {/* Search Form */}
           <div className="mt-8 bg-white rounded-lg border p-6">
             <div className="flex items-center gap-2 mb-4">
               <MapPin className="w-5 h-5 text-blue-600" />
               <h2 className="text-xl font-semibold text-gray-900">Your Move Details</h2>
             </div>
-            
+
             <form onSubmit={handleSearch}>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <div>
@@ -401,7 +726,7 @@ export default function MovingCompanies() {
                   />
                 </div>
               </div>
-              
+
               <Button 
                 type="submit" 
                 className="w-full" 
@@ -672,6 +997,37 @@ export default function MovingCompanies() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Moving Estimate Questionnaire */}
+              <div className="bg-white rounded-lg shadow-md border p-4">
+                <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
+                  <div className="w-1 h-6 bg-purple-500 rounded-full"></div>
+                  Estimate Questionnaire
+                </h3>
+                <p className="text-sm text-gray-600 mb-3">
+                  Prepare for accurate moving quotes by having these details ready when you call.
+                </p>
+                <div className="space-y-3">
+                  <button
+                    onClick={() => setShowQuestionnaireForm(true)}
+                    className="w-full bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded font-medium transition-colors flex items-center justify-center gap-2"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Fill Out Questionnaire
+                  </button>
+                  <button
+                    onClick={() => {}}
+                    className="w-full bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded font-medium transition-colors flex items-center justify-center gap-2"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Download PDF Form
+                  </button>
+                </div>
+              </div>
           </div>
         </div>
       </div>
