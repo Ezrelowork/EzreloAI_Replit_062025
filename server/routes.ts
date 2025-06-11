@@ -707,27 +707,67 @@ Only include real companies that actually serve ${fromLocation} to ${toLocation}
         }
       }
 
-      // Format all companies with consistent structure
-      const formattedCompanies = allCompanies.map(company => ({
-        ...company,
-        referralUrl: company.referralUrl || company.website || `https://www.google.com/search?q=${encodeURIComponent(company.provider)}`,
-        affiliateCode: company.affiliateCode || "",
-        rating: company.rating || 0,
-        hours: company.hours || "Contact for hours",
-        services: company.services || ["Moving Services"],
-        specialties: company.specialties || ["Professional Moving"],
-        availability: company.availability || "Contact for availability"
-      }));
+      // Format all companies with consistent structure and proximity scoring
+      const formattedCompanies = allCompanies.map((company, index) => {
+        let proximityScore = 50; // Default score
+        
+        // Higher proximity score for companies explicitly serving the origin location
+        if (company.category?.includes("Local") || 
+            company.category?.includes("Google Verified") ||
+            company.availability?.toLowerCase().includes(fromCity.toLowerCase()) ||
+            company.description?.toLowerCase().includes(fromCity.toLowerCase())) {
+          proximityScore = 90;
+        }
+        
+        // Medium score for regional companies
+        if (company.category?.includes("Regional") ||
+            company.description?.toLowerCase().includes(fromState.toLowerCase())) {
+          proximityScore = 70;
+        }
+        
+        // Lower score for national companies (still important but not location-specific)
+        if (company.category?.includes("National") || 
+            company.category?.includes("Alternative")) {
+          proximityScore = 30;
+        }
+        
+        // Boost score for highly rated local companies
+        if (proximityScore >= 70 && company.rating >= 4.0) {
+          proximityScore += 10;
+        }
 
-      console.log(`Total companies found: ${formattedCompanies.length}`);
+        return {
+          ...company,
+          referralUrl: company.referralUrl || company.website || `https://www.google.com/search?q=${encodeURIComponent(company.provider)}`,
+          affiliateCode: company.affiliateCode || "",
+          rating: company.rating || 0,
+          hours: company.hours || "Contact for hours",
+          services: company.services || ["Moving Services"],
+          specialties: company.specialties || ["Professional Moving"],
+          availability: company.availability || "Contact for availability",
+          proximityScore: proximityScore
+        };
+      });
+
+      // Sort by proximity score (highest first), then by rating
+      const sortedCompanies = formattedCompanies.sort((a, b) => {
+        if (b.proximityScore !== a.proximityScore) {
+          return b.proximityScore - a.proximityScore;
+        }
+        return (b.rating || 0) - (a.rating || 0);
+      });
+
+      console.log(`Total companies found: ${sortedCompanies.length}`);
+      console.log(`Proximity prioritization: Local (${sortedCompanies.filter(c => c.proximityScore >= 90).length}), Regional (${sortedCompanies.filter(c => c.proximityScore >= 70 && c.proximityScore < 90).length}), National (${sortedCompanies.filter(c => c.proximityScore < 70).length})`);
 
       res.json({
         success: true,
-        companies: formattedCompanies,
+        companies: sortedCompanies,
         searchInfo: {
           from: fromLocation,
           to: toLocation,
           moveType: moveType,
+          proximityPrioritization: "Closest to origin location first",
           sources: {
             chatgpt: process.env.OPENAI_API_KEY ? "available" : "unavailable",
             gemini: process.env.GOOGLE_AI_API_KEY ? "available" : "unavailable",
