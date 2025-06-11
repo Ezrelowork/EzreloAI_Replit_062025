@@ -559,14 +559,14 @@ export default function MovingCompanies() {
                 <span className="text-white text-lg font-bold">i</span>
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-900">Generate Your Plan</h1>
+                <h1 className="text-xl font-bold text-gray-900">Find Moving Companies</h1>
                 <div className="flex items-center gap-4 text-sm text-gray-600 mt-1">
                   <Badge variant="secondary" className="bg-gray-800 text-white hover:bg-gray-700">
                     MEDIUM
                   </Badge>
                   <span>Timeline: AI Planning</span>
                   <span>Category: Moving Services</span>
-                </div>
+                </div></div>
                 <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
                   <MapPin className="w-4 h-4" />
                   <span>
@@ -646,19 +646,9 @@ export default function MovingCompanies() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Page Header */}
+        {/* Search Form */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">Find Moving Companies</h1>
-          <p className="text-lg text-gray-600 max-w-3xl">
-            Professional movers for your relocation
-          </p>
-
-          {/* Search Form */}
-          <div className="mt-8 bg-white rounded-lg border p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <MapPin className="w-5 h-5 text-blue-600" />
-              <h2 className="text-xl font-semibold text-gray-900">Your Move Details</h2>
-            </div>
+          <div className="bg-white rounded-lg border p-6"></div>
 
             <form onSubmit={handleSearch}>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -745,8 +735,7 @@ export default function MovingCompanies() {
                 )}
               </Button>
             </form>
-          </div>
-        </div>
+          </div></div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Moving Companies Results */}
