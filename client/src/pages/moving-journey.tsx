@@ -131,8 +131,13 @@ export default function MovingJourney() {
   };
 
   const handleSignClick = (task: MovingTask) => {
-    setSelectedTask(task);
-    openTaskModal(task);
+    if (task.id === 'moving-company') {
+      // Navigate to the full moving companies page
+      setLocation('/moving-companies');
+    } else {
+      setSelectedTask(task);
+      openTaskModal(task);
+    }
   };
 
   const completedCount = completedTasks.size;
@@ -280,8 +285,8 @@ export default function MovingJourney() {
         </div>
       </div>
 
-      {/* Task Modal */}
-      {currentTask && (
+      {/* Task Modal - Only for non-moving company tasks */}
+      {currentTask && currentTask.id !== 'moving-company' && (
         <TaskModal
           isOpen={isTaskModalOpen}
           onClose={closeTaskModal}
