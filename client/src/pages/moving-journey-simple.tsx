@@ -205,8 +205,11 @@ export default function MovingJourneySimple() {
                 <div className="cursor-pointer transform hover:scale-105 transition-transform duration-200">
                   <DynamicHighwaySign
                     key={currentStep.id}
-                    text={currentStep.title}
-                    subtitle={currentStep.subtitle}
+                    title={currentStep.title}
+                    description={currentStep.description}
+                    week={currentStep.estimatedTime}
+                    priority={currentStep.priority}
+                    completed={false}
                     onClick={() => handleSignClick(currentStep)}
                     className="w-80 h-48"
                   />
