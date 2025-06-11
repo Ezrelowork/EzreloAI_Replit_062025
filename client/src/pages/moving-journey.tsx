@@ -127,7 +127,7 @@ export default function MovingJourney() {
       week: "Week 3",
       category: "Administrative",
       completed: false,
-      position: { x: "38%", y: "40%" }, // Above road, center
+      position: { x: "38%", y: "45%" }, // Above road, center
       icon: FileText
     },
     {
@@ -149,7 +149,7 @@ export default function MovingJourney() {
       week: "Week 5",
       category: "Family",
       completed: false,
-      position: { x: "55%", y: "18%" }, // Above road, right side
+      position: { x: "50%", y: "18%" }, // Above road, right side
       icon: GraduationCap
     }
   ];
