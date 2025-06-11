@@ -116,7 +116,7 @@ export default function MovingJourney() {
       week: "Week 2",
       category: "Essential Services",
       completed: false,
-      position: { x: "68%", y: "75%" }, // Below road, center-right
+      position: { x: "70%", y: "70%" }, // Below road, center-right
       icon: Zap
     },
     {
@@ -138,7 +138,7 @@ export default function MovingJourney() {
       week: "Week 4",
       category: "Healthcare",
       completed: false,
-      position: { x: "70%", y: "30%" }, // Below road, right side
+      position: { x: "78%", y: "27%" }, // Below road, right side
       icon: Stethoscope
     },
     {
