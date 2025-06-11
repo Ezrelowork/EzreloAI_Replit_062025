@@ -197,12 +197,18 @@ export default function MovingCompanies() {
     return hasCompletedActions && (selectedMover || quotesRequested.size > 0);
   };
 
-  // Auto-trigger search on component mount if addresses are available
-  useEffect(() => {
-    if (moveAddresses.currentCity && moveAddresses.newCity && movingCompanies.length === 0) {
+  // Manual search function
+  const handleSearchMovers = () => {
+    if (moveAddresses.currentCity && moveAddresses.newCity) {
       movingCompanyMutation.mutate(moveAddresses);
+    } else {
+      toast({
+        title: "Missing Information",
+        description: "Please set up your move details first through the AI Assistant",
+        variant: "destructive",
+      });
     }
-  }, [moveAddresses.currentCity, moveAddresses.newCity]);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -236,7 +242,7 @@ export default function MovingCompanies() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 <div>
                   <div className="text-sm font-medium text-gray-500">From</div>
                   <div className="text-lg font-semibold">
@@ -256,6 +262,13 @@ export default function MovingCompanies() {
                   </div>
                 )}
               </div>
+              <Button 
+                onClick={handleSearchMovers}
+                disabled={movingCompanyMutation.isPending}
+                className="w-full"
+              >
+                {movingCompanyMutation.isPending ? "Searching..." : "Search Moving Companies"}
+              </Button>
             </CardContent>
           </Card>
         )}
