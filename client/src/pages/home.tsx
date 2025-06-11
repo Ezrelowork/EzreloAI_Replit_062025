@@ -46,7 +46,7 @@ export default function Home() {
             </p>
 
             {/* Service Highlights */}
-            <div className="flex flex-wrap justify-center gap-6 text-primary mb-12">
+            <div className="flex flex-wrap justify-center gap-6 text-primary">
               <div className="flex items-center space-x-2">
                 <i className="fas fa-check-circle"></i>
                 <span className="font-medium">Utilities</span>
@@ -63,16 +63,6 @@ export default function Home() {
                 <i className="fas fa-check-circle"></i>
                 <span className="font-medium">Home Services</span>
               </div>
-            </div>
-
-            {/* Get Started CTA */}
-            <div className="mt-8">
-              <Link href="/ai-assistant">
-                <Button size="lg" className="bg-primary text-white hover:bg-primary/80 transition-all duration-300 px-12 py-4 text-lg">
-                  Get Started Now
-                  <i className="fas fa-arrow-right ml-2"></i>
-                </Button>
-              </Link>
             </div>
           </div>
         </div>
