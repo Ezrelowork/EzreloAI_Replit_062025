@@ -53,7 +53,7 @@ export default function MovingJourney() {
   const [completedTasks, setCompletedTasks] = useState<Set<string>>(new Set());
   const [showTaskPage, setShowTaskPage] = useState(false);
   const [selectedTask, setSelectedTask] = useState<MovingTask | null>(null);
-  const { isTaskModalOpen, openTaskModal, closeTaskModal } = useTaskModal();
+  const { isOpen: isTaskModalOpen, currentTask, openModal: openTaskModal, closeModal: closeTaskModal } = useTaskModal();
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Layout is now locked and finalized
@@ -132,7 +132,7 @@ export default function MovingJourney() {
 
   const handleSignClick = (task: MovingTask) => {
     setSelectedTask(task);
-    openTaskModal();
+    openTaskModal(task);
   };
 
   const completedCount = completedTasks.size;
@@ -281,17 +281,19 @@ export default function MovingJourney() {
       </div>
 
       {/* Task Modal */}
-      <TaskModal
-        isOpen={isTaskModalOpen}
-        onClose={closeTaskModal}
-        task={selectedTask}
-        onToggleComplete={() => {
-          if (selectedTask) {
-            toggleTaskCompletion(selectedTask.id);
-          }
-        }}
-        isCompleted={selectedTask ? completedTasks.has(selectedTask.id) : false}
-      />
+      {currentTask && (
+        <TaskModal
+          isOpen={isTaskModalOpen}
+          onClose={closeTaskModal}
+          task={currentTask}
+          onStartTask={() => {}}
+          onMarkComplete={() => {
+            if (currentTask) {
+              toggleTaskCompletion(currentTask.id);
+            }
+          }}
+        />
+      )}
     </div>
   );
 }
