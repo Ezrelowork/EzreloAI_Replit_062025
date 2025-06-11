@@ -161,8 +161,8 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 
                 <div className="flex items-center justify-between p-4 bg-green-50 rounded-2xl border border-green-200">
                   <div>
-                    <div className="font-semibold text-gray-900">Packing & Organization</div>
-                    <div className="text-sm text-gray-600">Moving checklist and packing guides</div>
+                    <div className="font-semibold text-gray-900">Local Services & Community</div>
+                    <div className="text-sm text-gray-600">Find schools, healthcare, and essential services</div>
                   </div>
                   <Button
                     onClick={() => {
@@ -176,7 +176,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
                       if (dateParam) params.set('date', dateParam);
                       
                       const queryString = params.toString();
-                      const finalRoute = queryString ? `/moving-checklist?${queryString}` : '/moving-checklist';
+                      const finalRoute = queryString ? `/local-services?${queryString}` : '/local-services';
                       
                       onClose();
                       setLocation(finalRoute);
@@ -184,7 +184,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
                     variant="outline"
                     className="border-green-300 text-green-700 hover:bg-green-100 font-semibold px-6 py-2 rounded-xl flex items-center gap-2"
                   >
-                    View Checklist
+                    Find Services
                     <ArrowRight className="w-4 h-4" />
                   </Button>
                 </div>
@@ -216,8 +216,8 @@ export const TaskModal: React.FC<TaskModalProps> = ({
                       targetRoute = '/utilities';
                     } else if (taskLower.includes('address') || taskLower.includes('change') && taskLower.includes('address')) {
                       targetRoute = '/change-of-address';
-                    } else if (taskLower.includes('pack') || taskLower.includes('checklist')) {
-                      targetRoute = '/moving-checklist';
+                    } else if (taskLower.includes('local') || taskLower.includes('services') || taskLower.includes('community')) {
+                      targetRoute = '/local-services';
                     }
                     
                     const queryString = params.toString();
