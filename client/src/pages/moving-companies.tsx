@@ -1,5 +1,7 @@
-import { useState } from "react";
-import { Link } from "wouter";
+
+import { useState, useEffect } from "react";
+import { Link, useLocation } from "wouter";
+import { useMutation } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -14,155 +16,210 @@ import {
   MapPin,
   Clock,
   DollarSign,
-  Home
+  Home,
+  Search,
+  Loader2
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface MovingCompany {
-  id: string;
-  name: string;
-  description: string;
+  category: string;
+  provider: string;
   phone: string;
+  description: string;
   website: string;
+  referralUrl: string;
+  affiliateCode: string;
+  hours: string;
   rating: number;
   services: string[];
   estimatedCost: string;
+  availability: string;
   specialties: string[];
-  hours: string;
-  location: string;
-  licenseInfo: string;
-  insuranceOptions: string[];
+  notes?: string;
 }
 
 export default function MovingCompanies() {
   const { toast } = useToast();
+  const [location] = useLocation();
+  const [movingCompanies, setMovingCompanies] = useState<MovingCompany[]>([]);
   const [selectedCompanies, setSelectedCompanies] = useState<Set<string>>(new Set());
   const [quotesRequested, setQuotesRequested] = useState<Set<string>>(new Set());
+  const [searchFormData, setSearchFormData] = useState({
+    fromCity: "",
+    fromState: "",
+    fromZip: "",
+    toCity: "",
+    toState: "",
+    toZip: "",
+    moveDate: ""
+  });
+  const [hasSearched, setHasSearched] = useState(false);
 
-  // Static moving companies data
-  const movingCompanies: MovingCompany[] = [
-    {
-      id: "atlas-van-lines",
-      name: "Atlas Van Lines",
-      description: "Full-service moving company with nationwide coverage and professional packing services",
-      phone: "(800) 252-8885",
-      website: "https://www.atlasvanlines.com",
-      rating: 4.2,
-      services: ["Local Moving", "Long Distance", "International", "Packing", "Storage"],
-      estimatedCost: "$2,800 - $4,500",
-      specialties: ["Corporate Relocation", "Military Moves", "Senior Moving"],
-      hours: "Mon-Fri 8AM-6PM, Sat 9AM-4PM",
-      location: "Nationwide Service",
-      licenseInfo: "USDOT #125550, MC-87113",
-      insuranceOptions: ["Basic Coverage", "Full Value Protection", "Third-Party Insurance"]
-    },
-    {
-      id: "united-van-lines",
-      name: "United Van Lines",
-      description: "America's largest household goods mover with comprehensive moving solutions",
-      phone: "(800) 325-3870",
-      website: "https://www.unitedvanlines.com",
-      rating: 4.1,
-      services: ["Residential Moving", "Corporate Relocation", "International", "Storage", "Vehicle Transport"],
-      estimatedCost: "$3,200 - $5,200",
-      specialties: ["High-Value Items", "Piano Moving", "Auto Transport"],
-      hours: "Mon-Fri 7AM-7PM, Sat 8AM-5PM",
-      location: "Nationwide Service",
-      licenseInfo: "USDOT #077949, MC-67132",
-      insuranceOptions: ["Released Value", "Full Value Protection", "Separate Liability Coverage"]
-    },
-    {
-      id: "mayflower-transit",
-      name: "Mayflower Transit",
-      description: "Trusted moving company with over 90 years of experience in residential and commercial moves",
-      phone: "(800) 428-1146",
-      website: "https://www.mayflower.com",
-      rating: 4.0,
-      services: ["Household Moving", "Corporate Services", "International", "Specialty Items", "Storage Solutions"],
-      estimatedCost: "$2,600 - $4,200",
-      specialties: ["Antique Moving", "Fine Art", "Government Moves"],
-      hours: "Mon-Fri 8AM-6PM, Sat 9AM-3PM",
-      location: "Nationwide Service",
-      licenseInfo: "USDOT #125563, MC-87113",
-      insuranceOptions: ["Basic Protection", "Full Replacement Value", "High Value Article Coverage"]
-    },
-    {
-      id: "north-american",
-      name: "North American Van Lines",
-      description: "Premium moving services with personalized moving consultants and quality assurance",
-      phone: "(800) 348-2111",
-      website: "https://www.northamerican.com",
-      rating: 4.3,
-      services: ["Residential Moving", "Corporate Relocation", "International Moving", "Storage", "Logistics"],
-      estimatedCost: "$3,000 - $4,800",
-      specialties: ["Executive Moving", "Lab & Medical Equipment", "Trade Shows"],
-      hours: "Mon-Fri 8AM-7PM, Sat 9AM-4PM",
-      location: "Nationwide Service",
-      licenseInfo: "USDOT #070851, MC-67112",
-      insuranceOptions: ["Released Value", "Full Value Protection", "Separate Liability Insurance"]
-    },
-    {
-      id: "allied-van-lines",
-      name: "Allied Van Lines",
-      description: "Comprehensive moving services with a network of professional agents nationwide",
-      phone: "(800) 689-8684",
-      website: "https://www.allied.com",
-      rating: 4.1,
-      services: ["Local & Long Distance", "International", "Corporate Moving", "Storage", "Specialty Services"],
-      estimatedCost: "$2,700 - $4,400",
-      specialties: ["Military Relocations", "Senior Moving", "Student Moving"],
-      hours: "Mon-Fri 8AM-6PM, Sat 9AM-5PM",
-      location: "Nationwide Service",
-      licenseInfo: "USDOT #076235, MC-67118",
-      insuranceOptions: ["Basic Coverage", "Full Value Protection", "Third-Party Coverage"]
-    },
-    {
-      id: "two-men-truck",
-      name: "TWO MEN AND A TRUCK",
-      description: "Local and long-distance moving with a focus on customer service and care",
-      phone: "(800) 345-1070",
-      website: "https://www.twomenandatruck.com",
-      rating: 4.4,
-      services: ["Local Moving", "Long Distance", "Packing", "Storage", "Junk Removal"],
-      estimatedCost: "$1,200 - $2,800",
-      specialties: ["Apartment Moving", "Senior Moving", "Business Moving"],
-      hours: "Mon-Sat 8AM-6PM, Sun 10AM-4PM",
-      location: "Multiple Locations",
-      licenseInfo: "Varies by Location",
-      insuranceOptions: ["Basic Protection", "Full Value Coverage", "Additional Insurance Available"]
+  // Check for URL parameters on component mount
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const fromParam = urlParams.get('from');
+    const toParam = urlParams.get('to');
+    const dateParam = urlParams.get('date');
+
+    if (fromParam && toParam) {
+      // Parse the from and to addresses
+      const [fromCity, fromStateZip] = fromParam.split(', ');
+      const [toCity, toStateZip] = toParam.split(', ');
+      
+      // Extract state and zip from state/zip combo
+      const fromStateParts = fromStateZip?.trim().split(' ');
+      const fromState = fromStateParts?.[0] || '';
+      const fromZip = fromStateParts?.[1] || '';
+      
+      const toStateParts = toStateZip?.trim().split(' ');
+      const toState = toStateParts?.[0] || '';
+      const toZip = toStateParts?.[1] || '';
+
+      const formData = {
+        fromCity: fromCity || '',
+        fromState,
+        fromZip,
+        toCity: toCity || '',
+        toState,
+        toZip,
+        moveDate: dateParam || ''
+      };
+
+      setSearchFormData(formData);
+
+      // Automatically search if we have the required data
+      if (fromCity && fromState && toCity && toState) {
+        searchMutation.mutate(formData);
+      }
     }
-  ];
+  }, []);
 
-  const handleSelectCompany = (companyId: string) => {
+  // API request helper
+  const apiRequest = async (method: string, url: string, data?: any) => {
+    const response = await fetch(url, {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: data ? JSON.stringify(data) : undefined,
+    });
+
+    if (!response.ok) {
+      throw new Error(`API request failed: ${response.statusText}`);
+    }
+
+    return response;
+  };
+
+  // Moving companies search mutation
+  const searchMutation = useMutation({
+    mutationFn: async (formData: typeof searchFormData) => {
+      const response = await apiRequest("POST", "/api/moving-companies", {
+        fromCity: formData.fromCity,
+        fromState: formData.fromState,
+        fromZip: formData.fromZip,
+        toCity: formData.toCity,
+        toState: formData.toState,
+        toZip: formData.toZip,
+        moveDate: formData.moveDate
+      });
+      return await response.json();
+    },
+    onSuccess: (data) => {
+      const companies = data?.companies || [];
+      setMovingCompanies(companies);
+      setHasSearched(true);
+      toast({
+        title: "Search Complete",
+        description: `Found ${companies.length} moving companies for your route`,
+      });
+    },
+    onError: (error) => {
+      console.error("Search error:", error);
+      toast({
+        title: "Search Failed",
+        description: "Unable to find moving companies. Please try again.",
+        variant: "destructive",
+      });
+      setHasSearched(true);
+    },
+  });
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!searchFormData.fromCity || !searchFormData.fromState || !searchFormData.toCity || !searchFormData.toState) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in both origin and destination cities and states.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    searchMutation.mutate(searchFormData);
+  };
+
+  const handleSelectCompany = (provider: string) => {
     setSelectedCompanies(prev => {
       const newSet = new Set(prev);
-      if (newSet.has(companyId)) {
-        newSet.delete(companyId);
+      if (newSet.has(provider)) {
+        newSet.delete(provider);
       } else {
-        newSet.add(companyId);
+        newSet.add(provider);
       }
       return newSet;
     });
   };
 
-  const handleRequestQuote = (company: MovingCompany) => {
+  const handleRequestQuote = async (company: MovingCompany) => {
     setQuotesRequested(prev => {
       const newSet = new Set(prev);
-      newSet.add(company.id);
+      newSet.add(company.provider);
       return newSet;
     });
 
+    // Track referral click
+    try {
+      await apiRequest("POST", "/api/track-referral", {
+        provider: company.provider,
+        category: "Moving Companies",
+        action: "quote_request",
+        userAddress: `${searchFormData.fromCity}, ${searchFormData.fromState}`,
+        affiliateCode: company.affiliateCode,
+        referralUrl: company.referralUrl
+      });
+    } catch (error) {
+      console.error("Referral tracking failed:", error);
+    }
+
     toast({
       title: "Quote Requested",
-      description: `Quote request sent to ${company.name}`,
+      description: `Opening ${company.provider} website for quote`,
     });
 
-    // Open company website in new tab
-    window.open(company.website, '_blank');
+    // Open company website
+    window.open(company.referralUrl || company.website, '_blank');
   };
 
-  const handleVisitWebsite = (company: MovingCompany) => {
-    window.open(company.website, '_blank');
+  const handleVisitWebsite = async (company: MovingCompany) => {
+    // Track referral click
+    try {
+      await apiRequest("POST", "/api/track-referral", {
+        provider: company.provider,
+        category: "Moving Companies",
+        action: "website_visit",
+        userAddress: `${searchFormData.fromCity}, ${searchFormData.fromState}`,
+        affiliateCode: company.affiliateCode,
+        referralUrl: company.referralUrl
+      });
+    } catch (error) {
+      console.error("Referral tracking failed:", error);
+    }
+
+    window.open(company.referralUrl || company.website, '_blank');
   };
 
   return (
@@ -202,113 +259,264 @@ export default function MovingCompanies() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Page Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">Professional Moving Companies</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-4">Find Moving Companies</h1>
           <p className="text-lg text-gray-600 max-w-3xl">
-            Compare trusted moving companies with nationwide service. Get quotes, read reviews, and choose the best mover for your relocation.
+            Professional movers for your relocation
           </p>
+          
+          {/* Search Form */}
+          <div className="mt-8 bg-white rounded-lg border p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <MapPin className="w-5 h-5 text-blue-600" />
+              <h2 className="text-xl font-semibold text-gray-900">Your Move Details</h2>
+            </div>
+            
+            <form onSubmit={handleSearch}>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">From City</label>
+                  <input 
+                    type="text" 
+                    placeholder="Current city"
+                    value={searchFormData.fromCity}
+                    onChange={(e) => setSearchFormData(prev => ({ ...prev, fromCity: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">From State</label>
+                  <input 
+                    type="text" 
+                    placeholder="State (e.g., NY)"
+                    value={searchFormData.fromState}
+                    onChange={(e) => setSearchFormData(prev => ({ ...prev, fromState: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">From Zip (Optional)</label>
+                  <input 
+                    type="text" 
+                    placeholder="Zip code"
+                    value={searchFormData.fromZip}
+                    onChange={(e) => setSearchFormData(prev => ({ ...prev, fromZip: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">To City</label>
+                  <input 
+                    type="text" 
+                    placeholder="Destination city"
+                    value={searchFormData.toCity}
+                    onChange={(e) => setSearchFormData(prev => ({ ...prev, toCity: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">To State</label>
+                  <input 
+                    type="text" 
+                    placeholder="State (e.g., CA)"
+                    value={searchFormData.toState}
+                    onChange={(e) => setSearchFormData(prev => ({ ...prev, toState: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Move Date (Optional)</label>
+                  <input 
+                    type="date" 
+                    value={searchFormData.moveDate}
+                    onChange={(e) => setSearchFormData(prev => ({ ...prev, moveDate: e.target.value }))}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+              
+              <Button 
+                type="submit" 
+                className="w-full" 
+                disabled={searchMutation.isPending}
+              >
+                {searchMutation.isPending ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Searching Moving Companies...
+                  </>
+                ) : (
+                  <>
+                    <Search className="w-4 h-4 mr-2" />
+                    Search Moving Companies
+                  </>
+                )}
+              </Button>
+            </form>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Moving Companies List */}
+          {/* Moving Companies Results */}
           <div className="lg:col-span-2">
-            <div className="space-y-6">
-              {movingCompanies.map((company) => (
-                <Card key={company.id} className="hover:shadow-lg transition-shadow">
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <CardTitle className="flex items-center gap-2 text-xl">
-                          <Truck className="w-5 h-5 text-blue-600" />
-                          {company.name}
-                        </CardTitle>
-                        <CardDescription className="mt-2">{company.description}</CardDescription>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-lg">
-                          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                          <span className="font-semibold">{company.rating}</span>
+            {searchMutation.isPending && (
+              <div className="flex items-center justify-center py-12">
+                <div className="text-center">
+                  <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-blue-600" />
+                  <p className="text-gray-600">Searching for moving companies...</p>
+                  <p className="text-sm text-gray-500 mt-2">This may take a few moments</p>
+                </div>
+              </div>
+            )}
+
+            {!searchMutation.isPending && !hasSearched && (
+              <div className="text-center py-12">
+                <div className="max-w-md mx-auto">
+                  <Truck className="w-16 h-16 text-blue-500 mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">Ready to Find Moving Companies?</h3>
+                  <p className="text-gray-600 mb-6">
+                    Enter your move details above to get personalized moving company recommendations.
+                  </p>
+                  <Link href="/ai-assistant">
+                    <Button>
+                      Start with AI Assistant
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            )}
+
+            {hasSearched && movingCompanies.length === 0 && !searchMutation.isPending && (
+              <div className="text-center py-12">
+                <div className="max-w-md mx-auto">
+                  <Truck className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold text-gray-900 mb-2">No Moving Companies Found</h3>
+                  <p className="text-gray-600 mb-6">
+                    We couldn't find moving companies for this route. Try adjusting your search criteria or contact us for assistance.
+                  </p>
+                  <Button onClick={() => setHasSearched(false)}>
+                    Try Different Search
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {movingCompanies.length > 0 && (
+              <div className="space-y-6">
+                <h3 className="text-2xl font-bold text-gray-900">
+                  Found {movingCompanies.length} Moving Companies
+                </h3>
+                {movingCompanies.map((company, index) => (
+                  <Card key={`${company.provider}-${index}`} className="hover:shadow-lg transition-shadow">
+                    <CardHeader>
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <CardTitle className="flex items-center gap-2 text-xl">
+                            <Truck className="w-5 h-5 text-blue-600" />
+                            {company.provider}
+                          </CardTitle>
+                          <Badge variant="outline" className="mt-2">{company.category}</Badge>
+                          <CardDescription className="mt-2">{company.description}</CardDescription>
                         </div>
+                        {company.rating > 0 && (
+                          <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-lg">
+                              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                              <span className="font-semibold">{company.rating}</span>
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    {/* Company Details */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                      <div className="flex items-center gap-2 text-sm">
-                        <Phone className="w-4 h-4 text-gray-500" />
-                        <span>{company.phone}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm">
-                        <Clock className="w-4 h-4 text-gray-500" />
-                        <span>{company.hours}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm">
-                        <DollarSign className="w-4 h-4 text-gray-500" />
-                        <span>{company.estimatedCost}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm">
-                        <MapPin className="w-4 h-4 text-gray-500" />
-                        <span>{company.location}</span>
-                      </div>
-                    </div>
-
-                    {/* Services */}
-                    <div className="mb-4">
-                      <div className="text-sm font-medium text-gray-700 mb-2">Services</div>
-                      <div className="flex flex-wrap gap-2">
-                        {company.services.map((service, idx) => (
-                          <Badge key={idx} variant="secondary" className="text-xs">{service}</Badge>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Specialties */}
-                    {company.specialties.length > 0 && (
-                      <div className="mb-4">
-                        <div className="text-sm font-medium text-gray-700 mb-2">Specialties</div>
-                        <div className="flex flex-wrap gap-2">
-                          {company.specialties.map((specialty, idx) => (
-                            <Badge key={idx} variant="outline" className="text-xs">{specialty}</Badge>
-                          ))}
+                    </CardHeader>
+                    <CardContent>
+                      {/* Company Details */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div className="flex items-center gap-2 text-sm">
+                          <Phone className="w-4 h-4 text-gray-500" />
+                          <span>{company.phone}</span>
                         </div>
+                        {company.hours && (
+                          <div className="flex items-center gap-2 text-sm">
+                            <Clock className="w-4 h-4 text-gray-500" />
+                            <span>{company.hours}</span>
+                          </div>
+                        )}
+                        <div className="flex items-center gap-2 text-sm">
+                          <DollarSign className="w-4 h-4 text-gray-500" />
+                          <span>{company.estimatedCost}</span>
+                        </div>
+                        {company.availability && (
+                          <div className="flex items-center gap-2 text-sm">
+                            <MapPin className="w-4 h-4 text-gray-500" />
+                            <span>{company.availability}</span>
+                          </div>
+                        )}
                       </div>
-                    )}
 
-                    {/* License Info */}
-                    <div className="mb-4 p-3 bg-gray-50 rounded-lg">
-                      <div className="text-sm font-medium text-gray-700 mb-1">License Information</div>
-                      <div className="text-sm text-gray-600">{company.licenseInfo}</div>
-                    </div>
+                      {/* Services */}
+                      {company.services && company.services.length > 0 && (
+                        <div className="mb-4">
+                          <div className="text-sm font-medium text-gray-700 mb-2">Services</div>
+                          <div className="flex flex-wrap gap-2">
+                            {company.services.map((service, idx) => (
+                              <Badge key={idx} variant="secondary" className="text-xs">{service}</Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
 
-                    {/* Action Buttons */}
-                    <div className="flex gap-3">
-                      <Button 
-                        onClick={() => handleRequestQuote(company)}
-                        className="flex-1"
-                        variant={quotesRequested.has(company.id) ? "secondary" : "default"}
-                      >
-                        <ExternalLink className="w-4 h-4 mr-2" />
-                        {quotesRequested.has(company.id) ? "Quote Requested" : "Get Quote"}
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        onClick={() => handleVisitWebsite(company)}
-                      >
-                        <Globe className="w-4 h-4 mr-2" />
-                        Website
-                      </Button>
-                      <Button 
-                        onClick={() => handleSelectCompany(company.id)}
-                        variant={selectedCompanies.has(company.id) ? "default" : "outline"}
-                        className={selectedCompanies.has(company.id) ? "bg-green-600 hover:bg-green-700" : ""}
-                      >
-                        {selectedCompanies.has(company.id) ? "Selected" : "Select"}
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                      {/* Specialties */}
+                      {company.specialties && company.specialties.length > 0 && (
+                        <div className="mb-4">
+                          <div className="text-sm font-medium text-gray-700 mb-2">Specialties</div>
+                          <div className="flex flex-wrap gap-2">
+                            {company.specialties.map((specialty, idx) => (
+                              <Badge key={idx} variant="outline" className="text-xs">{specialty}</Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Notes */}
+                      {company.notes && (
+                        <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+                          <div className="text-sm text-gray-600">{company.notes}</div>
+                        </div>
+                      )}
+
+                      {/* Action Buttons */}
+                      <div className="flex gap-3">
+                        <Button 
+                          onClick={() => handleRequestQuote(company)}
+                          className="flex-1"
+                          variant={quotesRequested.has(company.provider) ? "secondary" : "default"}
+                        >
+                          <ExternalLink className="w-4 h-4 mr-2" />
+                          {quotesRequested.has(company.provider) ? "Quote Requested" : "Get Quote"}
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          onClick={() => handleVisitWebsite(company)}
+                        >
+                          <Globe className="w-4 h-4 mr-2" />
+                          Website
+                        </Button>
+                        <Button 
+                          onClick={() => handleSelectCompany(company.provider)}
+                          variant={selectedCompanies.has(company.provider) ? "default" : "outline"}
+                          className={selectedCompanies.has(company.provider) ? "bg-green-600 hover:bg-green-700" : ""}
+                        >
+                          {selectedCompanies.has(company.provider) ? "Selected" : "Select"}
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Sidebar */}
