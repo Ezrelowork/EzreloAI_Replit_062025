@@ -70,36 +70,7 @@ export default function MovingJourney() {
       category: "Core Moving",
       completed: false,
       position: { x: "25%", y: "75%" }, // Above road, left side
-      icon: Truck,
-      onClick: () => {
-            // Get move data from localStorage
-            const storedMoveData = localStorage.getItem('moveData');
-            console.log('Stored move data:', storedMoveData);
-
-            if (storedMoveData) {
-              try {
-                const moveData = JSON.parse(storedMoveData);
-                console.log('Parsed move data:', moveData);
-
-                if (moveData.currentCity && moveData.newCity) {
-                  // Navigate with proper URL parameters
-                  const fromAddress = `${moveData.currentCity}, ${moveData.currentState} ${moveData.currentZip || ''}`.trim();
-                  const toAddress = `${moveData.newCity}, ${moveData.newState} ${moveData.newZip || ''}`.trim();
-                  const moveDate = moveData.moveDate || '';
-
-                  console.log('Navigating with:', { fromAddress, toAddress, moveDate });
-                  window.location.href = `/moving-companies?from=${encodeURIComponent(fromAddress)}&to=${encodeURIComponent(toAddress)}&date=${encodeURIComponent(moveDate)}`;
-                  return;
-                }
-              } catch (error) {
-                console.error('Error parsing move data:', error);
-              }
-            }
-
-            // Fallback - just navigate to the page
-            console.log('No valid move data found, navigating to moving companies page');
-            window.location.href = '/moving-companies';
-          }
+      icon: Truck
     },
     {
       id: "utilities-setup",
@@ -160,12 +131,8 @@ export default function MovingJourney() {
   };
 
   const handleSignClick = (task: MovingTask) => {
-    if (task.id === 'moving-company') {
-      task.onClick();
-    } else {
-      setSelectedTask(task);
-      openTaskModal(task);
-    }
+    setSelectedTask(task);
+    openTaskModal(task);
   };
 
   const completedCount = completedTasks.size;
