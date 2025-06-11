@@ -2,19 +2,13 @@ import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { JourneyRoad, JourneyLandscape, GraphicsTimeline } from "@/components/journey-assets";
-import { ProgressTracker, JourneyStats } from "@/components/progress-tracker";
 import { TaskModal, useTaskModal } from "@/components/task-modal";
-import { ZoomNavigation, useZoomNavigation } from "@/components/zoom-navigation";
 import { TaskPage } from "@/components/task-page";
+import { DynamicHighwaySign } from "@/components/dynamic-highway-sign";
 
-// Direct imports for highway graphics
+// Import highway background
 import highwayBackground from "@assets/highway-background.png";
-import sign1 from "@assets/SIgn1.png";
-import sign2 from "@assets/Sign2.png";
-import sign3 from "@assets/Sign3.png";
-import sign4 from "@assets/Sign4.png";
-import sign5 from "@assets/Sign5.png";
+
 import { 
   ArrowLeft,
   Truck,
@@ -42,328 +36,249 @@ import {
   Clipboard
 } from "lucide-react";
 
-interface JourneyStep {
+interface MovingTask {
   id: string;
   title: string;
   description: string;
+  priority: 'high' | 'medium' | 'low';
   week: string;
-  tasks: string[];
-  route: string;
-  position: { x: number; y: number };
-  signType: "stop" | "warning" | "highway" | "info";
+  category: string;
   completed: boolean;
-  priority: "high" | "medium" | "low";
+  position: { x: string; y: string };
+  icon: any;
 }
-
-// Comprehensive icon mapping for all moving tasks
-const getTaskIcon = (task: string) => {
-  const taskLower = task.toLowerCase();
-  
-  // Moving & Transport
-  if (taskLower.includes('mover') || taskLower.includes('moving') || taskLower.includes('transport') || taskLower.includes('truck')) return Truck;
-  if (taskLower.includes('pack') || taskLower.includes('box') || taskLower.includes('organize') || taskLower.includes('inventory')) return Package;
-  
-  // Housing & Property
-  if (taskLower.includes('home') || taskLower.includes('house') || taskLower.includes('property') || taskLower.includes('inspection')) return Home;
-  if (taskLower.includes('key') || taskLower.includes('lock') || taskLower.includes('access') || taskLower.includes('security')) return Key;
-  
-  // Utilities & Services
-  if (taskLower.includes('electric') || taskLower.includes('power') || taskLower.includes('utility') || taskLower.includes('gas')) return Zap;
-  if (taskLower.includes('internet') || taskLower.includes('wifi') || taskLower.includes('cable') || taskLower.includes('broadband')) return Wifi;
-  if (taskLower.includes('phone') || taskLower.includes('mobile') || taskLower.includes('cellular') || taskLower.includes('landline')) return Phone;
-  if (taskLower.includes('water') || taskLower.includes('sewer') || taskLower.includes('trash') || taskLower.includes('waste')) return Wrench;
-  
-  // Healthcare & Medical
-  if (taskLower.includes('health') || taskLower.includes('medical') || taskLower.includes('doctor') || taskLower.includes('dentist') || taskLower.includes('prescription')) return Stethoscope;
-  if (taskLower.includes('veterinar') || taskLower.includes('pet') || taskLower.includes('animal')) return Heart;
-  
-  // Education & Family
-  if (taskLower.includes('school') || taskLower.includes('education') || taskLower.includes('enroll') || taskLower.includes('daycare')) return GraduationCap;
-  if (taskLower.includes('family') || taskLower.includes('children') || taskLower.includes('kids') || taskLower.includes('spouse')) return Users;
-  
-  // Financial & Legal
-  if (taskLower.includes('bank') || taskLower.includes('financial') || taskLower.includes('credit') || taskLower.includes('loan')) return CreditCard;
-  if (taskLower.includes('insurance') || taskLower.includes('policy') || taskLower.includes('coverage')) return Shield;
-  if (taskLower.includes('legal') || taskLower.includes('attorney') || taskLower.includes('lawyer') || taskLower.includes('contract')) return FileText;
-  
-  // Address Changes & Registration
-  if (taskLower.includes('address') || taskLower.includes('registration') || taskLower.includes('voter') || taskLower.includes('dmv')) return MapPin;
-  if (taskLower.includes('license') || taskLower.includes('permit') || taskLower.includes('id') || taskLower.includes('vehicle')) return Car;
-  
-  // Documentation & Records
-  if (taskLower.includes('record') || taskLower.includes('document') || taskLower.includes('file') || taskLower.includes('paperwork')) return Clipboard;
-  if (taskLower.includes('notify') || taskLower.includes('inform') || taskLower.includes('update') || taskLower.includes('change')) return Info;
-  
-  // Emergency & Important
-  if (taskLower.includes('urgent') || taskLower.includes('important') || taskLower.includes('critical') || taskLower.includes('deadline')) return AlertTriangle;
-  
-  return CheckCircle;
-};
 
 export default function MovingJourney() {
   const [, setLocation] = useLocation();
-  const [journeyData, setJourneyData] = useState<JourneyStep[]>([]);
-  const { isOpen, currentTask, openModal, closeModal } = useTaskModal();
-  const { isZoomed, zoomOrigin, currentTaskData, zoomIntoTask, zoomOut } = useZoomNavigation();
-  const taskCardRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+  const [completedTasks, setCompletedTasks] = useState<Set<string>>(new Set());
+  const [showTaskPage, setShowTaskPage] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<MovingTask | null>(null);
+  const { isTaskModalOpen, openTaskModal, closeTaskModal } = useTaskModal();
+  const containerRef = useRef<HTMLDivElement>(null);
 
-  // Create static graphics object from imports
-  const customGraphics = {
-    roadBackground: {
-      src: highwayBackground,
-      alt: 'Highway Journey Background',
-      width: 1200,
-      height: 800
+  // Define moving tasks with highway positions
+  const movingTasks: MovingTask[] = [
+    {
+      id: "moving-company",
+      title: "Hire Moving Company",
+      description: "Research and book professional movers for your relocation",
+      priority: "high",
+      week: "Week 1",
+      category: "Core Moving",
+      completed: false,
+      position: { x: "15%", y: "25%" },
+      icon: Truck
     },
-    taskIcons: {
-      'moving': { src: sign1, alt: 'Core Moving Tasks', width: 120, height: 80 },
-      'utilities-setup': { src: sign2, alt: 'Set Up Utilities', width: 120, height: 80 },
-      'address-changes': { src: sign3, alt: 'Address Changes', width: 120, height: 80 },
-      'utilities-services': { src: sign4, alt: 'Utilities & Services', width: 120, height: 80 },
-      'essential-services': { src: sign5, alt: 'Essential Services', width: 120, height: 80 }
+    {
+      id: "utilities-setup",
+      title: "Set Up Utilities",
+      description: "Arrange electricity, gas, water, and internet services",
+      priority: "high", 
+      week: "Week 2",
+      category: "Essential Services",
+      completed: false,
+      position: { x: "35%", y: "35%" },
+      icon: Zap
+    },
+    {
+      id: "address-change",
+      title: "Change Address",
+      description: "Update address with banks, employers, and subscriptions",
+      priority: "medium",
+      week: "Week 3",
+      category: "Administrative",
+      completed: false,
+      position: { x: "55%", y: "45%" },
+      icon: FileText
+    },
+    {
+      id: "healthcare-transfer",
+      title: "Transfer Healthcare",
+      description: "Find new doctors and transfer medical records",
+      priority: "medium",
+      week: "Week 4",
+      category: "Healthcare",
+      completed: false,
+      position: { x: "75%", y: "35%" },
+      icon: Stethoscope
+    },
+    {
+      id: "school-enrollment",
+      title: "School Enrollment",
+      description: "Enroll children in new schools and transfer records",
+      priority: "low",
+      week: "Week 5",
+      category: "Family",
+      completed: false,
+      position: { x: "85%", y: "55%" },
+      icon: GraduationCap
     }
-  };
-  useEffect(() => {
-    // Get action plan data from localStorage (from AI assistant)
-    const savedActionPlan = localStorage.getItem('aiActionPlan');
-    
-    if (savedActionPlan) {
-      const actionPlan = JSON.parse(savedActionPlan);
-      
-      // Transform action plan into journey steps with road positions
-      const steps: JourneyStep[] = actionPlan.map((action: any, index: number) => {
-        const totalSteps = actionPlan.length;
-        const progress = index / (totalSteps - 1 || 1);
-        
-        // Calculate curved road positions with more spacing
-        const baseX = 8 + (progress * 84);
-        const curveY = 25 + Math.sin(progress * Math.PI * 1.5) * 20;
-        
-        // Determine sign type based on priority and position
-        let signType = 'warning';
-        if (action.priority === 'high') signType = 'stop';
-        else if (index === actionPlan.length - 1) signType = 'highway';
-        else if (action.route === '/dashboard') signType = 'info';
-        
-        return {
-          id: `action-${index}`,
-          title: action.title,
-          description: action.description,
-          week: action.timeframe,
-          tasks: [action.description],
-          route: action.route,
-          position: { x: baseX, y: curveY },
-          signType: signType,
-          completed: false,
-          priority: action.priority || 'medium'
-        };
-      });
-      
-      setJourneyData(steps);
-    }
-  }, []);
+  ];
 
-
-
-  const handleTaskClick = (step: JourneyStep, event: React.MouseEvent) => {
-    const cardElement = taskCardRefs.current[step.id];
-    if (cardElement) {
-      // Cinematic zoom into the task card
-      zoomIntoTask(cardElement, {
-        id: step.id,
-        title: step.title,
-        description: step.description,
-        priority: step.priority,
-        week: step.week,
-        category: getCategoryFromTask(step.title)
-      });
-    }
+  const toggleTaskCompletion = (taskId: string) => {
+    setCompletedTasks(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(taskId)) {
+        newSet.delete(taskId);
+      } else {
+        newSet.add(taskId);
+      }
+      return newSet;
+    });
   };
 
-  const handleStartTask = (step: JourneyStep) => {
-    // Smart routing with address data preservation
-    const fromParam = localStorage.getItem('aiFromLocation');
-    const toParam = localStorage.getItem('aiToLocation');
-    const dateParam = localStorage.getItem('aiMoveDate');
-    
-    // Intelligent routing based on task content
-    const taskLower = step.title.toLowerCase();
-    const descLower = step.description.toLowerCase();
-    const combined = `${taskLower} ${descLower}`;
-    
-    let targetRoute = step.route;
-    
-    // Override route based on task content for better UX
-    if (combined.includes('mover') || combined.includes('moving') || combined.includes('truck') || combined.includes('quote')) {
-      targetRoute = '/dashboard';
-    } else if (combined.includes('utility') || combined.includes('electric') || combined.includes('internet') || 
-               combined.includes('cable') || combined.includes('phone') || combined.includes('gas') || 
-               combined.includes('water') || combined.includes('wifi')) {
-      targetRoute = '/utilities';
-    } else if (combined.includes('checklist') || combined.includes('organize') || combined.includes('pack') || 
-               combined.includes('inventory') || combined.includes('timeline')) {
-      targetRoute = '/moving-checklist';
-    } else if (combined.includes('research') || combined.includes('compare') || combined.includes('recommend') || 
-               combined.includes('evaluate') || combined.includes('analysis')) {
-      targetRoute = '/ai-assistant';
-    }
-    
-    // Close modal and navigate
-    closeModal();
-    
-    // Pass location data for relevant routes
-    if ((targetRoute === '/dashboard' || targetRoute === '/utilities') && fromParam && toParam) {
-      setLocation(`${targetRoute}?from=${encodeURIComponent(fromParam)}&to=${encodeURIComponent(toParam)}&date=${dateParam || ''}`);
-    } else {
-      setLocation(targetRoute);
-    }
+  const handleSignClick = (task: MovingTask) => {
+    setSelectedTask(task);
+    openTaskModal();
   };
 
-  const getCategoryFromTask = (title: string) => {
-    const taskLower = title.toLowerCase();
-    if (taskLower.includes('mover') || taskLower.includes('moving')) return 'Moving & Transport';
-    if (taskLower.includes('utility') || taskLower.includes('electric') || taskLower.includes('internet')) return 'Utilities & Services';
-    if (taskLower.includes('pack') || taskLower.includes('organize')) return 'Organization & Planning';
-    if (taskLower.includes('address') || taskLower.includes('registration')) return 'Address Changes';
-    if (taskLower.includes('health') || taskLower.includes('medical')) return 'Healthcare & Services';
-    return 'General Tasks';
-  };
+  const completedCount = completedTasks.size;
+  const totalTasks = movingTasks.length;
+  const progressPercentage = (completedCount / totalTasks) * 100;
 
-  const getSignColor = (signType: string, priority?: string) => {
-    if (priority === 'high') return 'bg-red-600 border-red-800';
-    if (priority === 'medium') return 'bg-yellow-500 border-yellow-700';
-    if (priority === 'low') return 'bg-green-600 border-green-800';
-    
-    switch (signType) {
-      case 'stop': return 'bg-red-600 border-red-800';
-      case 'warning': return 'bg-yellow-500 border-yellow-700';
-      case 'highway': return 'bg-green-600 border-green-800';
-      case 'info': return 'bg-blue-600 border-blue-800';
-      default: return 'bg-gray-600 border-gray-800';
-    }
-  };
-
-  const getSignShape = (signType: string) => {
-    switch (signType) {
-      case 'stop': return 'clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)';
-      case 'warning': return 'clip-path: polygon(50% 0%, 0% 100%, 100% 100%)';
-      case 'highway': return 'border-radius: 8px';
-      case 'info': return 'border-radius: 50%';
-      default: return 'border-radius: 8px';
-    }
-  };
+  if (showTaskPage) {
+    return <TaskPage onBack={() => setShowTaskPage(false)} />;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
       {/* Header */}
-      <div className="relative z-20 p-6 bg-white/80 backdrop-blur-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link href="/ai-assistant">
-              <Button variant="outline" size="sm" className="flex items-center gap-2">
-                <ArrowLeft className="w-4 h-4" />
+      <header className="bg-white/80 backdrop-blur-lg shadow-sm sticky top-0 z-40 border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-4">
+            <div className="flex items-center space-x-4">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setLocation('/ai-assistant')}
+                className="text-gray-600 hover:text-gray-900"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to AI Assistant
               </Button>
-            </Link>
-            <Link href="/">
-              <Button variant="ghost" size="sm" className="flex items-center gap-2">
-                <Home className="w-4 h-4" />
-                Home
-              </Button>
-            </Link>
-          </div>
-          <h1 className="text-3xl font-bold text-gray-900">Interactive Moving Journey</h1>
-          <div className="w-32"></div>
-        </div>
-      </div>
-
-      {/* Journey Timeline */}
-      <div className="relative max-w-7xl mx-auto p-6 min-h-[600px]">
-        {/* Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-xl"></div>
-
-        {/* Task Cards */}
-        <div className="relative grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-6">
-          {journeyData.map((step, index) => {
-            const IconComponent = getTaskIcon(step.title);
-            const completedSteps = journeyData.filter(s => s.completed).length;
-            const isCurrentStep = index === completedSteps && !step.completed;
-            
-            return (
-              <div
-                key={step.id}
-                ref={el => taskCardRefs.current[step.id] = el}
-                data-step-id={step.id}
-                className={`bg-white rounded-lg shadow-md p-4 cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-105 ${
-                  step.completed ? 'opacity-70' : ''
-                } ${
-                  isCurrentStep ? 'ring-2 ring-blue-400' : ''
-                }`}
-                onClick={(e) => handleTaskClick(step, e)}
-              >
-                <div className="flex items-start gap-3">
-                  <div className={`p-2 rounded-lg ${getSignColor(step.signType, step.priority)}`}>
-                    <IconComponent className="w-5 h-5 text-white" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-sm text-gray-900 truncate">{step.title}</h3>
-                    <p className="text-xs text-gray-600 mt-1 line-clamp-2">{step.description}</p>
-                    <div className="flex gap-1 mt-2">
-                      <Badge variant={step.priority === 'high' ? 'destructive' : 'secondary'} className="text-xs">
-                        {step.priority}
-                      </Badge>
-                      <Badge variant="outline" className="text-xs">{step.week}</Badge>
-                    </div>
-                  </div>
-                  {step.completed && (
-                    <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
-                  )}
-                </div>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">Your Moving Journey</h1>
+                <p className="text-sm text-gray-600">Click signs to explore tasks and track progress</p>
               </div>
-            );
-          })}
+            </div>
+            <div className="flex items-center space-x-4">
+              <Badge variant="secondary" className="text-sm">
+                {completedCount}/{totalTasks} Completed
+              </Badge>
+              <Button
+                onClick={() => setShowTaskPage(true)}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                <Clipboard className="w-4 h-4 mr-2" />
+                View All Tasks
+              </Button>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Progress Bar */}
+      <div className="bg-white/80 backdrop-blur-lg border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm font-medium text-gray-700">Journey Progress</span>
+            <span className="text-sm text-gray-600">{Math.round(progressPercentage)}% Complete</span>
+          </div>
+          <div className="w-full bg-gray-200 rounded-full h-3">
+            <div 
+              className="bg-gradient-to-r from-blue-500 to-green-500 h-3 rounded-full transition-all duration-500"
+              style={{ width: `${progressPercentage}%` }}
+            />
+          </div>
         </div>
       </div>
 
-      {/* Fixed Position Progress Tracker */}
-      <div className="fixed top-24 right-6 space-y-4 w-80 z-30">
-        <ProgressTracker 
-          totalSteps={journeyData.length}
-          completedSteps={journeyData.filter(step => step.completed).length}
-          currentStep={journeyData.findIndex(step => !step.completed) + 1}
-        />
-        
-        <JourneyStats
-          highPriority={journeyData.filter(step => step.priority === 'high').length}
-          mediumPriority={journeyData.filter(step => step.priority === 'medium').length}
-          lowPriority={journeyData.filter(step => step.priority === 'low').length}
-        />
-      </div>
+      {/* Main Journey Container */}
+      <div className="relative overflow-hidden" style={{ height: 'calc(100vh - 200px)' }}>
+        {/* Highway Background */}
+        <div 
+          ref={containerRef}
+          className="relative w-full h-full bg-cover bg-center bg-no-repeat"
+          style={{
+            backgroundImage: `url(${highwayBackground})`,
+            backgroundSize: 'cover'
+          }}
+        >
+          {/* Dynamic Highway Signs */}
+          {movingTasks.map((task) => (
+            <div
+              key={task.id}
+              className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer hover:scale-105 transition-all duration-300"
+              style={{
+                left: task.position.x,
+                top: task.position.y,
+              }}
+              onClick={() => handleSignClick(task)}
+            >
+              <DynamicHighwaySign
+                title={task.title}
+                description={task.description}
+                week={task.week}
+                priority={task.priority}
+                completed={completedTasks.has(task.id)}
+                onClick={() => handleSignClick(task)}
+              />
+            </div>
+          ))}
 
-      {/* Instructions */}
-      <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-white rounded-lg px-6 py-3 shadow-lg border z-30">
-        <div className="text-gray-700 text-center text-sm">
-          Click any task to get started with your moving journey
+          {/* Journey Path Indicators */}
+          <div className="absolute inset-0 pointer-events-none">
+            {/* Start indicator */}
+            <div className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-green-500 text-white px-4 py-2 rounded-full font-semibold shadow-lg">
+              <MapPin className="w-4 h-4 inline mr-2" />
+              Start Here
+            </div>
+
+            {/* End indicator */}
+            <div className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-blue-500 text-white px-4 py-2 rounded-full font-semibold shadow-lg">
+              <Home className="w-4 h-4 inline mr-2" />
+              New Home
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Cinematic Zoom Navigation */}
-      <ZoomNavigation
-        isZoomed={isZoomed}
-        onZoomOut={zoomOut}
-        zoomOrigin={zoomOrigin}
-      >
-        {currentTaskData && (
-          <TaskPage
-            task={currentTaskData}
-            onComplete={() => {
-              // Mark task as complete and zoom out
-              zoomOut();
-            }}
-          />
-        )}
-      </ZoomNavigation>
+      {/* Legend */}
+      <div className="bg-white/90 backdrop-blur-lg border-t border-gray-100 p-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex flex-wrap items-center justify-center gap-6 text-sm">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+              <span>High Priority</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+              <span>Medium Priority</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+              <span>Low Priority</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <CheckCircle className="w-4 h-4 text-green-600" />
+              <span>Completed</span>
+            </div>
+          </div>
+        </div>
+      </div>
 
+      {/* Task Modal */}
+      <TaskModal
+        isOpen={isTaskModalOpen}
+        onClose={closeTaskModal}
+        task={selectedTask}
+        onToggleComplete={() => {
+          if (selectedTask) {
+            toggleTaskCompletion(selectedTask.id);
+          }
+        }}
+        isCompleted={selectedTask ? completedTasks.has(selectedTask.id) : false}
+      />
     </div>
   );
 }
