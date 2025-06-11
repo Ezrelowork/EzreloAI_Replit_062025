@@ -278,12 +278,12 @@ export default function MovingJourney() {
       </div>
 
       {/* Enhanced Journey Timeline with Custom Graphics */}
-      <div className="relative max-w-7xl mx-auto p-6">
+      <div className="relative max-w-7xl mx-auto p-6 min-h-[800px]">
         {/* Highway Background */}
         <div className="absolute inset-0 -z-10">
           <img 
-            src={customGraphics.roadBackground.src}
-            alt={customGraphics.roadBackground.alt}
+            src={highwayBackground}
+            alt="Highway Journey Background"
             className="w-full h-full object-cover opacity-80 rounded-3xl"
           />
         </div>
@@ -306,21 +306,22 @@ export default function MovingJourney() {
 
           const customSign = getCustomSign(step.title);
           
-          // Position signs along the winding road path
+          // Position signs along the winding road path - more realistic highway positions
           const roadPositions = [
-            { left: '15%', top: '80%' },   // Bottom left curve start
-            { left: '25%', top: '65%' },   // Lower curve
-            { left: '45%', top: '50%' },   // Middle section
-            { left: '65%', top: '35%' },   // Upper curve
-            { left: '80%', top: '20%' }    // Top right
+            { left: '12%', top: '75%' },   // Bottom left curve start
+            { left: '28%', top: '58%' },   // Lower curve
+            { left: '50%', top: '45%' },   // Middle section
+            { left: '72%', top: '32%' },   // Upper curve
+            { left: '85%', top: '18%' }    // Top right
           ];
           
-          const position = roadPositions[index] || { left: '50%', top: '50%' };
+          const position = roadPositions[index % roadPositions.length] || { left: '50%', top: '50%' };
           
           return (
             <div
               key={step.id}
               ref={el => taskCardRefs.current[step.id] = el}
+              data-step-id={step.id}
               className="absolute cursor-pointer transition-all duration-300 hover:scale-110 hover:z-10"
               style={{
                 left: position.left,
@@ -329,64 +330,42 @@ export default function MovingJourney() {
               }}
               onClick={(e) => handleTaskClick(step, e)}
             >
-              {/* Custom Highway Sign or Default Circle */}
-              {customSign ? (
-                <div className="relative group">
-                  <img 
-                    src={customSign.src}
-                    alt={customSign.alt}
-                    className={`w-24 h-16 object-contain transition-all duration-300 ${
-                      step.completed ? 'opacity-80 saturate-50' : 'hover:brightness-110'
-                    }`}
-                  />
-                  
-                  {/* Completion Check */}
-                  {step.completed && (
-                    <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center shadow-lg">
-                      <CheckCircle className="w-4 h-4 text-white" />
-                    </div>
-                  )}
-                  
-                  {/* Current Step Indicator */}
-                  {isCurrentStep && (
-                    <div className="absolute inset-0 rounded-lg ring-4 ring-blue-400 ring-opacity-50 animate-pulse"></div>
-                  )}
-                  
-                  {/* Hover Card */}
-                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-                    <div className="bg-white rounded-lg shadow-xl p-3 border min-w-48">
-                      <h4 className="font-semibold text-sm text-gray-900">{step.title}</h4>
-                      <p className="text-xs text-gray-600 mt-1">{step.description}</p>
-                      <div className="flex gap-1 mt-2">
-                        <Badge variant={step.priority === 'high' ? 'destructive' : 'secondary'} className="text-xs">
-                          {step.priority}
-                        </Badge>
-                        <Badge variant="outline" className="text-xs">{step.week}</Badge>
-                      </div>
+              {/* Custom Highway Sign */}
+              <div className="relative group">
+                <img 
+                  src={customSign.src}
+                  alt={customSign.alt}
+                  className={`w-28 h-20 object-contain transition-all duration-300 drop-shadow-lg ${
+                    step.completed ? 'opacity-80 saturate-50' : 'hover:brightness-110'
+                  }`}
+                />
+                
+                {/* Completion Check */}
+                {step.completed && (
+                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center shadow-lg">
+                    <CheckCircle className="w-4 h-4 text-white" />
+                  </div>
+                )}
+                
+                {/* Current Step Indicator */}
+                {isCurrentStep && (
+                  <div className="absolute inset-0 rounded-lg ring-4 ring-blue-400 ring-opacity-50 animate-pulse"></div>
+                )}
+                
+                {/* Hover Card */}
+                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-50">
+                  <div className="bg-white rounded-lg shadow-xl p-3 border min-w-48">
+                    <h4 className="font-semibold text-sm text-gray-900">{step.title}</h4>
+                    <p className="text-xs text-gray-600 mt-1">{step.description}</p>
+                    <div className="flex gap-1 mt-2">
+                      <Badge variant={step.priority === 'high' ? 'destructive' : 'secondary'} className="text-xs">
+                        {step.priority}
+                      </Badge>
+                      <Badge variant="outline" className="text-xs">{step.week}</Badge>
                     </div>
                   </div>
                 </div>
-              ) : (
-                /* Fallback Default Circle Design */
-                <div className={`
-                  relative w-16 h-16 rounded-full flex items-center justify-center shadow-lg transition-all duration-300
-                  ${step.completed 
-                    ? 'bg-green-500 text-white' 
-                    : isCurrentStep 
-                      ? 'bg-blue-500 text-white ring-4 ring-blue-200' 
-                      : 'bg-gray-200 text-gray-600'
-                  }
-                  hover:scale-110 hover:shadow-xl
-                `}>
-                  <IconComponent className="w-8 h-8" />
-                  
-                  {step.completed && (
-                    <div className="absolute -top-1 -right-1 w-6 h-6 bg-green-600 rounded-full flex items-center justify-center">
-                      <CheckCircle className="w-4 h-4 text-white" />
-                    </div>
-                  )}
-                </div>
-              )}
+              </div>
             </div>
           );
         })}
