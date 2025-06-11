@@ -82,79 +82,79 @@ export default function MovingCompanies() {
     const aiToLocation = localStorage.getItem('aiToLocation');
     const aiMoveDate = localStorage.getItem('aiMoveDate');
 
+    console.log('Loading AI data:', { aiFromLocation, aiToLocation, aiMoveDate });
+
     if (aiFromLocation && aiFromLocation !== 'undefined') {
-      const fromParts = aiFromLocation.split(',').map(part => part.trim());
-      if (fromParts.length >= 2) {
-        const lastPart = fromParts[fromParts.length - 1];
+      // Parse address: "123 Main St, Dallas, TX 75201" or "Dallas, TX"
+      const addressParts = aiFromLocation.split(',').map(part => part.trim());
+      
+      let city = '';
+      let state = '';
+      let zip = '';
+      
+      if (addressParts.length >= 2) {
+        // Get the last part which should contain state and possibly zip
+        const lastPart = addressParts[addressParts.length - 1];
         const zipMatch = lastPart.match(/\b(\d{5}(-\d{4})?)\b/);
-        
-        let state = '';
-        let city = '';
-        let zip = '';
         
         if (zipMatch) {
           zip = zipMatch[1];
-          const withoutZip = lastPart.replace(zipMatch[0], '').trim();
-          const stateCityParts = withoutZip.split(' ').filter(p => p.length > 0);
-          
-          if (stateCityParts.length >= 2) {
-            state = stateCityParts[stateCityParts.length - 1];
-            city = stateCityParts.slice(0, -1).join(' ');
-          }
+          // Remove zip from last part to get state
+          const stateOnly = lastPart.replace(zipMatch[0], '').trim();
+          state = stateOnly;
         } else {
-          const stateCityParts = lastPart.split(' ').filter(p => p.length > 0);
-          if (stateCityParts.length >= 2) {
-            state = stateCityParts[stateCityParts.length - 1];
-            city = stateCityParts.slice(0, -1).join(' ');
-          }
+          state = lastPart;
         }
-
-        setMoveDetails(prev => ({
-          ...prev,
-          fromAddress: aiFromLocation,
-          fromCity: city,
-          fromState: state,
-          fromZip: zip
-        }));
+        
+        // Get city from second to last part
+        const secondLastPart = addressParts[addressParts.length - 2];
+        city = secondLastPart;
       }
+
+      setMoveDetails(prev => ({
+        ...prev,
+        fromAddress: aiFromLocation,
+        fromCity: city,
+        fromState: state,
+        fromZip: zip
+      }));
     }
 
     if (aiToLocation && aiToLocation !== 'undefined') {
-      const toParts = aiToLocation.split(',').map(part => part.trim());
-      if (toParts.length >= 2) {
-        const lastPart = toParts[toParts.length - 1];
+      // Parse address: "456 Oak Ave, Austin, TX 78701" or "Austin, TX"
+      const addressParts = aiToLocation.split(',').map(part => part.trim());
+      
+      let city = '';
+      let state = '';
+      let zip = '';
+      
+      if (addressParts.length >= 2) {
+        // Get the last part which should contain state and possibly zip
+        const lastPart = addressParts[addressParts.length - 1];
         const zipMatch = lastPart.match(/\b(\d{5}(-\d{4})?)\b/);
-        
-        let state = '';
-        let city = '';
-        let zip = '';
         
         if (zipMatch) {
           zip = zipMatch[1];
-          const withoutZip = lastPart.replace(zipMatch[0], '').trim();
-          const stateCityParts = withoutZip.split(' ').filter(p => p.length > 0);
-          
-          if (stateCityParts.length >= 2) {
-            state = stateCityParts[stateCityParts.length - 1];
-            city = stateCityParts.slice(0, -1).join(' ');
-          }
+          // Remove zip from last part to get state
+          const stateOnly = lastPart.replace(zipMatch[0], '').trim();
+          state = stateOnly;
         } else {
-          const stateCityParts = lastPart.split(' ').filter(p => p.length > 0);
-          if (stateCityParts.length >= 2) {
-            state = stateCityParts[stateCityParts.length - 1];
-            city = stateCityParts.slice(0, -1).join(' ');
-          }
+          state = lastPart;
         }
-
-        setMoveDetails(prev => ({
-          ...prev,
-          toAddress: aiToLocation,
-          toCity: city,
-          toState: state,
-          toZip: zip,
-          moveDate: aiMoveDate || ""
-        }));
+        
+        // Get city from second to last part
+        const secondLastPart = addressParts[addressParts.length - 2];
+        city = secondLastPart;
       }
+
+      setMoveDetails(prev => ({
+        ...prev,
+        toAddress: aiToLocation,
+        toCity: city,
+        toState: state,
+        toZip: zip,
+        moveDate: aiMoveDate || ""
+      }));
     }
   }, []);
 
