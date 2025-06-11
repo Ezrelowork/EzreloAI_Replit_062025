@@ -17,7 +17,6 @@ import Analytics from "./pages/analytics";
 import NotFound from "./pages/not-found";
 import RelocationHub from "./pages/relocation-hub";
 import MovingJourney from "@/pages/moving-journey";
-import RelocationHubSimple from "./pages/relocation-hub-simple";
 import LogoShowcase from "./pages/logo-showcase";
 import Landing from "./pages/landing";
 
@@ -27,7 +26,6 @@ function App() {
       <Switch>
         <Route path="/" component={Home} />
         <Route path="/hub" component={RelocationHub} />
-        <Route path="/hub-simple" component={RelocationHubSimple} />
         <Route path="/landing" component={Landing} />
         <Route path="/dashboard" component={Dashboard} />
         <Route path="/moving-companies" component={MovingCompanies} />
@@ -40,7 +38,6 @@ function App() {
         <Route path="/ai-assistant" component={AIAssistant} />
         <Route path="/analytics" component={Analytics} />
         <Route path="/moving-journey" component={MovingJourney} />
-        <Route path="/moving-journey-simple" component={MovingJourneySimple} />
         <Route path="/logo-showcase" component={LogoShowcase} />
         <Route component={NotFound} />
       </Switch>
