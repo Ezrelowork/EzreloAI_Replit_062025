@@ -78,7 +78,7 @@ export default function MovingJourney() {
       week: "Week 2",
       category: "Essential Services",
       completed: false,
-      position: { x: "55%", y: "75%" }, // Below road, center-right
+      position: { x: "65%", y: "75%" }, // Below road, center-right
       icon: Zap
     },
     {
@@ -89,7 +89,7 @@ export default function MovingJourney() {
       week: "Week 3",
       category: "Administrative",
       completed: false,
-      position: { x: "38%", y: "48%" }, // Above road, center
+      position: { x: "38%", y: "40%" }, // Above road, center
       icon: FileText
     },
     {
@@ -100,7 +100,7 @@ export default function MovingJourney() {
       week: "Week 4",
       category: "Healthcare",
       completed: false,
-      position: { x: "70%", y: "35%" }, // Below road, right side
+      position: { x: "70%", y: "30%" }, // Below road, right side
       icon: Stethoscope
     },
     {
@@ -111,7 +111,7 @@ export default function MovingJourney() {
       week: "Week 5",
       category: "Family",
       completed: false,
-      position: { x: "60%", y: "30%" }, // Above road, right side
+      position: { x: "55%", y: "25%" }, // Above road, right side
       icon: GraduationCap
     }
   ];
