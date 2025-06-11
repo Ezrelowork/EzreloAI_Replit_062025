@@ -176,7 +176,7 @@ export default function MovingJourney() {
         description: 'Find moving companies and storage solutions for your relocation',
         week: 'Week 1',
         tasks: ['Research moving companies', 'Get quotes', 'Compare options'],
-        route: '/task',
+        route: '/moving-companies',
         position: { x: 25, y: 45 },
         signType: 'highway',
         completed: false,
@@ -228,24 +228,8 @@ export default function MovingJourney() {
       return;
     }
 
-    // Override Sign 3 content for task modal
-    let taskTitle = step.title;
-    let taskDescription = step.description;
-
-    if (stepIndex === 2) {
-      taskTitle = "Change of Address";
-      taskDescription = "USPS official address change. Update banks, insurance, subscriptions, etc.";
-    }
-
-    // Open modal instead of zooming
-    openModal({
-      id: step.id,
-      title: taskTitle,
-      description: taskDescription,
-      priority: step.priority,
-      week: step.week,
-      category: getCategoryFromTask(taskTitle)
-    });
+    // Go directly to the page instead of opening modal
+    handleStartTask(step);
   };
 
   const handleEditTask = (step: JourneyStep) => {
@@ -343,16 +327,16 @@ export default function MovingJourney() {
     const toParam = localStorage.getItem('aiToLocation');
     const dateParam = localStorage.getItem('aiMoveDate');
 
-    // Intelligent routing based on task content
+    // Intelligent routing based on task content - DIRECT to dedicated pages
     const taskLower = step.title.toLowerCase();
     const descLower = step.description.toLowerCase();
     const combined = `${taskLower} ${descLower}`;
 
-    let targetRoute = step.route;
+    let targetRoute = '/moving-checklist'; // Default fallback
 
-    // Override route based on task content for better UX
-    if (combined.includes('mover') || combined.includes('moving') || combined.includes('truck') || combined.includes('quote')) {
-      targetRoute = '/task';
+    // Direct routing to dedicated pages - NO dashboard/task routes
+    if (combined.includes('mover') || combined.includes('moving') || combined.includes('truck') || combined.includes('quote') || combined.includes('storage')) {
+      targetRoute = '/moving-companies';  // Go to moving companies page
     } else if (combined.includes('utility') || combined.includes('electric') || combined.includes('internet') || 
                combined.includes('gas') || combined.includes('water') || combined.includes('cable')) {
       targetRoute = '/utilities';
@@ -369,9 +353,15 @@ export default function MovingJourney() {
       targetRoute = '/moving-checklist';
     }
 
-    // Force Sign 3 to always go to change-of-address page
-    if (step.id === 'default-sign-3' || step.title.toLowerCase().includes('change of address')) {
+    // Force specific signs to their dedicated pages
+    if (step.id === 'default-sign-1' || step.title.toLowerCase().includes('moving and storage')) {
+      targetRoute = '/moving-companies';
+    } else if (step.id === 'default-sign-2' || step.title.toLowerCase().includes('utility setup')) {
+      targetRoute = '/utilities';
+    } else if (step.id === 'default-sign-3' || step.title.toLowerCase().includes('change of address')) {
       targetRoute = '/change-of-address';
+    } else if (step.id === 'default-sign-4' || step.title.toLowerCase().includes('local services')) {
+      targetRoute = '/local-services';
     }
 
     // Build query params for context preservation
@@ -380,16 +370,11 @@ export default function MovingJourney() {
     if (toParam) params.set('to', toParam);
     if (dateParam) params.set('date', dateParam);
 
-    // Add task details for the task page
-    params.set('taskId', step.id);
-    params.set('taskTitle', step.title);
-    params.set('taskDescription', step.description);
-    params.set('taskPriority', step.priority);
-    params.set('taskWeek', step.week);
-
     const queryString = params.toString();
     const finalRoute = queryString ? `${targetRoute}?${queryString}` : targetRoute;
 
+    // Close modal first, then navigate
+    closeModal();
     setLocation(finalRoute);
   };
 
