@@ -369,6 +369,11 @@ export default function MovingJourney() {
       targetRoute = '/moving-checklist';
     }
 
+    // Force Sign 3 to always go to change-of-address page
+    if (step.id === 'default-sign-3' || step.title.toLowerCase().includes('change of address')) {
+      targetRoute = '/change-of-address';
+    }
+
     // Build query params for context preservation
     const params = new URLSearchParams();
     if (fromParam) params.set('from', fromParam);
