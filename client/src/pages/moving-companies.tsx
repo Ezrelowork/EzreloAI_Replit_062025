@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,201 +13,156 @@ import {
   Globe,
   MapPin,
   Clock,
-  DollarSign
+  DollarSign,
+  Home
 } from "lucide-react";
-import { useMutation } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
 interface MovingCompany {
-  category: string;
-  provider: string;
-  phone: string;
+  id: string;
+  name: string;
   description: string;
+  phone: string;
   website: string;
-  referralUrl: string;
-  affiliateCode: string;
-  hours: string;
   rating: number;
   services: string[];
   estimatedCost: string;
-  availability?: string;
-  licenseInfo?: string;
-  specialties?: string[];
-  insuranceOptions?: string[];
-  estimatedTimeframe?: string;
-  notes?: string;
-}
-
-interface MoveAddresses {
-  currentAddress: string;
-  currentCity: string;
-  currentState: string;
-  currentZip: string;
-  newAddress: string;
-  newCity: string;
-  newState: string;
-  newZip: string;
-  moveDate: string;
+  specialties: string[];
+  hours: string;
+  location: string;
+  licenseInfo: string;
+  insuranceOptions: string[];
 }
 
 export default function MovingCompanies() {
   const { toast } = useToast();
-  const [movingCompanies, setMovingCompanies] = useState<MovingCompany[]>([]);
-  const [selectedMover, setSelectedMover] = useState<MovingCompany | null>(null);
+  const [selectedCompanies, setSelectedCompanies] = useState<Set<string>>(new Set());
   const [quotesRequested, setQuotesRequested] = useState<Set<string>>(new Set());
-  const [hasCompletedActions, setHasCompletedActions] = useState(false);
-  const [moveAddresses, setMoveAddresses] = useState<MoveAddresses>(() => {
-    // Get addresses from URL parameters or localStorage
-    const urlParams = new URLSearchParams(window.location.search);
-    const fromParam = urlParams.get('from');
-    const toParam = urlParams.get('to');
-    const dateParam = urlParams.get('date');
 
-    if (fromParam && toParam) {
-      const parseAddress = (address: string) => {
-        const parts = address.split(',').map(part => part.trim());
-        if (parts.length >= 3) {
-          const street = parts[0] || '';
-          const city = parts[1] || '';
-          const stateZip = parts[2] || '';
-          const stateZipParts = stateZip.split(' ');
-          const state = stateZipParts[0] || '';
-          const zip = stateZipParts[1] || '';
-          return { street, city, state, zip };
-        }
-        return { street: address, city: '', state: '', zip: '' };
-      };
-
-      const fromParsed = parseAddress(fromParam);
-      const toParsed = parseAddress(toParam);
-
-      return {
-        currentAddress: fromParsed.street,
-        currentCity: fromParsed.city,
-        currentState: fromParsed.state,
-        currentZip: fromParsed.zip,
-        newAddress: toParsed.street,
-        newCity: toParsed.city,
-        newState: toParsed.state,
-        newZip: toParsed.zip,
-        moveDate: dateParam || ""
-      };
+  // Static moving companies data
+  const movingCompanies: MovingCompany[] = [
+    {
+      id: "atlas-van-lines",
+      name: "Atlas Van Lines",
+      description: "Full-service moving company with nationwide coverage and professional packing services",
+      phone: "(800) 252-8885",
+      website: "https://www.atlasvanlines.com",
+      rating: 4.2,
+      services: ["Local Moving", "Long Distance", "International", "Packing", "Storage"],
+      estimatedCost: "$2,800 - $4,500",
+      specialties: ["Corporate Relocation", "Military Moves", "Senior Moving"],
+      hours: "Mon-Fri 8AM-6PM, Sat 9AM-4PM",
+      location: "Nationwide Service",
+      licenseInfo: "USDOT #125550, MC-87113",
+      insuranceOptions: ["Basic Coverage", "Full Value Protection", "Third-Party Insurance"]
+    },
+    {
+      id: "united-van-lines",
+      name: "United Van Lines",
+      description: "America's largest household goods mover with comprehensive moving solutions",
+      phone: "(800) 325-3870",
+      website: "https://www.unitedvanlines.com",
+      rating: 4.1,
+      services: ["Residential Moving", "Corporate Relocation", "International", "Storage", "Vehicle Transport"],
+      estimatedCost: "$3,200 - $5,200",
+      specialties: ["High-Value Items", "Piano Moving", "Auto Transport"],
+      hours: "Mon-Fri 7AM-7PM, Sat 8AM-5PM",
+      location: "Nationwide Service",
+      licenseInfo: "USDOT #077949, MC-67132",
+      insuranceOptions: ["Released Value", "Full Value Protection", "Separate Liability Coverage"]
+    },
+    {
+      id: "mayflower-transit",
+      name: "Mayflower Transit",
+      description: "Trusted moving company with over 90 years of experience in residential and commercial moves",
+      phone: "(800) 428-1146",
+      website: "https://www.mayflower.com",
+      rating: 4.0,
+      services: ["Household Moving", "Corporate Services", "International", "Specialty Items", "Storage Solutions"],
+      estimatedCost: "$2,600 - $4,200",
+      specialties: ["Antique Moving", "Fine Art", "Government Moves"],
+      hours: "Mon-Fri 8AM-6PM, Sat 9AM-3PM",
+      location: "Nationwide Service",
+      licenseInfo: "USDOT #125563, MC-87113",
+      insuranceOptions: ["Basic Protection", "Full Replacement Value", "High Value Article Coverage"]
+    },
+    {
+      id: "north-american",
+      name: "North American Van Lines",
+      description: "Premium moving services with personalized moving consultants and quality assurance",
+      phone: "(800) 348-2111",
+      website: "https://www.northamerican.com",
+      rating: 4.3,
+      services: ["Residential Moving", "Corporate Relocation", "International Moving", "Storage", "Logistics"],
+      estimatedCost: "$3,000 - $4,800",
+      specialties: ["Executive Moving", "Lab & Medical Equipment", "Trade Shows"],
+      hours: "Mon-Fri 8AM-7PM, Sat 9AM-4PM",
+      location: "Nationwide Service",
+      licenseInfo: "USDOT #070851, MC-67112",
+      insuranceOptions: ["Released Value", "Full Value Protection", "Separate Liability Insurance"]
+    },
+    {
+      id: "allied-van-lines",
+      name: "Allied Van Lines",
+      description: "Comprehensive moving services with a network of professional agents nationwide",
+      phone: "(800) 689-8684",
+      website: "https://www.allied.com",
+      rating: 4.1,
+      services: ["Local & Long Distance", "International", "Corporate Moving", "Storage", "Specialty Services"],
+      estimatedCost: "$2,700 - $4,400",
+      specialties: ["Military Relocations", "Senior Moving", "Student Moving"],
+      hours: "Mon-Fri 8AM-6PM, Sat 9AM-5PM",
+      location: "Nationwide Service",
+      licenseInfo: "USDOT #076235, MC-67118",
+      insuranceOptions: ["Basic Coverage", "Full Value Protection", "Third-Party Coverage"]
+    },
+    {
+      id: "two-men-truck",
+      name: "TWO MEN AND A TRUCK",
+      description: "Local and long-distance moving with a focus on customer service and care",
+      phone: "(800) 345-1070",
+      website: "https://www.twomenandatruck.com",
+      rating: 4.4,
+      services: ["Local Moving", "Long Distance", "Packing", "Storage", "Junk Removal"],
+      estimatedCost: "$1,200 - $2,800",
+      specialties: ["Apartment Moving", "Senior Moving", "Business Moving"],
+      hours: "Mon-Sat 8AM-6PM, Sun 10AM-4PM",
+      location: "Multiple Locations",
+      licenseInfo: "Varies by Location",
+      insuranceOptions: ["Basic Protection", "Full Value Coverage", "Additional Insurance Available"]
     }
+  ];
 
-    return {
-      currentAddress: "",
-      currentCity: "",
-      currentState: "",
-      currentZip: "",
-      newAddress: "",
-      newCity: "",
-      newState: "",
-      newZip: "",
-      moveDate: ""
-    };
-  });
-
-  // Moving company search mutation
-  const movingCompanyMutation = useMutation({
-    mutationFn: async (addresses: MoveAddresses) => {
-      const response = await apiRequest("POST", "/api/moving-companies", {
-        fromAddress: addresses.currentAddress,
-        fromCity: addresses.currentCity,
-        fromState: addresses.currentState,
-        fromZip: addresses.currentZip,
-        toCity: addresses.newCity,
-        toState: addresses.newState,
-        toZip: addresses.newZip
-      });
-      return await response.json();
-    },
-    onSuccess: (data) => {
-      const companies = data?.companies || [];
-      setMovingCompanies(companies);
-      toast({
-        title: "Moving Companies Found",
-        description: `Found ${companies.length} qualified moving companies for your route`,
-      });
-    },
-    onError: (error) => {
-      toast({
-        title: "Search Error",
-        description: "Unable to find moving companies. Please try again.",
-        variant: "destructive",
-      });
-    },
-  });
-
-  const handleReferralClick = async (company: MovingCompany, action: string) => {
-    try {
-      await apiRequest("POST", "/api/track-referral", {
-        provider: company.provider,
-        category: "Moving Companies",
-        action: action,
-        userAddress: `${moveAddresses.currentCity}, ${moveAddresses.currentState}`,
-        affiliateCode: company.affiliateCode,
-        referralUrl: company.referralUrl
-      });
-
-      if (action === "Get Quote") {
-        setQuotesRequested(prev => {
-          const newSet = new Set(prev);
-          newSet.add(company.provider);
-          return newSet;
-        });
-        setHasCompletedActions(true);
+  const handleSelectCompany = (companyId: string) => {
+    setSelectedCompanies(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(companyId)) {
+        newSet.delete(companyId);
+      } else {
+        newSet.add(companyId);
       }
-
-      window.open(company.referralUrl, '_blank');
-
-      toast({
-        title: "Opening Provider",
-        description: `Redirecting to ${company.provider}`,
-      });
-    } catch (error) {
-      window.open(company.website, '_blank');
-    }
+      return newSet;
+    });
   };
 
-  const handleSelectMover = async (company: MovingCompany) => {
-    setSelectedMover(company);
-    setHasCompletedActions(true);
-
-    toast({
-      title: "Mover Selected",
-      description: `You've selected ${company.provider} as your moving company`,
+  const handleRequestQuote = (company: MovingCompany) => {
+    setQuotesRequested(prev => {
+      const newSet = new Set(prev);
+      newSet.add(company.id);
+      return newSet;
     });
 
-    // Save selection to project if available
-    try {
-      await apiRequest("POST", "/api/select-mover", {
-        provider: company.provider,
-        category: company.category,
-        phone: company.phone,
-        estimatedCost: company.estimatedCost,
-        moveRoute: `${moveAddresses.currentCity}, ${moveAddresses.currentState} to ${moveAddresses.newCity}, ${moveAddresses.newState}`
-      });
-    } catch (error) {
-      console.error("Error saving mover selection:", error);
-    }
+    toast({
+      title: "Quote Requested",
+      description: `Quote request sent to ${company.name}`,
+    });
+
+    // Open company website in new tab
+    window.open(company.website, '_blank');
   };
 
-  const canCompleteTask = () => {
-    return hasCompletedActions && (selectedMover || quotesRequested.size > 0);
-  };
-
-  // Manual search function
-  const handleSearchMovers = () => {
-    if (moveAddresses.currentCity && moveAddresses.newCity) {
-      movingCompanyMutation.mutate(moveAddresses);
-    } else {
-      toast({
-        title: "Missing Information",
-        description: "Please set up your move details first through the AI Assistant",
-        variant: "destructive",
-      });
-    }
+  const handleVisitWebsite = (company: MovingCompany) => {
+    window.open(company.website, '_blank');
   };
 
   return (
@@ -217,14 +172,27 @@ export default function MovingCompanies() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center gap-4">
+              <Link href="/moving-journey">
+                <Button variant="ghost" size="sm">
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Back to Journey
+                </Button>
+              </Link>
               <div className="flex items-center gap-2">
                 <Truck className="w-6 h-6 text-blue-600" />
-                <span className="text-sm text-gray-500 font-medium">Moving Company Search</span>
+                <span className="text-sm text-gray-500 font-medium">Moving Companies</span>
               </div>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">Find Moving Companies</h1>
-                <p className="text-sm text-gray-600">Professional movers for your relocation</p>
-              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <Badge variant="secondary">
+                {selectedCompanies.size} Selected
+              </Badge>
+              <Link href="/">
+                <Button variant="outline" size="sm">
+                  <Home className="w-4 h-4 mr-2" />
+                  Home
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
@@ -232,350 +200,208 @@ export default function MovingCompanies() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Move Details */}
-        {(moveAddresses.currentCity || moveAddresses.newCity) && (
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MapPin className="w-5 h-5" />
-                Your Move Details
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                <div>
-                  <div className="text-sm font-medium text-gray-500">From</div>
-                  <div className="text-lg font-semibold">
-                    {moveAddresses.currentCity}, {moveAddresses.currentState}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-sm font-medium text-gray-500">To</div>
-                  <div className="text-lg font-semibold">
-                    {moveAddresses.newCity}, {moveAddresses.newState}
-                  </div>
-                </div>
-                {moveAddresses.moveDate && (
-                  <div>
-                    <div className="text-sm font-medium text-gray-500">Move Date</div>
-                    <div className="text-lg font-semibold">{moveAddresses.moveDate}</div>
-                  </div>
-                )}
-              </div>
-              <Button 
-                onClick={handleSearchMovers}
-                disabled={movingCompanyMutation.isPending}
-                className="w-full"
-              >
-                {movingCompanyMutation.isPending ? "Searching..." : "Search Moving Companies"}
-              </Button>
-            </CardContent>
-          </Card>
-        )}
+        {/* Page Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-4">Professional Moving Companies</h1>
+          <p className="text-lg text-gray-600 max-w-3xl">
+            Compare trusted moving companies with nationwide service. Get quotes, read reviews, and choose the best mover for your relocation.
+          </p>
+        </div>
 
-        {/* Search Status */}
-        {movingCompanyMutation.isPending && (
-          <Card className="mb-8">
-            <CardContent className="p-8 text-center">
-              <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Searching for Moving Companies</h3>
-              <p className="text-gray-600">Finding qualified movers for your route...</p>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Moving Companies Results */}
-        {movingCompanies.length > 0 && (
-          <>
-            <div className="mb-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-2">
-                {movingCompanies.length} Moving Companies Found
-              </h2>
-              <p className="text-gray-600">
-                Professional movers serving your route from {moveAddresses.currentCity} to {moveAddresses.newCity}
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Left Column - Moving Companies */}
-              <div className="lg:col-span-2">
-                <div className="grid gap-6">
-                  {movingCompanies.map((company, index) => (
-                    <Card key={index} className="hover:shadow-lg transition-shadow">
-                      <CardHeader>
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <CardTitle className="flex items-center gap-2 text-xl">
-                              <Truck className="w-5 h-5 text-blue-600" />
-                              {company.provider}
-                            </CardTitle>
-                            <CardDescription className="mt-1">{company.description}</CardDescription>
-                            <Badge variant="outline" className="mt-2">{company.category}</Badge>
-                          </div>
-                          {company.rating > 0 && (
-                            <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-lg">
-                              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                              <span className="font-semibold">{company.rating}</span>
-                            </div>
-                          )}
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-                          <div className="flex items-center gap-2 text-sm">
-                            <Phone className="w-4 h-4 text-gray-500" />
-                            <span>{company.phone}</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-sm">
-                            <Clock className="w-4 h-4 text-gray-500" />
-                            <span>{company.hours}</span>
-                          </div>
-                          <div className="flex items-center gap-2 text-sm">
-                            <DollarSign className="w-4 h-4 text-gray-500" />
-                            <span>{company.estimatedCost}</span>
-                          </div>
-                          {company.availability && (
-                            <div className="flex items-center gap-2 text-sm">
-                              <MapPin className="w-4 h-4 text-gray-500" />
-                              <span>{company.availability}</span>
-                            </div>
-                          )}
-                        </div>
-
-                        {company.services.length > 0 && (
-                          <div className="mb-4">
-                            <div className="text-sm font-medium text-gray-700 mb-2">Services</div>
-                            <div className="flex flex-wrap gap-2">
-                              {company.services.slice(0, 4).map((service, idx) => (
-                                <Badge key={idx} variant="secondary" className="text-xs">{service}</Badge>
-                              ))}
-                              {company.services.length > 4 && (
-                                <Badge variant="secondary" className="text-xs">+{company.services.length - 4} more</Badge>
-                              )}
-                            </div>
-                          </div>
-                        )}
-
-                        {company.notes && (
-                          <div className="mb-4 p-3 bg-gray-50 rounded-lg">
-                            <div className="text-sm text-gray-600">{company.notes}</div>
-                          </div>
-                        )}
-
-                        <div className="flex gap-3">
-                          <Button 
-                            onClick={() => handleReferralClick(company, "Get Quote")}
-                            className="flex-1"
-                            variant={quotesRequested.has(company.provider) ? "secondary" : "default"}
-                          >
-                            <ExternalLink className="w-4 h-4 mr-2" />
-                            {quotesRequested.has(company.provider) ? "Quote Requested" : "Get Quote"}
-                          </Button>
-                          <Button 
-                            variant="outline" 
-                            onClick={() => handleReferralClick(company, "Visit Website")}
-                          >
-                            <Globe className="w-4 h-4 mr-2" />
-                            Website
-                          </Button>
-                          <Button 
-                            onClick={() => handleSelectMover(company)}
-                            variant={selectedMover?.provider === company.provider ? "default" : "outline"}
-                            className={selectedMover?.provider === company.provider ? "bg-green-600 hover:bg-green-700" : ""}
-                          >
-                            {selectedMover?.provider === company.provider ? "Selected" : "Select Mover"}
-                          </Button>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-
-              {/* Right Sidebar - Moving Tools & Resources */}
-              <div className="space-y-6">
-                {/* Estimate Questionnaire */}
-                <Card className="border-l-4 border-l-purple-500">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Moving Companies List */}
+          <div className="lg:col-span-2">
+            <div className="space-y-6">
+              {movingCompanies.map((company) => (
+                <Card key={company.id} className="hover:shadow-lg transition-shadow">
                   <CardHeader>
-                    <CardTitle className="text-lg text-purple-700">Estimate Questionnaire</CardTitle>
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <CardTitle className="flex items-center gap-2 text-xl">
+                          <Truck className="w-5 h-5 text-blue-600" />
+                          {company.name}
+                        </CardTitle>
+                        <CardDescription className="mt-2">{company.description}</CardDescription>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-lg">
+                          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                          <span className="font-semibold">{company.rating}</span>
+                        </div>
+                      </div>
+                    </div>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-gray-600 mb-4 text-sm">
-                      Prepare for accurate moving quotes by having these details ready when you call.
-                    </p>
-                    <Button className="w-full bg-purple-600 hover:bg-purple-700 mb-4">
-                      📋 Fill Out Questionnaire
-                    </Button>
-                    <div className="text-sm">
-                      <div className="font-medium text-gray-700 mb-2">Key Information Needed:</div>
-                      <ul className="space-y-1 text-purple-600">
-                        <li>• Current and destination addresses</li>
-                        <li>• Moving date and home size</li>
-                        <li>• Number of floors at each location</li>
-                        <li>• Major items and inventory list</li>
-                        <li>• Packing service preferences</li>
-                        <li>• Special items and storage needs</li>
-                      </ul>
+                    {/* Company Details */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                      <div className="flex items-center gap-2 text-sm">
+                        <Phone className="w-4 h-4 text-gray-500" />
+                        <span>{company.phone}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm">
+                        <Clock className="w-4 h-4 text-gray-500" />
+                        <span>{company.hours}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm">
+                        <DollarSign className="w-4 h-4 text-gray-500" />
+                        <span>{company.estimatedCost}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm">
+                        <MapPin className="w-4 h-4 text-gray-500" />
+                        <span>{company.location}</span>
+                      </div>
+                    </div>
+
+                    {/* Services */}
+                    <div className="mb-4">
+                      <div className="text-sm font-medium text-gray-700 mb-2">Services</div>
+                      <div className="flex flex-wrap gap-2">
+                        {company.services.map((service, idx) => (
+                          <Badge key={idx} variant="secondary" className="text-xs">{service}</Badge>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Specialties */}
+                    {company.specialties.length > 0 && (
+                      <div className="mb-4">
+                        <div className="text-sm font-medium text-gray-700 mb-2">Specialties</div>
+                        <div className="flex flex-wrap gap-2">
+                          {company.specialties.map((specialty, idx) => (
+                            <Badge key={idx} variant="outline" className="text-xs">{specialty}</Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* License Info */}
+                    <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+                      <div className="text-sm font-medium text-gray-700 mb-1">License Information</div>
+                      <div className="text-sm text-gray-600">{company.licenseInfo}</div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex gap-3">
+                      <Button 
+                        onClick={() => handleRequestQuote(company)}
+                        className="flex-1"
+                        variant={quotesRequested.has(company.id) ? "secondary" : "default"}
+                      >
+                        <ExternalLink className="w-4 h-4 mr-2" />
+                        {quotesRequested.has(company.id) ? "Quote Requested" : "Get Quote"}
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        onClick={() => handleVisitWebsite(company)}
+                      >
+                        <Globe className="w-4 h-4 mr-2" />
+                        Website
+                      </Button>
+                      <Button 
+                        onClick={() => handleSelectCompany(company.id)}
+                        variant={selectedCompanies.has(company.id) ? "default" : "outline"}
+                        className={selectedCompanies.has(company.id) ? "bg-green-600 hover:bg-green-700" : ""}
+                      >
+                        {selectedCompanies.has(company.id) ? "Selected" : "Select"}
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
-
-                {/* Pro Tips */}
-                <Card className="border-l-4 border-l-blue-500">
-                  <CardHeader>
-                    <CardTitle className="text-lg text-blue-700">Pro Tips</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="bg-blue-50 p-3 rounded-lg">
-                      <div className="font-medium text-blue-800 text-sm mb-1">Best Booking Time</div>
-                      <div className="text-blue-700 text-xs">Book 6+ weeks ahead for summer moves, 4+ weeks for off-season</div>
-                    </div>
-                    <div className="bg-green-50 p-3 rounded-lg">
-                      <div className="font-medium text-green-800 text-sm mb-1">Save Money</div>
-                      <div className="text-green-700 text-xs">Move mid-month, mid-week, and avoid summer peak season</div>
-                    </div>
-                    <div className="bg-red-50 p-3 rounded-lg">
-                      <div className="font-medium text-red-800 text-sm mb-1">Red Flags</div>
-                      <div className="text-red-700 text-xs">Avoid companies requiring large deposits or door-to-door sales</div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Quick Checklist */}
-                <Card className="border-l-4 border-l-green-500">
-                  <CardHeader>
-                    <CardTitle className="text-lg text-green-700">Quick Checklist</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      <label className="flex items-center space-x-2 text-sm">
-                        <input type="checkbox" className="rounded" />
-                        <span>Get 3+ written estimates</span>
-                      </label>
-                      <label className="flex items-center space-x-2 text-sm">
-                        <input type="checkbox" className="rounded" />
-                        <span>Check insurance coverage</span>
-                      </label>
-                      <label className="flex items-center space-x-2 text-sm">
-                        <input type="checkbox" className="rounded" />
-                        <span>Read reviews & references</span>
-                      </label>
-                      <label className="flex items-center space-x-2 text-sm">
-                        <input type="checkbox" className="rounded" />
-                        <span>Verify license & bonding</span>
-                      </label>
-                      <label className="flex items-center space-x-2 text-sm">
-                        <input type="checkbox" className="rounded" />
-                        <span>Understand pricing structure</span>
-                      </label>
-                      <label className="flex items-center space-x-2 text-sm">
-                        <input type="checkbox" className="rounded" />
-                        <span>Confirm moving date</span>
-                      </label>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Estimated Costs */}
-                <Card className="border-l-4 border-l-gray-500">
-                  <CardHeader>
-                    <CardTitle className="text-lg text-gray-700">Estimated Costs</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Local Move (same city)</span>
-                        <span className="font-medium">$800-1,500</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Long Distance (interstate)</span>
-                        <span className="font-medium">$2,500-5,000</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Packing Services</span>
-                        <span className="font-medium">$500-1,200</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Storage (per month)</span>
-                        <span className="font-medium">$50-200</span>
-                      </div>
-                      <Separator />
-                      <div className="flex justify-between font-semibold text-green-600">
-                        <span>Total Range</span>
-                        <span>$1,350-6,700</span>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-          </>
-        )}
-
-        {/* No Results */}
-        {!movingCompanyMutation.isPending && movingCompanies.length === 0 && moveAddresses.currentCity && (
-          <Card>
-            <CardContent className="p-8 text-center">
-              <Truck className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">No Moving Companies Found</h3>
-              <p className="text-gray-600 mb-4">
-                We couldn't find moving companies for your specific route. Try searching for a broader area or contact us for assistance.
-              </p>
-              <Button onClick={() => movingCompanyMutation.mutate(moveAddresses)}>
-                Search Again
-              </Button>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Call to Action */}
-        {!moveAddresses.currentCity && (
-          <Card>
-            <CardContent className="p-8 text-center">
-              <Truck className="w-12 h-12 text-blue-600 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Ready to Find Moving Companies?</h3>
-              <p className="text-gray-600 mb-4">
-                Start by setting up your move details through our AI assistant to get personalized moving company recommendations.
-              </p>
-              <Link href="/ai-assistant">
-                <Button>
-                  Start with AI Assistant
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Task Completion Bar */}
-        {movingCompanies.length > 0 && (
-          <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50">
-            <div className="bg-white rounded-lg shadow-lg border p-4 flex items-center gap-4">
-              <Button
-                onClick={() => {
-                  if (canCompleteTask()) {
-                    toast({
-                      title: "Moving Company Search Complete",
-                      description: selectedMover 
-                        ? "Moving company selected and ready to proceed" 
-                        : "Moving quotes requested from selected companies",
-                    });
-                  }
-                }}
-                disabled={!canCompleteTask()}
-                className={`font-medium py-2 px-6 rounded-lg text-sm shadow-sm transition-all ${
-                  canCompleteTask() 
-                    ? "bg-green-600 hover:bg-green-700 text-white" 
-                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                }`}
-              >
-                <Truck className="w-4 h-4 mr-2" />
-                {canCompleteTask() ? "Complete Moving Company Search" : "Request Quotes or Select Mover First"}
-              </Button>
-
-
+              ))}
             </div>
           </div>
-        )}
+
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Moving Tips */}
+            <Card className="border-l-4 border-l-blue-500">
+              <CardHeader>
+                <CardTitle className="text-lg text-blue-700">Moving Tips</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="bg-blue-50 p-3 rounded-lg">
+                  <div className="font-medium text-blue-800 text-sm mb-1">Get Multiple Quotes</div>
+                  <div className="text-blue-700 text-xs">Request quotes from at least 3 companies to compare pricing and services</div>
+                </div>
+                <div className="bg-green-50 p-3 rounded-lg">
+                  <div className="font-medium text-green-800 text-sm mb-1">Book Early</div>
+                  <div className="text-green-700 text-xs">Reserve your moving company 6-8 weeks in advance for best availability</div>
+                </div>
+                <div className="bg-yellow-50 p-3 rounded-lg">
+                  <div className="font-medium text-yellow-800 text-sm mb-1">Verify Credentials</div>
+                  <div className="text-yellow-700 text-xs">Check USDOT number and read reviews before making your decision</div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Cost Estimator */}
+            <Card className="border-l-4 border-l-green-500">
+              <CardHeader>
+                <CardTitle className="text-lg text-green-700">Estimated Costs</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Local Move (under 50 miles)</span>
+                    <span className="font-medium">$800 - $1,500</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Long Distance Move</span>
+                    <span className="font-medium">$2,500 - $5,000</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Full Packing Service</span>
+                    <span className="font-medium">$500 - $1,200</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Storage (per month)</span>
+                    <span className="font-medium">$50 - $300</span>
+                  </div>
+                  <Separator />
+                  <div className="flex justify-between font-semibold text-green-600">
+                    <span>Average Total</span>
+                    <span>$1,350 - $6,700</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Moving Checklist */}
+            <Card className="border-l-4 border-l-purple-500">
+              <CardHeader>
+                <CardTitle className="text-lg text-purple-700">Moving Checklist</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  <label className="flex items-center space-x-2 text-sm">
+                    <input type="checkbox" className="rounded" />
+                    <span>Research and get quotes</span>
+                  </label>
+                  <label className="flex items-center space-x-2 text-sm">
+                    <input type="checkbox" className="rounded" />
+                    <span>Check company credentials</span>
+                  </label>
+                  <label className="flex items-center space-x-2 text-sm">
+                    <input type="checkbox" className="rounded" />
+                    <span>Read contract carefully</span>
+                  </label>
+                  <label className="flex items-center space-x-2 text-sm">
+                    <input type="checkbox" className="rounded" />
+                    <span>Schedule moving date</span>
+                  </label>
+                  <label className="flex items-center space-x-2 text-sm">
+                    <input type="checkbox" className="rounded" />
+                    <span>Arrange packing services</span>
+                  </label>
+                  <label className="flex items-center space-x-2 text-sm">
+                    <input type="checkbox" className="rounded" />
+                    <span>Purchase moving insurance</span>
+                  </label>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
       </div>
     </div>
   );
