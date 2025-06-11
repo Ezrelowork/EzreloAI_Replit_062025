@@ -1235,6 +1235,14 @@ Only include real providers that actually serve this location.`;
       if (normalizedAddress.includes(',')) {
         // Address already has commas, just clean up extra spaces around commas
         normalizedAddress = normalizedAddress.replace(/\s*,\s*/g, ', ');
+        
+        // Ensure proper capitalization for USPS standards
+        normalizedAddress = normalizedAddress.replace(/\b\w+/g, word => {
+          // Keep state abbreviations uppercase
+          if (word.length === 2 && /^[A-Z]{2}$/.test(word)) return word;
+          // Capitalize first letter of each word
+          return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+        });
       } else {
         // Address has no commas, try to add them intelligently
         const stateZipPattern = /\b([A-Z]{2})\s+(\d{5}(-\d{4})?)\s*$/;
@@ -1302,12 +1310,26 @@ Only include real providers that actually serve this location.`;
         }
       }
 
+      // Final USPS-style formatting pass
+      normalizedAddress = normalizedAddress.replace(/\b\w+/g, word => {
+        // Keep state abbreviations uppercase
+        if (word.length === 2 && /^[A-Z]{2}$/.test(word)) return word;
+        // Keep ZIP codes as-is
+        if (/^\d{5}(-\d{4})?$/.test(word)) return word;
+        // Capitalize first letter of each word for proper case
+        return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
+      });
+
+      // Ensure proper spacing around commas
+      normalizedAddress = normalizedAddress.replace(/\s*,\s*/g, ', ');
+
       console.log('Address normalization:', { original: address, normalized: normalizedAddress });
 
       res.json({ 
         verifiedAddress: normalizedAddress,
         original: address,
-        verified: true 
+        verified: true,
+        uspsFormatted: normalizedAddress !== address
       });
 
     } catch (error) {

@@ -53,6 +53,14 @@ export default function AIAssistant() {
   });
   const [aiResponse, setAiResponse] = useState<AIResponse | null>(null);
   const [showJourneyButton, setShowJourneyButton] = useState(false);
+  const [addressSuggestions, setAddressSuggestions] = useState<{
+    from?: string;
+    to?: string;
+  }>({});
+  const [showAddressPicker, setShowAddressPicker] = useState<{
+    from: boolean;
+    to: boolean;
+  }>({ from: false, to: false });
 
   const priorityOptions = [
     "Cost savings",
@@ -149,6 +157,63 @@ export default function AIAssistant() {
       priorities: checked
         ? [...prev.priorities, priority]
         : prev.priorities.filter(p => p !== priority)
+    }));
+  };
+
+  const verifyAddress = async (address: string, type: 'from' | 'to') => {
+    if (!address.trim()) return;
+    
+    try {
+      const response = await apiRequest("POST", "/api/verify-address", { address });
+      const data = await response.json();
+      
+      if (data.verifiedAddress && data.verifiedAddress !== address) {
+        setAddressSuggestions(prev => ({
+          ...prev,
+          [type]: data.verifiedAddress
+        }));
+        setShowAddressPicker(prev => ({
+          ...prev,
+          [type]: true
+        }));
+      }
+    } catch (error) {
+      console.error('Address verification failed:', error);
+    }
+  };
+
+  const handleAddressBlur = (address: string, type: 'from' | 'to') => {
+    if (address.length > 10) { // Only verify if address has substance
+      verifyAddress(address, type);
+    }
+  };
+
+  const acceptSuggestion = (type: 'from' | 'to') => {
+    const suggestion = addressSuggestions[type];
+    if (suggestion) {
+      setRelocationDetails(prev => ({
+        ...prev,
+        [`${type}Location`]: suggestion
+      }));
+      setShowAddressPicker(prev => ({
+        ...prev,
+        [type]: false
+      }));
+      setAddressSuggestions(prev => ({
+        ...prev,
+        [type]: undefined
+      }));
+    }
+  };
+
+  const rejectSuggestion = (type: 'from' | 'to') => {
+    setShowAddressPicker(prev => ({
+      ...prev,
+      [type]: false
+    }));
+    setAddressSuggestions(prev => ({
+      ...prev,
+      [type]: undefined
     }));
   };
 
@@ -288,25 +353,83 @@ export default function AIAssistant() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
+                  <div className="space-y-2">
                     <Label htmlFor="fromLocation">Current Address *</Label>
                     <Input
                       id="fromLocation"
                       value={relocationDetails.fromLocation}
                       onChange={(e) => setRelocationDetails(prev => ({ ...prev, fromLocation: e.target.value }))}
+                      onBlur={(e) => handleAddressBlur(e.target.value, 'from')}
                       placeholder="123 Main St, Dallas, TX 75201"
                       required
                     />
+                    {showAddressPicker.from && addressSuggestions.from && (
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 space-y-2">
+                        <div className="flex items-start gap-2">
+                          <CheckCircle2 className="w-4 h-4 text-blue-600 mt-0.5" />
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-blue-900">USPS Verified Address</p>
+                            <p className="text-sm text-blue-800">{addressSuggestions.from}</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button 
+                            size="sm" 
+                            onClick={() => acceptSuggestion('from')}
+                            className="text-xs"
+                          >
+                            Use USPS Format
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            onClick={() => rejectSuggestion('from')}
+                            className="text-xs"
+                          >
+                            Keep Original
+                          </Button>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  <div>
+                  <div className="space-y-2">
                     <Label htmlFor="toLocation">Moving To *</Label>
                     <Input
                       id="toLocation"
                       value={relocationDetails.toLocation}
                       onChange={(e) => setRelocationDetails(prev => ({ ...prev, toLocation: e.target.value }))}
+                      onBlur={(e) => handleAddressBlur(e.target.value, 'to')}
                       placeholder="456 Oak Ave, Austin, TX 78701"
                       required
                     />
+                    {showAddressPicker.to && addressSuggestions.to && (
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 space-y-2">
+                        <div className="flex items-start gap-2">
+                          <CheckCircle2 className="w-4 h-4 text-blue-600 mt-0.5" />
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-blue-900">USPS Verified Address</p>
+                            <p className="text-sm text-blue-800">{addressSuggestions.to}</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button 
+                            size="sm" 
+                            onClick={() => acceptSuggestion('to')}
+                            className="text-xs"
+                          >
+                            Use USPS Format
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            variant="outline" 
+                            onClick={() => rejectSuggestion('to')}
+                            className="text-xs"
+                          >
+                            Keep Original
+                          </Button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
 
