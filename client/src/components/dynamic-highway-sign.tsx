@@ -43,7 +43,7 @@ export const DynamicHighwaySign: React.FC<DynamicSignProps> = ({
           alt="Highway Sign" 
           className="w-full h-full object-contain"
         />
-        
+
         {/* Clickable area overlay - positioned over actual sign */}
         <div 
           className="absolute cursor-pointer transform transition-all duration-300 hover:scale-105"
@@ -55,7 +55,7 @@ export const DynamicHighwaySign: React.FC<DynamicSignProps> = ({
             height: '50%'
           }}
         />
-        
+
         {/* Dynamic text overlay - contained within sign bounds */}
         <div 
           className="absolute flex flex-col justify-center items-center p-2 pointer-events-none"
@@ -71,17 +71,17 @@ export const DynamicHighwaySign: React.FC<DynamicSignProps> = ({
             <div className={`text-[10px] font-bold mb-1 ${priorityColors[priority]} uppercase tracking-wider drop-shadow-sm`}>
               {priority} PRIORITY
             </div>
-            
+
             {/* Main title - larger and more readable */}
-            <div className="text-[13px] font-bold mb-1 leading-tight px-1 drop-shadow-lg">
-              {title.length > 45 ? title.substring(0, 45) + '...' : title}
+            <div className="text-[13px] font-bold mb-1 leading-tight px-1 drop-shadow-sm">
+              {title && title.length > 45 ? title.substring(0, 45) + '...' : title || ''}
             </div>
-            
+
             {/* Description - additional info */}
             <div className="text-[9px] opacity-95 leading-tight px-1 mb-1 drop-shadow-sm">
               {description.length > 55 ? description.substring(0, 55) + '...' : description}
             </div>
-            
+
             {/* Week/timeframe */}
             <div className="text-[9px] opacity-85 font-semibold drop-shadow-sm">
               {week}

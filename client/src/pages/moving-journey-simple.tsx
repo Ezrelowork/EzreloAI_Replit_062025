@@ -85,7 +85,7 @@ export default function MovingJourneySimple() {
   const urlParams = new URLSearchParams(window.location.search);
   const fromParam = urlParams.get('from');
 
-  const currentStep = steps[currentStepIndex];
+  const currentStep = steps[currentStepIndex] || steps[0];
 
   const handleSignClick = (step: JourneyStep) => {
     let targetRoute = step.route;
