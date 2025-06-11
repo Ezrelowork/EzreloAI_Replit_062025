@@ -56,43 +56,7 @@ export default function MovingJourney() {
   const { isTaskModalOpen, openTaskModal, closeTaskModal } = useTaskModal();
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Prevent unwanted navigation during development
-  useEffect(() => {
-    if (process.env.NODE_ENV === 'development') {
-      // Force stay on journey page
-      const currentPath = window.location.pathname;
-      if (currentPath !== '/moving-journey') {
-        window.history.replaceState(null, '', '/moving-journey');
-      }
-
-      // Prevent any navigation attempts
-      const preventNavigation = (e: PopStateEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        window.history.pushState(null, '', '/moving-journey');
-      };
-
-      // Prevent router changes
-      const preventRouterChange = () => {
-        if (window.location.pathname !== '/moving-journey') {
-          window.history.replaceState(null, '', '/moving-journey');
-        }
-      };
-
-      // Set up event listeners
-      window.addEventListener('popstate', preventNavigation, true);
-      window.addEventListener('hashchange', preventRouterChange, true);
-      
-      // Check every 100ms to ensure we stay on the journey page
-      const intervalId = setInterval(preventRouterChange, 100);
-
-      return () => {
-        window.removeEventListener('popstate', preventNavigation, true);
-        window.removeEventListener('hashchange', preventRouterChange, true);
-        clearInterval(intervalId);
-      };
-    }
-  }, []);
+  // Layout is now locked and finalized
 
   // Define moving tasks with highway positions - alternating above and below the road
   // LOCKED POSITIONS - DO NOT REVERT: User specified exact coordinates
@@ -198,9 +162,6 @@ export default function MovingJourney() {
                 <h1 className="text-2xl font-bold text-gray-900">Your Moving Journey</h1>
                 <p className="text-sm text-gray-600">
                   Click signs to explore tasks and track progress
-                  {process.env.NODE_ENV === 'development' && (
-                    <span className="ml-2 text-orange-600 font-medium">🔒 Navigation Locked (Dev Mode)</span>
-                  )}
                 </p>
               </div>
             </div>
@@ -218,18 +179,11 @@ export default function MovingJourney() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => {
-                  if (process.env.NODE_ENV === 'development') {
-                    alert('Navigation locked during development to prevent page resets');
-                    return;
-                  }
-                  setLocation('/');
-                }}
-                className={`text-gray-600 hover:text-gray-900 ${process.env.NODE_ENV === 'development' ? 'opacity-50 cursor-not-allowed' : ''}`}
-                disabled={process.env.NODE_ENV === 'development'}
+                onClick={() => setLocation('/')}
+                className="text-gray-600 hover:text-gray-900"
               >
                 <Home className="w-4 h-4 mr-2" />
-                {process.env.NODE_ENV === 'development' ? '🔒 Dev Mode' : 'Home'}
+                Home
               </Button>
             </div>
           </div>
