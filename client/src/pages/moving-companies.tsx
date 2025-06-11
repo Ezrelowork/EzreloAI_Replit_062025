@@ -651,7 +651,7 @@ export default function MovingCompanies() {
         <div className="mb-8">
           <div className="bg-white rounded-lg border p-6">
             <form onSubmit={handleSearch}>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6"></div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">From City</label>
                   <input 
