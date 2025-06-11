@@ -1,11 +1,15 @@
+
 import { useState, useEffect } from "react";
-import { Link } from "wouter";
-import { Button } from "@/components/ui/button";
+import { useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { useToast } from "@/hooks/use-toast";
 import { 
-  ArrowLeft, 
+  ArrowLeft,
   Truck,
   Star,
   ExternalLink,
@@ -13,11 +17,15 @@ import {
   Globe,
   MapPin,
   Clock,
-  DollarSign
+  DollarSign,
+  CheckCircle,
+  AlertCircle,
+  Info,
+  Calendar,
+  Building2
 } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
 
 interface MovingCompany {
   category: string;
@@ -52,17 +60,18 @@ interface MoveAddresses {
 }
 
 export default function MovingCompanies() {
+  const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [movingCompanies, setMovingCompanies] = useState<MovingCompany[]>([]);
   const [selectedMover, setSelectedMover] = useState<MovingCompany | null>(null);
   const [quotesRequested, setQuotesRequested] = useState<Set<string>>(new Set());
   const [hasCompletedActions, setHasCompletedActions] = useState(false);
   const [moveAddresses, setMoveAddresses] = useState<MoveAddresses>(() => {
-    // Get addresses from URL parameters or localStorage
+    // Load from URL params or localStorage
     const urlParams = new URLSearchParams(window.location.search);
-    const fromParam = urlParams.get('from');
-    const toParam = urlParams.get('to');
-    const dateParam = urlParams.get('date');
+    const fromParam = urlParams.get('from') || localStorage.getItem('aiFromLocation') || '';
+    const toParam = urlParams.get('to') || localStorage.getItem('aiToLocation') || '';
+    const dateParam = urlParams.get('date') || localStorage.getItem('aiMoveDate') || '';
     
     if (fromParam && toParam) {
       const parseAddress = (address: string) => {
@@ -108,6 +117,11 @@ export default function MovingCompanies() {
     };
   });
 
+  // Determine if task can be marked complete based on user actions
+  const canCompleteTask = () => {
+    return movingCompanies.length > 0 && (hasCompletedActions || selectedMover || quotesRequested.size > 0);
+  };
+
   // Moving company search mutation
   const movingCompanyMutation = useMutation({
     mutationFn: async (addresses: MoveAddresses) => {
@@ -125,6 +139,7 @@ export default function MovingCompanies() {
     onSuccess: (data) => {
       const companies = data?.companies || [];
       setMovingCompanies(companies);
+      setHasCompletedActions(true); // Mark search as completed action
       toast({
         title: "Moving Companies Found",
         description: `Found ${companies.length} qualified moving companies for your route`,
@@ -138,6 +153,19 @@ export default function MovingCompanies() {
       });
     },
   });
+
+  const handleSearch = () => {
+    if (!moveAddresses.currentCity || !moveAddresses.newCity) {
+      toast({
+        title: "Missing Information",
+        description: "Please enter both current and destination cities to search for moving companies.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    movingCompanyMutation.mutate(moveAddresses);
+  };
 
   const handleReferralClick = async (company: MovingCompany, action: string) => {
     try {
@@ -167,6 +195,7 @@ export default function MovingCompanies() {
       });
     } catch (error) {
       window.open(company.website, '_blank');
+      setHasCompletedActions(true);
     }
   };
 
@@ -193,10 +222,6 @@ export default function MovingCompanies() {
     }
   };
 
-  const canCompleteTask = () => {
-    return hasCompletedActions && (selectedMover || quotesRequested.size > 0);
-  };
-
   // Auto-trigger search on component mount if addresses are available
   useEffect(() => {
     if (moveAddresses.currentCity && moveAddresses.newCity && movingCompanies.length === 0) {
@@ -205,16 +230,14 @@ export default function MovingCompanies() {
   }, [moveAddresses.currentCity, moveAddresses.newCity]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b sticky top-0 z-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+      <div className="bg-white shadow-sm border-b">
+        <div className="max-w-6xl mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="gap-2"
+              <Button
+                variant="ghost"
                 onClick={() => {
                   const urlParams = new URLSearchParams(window.location.search);
                   const from = urlParams.get('from');
@@ -232,13 +255,14 @@ export default function MovingCompanies() {
                   
                   window.location.href = journeyUrl;
                 }}
+                className="flex items-center gap-2"
               >
                 <ArrowLeft className="w-4 h-4" />
                 Back to Journey
               </Button>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">Find Moving Companies</h1>
-                <p className="text-sm text-gray-600">Professional movers for your relocation</p>
+                <h1 className="text-2xl font-bold text-gray-900">Moving Companies</h1>
+                <p className="text-gray-600">Find professional movers for your relocation</p>
               </div>
             </div>
           </div>
@@ -246,261 +270,432 @@ export default function MovingCompanies() {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Move Details */}
-        {(moveAddresses.currentCity || moveAddresses.newCity) && (
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MapPin className="w-5 h-5" />
-                Your Move Details
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <div className="text-sm font-medium text-gray-500">From</div>
-                  <div className="text-lg font-semibold">
-                    {moveAddresses.currentCity}, {moveAddresses.currentState}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-sm font-medium text-gray-500">To</div>
-                  <div className="text-lg font-semibold">
-                    {moveAddresses.newCity}, {moveAddresses.newState}
-                  </div>
-                </div>
-                {moveAddresses.moveDate && (
+      <div className="max-w-6xl mx-auto px-6 py-8">
+        {/* Move Details Input */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <MapPin className="w-5 h-5 text-blue-600" />
+              Your Move Details
+            </CardTitle>
+            <CardDescription>
+              Enter your move information to find qualified moving companies
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Current Address */}
+              <div className="space-y-4">
+                <h3 className="font-semibold text-lg">Current Location</h3>
+                <div className="space-y-3">
                   <div>
-                    <div className="text-sm font-medium text-gray-500">Move Date</div>
-                    <div className="text-lg font-semibold">{moveAddresses.moveDate}</div>
+                    <Label htmlFor="currentAddress">Street Address</Label>
+                    <Input
+                      id="currentAddress"
+                      value={moveAddresses.currentAddress}
+                      onChange={(e) => setMoveAddresses(prev => ({ ...prev, currentAddress: e.target.value }))}
+                      placeholder="123 Current Street"
+                    />
                   </div>
-                )}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label htmlFor="currentCity">City *</Label>
+                      <Input
+                        id="currentCity"
+                        value={moveAddresses.currentCity}
+                        onChange={(e) => setMoveAddresses(prev => ({ ...prev, currentCity: e.target.value }))}
+                        placeholder="Current City"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="currentState">State *</Label>
+                      <Input
+                        id="currentState"
+                        value={moveAddresses.currentState}
+                        onChange={(e) => setMoveAddresses(prev => ({ ...prev, currentState: e.target.value }))}
+                        placeholder="TX"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="currentZip">ZIP Code</Label>
+                    <Input
+                      id="currentZip"
+                      value={moveAddresses.currentZip}
+                      onChange={(e) => setMoveAddresses(prev => ({ ...prev, currentZip: e.target.value }))}
+                      placeholder="12345"
+                    />
+                  </div>
+                </div>
               </div>
-            </CardContent>
-          </Card>
-        )}
 
-        {/* Search Status */}
+              {/* New Address */}
+              <div className="space-y-4">
+                <h3 className="font-semibold text-lg">Destination</h3>
+                <div className="space-y-3">
+                  <div>
+                    <Label htmlFor="newAddress">Street Address</Label>
+                    <Input
+                      id="newAddress"
+                      value={moveAddresses.newAddress}
+                      onChange={(e) => setMoveAddresses(prev => ({ ...prev, newAddress: e.target.value }))}
+                      placeholder="456 New Street"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label htmlFor="newCity">City *</Label>
+                      <Input
+                        id="newCity"
+                        value={moveAddresses.newCity}
+                        onChange={(e) => setMoveAddresses(prev => ({ ...prev, newCity: e.target.value }))}
+                        placeholder="New City"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="newState">State *</Label>
+                      <Input
+                        id="newState"
+                        value={moveAddresses.newState}
+                        onChange={(e) => setMoveAddresses(prev => ({ ...prev, newState: e.target.value }))}
+                        placeholder="CA"
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="newZip">ZIP Code</Label>
+                    <Input
+                      id="newZip"
+                      value={moveAddresses.newZip}
+                      onChange={(e) => setMoveAddresses(prev => ({ ...prev, newZip: e.target.value }))}
+                      placeholder="54321"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="moveDate">Move Date</Label>
+                <Input
+                  id="moveDate"
+                  type="date"
+                  value={moveAddresses.moveDate}
+                  onChange={(e) => setMoveAddresses(prev => ({ ...prev, moveDate: e.target.value }))}
+                />
+              </div>
+              <div className="flex items-end">
+                <Button 
+                  onClick={handleSearch}
+                  disabled={movingCompanyMutation.isPending || !moveAddresses.currentCity || !moveAddresses.newCity}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  {movingCompanyMutation.isPending ? "Searching..." : "Find Moving Companies"}
+                </Button>
+              </div>
+            </div>
+
+            <div className="mt-4 text-sm text-gray-600">
+              <p className="font-medium mb-2">We'll help you find:</p>
+              <div className="flex flex-wrap gap-2">
+                <Badge variant="outline">Licensed & Insured Movers</Badge>
+                <Badge variant="outline">Long Distance Specialists</Badge>
+                <Badge variant="outline">Local Moving Companies</Badge>
+                <Badge variant="outline">Full Service Movers</Badge>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Loading State */}
         {movingCompanyMutation.isPending && (
-          <Card className="mb-8">
-            <CardContent className="p-8 text-center">
-              <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Searching for Moving Companies</h3>
-              <p className="text-gray-600">Finding qualified movers for your route...</p>
-            </CardContent>
-          </Card>
+          <div className="text-center py-12">
+            <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto mb-4" />
+            <p className="text-gray-600">Finding qualified moving companies for your route...</p>
+          </div>
         )}
 
-        {/* Moving Companies Results */}
+        {/* Results */}
         {movingCompanies.length > 0 && (
-          <>
-            <div className="mb-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-2">
-                {movingCompanies.length} Moving Companies Found
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-semibold">
+                Found {movingCompanies.length} Moving Companies
               </h2>
-              <p className="text-gray-600">
-                Professional movers serving your route from {moveAddresses.currentCity} to {moveAddresses.newCity}
-              </p>
+              <Badge variant="outline" className="text-sm">
+                {moveAddresses.currentCity}, {moveAddresses.currentState} → {moveAddresses.newCity}, {moveAddresses.newState}
+              </Badge>
             </div>
 
             <div className="grid gap-6">
               {movingCompanies.map((company, index) => (
                 <Card key={index} className="hover:shadow-lg transition-shadow">
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <CardTitle className="flex items-center gap-2 text-xl">
-                          <Truck className="w-5 h-5 text-blue-600" />
-                          {company.provider}
-                        </CardTitle>
-                        <CardDescription className="mt-1">{company.description}</CardDescription>
-                        <Badge variant="outline" className="mt-2">{company.category}</Badge>
-                      </div>
-                      {company.rating > 0 && (
-                        <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-lg">
-                          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                          <span className="font-semibold">{company.rating}</span>
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-start gap-4">
+                        <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <Truck className="w-6 h-6 text-blue-600" />
                         </div>
-                      )}
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-                      <div className="flex items-center gap-2 text-sm">
-                        <Phone className="w-4 h-4 text-gray-500" />
-                        <span>{company.phone}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm">
-                        <Clock className="w-4 h-4 text-gray-500" />
-                        <span>{company.hours}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm">
-                        <DollarSign className="w-4 h-4 text-gray-500" />
-                        <span>{company.estimatedCost}</span>
-                      </div>
-                      {company.availability && (
-                        <div className="flex items-center gap-2 text-sm">
-                          <MapPin className="w-4 h-4 text-gray-500" />
-                          <span>{company.availability}</span>
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="text-lg font-semibold">{company.provider}</h3>
+                            <Badge variant="outline">{company.category}</Badge>
+                          </div>
+                          {company.rating > 0 && (
+                            <div className="flex items-center gap-1 mb-2">
+                              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                              <span className="text-sm font-medium">{company.rating.toFixed(1)}</span>
+                            </div>
+                          )}
+                          <p className="text-gray-600 mb-3">{company.description}</p>
+                          
+                          {company.licenseInfo && (
+                            <div className="flex items-center gap-1 mb-2 text-sm text-gray-600">
+                              <CheckCircle className="w-4 h-4 text-green-600" />
+                              <span>{company.licenseInfo}</span>
+                            </div>
+                          )}
                         </div>
-                      )}
+                      </div>
+                      
+                      <div className="text-right">
+                        <div className="text-lg font-semibold text-green-600 mb-1">
+                          {company.estimatedCost}
+                        </div>
+                        {company.availability && (
+                          <div className="text-sm text-gray-500">
+                            {company.availability}
+                          </div>
+                        )}
+                        {company.estimatedTimeframe && (
+                          <div className="text-sm text-gray-500">
+                            {company.estimatedTimeframe}
+                          </div>
+                        )}
+                      </div>
                     </div>
 
-                    {company.services.length > 0 && (
+                    {/* Services */}
+                    {company.services && company.services.length > 0 && (
                       <div className="mb-4">
-                        <div className="text-sm font-medium text-gray-700 mb-2">Services</div>
-                        <div className="flex flex-wrap gap-2">
+                        <h4 className="text-sm font-medium text-gray-700 mb-2">Services:</h4>
+                        <div className="flex flex-wrap gap-1">
                           {company.services.slice(0, 4).map((service, idx) => (
-                            <Badge key={idx} variant="secondary" className="text-xs">{service}</Badge>
+                            <Badge key={idx} variant="secondary" className="text-xs">
+                              {service}
+                            </Badge>
                           ))}
                           {company.services.length > 4 && (
-                            <Badge variant="secondary" className="text-xs">+{company.services.length - 4} more</Badge>
+                            <Badge variant="secondary" className="text-xs">
+                              +{company.services.length - 4} more
+                            </Badge>
                           )}
                         </div>
                       </div>
                     )}
 
-                    {company.notes && (
-                      <div className="mb-4 p-3 bg-gray-50 rounded-lg">
-                        <div className="text-sm text-gray-600">{company.notes}</div>
+                    {/* Insurance Options */}
+                    {company.insuranceOptions && company.insuranceOptions.length > 0 && (
+                      <div className="mb-4">
+                        <h4 className="text-sm font-medium text-gray-700 mb-2">Insurance Options:</h4>
+                        <div className="flex flex-wrap gap-1">
+                          {company.insuranceOptions.slice(0, 3).map((insurance, idx) => (
+                            <Badge key={idx} variant="secondary" className="text-xs">
+                              {insurance}
+                            </Badge>
+                          ))}
+                          {company.insuranceOptions.length > 3 && (
+                            <Badge variant="secondary" className="text-xs">
+                              +{company.insuranceOptions.length - 3} more
+                            </Badge>
+                          )}
+                        </div>
                       </div>
                     )}
 
-                    <div className="flex gap-3">
-                      <Button 
-                        onClick={() => handleReferralClick(company, "Get Quote")}
-                        className="flex-1"
-                        variant={quotesRequested.has(company.provider) ? "secondary" : "default"}
-                      >
-                        <ExternalLink className="w-4 h-4 mr-2" />
-                        {quotesRequested.has(company.provider) ? "Quote Requested" : "Get Quote"}
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        onClick={() => handleReferralClick(company, "Visit Website")}
-                      >
-                        <Globe className="w-4 h-4 mr-2" />
-                        Website
-                      </Button>
-                      <Button 
-                        onClick={() => handleSelectMover(company)}
-                        variant={selectedMover?.provider === company.provider ? "default" : "outline"}
-                        className={selectedMover?.provider === company.provider ? "bg-green-600 hover:bg-green-700" : ""}
-                      >
-                        {selectedMover?.provider === company.provider ? "Selected" : "Select Mover"}
-                      </Button>
+                    {/* Special Notes */}
+                    {company.notes && (
+                      <div className="mb-4 bg-blue-50 p-3 rounded-lg border border-blue-200">
+                        <p className="text-sm text-blue-800">
+                          <strong>Note:</strong> {company.notes}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Action Buttons */}
+                    <div className="flex items-center justify-between pt-2">
+                      <div className="flex flex-col gap-2 text-sm text-gray-600">
+                        <div className="flex items-center gap-4">
+                          {company.phone && (
+                            <div className="flex items-center gap-1">
+                              <Phone className="w-4 h-4" />
+                              <span>{company.phone}</span>
+                            </div>
+                          )}
+                          {company.hours && (
+                            <div className="flex items-center gap-1">
+                              <Clock className="w-4 h-4" />
+                              <span>{company.hours}</span>
+                            </div>
+                          )}
+                        </div>
+                        {company.website && company.website !== `https://www.google.com/search?q=${encodeURIComponent(company.provider)}` && (
+                          <div className="flex items-center gap-1">
+                            <Globe className="w-4 h-4" />
+                            <a 
+                              href={company.website} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-blue-600 hover:text-blue-800 underline"
+                              onClick={() => setHasCompletedActions(true)}
+                            >
+                              {company.website.replace(/^https?:\/\//, '').replace(/\/$/, '')}
+                            </a>
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="flex gap-2">
+                        {company.phone && (
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => {
+                              window.open(`tel:${company.phone}`, '_self');
+                              setHasCompletedActions(true);
+                            }}
+                          >
+                            Call Now
+                          </Button>
+                        )}
+                        <Button 
+                          size="sm"
+                          onClick={() => handleReferralClick(company, "Get Quote")}
+                          variant={quotesRequested.has(company.provider) ? "secondary" : "default"}
+                        >
+                          {quotesRequested.has(company.provider) ? "Quote Requested" : "Get Quote"}
+                        </Button>
+                        <Button 
+                          onClick={() => handleSelectMover(company)}
+                          variant={selectedMover?.provider === company.provider ? "default" : "outline"}
+                          className={selectedMover?.provider === company.provider ? "bg-green-600 hover:bg-green-700" : ""}
+                          size="sm"
+                        >
+                          {selectedMover?.provider === company.provider ? "Selected" : "Select"}
+                        </Button>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
               ))}
             </div>
-          </>
+          </div>
         )}
 
-        {/* No Results */}
-        {!movingCompanyMutation.isPending && movingCompanies.length === 0 && moveAddresses.currentCity && (
+        {/* Empty State */}
+        {!movingCompanyMutation.isPending && movingCompanies.length === 0 && moveAddresses.currentCity && moveAddresses.newCity && (
           <Card>
-            <CardContent className="p-8 text-center">
+            <CardContent className="text-center py-12">
               <Truck className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">No Moving Companies Found</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No Moving Companies Found</h3>
               <p className="text-gray-600 mb-4">
-                We couldn't find moving companies for your specific route. Try searching for a broader area or contact us for assistance.
+                We couldn't find moving companies for your specific route. Try adjusting your search or contact us for assistance.
               </p>
-              <Button onClick={() => movingCompanyMutation.mutate(moveAddresses)}>
+              <Button onClick={handleSearch}>
                 Search Again
               </Button>
             </CardContent>
           </Card>
         )}
 
-        {/* Call to Action */}
-        {!moveAddresses.currentCity && (
-          <Card>
-            <CardContent className="p-8 text-center">
-              <Truck className="w-12 h-12 text-blue-600 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Ready to Find Moving Companies?</h3>
-              <p className="text-gray-600 mb-4">
-                Start by setting up your move details through our AI assistant to get personalized moving company recommendations.
-              </p>
-              <Link href="/ai-assistant">
-                <Button>
-                  Start with AI Assistant
-                </Button>
-              </Link>
-            </CardContent>
-          </Card>
+        {/* No Address State */}
+        {!moveAddresses.currentCity && !moveAddresses.newCity && (
+          <div className="text-center py-12">
+            <Truck className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Ready to Find Your Moving Company?</h2>
+            <p className="text-gray-600 mb-6">
+              Enter your move details above to find qualified, licensed moving companies for your relocation.
+            </p>
+            <Button 
+              onClick={() => document.getElementById('currentCity')?.focus()}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              Get Started
+            </Button>
+          </div>
         )}
 
         {/* Task Completion Bar */}
-        {movingCompanies.length > 0 && (
-          <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50">
-            <div className="bg-white rounded-lg shadow-lg border p-4 flex items-center gap-4">
-              <Button
-                onClick={() => {
-                  if (canCompleteTask()) {
-                    toast({
-                      title: "Moving Company Task Completed!",
-                      description: "Returning to your moving journey...",
-                    });
+        <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50">
+          <div className="bg-white rounded-lg shadow-lg border p-4 flex items-center gap-4">
+            <Button
+              onClick={() => {
+                if (canCompleteTask()) {
+                  toast({
+                    title: "Moving Company Task Completed!",
+                    description: "Returning to your moving journey...",
+                  });
+                  
+                  setTimeout(() => {
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const from = urlParams.get('from');
+                    const to = urlParams.get('to');
+                    const date = urlParams.get('date');
                     
-                    // Navigate back to journey with preserved context
-                    setTimeout(() => {
-                      const urlParams = new URLSearchParams(window.location.search);
-                      const from = urlParams.get('from');
-                      const to = urlParams.get('to');
-                      const date = urlParams.get('date');
-                      
-                      let journeyUrl = '/moving-journey';
-                      if (from || to || date) {
-                        const params = new URLSearchParams();
-                        if (from) params.set('from', from);
-                        if (to) params.set('to', to);
-                        if (date) params.set('date', date);
-                        journeyUrl += `?${params.toString()}`;
-                      }
-                      
-                      window.location.href = journeyUrl;
-                    }, 1000);
-                  }
-                }}
-                disabled={!canCompleteTask()}
-                className={`font-medium py-2 px-6 rounded-lg text-sm shadow-sm transition-all ${
-                  canCompleteTask() 
-                    ? "bg-green-600 hover:bg-green-700 text-white" 
-                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                }`}
-              >
-                <Truck className="w-4 h-4 mr-2" />
-                {canCompleteTask() ? "Complete Moving Company Search" : "Request Quotes or Select Mover First"}
-              </Button>
-              
-              <Button
-                onClick={() => {
-                  const urlParams = new URLSearchParams(window.location.search);
-                  const from = urlParams.get('from');
-                  const to = urlParams.get('to');
-                  const date = urlParams.get('date');
-                  
-                  let journeyUrl = '/moving-journey';
-                  if (from || to || date) {
-                    const params = new URLSearchParams();
-                    if (from) params.set('from', from);
-                    if (to) params.set('to', to);
-                    if (date) params.set('date', date);
-                    journeyUrl += `?${params.toString()}`;
-                  }
-                  
-                  window.location.href = journeyUrl;
-                }}
-                variant="outline"
-                className="border-blue-300 text-blue-700 hover:bg-blue-50 font-medium py-2 px-4 rounded-lg text-sm shadow-sm transition-all"
-              >
-                Return to Journey
-              </Button>
-            </div>
+                    let journeyUrl = '/moving-journey';
+                    if (from || to || date) {
+                      const params = new URLSearchParams();
+                      if (from) params.set('from', from);
+                      if (to) params.set('to', to);
+                      if (date) params.set('date', date);
+                      journeyUrl += `?${params.toString()}`;
+                    }
+                    
+                    window.location.href = journeyUrl;
+                  }, 1000);
+                }
+              }}
+              disabled={!canCompleteTask()}
+              className={`font-medium py-2 px-6 rounded-lg text-sm shadow-sm transition-all ${
+                canCompleteTask() 
+                  ? "bg-green-600 hover:bg-green-700 text-white" 
+                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
+              }`}
+            >
+              <CheckCircle className="w-4 h-4 mr-2" />
+              {canCompleteTask() ? "Complete Moving Company Search" : "Find & Contact Movers First"}
+            </Button>
+            
+            <Button
+              onClick={() => {
+                const urlParams = new URLSearchParams(window.location.search);
+                const from = urlParams.get('from');
+                const to = urlParams.get('to');
+                const date = urlParams.get('date');
+                
+                let journeyUrl = '/moving-journey';
+                if (from || to || date) {
+                  const params = new URLSearchParams();
+                  if (from) params.set('from', from);
+                  if (to) params.set('to', to);
+                  if (date) params.set('date', date);
+                  journeyUrl += `?${params.toString()}`;
+                }
+                
+                window.location.href = journeyUrl;
+              }}
+              variant="outline"
+              className="border-blue-300 text-blue-700 hover:bg-blue-50 font-medium py-2 px-4 rounded-lg text-sm shadow-sm transition-all"
+            >
+              Return to Journey
+            </Button>
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
