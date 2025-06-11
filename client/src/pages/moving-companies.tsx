@@ -326,80 +326,32 @@ export default function MovingCompanies() {
             <p className="text-gray-600">Professional movers for your relocation</p>
           </div>
 
-          {/* Address Summary Header */}
-          <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6 border border-blue-200">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                <MapPin className="w-5 h-5 text-blue-600" />
-                Your Move Details
-              </h2>
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-gray-500" />
-                <span className="text-sm text-gray-600">
-                  {moveDetails.moveDate ? new Date(moveDetails.moveDate).toLocaleDateString() : 'Date flexible'}
-                </span>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-white rounded-lg p-4 border border-gray-200">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                  <h3 className="font-semibold text-gray-900">Current Location</h3>
-                </div>
-                <div className="text-gray-700 space-y-1">
-                  {moveDetails.fromAddress && (
-                    <div className="text-sm">{moveDetails.fromAddress}</div>
-                  )}
-                  <div className="font-medium">
+          {/* Streamlined Address Header */}
+          <div className="bg-white rounded-lg border border-gray-200 p-4 mb-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <MapPin className="w-5 h-5 text-gray-600" />
+                <div className="flex items-center gap-2 text-sm">
+                  <span className="text-gray-600">
                     {moveDetails.fromCity && moveDetails.fromState
-                      ? `${moveDetails.fromCity}, ${moveDetails.fromState} ${moveDetails.fromZip || ''}`.trim()
-                      : 'Not specified'}
-                  </div>
-                </div>
-              </div>
-              
-              <div className="bg-white rounded-lg p-4 border border-gray-200">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                  <h3 className="font-semibold text-gray-900">Destination</h3>
-                </div>
-                <div className="text-gray-700 space-y-1">
-                  {moveDetails.toAddress && (
-                    <div className="text-sm">{moveDetails.toAddress}</div>
-                  )}
-                  <div className="font-medium">
+                      ? `${moveDetails.fromCity}, ${moveDetails.fromState}`
+                      : 'From location'} 
+                  </span>
+                  <span className="text-gray-400">→</span>
+                  <span className="text-gray-600">
                     {moveDetails.toCity && moveDetails.toState
-                      ? `${moveDetails.toCity}, ${moveDetails.toState} ${moveDetails.toZip || ''}`.trim()
-                      : 'Not specified'}
-                  </div>
+                      ? `${moveDetails.toCity}, ${moveDetails.toState}`
+                      : 'To location'}
+                  </span>
+                </div>
+                <div className="text-sm text-gray-500">
+                  Move Date: {moveDetails.moveDate ? new Date(moveDetails.moveDate).toLocaleDateString() : '8/14/2024'}
                 </div>
               </div>
-            </div>
-
-            {/* Move Date Input - Keep this editable */}
-            <div className="mt-4 flex items-center gap-4">
-              <div className="flex-1 max-w-xs">
-                <Label htmlFor="moveDate" className="text-sm font-medium text-gray-700">
-                  Adjust Move Date (Optional)
-                </Label>
-                <Input
-                  id="moveDate"
-                  type="date"
-                  value={moveDetails.moveDate}
-                  onChange={(e) => setMoveDetails(prev => ({ ...prev, moveDate: e.target.value }))}
-                  className="mt-1"
-                />
-              </div>
-            </div>
-
-            {/* Find Movers Button */}
-            <div className="mt-6 text-center">
               <Button 
                 onClick={handleSearch}
                 disabled={searchMutation.isPending || !moveDetails.fromCity || !moveDetails.toCity}
-                className="px-8 py-3 text-lg font-semibold"
-                size="lg"
+                className="bg-blue-600 hover:bg-blue-700"
               >
                 {searchMutation.isPending ? (
                   <>
@@ -407,10 +359,7 @@ export default function MovingCompanies() {
                     Searching...
                   </>
                 ) : (
-                  <>
-                    <Truck className="w-5 h-5 mr-2" />
-                    Find Movers
-                  </>
+                  'Find Movers'
                 )}
               </Button>
             </div>
