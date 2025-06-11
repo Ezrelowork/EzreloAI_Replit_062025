@@ -2,24 +2,27 @@ import React from 'react';
 import blankSignPath from '@assets/9097D925-400E-4B8C-9697-19B7E4BDA0C9_1749334781517.png';
 
 interface DynamicSignProps {
-  title: string;
-  description: string;
-  week: string;
-  priority: 'high' | 'medium' | 'low';
-  completed: boolean;
-  onClick: () => void;
+  title?: string;
+  description?: string;
+  week?: string;
+  priority?: 'high' | 'medium' | 'low';
+  completed?: boolean;
+  onClick?: () => void;
   className?: string;
 }
 
 export const DynamicHighwaySign: React.FC<DynamicSignProps> = ({
-  title,
-  description,
-  week,
-  priority,
-  completed,
+  title = "Default Title",
+  description = "Default description text for this highway sign",
+  week = "Week 1", 
+  priority = "medium",
+  completed = false,
   onClick,
-  className = ''
+  className = ""
 }) => {
+  // Ensure description is always a string
+  const safeDescription = typeof description === 'string' ? description : "Default description text for this highway sign";
+
   const priorityColors = {
     high: 'text-red-600',
     medium: 'text-yellow-600', 
@@ -79,7 +82,7 @@ export const DynamicHighwaySign: React.FC<DynamicSignProps> = ({
 
             {/* Description - additional info */}
             <div className="text-[9px] opacity-95 leading-tight px-1 mb-1 drop-shadow-sm">
-              {description.length > 55 ? description.substring(0, 55) + '...' : description}
+              {safeDescription.length > 55 ? safeDescription.substring(0, 55) + '...' : safeDescription}
             </div>
 
             {/* Week/timeframe */}
