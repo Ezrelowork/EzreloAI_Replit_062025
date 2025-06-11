@@ -85,14 +85,18 @@ export default function MovingCompanies() {
     console.log('Loading AI data:', { aiFromLocation, aiToLocation, aiMoveDate });
 
     if (aiFromLocation && aiFromLocation !== 'undefined') {
-      // Parse address: "123 Main St, Dallas, TX 75201" or "Dallas, TX"
+      // Parse address: "123 Main St, Dallas, TX 75201" 
       const addressParts = aiFromLocation.split(',').map(part => part.trim());
       
+      let streetAddress = '';
       let city = '';
       let state = '';
       let zip = '';
       
       if (addressParts.length >= 2) {
+        // First part is the street address (number and street name)
+        streetAddress = addressParts[0];
+        
         // Get the last part which should contain state and possibly zip
         const lastPart = addressParts[addressParts.length - 1];
         const zipMatch = lastPart.match(/\b(\d{5}(-\d{4})?)\b/);
@@ -109,11 +113,19 @@ export default function MovingCompanies() {
         // Get city from second to last part
         const secondLastPart = addressParts[addressParts.length - 2];
         city = secondLastPart;
+      } else if (addressParts.length === 1) {
+        // If only one part, assume it's just city/state, no street address
+        streetAddress = '';
+        const parts = addressParts[0].split(' ');
+        if (parts.length >= 2) {
+          state = parts[parts.length - 1];
+          city = parts.slice(0, -1).join(' ');
+        }
       }
 
       setMoveDetails(prev => ({
         ...prev,
-        fromAddress: aiFromLocation,
+        fromAddress: streetAddress,
         fromCity: city,
         fromState: state,
         fromZip: zip
@@ -121,14 +133,18 @@ export default function MovingCompanies() {
     }
 
     if (aiToLocation && aiToLocation !== 'undefined') {
-      // Parse address: "456 Oak Ave, Austin, TX 78701" or "Austin, TX"
+      // Parse address: "456 Oak Ave, Austin, TX 78701"
       const addressParts = aiToLocation.split(',').map(part => part.trim());
       
+      let streetAddress = '';
       let city = '';
       let state = '';
       let zip = '';
       
       if (addressParts.length >= 2) {
+        // First part is the street address (number and street name)
+        streetAddress = addressParts[0];
+        
         // Get the last part which should contain state and possibly zip
         const lastPart = addressParts[addressParts.length - 1];
         const zipMatch = lastPart.match(/\b(\d{5}(-\d{4})?)\b/);
@@ -145,11 +161,19 @@ export default function MovingCompanies() {
         // Get city from second to last part
         const secondLastPart = addressParts[addressParts.length - 2];
         city = secondLastPart;
+      } else if (addressParts.length === 1) {
+        // If only one part, assume it's just city/state, no street address
+        streetAddress = '';
+        const parts = addressParts[0].split(' ');
+        if (parts.length >= 2) {
+          state = parts[parts.length - 1];
+          city = parts.slice(0, -1).join(' ');
+        }
       }
 
       setMoveDetails(prev => ({
         ...prev,
-        toAddress: aiToLocation,
+        toAddress: streetAddress,
         toCity: city,
         toState: state,
         toZip: zip,
@@ -283,12 +307,12 @@ export default function MovingCompanies() {
                 <h3 className="font-semibold">Current Location</h3>
                 <div className="space-y-3">
                   <div>
-                    <Label htmlFor="fromAddress">Full Address</Label>
+                    <Label htmlFor="fromAddress">Street Address</Label>
                     <Input
                       id="fromAddress"
                       value={moveDetails.fromAddress}
                       onChange={(e) => setMoveDetails(prev => ({ ...prev, fromAddress: e.target.value }))}
-                      placeholder="Full current address"
+                      placeholder="123 Main Street"
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-2">
@@ -320,12 +344,12 @@ export default function MovingCompanies() {
                 <h3 className="font-semibold">Destination</h3>
                 <div className="space-y-3">
                   <div>
-                    <Label htmlFor="toAddress">Full Address</Label>
+                    <Label htmlFor="toAddress">Street Address</Label>
                     <Input
                       id="toAddress"
                       value={moveDetails.toAddress}
                       onChange={(e) => setMoveDetails(prev => ({ ...prev, toAddress: e.target.value }))}
-                      placeholder="Full destination address"
+                      placeholder="456 Oak Avenue"
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-2">
