@@ -313,128 +313,109 @@ export default function MovingCompanies() {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <Button variant="ghost" onClick={() => window.history.back()} className="mb-4">
+          <Button variant="ghost" onClick={() => window.history.back()} className="mb-6">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Journey
           </Button>
 
-          <div className="text-center">
+          <div className="text-center mb-6">
             <div className="flex items-center justify-center gap-3 mb-2">
               <Truck className="w-8 h-8 text-blue-600" />
               <h1 className="text-3xl font-bold text-gray-900">Find Moving Companies</h1>
             </div>
             <p className="text-gray-600">Professional movers for your relocation</p>
           </div>
-        </div>
 
-        {/* Move Details Input */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <MapPin className="w-5 h-5 text-blue-600" />
-              Your Move Details
-            </CardTitle>
-            <CardDescription>
-              Enter your move information to find qualified moving companies
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-4">
-                <h3 className="font-semibold">Current Location</h3>
-                <div className="space-y-3">
-                  <div>
-                    <Label htmlFor="fromAddress">Street Address</Label>
-                    <Input
-                      id="fromAddress"
-                      value={moveDetails.fromAddress}
-                      onChange={(e) => setMoveDetails(prev => ({ ...prev, fromAddress: e.target.value }))}
-                      placeholder="123 Main Street"
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <Label htmlFor="fromCity">City *</Label>
-                      <Input
-                        id="fromCity"
-                        value={moveDetails.fromCity}
-                        onChange={(e) => setMoveDetails(prev => ({ ...prev, fromCity: e.target.value }))}
-                        placeholder="Current city"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="fromState">State *</Label>
-                      <Input
-                        id="fromState"
-                        value={moveDetails.fromState}
-                        onChange={(e) => setMoveDetails(prev => ({ ...prev, fromState: e.target.value }))}
-                        placeholder="TX"
-                        required
-                      />
-                    </div>
+          {/* Address Summary Header */}
+          <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6 border border-blue-200">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                <MapPin className="w-5 h-5 text-blue-600" />
+                Your Move Details
+              </h2>
+              <div className="flex items-center gap-2">
+                <Clock className="w-4 h-4 text-gray-500" />
+                <span className="text-sm text-gray-600">
+                  {moveDetails.moveDate ? new Date(moveDetails.moveDate).toLocaleDateString() : 'Date flexible'}
+                </span>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-white rounded-lg p-4 border border-gray-200">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                  <h3 className="font-semibold text-gray-900">Current Location</h3>
+                </div>
+                <div className="text-gray-700 space-y-1">
+                  {moveDetails.fromAddress && (
+                    <div className="text-sm">{moveDetails.fromAddress}</div>
+                  )}
+                  <div className="font-medium">
+                    {moveDetails.fromCity && moveDetails.fromState
+                      ? `${moveDetails.fromCity}, ${moveDetails.fromState} ${moveDetails.fromZip || ''}`.trim()
+                      : 'Not specified'}
                   </div>
                 </div>
               </div>
               
-              <div className="space-y-4">
-                <h3 className="font-semibold">Destination</h3>
-                <div className="space-y-3">
-                  <div>
-                    <Label htmlFor="toAddress">Street Address</Label>
-                    <Input
-                      id="toAddress"
-                      value={moveDetails.toAddress}
-                      onChange={(e) => setMoveDetails(prev => ({ ...prev, toAddress: e.target.value }))}
-                      placeholder="456 Oak Avenue"
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <Label htmlFor="toCity">City *</Label>
-                      <Input
-                        id="toCity"
-                        value={moveDetails.toCity}
-                        onChange={(e) => setMoveDetails(prev => ({ ...prev, toCity: e.target.value }))}
-                        placeholder="Destination city"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="toState">State *</Label>
-                      <Input
-                        id="toState"
-                        value={moveDetails.toState}
-                        onChange={(e) => setMoveDetails(prev => ({ ...prev, toState: e.target.value }))}
-                        placeholder="CA"
-                        required
-                      />
-                    </div>
+              <div className="bg-white rounded-lg p-4 border border-gray-200">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                  <h3 className="font-semibold text-gray-900">Destination</h3>
+                </div>
+                <div className="text-gray-700 space-y-1">
+                  {moveDetails.toAddress && (
+                    <div className="text-sm">{moveDetails.toAddress}</div>
+                  )}
+                  <div className="font-medium">
+                    {moveDetails.toCity && moveDetails.toState
+                      ? `${moveDetails.toCity}, ${moveDetails.toState} ${moveDetails.toZip || ''}`.trim()
+                      : 'Not specified'}
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="flex gap-4 items-end">
-              <div className="flex-1">
-                <Label htmlFor="moveDate">Move Date</Label>
+            {/* Move Date Input - Keep this editable */}
+            <div className="mt-4 flex items-center gap-4">
+              <div className="flex-1 max-w-xs">
+                <Label htmlFor="moveDate" className="text-sm font-medium text-gray-700">
+                  Adjust Move Date (Optional)
+                </Label>
                 <Input
                   id="moveDate"
                   type="date"
                   value={moveDetails.moveDate}
                   onChange={(e) => setMoveDetails(prev => ({ ...prev, moveDate: e.target.value }))}
+                  className="mt-1"
                 />
               </div>
+            </div>
+
+            {/* Find Movers Button */}
+            <div className="mt-6 text-center">
               <Button 
                 onClick={handleSearch}
                 disabled={searchMutation.isPending || !moveDetails.fromCity || !moveDetails.toCity}
-                className="px-8"
+                className="px-8 py-3 text-lg font-semibold"
+                size="lg"
               >
-                {searchMutation.isPending ? "Searching..." : "Find Movers"}
+                {searchMutation.isPending ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    Searching...
+                  </>
+                ) : (
+                  <>
+                    <Truck className="w-5 h-5 mr-2" />
+                    Find Movers
+                  </>
+                )}
               </Button>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
         {/* Moving Type Tabs */}
         <Tabs value={selectedTab} onValueChange={setSelectedTab} className="mb-8">
