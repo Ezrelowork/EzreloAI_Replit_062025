@@ -58,6 +58,7 @@ function Router() {
           <Route path="/documentation" component={Documentation} />
           <Route path="/moving-checklist" component={MovingChecklist} />
           <Route path="/change-of-address" component={ChangeOfAddress} />
+          <Route path="/dashboard" component={Dashboard} />
           <Route path="/analytics" component={Analytics} />
           <Route path="/logo-showcase" component={LogoShowcase} />
           <Route path="/task" component={() => {

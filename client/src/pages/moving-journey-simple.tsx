@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { useQuery } from '@tanstack/react-query';
 import { Link, useLocation } from "wouter";
@@ -327,10 +326,10 @@ export default function MovingJourney() {
     const toParam = localStorage.getItem('aiToLocation');
     const dateParam = localStorage.getItem('aiMoveDate');
 
-    // FORCE DIRECT ROUTING - No dashboard, no task pages
-    let targetRoute = '/moving-checklist'; // Default fallback
+    // SIMPLE DIRECT ROUTING - Only to verified pages
+    let targetRoute = '/moving-checklist'; // Safe default fallback
 
-    // Override by sign ID first (highest priority)
+    // Simple sign-based routing (highest priority)
     if (step.id === 'default-sign-1') {
       targetRoute = '/moving-companies';
     } else if (step.id === 'default-sign-2') {
@@ -339,27 +338,6 @@ export default function MovingJourney() {
       targetRoute = '/change-of-address';
     } else if (step.id === 'default-sign-4') {
       targetRoute = '/local-services';
-    } else {
-      // Fallback content-based routing
-      const taskLower = step.title.toLowerCase();
-      const descLower = step.description.toLowerCase();
-      const combined = `${taskLower} ${descLower}`;
-
-      if (combined.includes('mover') || combined.includes('moving') || combined.includes('truck') || combined.includes('quote') || combined.includes('storage')) {
-        targetRoute = '/moving-companies';
-      } else if (combined.includes('utility') || combined.includes('electric') || combined.includes('internet') || 
-                 combined.includes('gas') || combined.includes('water') || combined.includes('cable')) {
-        targetRoute = '/utilities';
-      } else if (combined.includes('address') || combined.includes('change') || combined.includes('usps') || 
-                 combined.includes('documentation') || combined.includes('registration') || 
-                 combined.includes('voter') || combined.includes('license') || combined.includes('update') ||
-                 combined.includes('bank') || combined.includes('insurance') || combined.includes('subscription') ||
-                 combined.includes('mail') || combined.includes('forward') || combined.includes('postal')) {
-        targetRoute = '/change-of-address';
-      } else if (combined.includes('local') || combined.includes('school') || combined.includes('doctor') || 
-                 combined.includes('healthcare') || combined.includes('community') || combined.includes('services')) {
-        targetRoute = '/local-services';
-      }
     }
 
     // Build query params for context preservation
