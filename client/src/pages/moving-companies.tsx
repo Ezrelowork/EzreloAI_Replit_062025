@@ -648,10 +648,9 @@ export default function MovingCompanies() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Search Form */}
         <div className="mb-8">
-          <div className="bg-white rounded-lg border p-6"></div>
-
+          <div className="bg-white rounded-lg border p-6">
             <form onSubmit={handleSearch}>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6"></div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">From City</label>
                   <input 
@@ -735,7 +734,8 @@ export default function MovingCompanies() {
                 )}
               </Button>
             </form>
-          </div></div>
+          </div>
+        </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Moving Companies Results */}
