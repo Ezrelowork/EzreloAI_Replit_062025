@@ -1219,16 +1219,59 @@ Only include real providers that actually serve this location.`;
         .replace(/\s+/g, ' ')  // Replace multiple spaces with single space
         .trim();
 
-      // Standardize street suffixes
-      normalizedAddress = normalizedAddress
-        .replace(/\b(Street|St\.?)\b/gi, 'St')
-        .replace(/\b(Avenue|Ave\.?)\b/gi, 'Ave') 
-        .replace(/\b(Road|Rd\.?)\b/gi, 'Rd')
-        .replace(/\b(Boulevard|Blvd\.?)\b/gi, 'Blvd')
-        .replace(/\b(Trail|Trl\.?)\b/gi, 'Trl')
-        .replace(/\b(Drive|Dr\.?)\b/gi, 'Dr')
-        .replace(/\b(Lane|Ln\.?)\b/gi, 'Ln')
-        .replace(/\b(Court|Ct\.?)\b/gi, 'Ct');
+      // Standardize street suffixes - only abbreviate when they are actual suffixes (end of street address part)
+      // First, identify where the street address likely ends
+      const addressParts = normalizedAddress.split(',');
+      let streetPart = addressParts[0] || normalizedAddress;
+      
+      if (addressParts.length > 1) {
+        // Apply suffix abbreviations only to the street address part (before first comma)
+        streetPart = streetPart
+          .replace(/\b(Street|St\.?)\s*$/gi, 'St')
+          .replace(/\b(Avenue|Ave\.?)\s*$/gi, 'Ave') 
+          .replace(/\b(Road|Rd\.?)\s*$/gi, 'Rd')
+          .replace(/\b(Boulevard|Blvd\.?)\s*$/gi, 'Blvd')
+          .replace(/\b(Trail|Trl\.?)\s*$/gi, 'Trl')
+          .replace(/\b(Drive|Dr\.?)\s*$/gi, 'Dr')
+          .replace(/\b(Lane|Ln\.?)\s*$/gi, 'Ln')
+          .replace(/\b(Court|Ct\.?)\s*$/gi, 'Ct');
+        
+        // Reconstruct the address
+        normalizedAddress = streetPart + ', ' + addressParts.slice(1).join(', ');
+      } else {
+        // No commas present, apply suffix abbreviations more carefully
+        // Only abbreviate if the word is at the end of what appears to be the street portion
+        const words = normalizedAddress.split(/\s+/);
+        if (words.length >= 3) {
+          // Look for state pattern to identify where street address ends
+          const statePattern = /\b[A-Z]{2}\b/;
+          let streetEndIndex = words.length;
+          
+          for (let i = 0; i < words.length; i++) {
+            if (statePattern.test(words[i])) {
+              streetEndIndex = i;
+              break;
+            }
+          }
+          
+          // Only abbreviate suffix-like words that appear at the end of the street portion
+          if (streetEndIndex > 2) {
+            const possibleSuffix = words[streetEndIndex - 2]; // Word before city
+            if (/^(Street|St\.?|Avenue|Ave\.?|Road|Rd\.?|Boulevard|Blvd\.?|Trail|Trl\.?|Drive|Dr\.?|Lane|Ln\.?|Court|Ct\.?)$/i.test(possibleSuffix)) {
+              words[streetEndIndex - 2] = possibleSuffix
+                .replace(/^(Street|St\.?)$/i, 'St')
+                .replace(/^(Avenue|Ave\.?)$/i, 'Ave')
+                .replace(/^(Road|Rd\.?)$/i, 'Rd')
+                .replace(/^(Boulevard|Blvd\.?)$/i, 'Blvd')
+                .replace(/^(Trail|Trl\.?)$/i, 'Trl')
+                .replace(/^(Drive|Dr\.?)$/i, 'Dr')
+                .replace(/^(Lane|Ln\.?)$/i, 'Ln')
+                .replace(/^(Court|Ct\.?)$/i, 'Ct');
+            }
+          }
+          normalizedAddress = words.join(' ');
+        }
+      }
 
       // Handle addresses that are missing proper comma separation
       // Check if address already has commas - if so, leave it mostly alone
