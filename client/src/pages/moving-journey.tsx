@@ -56,7 +56,8 @@ export default function MovingJourney() {
   const { isTaskModalOpen, openTaskModal, closeTaskModal } = useTaskModal();
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Define moving tasks with highway positions
+  // Define moving tasks with highway positions - alternating above and below the road
+  // LOCKED POSITIONS - DO NOT REVERT: User specified exact coordinates
   const movingTasks: MovingTask[] = [
     {
       id: "moving-company",
