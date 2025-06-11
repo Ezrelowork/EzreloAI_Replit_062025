@@ -313,8 +313,8 @@ export default function MovingJourney() {
         </div>
       </div>
 
-      {/* Task Modal - Only for non-moving company tasks */}
-      {currentTask && currentTask.id !== 'moving-company' && (
+      {/* Task Modal */}
+      {currentTask && (
         <TaskModal
           isOpen={isTaskModalOpen}
           onClose={closeTaskModal}
