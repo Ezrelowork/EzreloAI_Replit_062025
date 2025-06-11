@@ -277,86 +277,37 @@ export default function MovingJourney() {
         </div>
       </div>
 
-      {/* Enhanced Journey Timeline with Custom Graphics */}
-      <div className="relative max-w-7xl mx-auto p-6 min-h-[800px]">
-        {/* Highway Background */}
-        <div className="absolute inset-0 -z-10">
-          <img 
-            src={highwayBackground}
-            alt="Highway Journey Background"
-            className="w-full h-full object-cover opacity-80 rounded-3xl"
-          />
-        </div>
+      {/* Journey Timeline */}
+      <div className="relative max-w-7xl mx-auto p-6 min-h-[600px]">
+        {/* Background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-xl"></div>
 
-        {/* Highway Signs Positioned Along Road */}
-        {journeyData.map((step, index) => {
-          const IconComponent = getTaskIcon(step.title);
-          const completedSteps = journeyData.filter(s => s.completed).length;
-          const isCurrentStep = index === completedSteps && !step.completed;
-          
-          // Get custom sign for this task category
-          const getCustomSign = (stepTitle: string) => {
-            if (stepTitle.includes('Moving') || stepTitle.includes('Truck')) return customGraphics.taskIcons['moving'];
-            if (stepTitle.includes('Utility') && stepTitle.includes('Setup')) return customGraphics.taskIcons['utilities-setup'];
-            if (stepTitle.includes('Address')) return customGraphics.taskIcons['address-changes'];
-            if (stepTitle.includes('Utility') || stepTitle.includes('Service')) return customGraphics.taskIcons['utilities-services'];
-            if (stepTitle.includes('Essential') || stepTitle.includes('Medical')) return customGraphics.taskIcons['essential-services'];
-            return customGraphics.taskIcons['moving']; // Default to first sign
-          };
-
-          const customSign = getCustomSign(step.title);
-          
-          // Position signs along the winding road path - more realistic highway positions
-          const roadPositions = [
-            { left: '12%', top: '75%' },   // Bottom left curve start
-            { left: '28%', top: '58%' },   // Lower curve
-            { left: '50%', top: '45%' },   // Middle section
-            { left: '72%', top: '32%' },   // Upper curve
-            { left: '85%', top: '18%' }    // Top right
-          ];
-          
-          const position = roadPositions[index % roadPositions.length] || { left: '50%', top: '50%' };
-          
-          return (
-            <div
-              key={step.id}
-              ref={el => taskCardRefs.current[step.id] = el}
-              data-step-id={step.id}
-              className="absolute cursor-pointer transition-all duration-300 hover:scale-110 hover:z-10"
-              style={{
-                left: position.left,
-                top: position.top,
-                transform: 'translate(-50%, -50%)'
-              }}
-              onClick={(e) => handleTaskClick(step, e)}
-            >
-              {/* Custom Highway Sign */}
-              <div className="relative group">
-                <img 
-                  src={customSign.src}
-                  alt={customSign.alt}
-                  className={`w-28 h-20 object-contain transition-all duration-300 drop-shadow-lg ${
-                    step.completed ? 'opacity-80 saturate-50' : 'hover:brightness-110'
-                  }`}
-                />
-                
-                {/* Completion Check */}
-                {step.completed && (
-                  <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center shadow-lg">
-                    <CheckCircle className="w-4 h-4 text-white" />
+        {/* Task Cards */}
+        <div className="relative grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-6">
+          {journeyData.map((step, index) => {
+            const IconComponent = getTaskIcon(step.title);
+            const completedSteps = journeyData.filter(s => s.completed).length;
+            const isCurrentStep = index === completedSteps && !step.completed;
+            
+            return (
+              <div
+                key={step.id}
+                ref={el => taskCardRefs.current[step.id] = el}
+                data-step-id={step.id}
+                className={`bg-white rounded-lg shadow-md p-4 cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-105 ${
+                  step.completed ? 'opacity-70' : ''
+                } ${
+                  isCurrentStep ? 'ring-2 ring-blue-400' : ''
+                }`}
+                onClick={(e) => handleTaskClick(step, e)}
+              >
+                <div className="flex items-start gap-3">
+                  <div className={`p-2 rounded-lg ${getSignColor(step.signType, step.priority)}`}>
+                    <IconComponent className="w-5 h-5 text-white" />
                   </div>
-                )}
-                
-                {/* Current Step Indicator */}
-                {isCurrentStep && (
-                  <div className="absolute inset-0 rounded-lg ring-4 ring-blue-400 ring-opacity-50 animate-pulse"></div>
-                )}
-                
-                {/* Hover Card */}
-                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-50">
-                  <div className="bg-white rounded-lg shadow-xl p-3 border min-w-48">
-                    <h4 className="font-semibold text-sm text-gray-900">{step.title}</h4>
-                    <p className="text-xs text-gray-600 mt-1">{step.description}</p>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-sm text-gray-900 truncate">{step.title}</h3>
+                    <p className="text-xs text-gray-600 mt-1 line-clamp-2">{step.description}</p>
                     <div className="flex gap-1 mt-2">
                       <Badge variant={step.priority === 'high' ? 'destructive' : 'secondary'} className="text-xs">
                         {step.priority}
@@ -364,11 +315,14 @@ export default function MovingJourney() {
                       <Badge variant="outline" className="text-xs">{step.week}</Badge>
                     </div>
                   </div>
+                  {step.completed && (
+                    <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0" />
+                  )}
                 </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
 
       {/* Fixed Position Progress Tracker */}
@@ -386,11 +340,10 @@ export default function MovingJourney() {
         />
       </div>
 
-      {/* Interactive Instructions */}
-      <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-black/90 backdrop-blur-sm rounded-2xl px-8 py-4 shadow-2xl z-30">
-        <div className="text-white text-center">
-          <div className="text-lg font-bold mb-2">🎬 Cinematic Journey</div>
-          <div className="text-sm opacity-90">Click any task card to zoom in • Experience immersive task management</div>
+      {/* Instructions */}
+      <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-white rounded-lg px-6 py-3 shadow-lg border z-30">
+        <div className="text-gray-700 text-center text-sm">
+          Click any task to get started with your moving journey
         </div>
       </div>
 
