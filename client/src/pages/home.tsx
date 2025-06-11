@@ -8,28 +8,15 @@ export default function Home() {
       {/* Header */}
       <header className="bg-white shadow-sm sticky top-0 z-30 border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4 py-4">
-            <div className="flex items-center justify-center md:justify-start">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center">
-                  <svg width="28" height="28" fill="white" viewBox="0 0 24 24">
-                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                  </svg>
-                </div>
-                <span className="text-3xl font-bold text-primary">Ezrelo</span>
+          <div className="flex justify-center items-center py-4">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center">
+                <svg width="28" height="28" fill="white" viewBox="0 0 24 24">
+                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                </svg>
               </div>
+              <span className="text-3xl font-bold text-primary">Ezrelo</span>
             </div>
-            <nav className="hidden md:flex space-x-8">
-              <a href="#how-it-works" className="text-gray-600 hover:text-primary px-3 py-2 text-sm font-medium transition-colors duration-200">
-                How It Works
-              </a>
-              <a href="#services" className="text-gray-600 hover:text-primary px-3 py-2 text-sm font-medium transition-colors duration-200">
-                Services
-              </a>
-              <a href="#features" className="text-gray-600 hover:text-primary px-3 py-2 text-sm font-medium transition-colors duration-200">
-                Features
-              </a>
-            </nav>
           </div>
         </div>
       </header>
