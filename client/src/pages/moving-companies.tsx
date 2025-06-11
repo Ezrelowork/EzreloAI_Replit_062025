@@ -328,30 +328,32 @@ export default function MovingCompanies() {
 
           {/* Streamlined Address Header */}
           <div className="bg-white rounded-lg border border-gray-200 p-4 mb-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <MapPin className="w-5 h-5 text-gray-600" />
-                <div className="flex items-center gap-2 text-sm">
-                  <span className="text-gray-600">
-                    {moveDetails.fromCity && moveDetails.fromState
-                      ? `${moveDetails.fromCity}, ${moveDetails.fromState}`
-                      : 'From location'} 
-                  </span>
-                  <span className="text-gray-400">→</span>
-                  <span className="text-gray-600">
-                    {moveDetails.toCity && moveDetails.toState
-                      ? `${moveDetails.toCity}, ${moveDetails.toState}`
-                      : 'To location'}
-                  </span>
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-3">
+                  <MapPin className="w-5 h-5 text-gray-600" />
+                  <div className="flex items-center gap-3 text-sm">
+                    <span className="text-gray-700 font-medium">
+                      {moveDetails.fromAddress || moveDetails.fromCity
+                        ? `${moveDetails.fromAddress ? moveDetails.fromAddress + ', ' : ''}${moveDetails.fromCity}${moveDetails.fromState ? ', ' + moveDetails.fromState : ''}${moveDetails.fromZip ? ' ' + moveDetails.fromZip : ''}`
+                        : 'From location'} 
+                    </span>
+                    <span className="text-gray-400 text-lg">→</span>
+                    <span className="text-gray-700 font-medium">
+                      {moveDetails.toAddress || moveDetails.toCity
+                        ? `${moveDetails.toAddress ? moveDetails.toAddress + ', ' : ''}${moveDetails.toCity}${moveDetails.toState ? ', ' + moveDetails.toState : ''}${moveDetails.toZip ? ' ' + moveDetails.toZip : ''}`
+                        : 'To location'}
+                    </span>
+                  </div>
                 </div>
-                <div className="text-sm text-gray-500">
-                  Move Date: {moveDetails.moveDate ? new Date(moveDetails.moveDate).toLocaleDateString() : '8/14/2024'}
+                <div className="text-sm text-gray-500 ml-8">
+                  Move Date: {moveDetails.moveDate ? new Date(moveDetails.moveDate).toLocaleDateString() : 'July 27, 2025'}
                 </div>
               </div>
               <Button 
                 onClick={handleSearch}
                 disabled={searchMutation.isPending || !moveDetails.fromCity || !moveDetails.toCity}
-                className="bg-blue-600 hover:bg-blue-700"
+                className="bg-blue-600 hover:bg-blue-700 ml-4"
               >
                 {searchMutation.isPending ? (
                   <>
