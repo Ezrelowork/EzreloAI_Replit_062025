@@ -111,7 +111,7 @@ export default function MovingCompanies() {
 
         setMoveDetails(prev => ({
           ...prev,
-          fromAddress: fromParts.slice(0, -1).join(', '),
+          fromAddress: aiFromLocation,
           fromCity: city,
           fromState: state,
           fromZip: zip
@@ -148,7 +148,7 @@ export default function MovingCompanies() {
 
         setMoveDetails(prev => ({
           ...prev,
-          toAddress: toParts.slice(0, -1).join(', '),
+          toAddress: aiToLocation,
           toCity: city,
           toState: state,
           toZip: zip,
