@@ -262,7 +262,7 @@ export default function MovingCompanies() {
         questionnaireData.fragileItems,
         questionnaireData.email
       ].filter(field => field).length;
-  
+
       setFormProgress((filledFields / totalFields) * 100);
     }, [questionnaireData]);
 
@@ -436,7 +436,8 @@ export default function MovingCompanies() {
                       </div>
                     ))}
                   </div>
-                </div>
+                  {/* Closing tag added to fix the issue */}
+                  </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
