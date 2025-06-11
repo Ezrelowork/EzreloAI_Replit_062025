@@ -227,27 +227,91 @@ export default function MovingCompanies() {
       {/* Header */}
       <div className="bg-white shadow-sm border-b sticky top-0 z-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
+          {/* Main Header Row */}
+          <div className="flex items-center justify-between py-4">
             <div className="flex items-center gap-4">
-              <Link href="/moving-journey">
-                <Button variant="ghost" size="sm">
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Back to Journey
-                </Button>
-              </Link>
-              <div className="flex items-center gap-2">
-                <Truck className="w-6 h-6 text-blue-600" />
-                <span className="text-sm text-gray-500 font-medium">Moving Companies</span>
+              <div className="w-12 h-12 bg-gray-800 rounded-lg flex items-center justify-center">
+                <span className="text-white text-lg font-bold">i</span>
+              </div>
+              <div>
+                <h1 className="text-xl font-bold text-gray-900">Generate Your Plan</h1>
+                <div className="flex items-center gap-4 text-sm text-gray-600 mt-1">
+                  <Badge variant="secondary" className="bg-gray-800 text-white hover:bg-gray-700">
+                    MEDIUM
+                  </Badge>
+                  <span>Timeline: AI Planning</span>
+                  <span>Category: Moving Services</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
+                  <MapPin className="w-4 h-4" />
+                  <span>
+                    {searchFormData.fromCity && searchFormData.fromState 
+                      ? `${searchFormData.fromCity}, ${searchFormData.fromState}` 
+                      : 'Austin, TX'
+                    } → {searchFormData.toCity && searchFormData.toState 
+                      ? `${searchFormData.toCity}, ${searchFormData.toState}` 
+                      : 'Dallas, TX'
+                    }
+                  </span>
+                  <span className="ml-4">
+                    Move Date: {searchFormData.moveDate || '8/14/2024'}
+                  </span>
+                </div>
               </div>
             </div>
-            <div className="flex items-center gap-4">
-              <Badge variant="secondary">
-                {selectedCompanies.size} Selected
-              </Badge>
-              <Link href="/">
+            
+            {/* Progress Section */}
+            <div className="text-right">
+              <div className="text-sm font-medium text-gray-900 mb-2">Progress</div>
+              <div className="text-2xl font-bold text-blue-600 mb-1">25%</div>
+              <div className="flex items-center gap-4 text-xs text-gray-600">
+                <div className="text-center">
+                  <div className="text-blue-600 font-medium">Research</div>
+                  <div className="w-16 h-2 bg-blue-600 rounded-full mt-1"></div>
+                </div>
+                <div className="text-center">
+                  <div>Quote</div>
+                  <div className="w-16 h-2 bg-gray-200 rounded-full mt-1"></div>
+                </div>
+                <div className="text-center">
+                  <div>Book</div>
+                  <div className="w-16 h-2 bg-gray-200 rounded-full mt-1"></div>
+                </div>
+                <div className="text-center">
+                  <div>Complete</div>
+                  <div className="w-16 h-2 bg-gray-200 rounded-full mt-1"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Navigation Row */}
+          <div className="border-t border-gray-200 py-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <Link href="/ai-assistant">
+                  <Button variant="ghost" size="sm">
+                    <ArrowLeft className="w-4 h-4 mr-2" />
+                    Hub
+                  </Button>
+                </Link>
+                <Link href="/moving-journey">
+                  <Button variant="ghost" size="sm">
+                    <ArrowLeft className="w-4 h-4 mr-2" />
+                    Journey
+                  </Button>
+                </Link>
+                <Button className="bg-purple-600 hover:bg-purple-700 text-white">
+                  Fill Out Questionnaire
+                </Button>
+                <Button variant="ghost" size="sm" className="text-gray-400">
+                  <span className="mr-2">✓</span>
+                  Complete Task First
+                </Button>
+              </div>
+              <Link href="/moving-journey">
                 <Button variant="outline" size="sm">
-                  <Home className="w-4 h-4 mr-2" />
-                  Home
+                  Return to Journey
                 </Button>
               </Link>
             </div>
