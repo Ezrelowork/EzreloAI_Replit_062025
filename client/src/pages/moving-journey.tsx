@@ -288,13 +288,13 @@ export default function MovingJourney() {
           {/* Journey Path Indicators */}
           <div className="absolute inset-0 pointer-events-none">
             {/* Start indicator */}
-            <div className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-green-500 text-white px-4 py-2 rounded-full font-semibold shadow-lg">
+            <div className="absolute transform -translate-x-1/2 -translate-y-1/2 bg-green-500 text-white px-4 py-2 rounded-full font-semibold shadow-lg" style={{ left: "15%", top: "80%" }}>
               <MapPin className="w-4 h-4 inline mr-2" />
               Start Here
             </div>
 
             {/* End indicator */}
-            <div className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-blue-500 text-white px-4 py-2 rounded-full font-semibold shadow-lg">
+            <div className="absolute transform -translate-x-1/2 -translate-y-1/2 bg-blue-500 text-white px-4 py-2 rounded-full font-semibold shadow-lg" style={{ left: "85%", top: "15%" }}>
               <Home className="w-4 h-4 inline mr-2" />
               New Home
             </div>
