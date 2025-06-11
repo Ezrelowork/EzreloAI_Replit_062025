@@ -56,6 +56,27 @@ export default function MovingJourney() {
   const { isTaskModalOpen, openTaskModal, closeTaskModal } = useTaskModal();
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // Prevent unwanted navigation during development
+  useEffect(() => {
+    const preventNavigation = (e: PopStateEvent) => {
+      if (process.env.NODE_ENV === 'development') {
+        e.preventDefault();
+        window.history.pushState(null, '', '/moving-journey');
+      }
+    };
+
+    window.addEventListener('popstate', preventNavigation);
+    
+    // Ensure we stay on the journey page during development
+    if (process.env.NODE_ENV === 'development' && window.location.pathname !== '/moving-journey') {
+      window.history.replaceState(null, '', '/moving-journey');
+    }
+
+    return () => {
+      window.removeEventListener('popstate', preventNavigation);
+    };
+  }, []);
+
   // Define moving tasks with highway positions - alternating above and below the road
   // LOCKED POSITIONS - DO NOT REVERT: User specified exact coordinates
   const movingTasks: MovingTask[] = [
@@ -175,11 +196,17 @@ export default function MovingJourney() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setLocation('/')}
+                onClick={() => {
+                  if (process.env.NODE_ENV === 'development') {
+                    console.log('Navigation to home prevented during development');
+                    return;
+                  }
+                  setLocation('/');
+                }}
                 className="text-gray-600 hover:text-gray-900"
               >
                 <Home className="w-4 h-4 mr-2" />
-                Home
+                {process.env.NODE_ENV === 'development' ? 'Home (Dev Mode)' : 'Home'}
               </Button>
             </div>
           </div>
