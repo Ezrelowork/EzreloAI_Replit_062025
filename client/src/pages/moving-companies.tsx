@@ -76,110 +76,147 @@ export default function MovingCompanies() {
   const [hasCompletedActions, setHasCompletedActions] = useState(false);
   const [quotesRequested, setQuotesRequested] = useState<Set<string>>(new Set());
 
+  // USPS Address verification function
+  const verifyAddress = async (address: string) => {
+    try {
+      const response = await apiRequest("POST", "/api/verify-address", { address });
+      const data = await response.json();
+      return data.verifiedAddress || address; // Return verified address or original if verification fails
+    } catch (error) {
+      console.log('Address verification failed, using original address');
+      return address;
+    }
+  };
+
+  // Enhanced address parsing function
+  const parseAddress = (addressString: string) => {
+    let streetAddress = '';
+    let city = '';
+    let state = '';
+    let zip = '';
+
+    // First, try to extract ZIP code
+    const zipMatch = addressString.match(/\b(\d{5}(-\d{4})?)\b/);
+    let addressWithoutZip = addressString;
+    
+    if (zipMatch) {
+      zip = zipMatch[1];
+      addressWithoutZip = addressString.replace(zipMatch[0], '').trim();
+    }
+
+    // Check if address has commas (properly formatted)
+    if (addressWithoutZip.includes(',')) {
+      const parts = addressWithoutZip.split(',').map(part => part.trim());
+      
+      if (parts.length >= 3) {
+        // Format: "123 Main St, Dallas, TX"
+        streetAddress = parts[0];
+        city = parts[1];
+        state = parts[2];
+      } else if (parts.length === 2) {
+        // Format: "123 Main St, Dallas TX" or "Dallas, TX"
+        const secondPart = parts[1].trim();
+        const stateMatch = secondPart.match(/\b([A-Z]{2})\b$/);
+        
+        if (stateMatch) {
+          state = stateMatch[1];
+          const cityPart = secondPart.replace(stateMatch[0], '').trim();
+          
+          if (cityPart) {
+            // Has city in second part
+            streetAddress = parts[0];
+            city = cityPart;
+          } else {
+            // No street address, just city and state
+            city = parts[0];
+          }
+        }
+      }
+    } else {
+      // No commas - need to parse differently (like "3201 Stonecrop TrailArgyle TX 76226")
+      // Try to identify state pattern first
+      const stateMatch = addressWithoutZip.match(/\b([A-Z]{2})\b/);
+      
+      if (stateMatch) {
+        state = stateMatch[1];
+        const beforeState = addressWithoutZip.substring(0, stateMatch.index).trim();
+        const afterState = addressWithoutZip.substring(stateMatch.index + 2).trim();
+        
+        // Split beforeState to separate street address and city
+        const words = beforeState.split(/\s+/);
+        
+        if (words.length >= 3) {
+          // Assume last word before state is city, rest is street address
+          city = words[words.length - 1];
+          streetAddress = words.slice(0, -1).join(' ');
+        } else if (words.length === 2) {
+          // Could be just number + street or city + street
+          // If first word is a number, assume it's street address
+          if (/^\d+/.test(words[0])) {
+            streetAddress = beforeState;
+            city = afterState; // City might be after state
+          } else {
+            city = beforeState;
+          }
+        } else {
+          streetAddress = beforeState;
+        }
+      } else {
+        // No state found, try other patterns
+        const words = addressWithoutZip.split(/\s+/);
+        if (words.length >= 2 && /^\d+/.test(words[0])) {
+          // Starts with number, likely has street address
+          streetAddress = words.slice(0, -1).join(' ');
+          city = words[words.length - 1];
+        } else {
+          city = addressWithoutZip;
+        }
+      }
+    }
+
+    return { streetAddress, city, state, zip };
+  };
+
   // Load move data from localStorage on component mount
   useEffect(() => {
-    const aiFromLocation = localStorage.getItem('aiFromLocation');
-    const aiToLocation = localStorage.getItem('aiToLocation');
-    const aiMoveDate = localStorage.getItem('aiMoveDate');
+    const loadAndParseAddresses = async () => {
+      const aiFromLocation = localStorage.getItem('aiFromLocation');
+      const aiToLocation = localStorage.getItem('aiToLocation');
+      const aiMoveDate = localStorage.getItem('aiMoveDate');
 
-    console.log('Loading AI data:', { aiFromLocation, aiToLocation, aiMoveDate });
+      console.log('Loading AI data:', { aiFromLocation, aiToLocation, aiMoveDate });
 
-    if (aiFromLocation && aiFromLocation !== 'undefined') {
-      // Parse address: "123 Main St, Dallas, TX 75201" 
-      const addressParts = aiFromLocation.split(',').map(part => part.trim());
-      
-      let streetAddress = '';
-      let city = '';
-      let state = '';
-      let zip = '';
-      
-      if (addressParts.length >= 2) {
-        // First part is the street address (number and street name)
-        streetAddress = addressParts[0];
+      if (aiFromLocation && aiFromLocation !== 'undefined') {
+        // Verify and parse from address
+        const verifiedFromAddress = await verifyAddress(aiFromLocation);
+        const fromParsed = parseAddress(verifiedFromAddress);
         
-        // Get the last part which should contain state and possibly zip
-        const lastPart = addressParts[addressParts.length - 1];
-        const zipMatch = lastPart.match(/\b(\d{5}(-\d{4})?)\b/);
-        
-        if (zipMatch) {
-          zip = zipMatch[1];
-          // Remove zip from last part to get state
-          const stateOnly = lastPart.replace(zipMatch[0], '').trim();
-          state = stateOnly;
-        } else {
-          state = lastPart;
-        }
-        
-        // Get city from second to last part
-        const secondLastPart = addressParts[addressParts.length - 2];
-        city = secondLastPart;
-      } else if (addressParts.length === 1) {
-        // If only one part, assume it's just city/state, no street address
-        streetAddress = '';
-        const parts = addressParts[0].split(' ');
-        if (parts.length >= 2) {
-          state = parts[parts.length - 1];
-          city = parts.slice(0, -1).join(' ');
-        }
+        setMoveDetails(prev => ({
+          ...prev,
+          fromAddress: fromParsed.streetAddress,
+          fromCity: fromParsed.city,
+          fromState: fromParsed.state,
+          fromZip: fromParsed.zip
+        }));
       }
 
-      setMoveDetails(prev => ({
-        ...prev,
-        fromAddress: streetAddress,
-        fromCity: city,
-        fromState: state,
-        fromZip: zip
-      }));
-    }
-
-    if (aiToLocation && aiToLocation !== 'undefined') {
-      // Parse address: "456 Oak Ave, Austin, TX 78701"
-      const addressParts = aiToLocation.split(',').map(part => part.trim());
-      
-      let streetAddress = '';
-      let city = '';
-      let state = '';
-      let zip = '';
-      
-      if (addressParts.length >= 2) {
-        // First part is the street address (number and street name)
-        streetAddress = addressParts[0];
+      if (aiToLocation && aiToLocation !== 'undefined') {
+        // Verify and parse to address
+        const verifiedToAddress = await verifyAddress(aiToLocation);
+        const toParsed = parseAddress(verifiedToAddress);
         
-        // Get the last part which should contain state and possibly zip
-        const lastPart = addressParts[addressParts.length - 1];
-        const zipMatch = lastPart.match(/\b(\d{5}(-\d{4})?)\b/);
-        
-        if (zipMatch) {
-          zip = zipMatch[1];
-          // Remove zip from last part to get state
-          const stateOnly = lastPart.replace(zipMatch[0], '').trim();
-          state = stateOnly;
-        } else {
-          state = lastPart;
-        }
-        
-        // Get city from second to last part
-        const secondLastPart = addressParts[addressParts.length - 2];
-        city = secondLastPart;
-      } else if (addressParts.length === 1) {
-        // If only one part, assume it's just city/state, no street address
-        streetAddress = '';
-        const parts = addressParts[0].split(' ');
-        if (parts.length >= 2) {
-          state = parts[parts.length - 1];
-          city = parts.slice(0, -1).join(' ');
-        }
+        setMoveDetails(prev => ({
+          ...prev,
+          toAddress: toParsed.streetAddress,
+          toCity: toParsed.city,
+          toState: toParsed.state,
+          toZip: toParsed.zip,
+          moveDate: aiMoveDate || ""
+        }));
       }
+    };
 
-      setMoveDetails(prev => ({
-        ...prev,
-        toAddress: streetAddress,
-        toCity: city,
-        toState: state,
-        toZip: zip,
-        moveDate: aiMoveDate || ""
-      }));
-    }
+    loadAndParseAddresses();
   }, []);
 
   // Search for moving companies

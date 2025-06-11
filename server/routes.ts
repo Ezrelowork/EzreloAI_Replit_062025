@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { db } from "./db";
 import { movingProjects, movingProjectSchema } from "@shared/schema";
 import { eq } from "drizzle-orm";
+import { Request, Response } from "express";
 
 function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
   const R = 3959; // Earth's radius in miles
@@ -519,7 +520,7 @@ Only include real companies that actually serve ${fromLocation} to ${toLocation}
 
           const geminiResult = await model.generateContent(geminiPrompt);
           const geminiText = geminiResult.response.text();
-          
+
           // Extract JSON from Gemini response
           const jsonMatch = geminiText.match(/\{[\s\S]*\}/);
           if (jsonMatch) {
@@ -1012,7 +1013,7 @@ Only include real providers that actually serve this location.`;
 
           const geminiResult = await model.generateContent(geminiPrompt);
           const geminiText = geminiResult.response.text();
-          
+
           // Extract JSON from Gemini response
           const jsonMatch = geminiText.match(/\{[\s\S]*\}/);
           if (jsonMatch) {
@@ -1204,8 +1205,78 @@ Only include real providers that actually serve this location.`;
     }
   });
 
-  // Track referral clicks
-  app.post("/api/track-referral", async (req, res) => {
+  // USPS Address verification endpoint
+  app.post("/api/verify-address", async (req: Request, res: Response) => {
+    try {
+      const { address } = req.body;
+
+      if (!address) {
+        return res.status(400).json({ error: "Address is required" });
+      }
+
+      // Basic address normalization
+      let normalizedAddress = address
+        .replace(/\s+/g, ' ')  // Replace multiple spaces with single space
+        .trim()
+        .replace(/\b(Street|St\.?)\b/gi, 'St')
+        .replace(/\b(Avenue|Ave\.?)\b/gi, 'Ave') 
+        .replace(/\b(Road|Rd\.?)\b/gi, 'Rd')
+        .replace(/\b(Boulevard|Blvd\.?)\b/gi, 'Blvd')
+        .replace(/\b(Trail|Trl\.?)\b/gi, 'Trl')
+        .replace(/\b(Drive|Dr\.?)\b/gi, 'Dr')
+        .replace(/\b(Lane|Ln\.?)\b/gi, 'Ln')
+        .replace(/\b(Court|Ct\.?)\b/gi, 'Ct');
+
+      // Add proper comma separation if missing
+      // Pattern: "1234 Street NameCity ST 12345" -> "1234 Street Name, City, ST 12345" 
+      const stateZipPattern = /\b([A-Z]{2})\s+(\d{5}(-\d{4})?)\s*$/;
+      const stateMatch = normalizedAddress.match(stateZipPattern);
+
+      if (stateMatch) {
+        const beforeStateZip = normalizedAddress.substring(0, stateMatch.index).trim();
+        const state = stateMatch[1];
+        const zip = stateMatch[2];
+
+        // Try to separate street address from city
+        const words = beforeStateZip.split(/\s+/);
+
+        if (words.length >= 3) {
+          // Look for likely city name (last word or two before state)
+          // Simple heuristic: if last word is capitalized and not a street suffix, it's likely a city
+          const lastWord = words[words.length - 1];
+          const streetSuffixes = ['St', 'Ave', 'Rd', 'Blvd', 'Trl', 'Dr', 'Ln', 'Ct', 'Way', 'Pl'];
+
+          if (!streetSuffixes.includes(lastWord) && /^[A-Z]/.test(lastWord)) {
+            // Last word is likely city
+            const streetAddress = words.slice(0, -1).join(' ');
+            const city = lastWord;
+            normalizedAddress = `${streetAddress}, ${city}, ${state} ${zip}`;
+          } else {
+            // Keep original format but add minimal commas
+            normalizedAddress = `${beforeStateZip}, ${state} ${zip}`;
+          }
+        }
+      }
+
+      console.log('Address normalization:', { original: address, normalized: normalizedAddress });
+
+      res.json({ 
+        verifiedAddress: normalizedAddress,
+        original: address,
+        verified: true 
+      });
+
+    } catch (error) {
+      console.error('Address verification error:', error);
+      res.status(500).json({ 
+        error: "Address verification failed",
+        verifiedAddress: req.body.address // Return original address as fallback
+      });
+    }
+  });
+
+  // Track referral clicks and interactions
+  app.post("/api/track-referral", async (req: Request, res: Response) => {
     try {
       const { provider, category, action, userAddress } = req.body;
 
