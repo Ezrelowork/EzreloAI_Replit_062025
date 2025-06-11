@@ -132,8 +132,23 @@ export default function MovingJourney() {
 
   const handleSignClick = (task: MovingTask) => {
     if (task.id === 'moving-company') {
-      // Navigate to the full moving companies page
-      setLocation('/moving-companies');
+      // Get AI data from localStorage
+      const fromLocation = localStorage.getItem('aiFromLocation');
+      const toLocation = localStorage.getItem('aiToLocation');
+      const moveDate = localStorage.getItem('aiMoveDate');
+      
+      if (fromLocation && toLocation) {
+        // Navigate with URL parameters for the moving companies page
+        const params = new URLSearchParams({
+          from: fromLocation,
+          to: toLocation,
+          ...(moveDate && { date: moveDate })
+        });
+        setLocation(`/moving-companies?${params.toString()}`);
+      } else {
+        // Fallback to regular page if no AI data
+        setLocation('/moving-companies');
+      }
     } else {
       setSelectedTask(task);
       openTaskModal(task);
