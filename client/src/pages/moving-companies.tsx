@@ -457,133 +457,272 @@ export default function MovingCompanies() {
           </div>
         </Tabs>
 
-        {/* Companies Results */}
-        {companies.length > 0 && (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-gray-900">
-                Available Moving Companies
-              </h2>
-              <Badge variant="outline" className="text-sm">
-                {companies.length} companies found
-              </Badge>
-            </div>
+        {/* Main Content Layout */}
+        <div className="flex gap-8">
+          {/* Left Section - Companies Results (2/3 width) */}
+          <div className="flex-1">
+            {companies.length > 0 && (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-2xl font-bold text-gray-900">
+                    Available Moving Companies
+                  </h2>
+                  <Badge variant="outline" className="text-sm">
+                    {companies.length} companies found
+                  </Badge>
+                </div>
 
             <div className="grid gap-4">
-              {companies.map((company, index) => (
-                <Card key={index} className="hover:shadow-md transition-shadow">
-                  <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <CardTitle className="text-lg flex items-center gap-2">
-                          <Truck className="w-5 h-5 text-blue-600" />
-                          {company.provider}
-                          {company.rating > 0 && (
-                            <div className="flex items-center gap-1">
-                              <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                              <span className="text-sm font-normal text-gray-600">
-                                {company.rating.toFixed(1)}
-                              </span>
+                  {companies.map((company, index) => (
+                    <Card key={index} className="hover:shadow-md transition-shadow">
+                      <CardHeader className="pb-3">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <CardTitle className="text-lg flex items-center gap-2">
+                              <Truck className="w-5 h-5 text-blue-600" />
+                              {company.provider}
+                              {company.rating > 0 && (
+                                <div className="flex items-center gap-1">
+                                  <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                                  <span className="text-sm font-normal text-gray-600">
+                                    {company.rating.toFixed(1)}
+                                  </span>
+                                </div>
+                              )}
+                            </CardTitle>
+                            <CardDescription className="mt-1">
+                              {company.description}
+                            </CardDescription>
+                            <Badge variant="outline" className="mt-2">{company.category}</Badge>
+                          </div>
+                          <div className="text-right">
+                            <Badge className="bg-green-100 text-green-800">
+                              {company.estimatedCost}
+                            </Badge>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="pt-0">
+                        <div className="space-y-3">
+                          {/* Company Details */}
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                            <div className="flex items-center gap-2">
+                              <Phone className="w-4 h-4 text-gray-500" />
+                              <span>{company.phone}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Clock className="w-4 h-4 text-gray-500" />
+                              <span>{company.hours}</span>
+                            </div>
+                            {company.availability && (
+                              <div className="flex items-center gap-2">
+                                <MapPin className="w-4 h-4 text-gray-500" />
+                                <span>{company.availability}</span>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Services */}
+                          {company.services && company.services.length > 0 && (
+                            <div>
+                              <p className="text-sm font-medium text-gray-700 mb-2">Services:</p>
+                              <div className="flex flex-wrap gap-2">
+                                {company.services.slice(0, 4).map((service, idx) => (
+                                  <Badge key={idx} variant="secondary" className="text-xs">
+                                    {service}
+                                  </Badge>
+                                ))}
+                                {company.services.length > 4 && (
+                                  <Badge variant="secondary" className="text-xs">
+                                    +{company.services.length - 4} more
+                                  </Badge>
+                                )}
+                              </div>
                             </div>
                           )}
-                        </CardTitle>
-                        <CardDescription className="mt-1">
-                          {company.description}
-                        </CardDescription>
-                        <Badge variant="outline" className="mt-2">{company.category}</Badge>
-                      </div>
-                      <div className="text-right">
-                        <Badge className="bg-green-100 text-green-800">
-                          {company.estimatedCost}
-                        </Badge>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <div className="space-y-3">
-                      {/* Company Details */}
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                        <div className="flex items-center gap-2">
-                          <Phone className="w-4 h-4 text-gray-500" />
-                          <span>{company.phone}</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Clock className="w-4 h-4 text-gray-500" />
-                          <span>{company.hours}</span>
-                        </div>
-                        {company.availability && (
-                          <div className="flex items-center gap-2">
-                            <MapPin className="w-4 h-4 text-gray-500" />
-                            <span>{company.availability}</span>
-                          </div>
-                        )}
-                      </div>
 
-                      {/* Services */}
-                      {company.services && company.services.length > 0 && (
-                        <div>
-                          <p className="text-sm font-medium text-gray-700 mb-2">Services:</p>
-                          <div className="flex flex-wrap gap-2">
-                            {company.services.slice(0, 4).map((service, idx) => (
-                              <Badge key={idx} variant="secondary" className="text-xs">
-                                {service}
-                              </Badge>
-                            ))}
-                            {company.services.length > 4 && (
-                              <Badge variant="secondary" className="text-xs">
-                                +{company.services.length - 4} more
-                              </Badge>
+                          {/* Special Notes */}
+                          {company.notes && (
+                            <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+                              <p className="text-sm text-blue-800">
+                                <strong>Note:</strong> {company.notes}
+                              </p>
+                            </div>
+                          )}
+
+                          {/* Action Buttons */}
+                          <div className="flex gap-3 pt-2">
+                            <Button 
+                              onClick={() => handleCompanyClick(company, "Get Quote")}
+                              className="flex-1"
+                              variant={quotesRequested.has(company.provider) ? "secondary" : "default"}
+                            >
+                              <ExternalLink className="w-4 h-4 mr-2" />
+                              {quotesRequested.has(company.provider) ? "Quote Requested" : "Get Quote"}
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              onClick={() => handleCompanyClick(company, "Visit Website")}
+                            >
+                              <Globe className="w-4 h-4 mr-2" />
+                              Website
+                            </Button>
+                            {company.phone && (
+                              <Button 
+                                variant="outline" 
+                                onClick={() => {
+                                  window.open(`tel:${company.phone}`, '_self');
+                                  setHasCompletedActions(true);
+                                }}
+                              >
+                                <Phone className="w-4 h-4 mr-2" />
+                                Call
+                              </Button>
                             )}
                           </div>
                         </div>
-                      )}
-
-                      {/* Special Notes */}
-                      {company.notes && (
-                        <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-                          <p className="text-sm text-blue-800">
-                            <strong>Note:</strong> {company.notes}
-                          </p>
-                        </div>
-                      )}
-
-                      {/* Action Buttons */}
-                      <div className="flex gap-3 pt-2">
-                        <Button 
-                          onClick={() => handleCompanyClick(company, "Get Quote")}
-                          className="flex-1"
-                          variant={quotesRequested.has(company.provider) ? "secondary" : "default"}
-                        >
-                          <ExternalLink className="w-4 h-4 mr-2" />
-                          {quotesRequested.has(company.provider) ? "Quote Requested" : "Get Quote"}
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          onClick={() => handleCompanyClick(company, "Visit Website")}
-                        >
-                          <Globe className="w-4 h-4 mr-2" />
-                          Website
-                        </Button>
-                        {company.phone && (
-                          <Button 
-                            variant="outline" 
-                            onClick={() => {
-                              window.open(`tel:${company.phone}`, '_self');
-                              setHasCompletedActions(true);
-                            }}
-                          >
-                            <Phone className="w-4 h-4 mr-2" />
-                            Call
-                          </Button>
-                        )}
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
-        )}
+
+        {/* Right Section - Sidebar (1/3 width) */}
+          <div className="w-80 space-y-6">
+            {/* Estimate Questionnaire */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <div className="w-1 h-6 bg-purple-500 rounded-full"></div>
+                  Estimate Questionnaire
+                </CardTitle>
+                <CardDescription>
+                  Prepare for accurate moving quotes by having these details ready when you call.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white">
+                  <Package className="w-4 h-4 mr-2" />
+                  Fill Out Questionnaire
+                </Button>
+                
+                <div className="mt-4 p-3 bg-purple-50 rounded-lg border border-purple-200">
+                  <p className="text-sm font-medium text-purple-900 mb-2">Key Information Needed:</p>
+                  <ul className="text-xs text-purple-800 space-y-1">
+                    <li>• Current and destination addresses</li>
+                    <li>• Moving date and home size</li>
+                    <li>• Number of floors at each location</li>
+                    <li>• Major items and inventory list</li>
+                    <li>• Packing service preferences</li>
+                    <li>• Special items and storage needs</li>
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Pro Tips */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <div className="w-1 h-6 bg-blue-500 rounded-full"></div>
+                  Pro Tips
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                  <h4 className="text-sm font-semibold text-blue-900">Best Booking Time</h4>
+                  <p className="text-xs text-blue-800">Book 8+ weeks ahead for summer moves, 4+ weeks for off-season</p>
+                </div>
+                
+                <div className="p-3 bg-green-50 rounded-lg border border-green-200">
+                  <h4 className="text-sm font-semibold text-green-900">Save Money</h4>
+                  <p className="text-xs text-green-800">Move mid-month, mid-week, and avoid summer peak season</p>
+                </div>
+                
+                <div className="p-3 bg-red-50 rounded-lg border border-red-200">
+                  <h4 className="text-sm font-semibold text-red-900">Red Flags</h4>
+                  <p className="text-xs text-red-800">Avoid companies requiring large deposits or door-to-door sales</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Quick Checklist */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <div className="w-1 h-6 bg-green-500 rounded-full"></div>
+                  Quick Checklist
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  <label className="flex items-center space-x-2 text-sm">
+                    <input type="checkbox" className="rounded" />
+                    <span>Get 3+ written estimates</span>
+                  </label>
+                  <label className="flex items-center space-x-2 text-sm">
+                    <input type="checkbox" className="rounded" />
+                    <span>Check insurance coverage</span>
+                  </label>
+                  <label className="flex items-center space-x-2 text-sm">
+                    <input type="checkbox" className="rounded" />
+                    <span>Read reviews & references</span>
+                  </label>
+                  <label className="flex items-center space-x-2 text-sm">
+                    <input type="checkbox" className="rounded" />
+                    <span>Verify license & bonding</span>
+                  </label>
+                  <label className="flex items-center space-x-2 text-sm">
+                    <input type="checkbox" className="rounded" />
+                    <span>Understand pricing structure</span>
+                  </label>
+                  <label className="flex items-center space-x-2 text-sm">
+                    <input type="checkbox" className="rounded" />
+                    <span>Confirm moving date</span>
+                  </label>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Estimated Costs */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-lg flex items-center gap-2">
+                  <div className="w-1 h-6 bg-yellow-500 rounded-full"></div>
+                  Estimated Costs
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3 text-sm">
+                  <div className="flex justify-between">
+                    <span>Local Move (same city)</span>
+                    <span className="font-medium">$800-1,500</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Long Distance (interstate)</span>
+                    <span className="font-medium">$2,500-5,000</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Packing Services</span>
+                    <span className="font-medium">$500-1,200</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Storage (per month)</span>
+                    <span className="font-medium">$50-200</span>
+                  </div>
+                  <div className="border-t pt-2 mt-3">
+                    <div className="flex justify-between font-semibold text-green-700">
+                      <span>Total Range</span>
+                      <span>$1,350-6,700</span>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
 
         {/* Empty State */}
         {companies.length === 0 && !searchMutation.isPending && moveDetails.fromCity && moveDetails.toCity && (
