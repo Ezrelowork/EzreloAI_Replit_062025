@@ -212,7 +212,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
                     const taskLower = task.title.toLowerCase();
                     let targetRoute = '/dashboard';
                     
-                    if (taskLower.includes('utility') || taskLower.includes('electric') || taskLower.includes('internet')) {
+                    if (taskLower.includes('utility') || taskLower.includes('utilities') || taskLower.includes('electric') || taskLower.includes('internet') || taskLower.includes('gas') || taskLower.includes('water')) {
                       targetRoute = '/utilities';
                     } else if (taskLower.includes('pack') || taskLower.includes('checklist')) {
                       targetRoute = '/moving-checklist';
