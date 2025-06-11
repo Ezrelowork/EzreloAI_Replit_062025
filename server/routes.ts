@@ -1214,10 +1214,13 @@ Only include real providers that actually serve this location.`;
         return res.status(400).json({ error: "Address is required" });
       }
 
-      // Basic address normalization
+      // Smart address normalization
       let normalizedAddress = address
         .replace(/\s+/g, ' ')  // Replace multiple spaces with single space
-        .trim()
+        .trim();
+
+      // Standardize street suffixes
+      normalizedAddress = normalizedAddress
         .replace(/\b(Street|St\.?)\b/gi, 'St')
         .replace(/\b(Avenue|Ave\.?)\b/gi, 'Ave') 
         .replace(/\b(Road|Rd\.?)\b/gi, 'Rd')
@@ -1227,32 +1230,73 @@ Only include real providers that actually serve this location.`;
         .replace(/\b(Lane|Ln\.?)\b/gi, 'Ln')
         .replace(/\b(Court|Ct\.?)\b/gi, 'Ct');
 
-      // Add proper comma separation if missing
-      // Pattern: "1234 Street NameCity ST 12345" -> "1234 Street Name, City, ST 12345" 
-      const stateZipPattern = /\b([A-Z]{2})\s+(\d{5}(-\d{4})?)\s*$/;
-      const stateMatch = normalizedAddress.match(stateZipPattern);
+      // Handle addresses that are missing proper comma separation
+      // Check if address already has commas - if so, leave it mostly alone
+      if (normalizedAddress.includes(',')) {
+        // Address already has commas, just clean up extra spaces around commas
+        normalizedAddress = normalizedAddress.replace(/\s*,\s*/g, ', ');
+      } else {
+        // Address has no commas, try to add them intelligently
+        const stateZipPattern = /\b([A-Z]{2})\s+(\d{5}(-\d{4})?)\s*$/;
+        const stateMatch = normalizedAddress.match(stateZipPattern);
 
-      if (stateMatch) {
-        const beforeStateZip = normalizedAddress.substring(0, stateMatch.index).trim();
-        const state = stateMatch[1];
-        const zip = stateMatch[2];
+        if (stateMatch) {
+          const beforeStateZip = normalizedAddress.substring(0, stateMatch.index).trim();
+          const state = stateMatch[1];
+          const zip = stateMatch[2];
 
-        // Try to separate street address from city
-        const words = beforeStateZip.split(/\s+/);
-
-        if (words.length >= 3) {
-          // Look for likely city name (last word or two before state)
-          // Simple heuristic: if last word is capitalized and not a street suffix, it's likely a city
-          const lastWord = words[words.length - 1];
-          const streetSuffixes = ['St', 'Ave', 'Rd', 'Blvd', 'Trl', 'Dr', 'Ln', 'Ct', 'Way', 'Pl'];
-
-          if (!streetSuffixes.includes(lastWord) && /^[A-Z]/.test(lastWord)) {
-            // Last word is likely city
-            const streetAddress = words.slice(0, -1).join(' ');
-            const city = lastWord;
-            normalizedAddress = `${streetAddress}, ${city}, ${state} ${zip}`;
+          // Split the part before state/zip into words
+          const words = beforeStateZip.split(/\s+/);
+          
+          if (words.length >= 4) {
+            // Try to intelligently separate street address from city
+            // Look for patterns like "123 Main Street CityName" -> "123 Main Street, CityName"
+            
+            // Find the likely boundary between street and city
+            let streetEndIndex = -1;
+            const streetSuffixes = ['St', 'Ave', 'Rd', 'Blvd', 'Trl', 'Dr', 'Ln', 'Ct', 'Way', 'Pl', 'Pkwy', 'Cir'];
+            
+            // Look for street suffix to determine where street ends
+            for (let i = 1; i < words.length - 1; i++) {
+              if (streetSuffixes.includes(words[i])) {
+                streetEndIndex = i;
+                break;
+              }
+            }
+            
+            if (streetEndIndex > 0 && streetEndIndex < words.length - 1) {
+              // Found a street suffix, split there
+              const streetPart = words.slice(0, streetEndIndex + 1).join(' ');
+              const cityPart = words.slice(streetEndIndex + 1).join(' ');
+              normalizedAddress = `${streetPart}, ${cityPart}, ${state} ${zip}`;
+            } else {
+              // No clear street suffix found, assume last word(s) are city
+              // For cases like "3201 Stonecrop TrailArgyle" - need to handle concatenated city names
+              const lastWord = words[words.length - 1];
+              
+              // Check if last word might be a concatenated "StreetCity" pattern
+              if (lastWord.length > 8 && /^[A-Z][a-z]+[A-Z][a-z]+/.test(lastWord)) {
+                // Looks like concatenated street+city, try to split it
+                // This is a heuristic - look for capital letter transitions
+                const matches = lastWord.match(/^([A-Z][a-z]+)([A-Z][a-z]+.*)$/);
+                if (matches) {
+                  const streetEnd = matches[1];
+                  const cityStart = matches[2];
+                  const streetPart = words.slice(0, -1).concat(streetEnd).join(' ');
+                  normalizedAddress = `${streetPart}, ${cityStart}, ${state} ${zip}`;
+                } else {
+                  // Fallback: assume last word is city
+                  const streetPart = words.slice(0, -1).join(' ');
+                  normalizedAddress = `${streetPart}, ${lastWord}, ${state} ${zip}`;
+                }
+              } else {
+                // Regular case: assume last word is city
+                const streetPart = words.slice(0, -1).join(' ');
+                normalizedAddress = `${streetPart}, ${lastWord}, ${state} ${zip}`;
+              }
+            }
           } else {
-            // Keep original format but add minimal commas
+            // Short address, just add comma before state
             normalizedAddress = `${beforeStateZip}, ${state} ${zip}`;
           }
         }
