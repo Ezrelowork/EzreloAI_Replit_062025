@@ -367,24 +367,12 @@ export default function MovingCompanies() {
         </div>
 
         {/* Moving Type Tabs */}
-        <Tabs value={selectedTab} onValueChange={setSelectedTab} className="mb-8">
+        <Tabs value={selectedTab} onValueChange={setSelectedTab} className="mb-6">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="local">Local Movers</TabsTrigger>
             <TabsTrigger value="longDistance">Long Distance</TabsTrigger>
             <TabsTrigger value="specialty">Specialty</TabsTrigger>
           </TabsList>
-
-          <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <h3 className="font-semibold text-blue-900 mb-2">Tips for {currentType.title}</h3>
-            <ul className="space-y-1">
-              {currentType.tips.map((tip, index) => (
-                <li key={index} className="flex items-center gap-2 text-sm text-blue-800">
-                  <CheckCircle className="w-4 h-4 text-blue-600" />
-                  {tip}
-                </li>
-              ))}
-            </ul>
-          </div>
         </Tabs>
 
         {/* Main Content Layout */}
