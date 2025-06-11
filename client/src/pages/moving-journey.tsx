@@ -258,12 +258,20 @@ export default function MovingJourney() {
       {/* Header */}
       <div className="relative z-20 p-6 bg-white/80 backdrop-blur-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <Link href="/ai-assistant">
-            <Button variant="outline" size="sm" className="flex items-center gap-2 interactive-element">
-              <ArrowLeft className="w-4 h-4" />
-              Back to AI Assistant
-            </Button>
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link href="/ai-assistant">
+              <Button variant="outline" size="sm" className="flex items-center gap-2">
+                <ArrowLeft className="w-4 h-4" />
+                Back to AI Assistant
+              </Button>
+            </Link>
+            <Link href="/">
+              <Button variant="ghost" size="sm" className="flex items-center gap-2">
+                <Home className="w-4 h-4" />
+                Home
+              </Button>
+            </Link>
+          </div>
           <h1 className="text-3xl font-bold text-gray-900">Interactive Moving Journey</h1>
           <div className="w-32"></div>
         </div>

@@ -300,7 +300,7 @@ export default function Home() {
             </div>
             
             {/* Service Highlights */}
-            <div className="flex flex-wrap justify-center gap-6 text-primary">
+            <div className="flex flex-wrap justify-center gap-6 text-primary mb-8">
               <div className="flex items-center space-x-2">
                 <i className="fas fa-check-circle"></i>
                 <span className="font-medium">Utilities</span>
@@ -317,6 +317,17 @@ export default function Home() {
                 <i className="fas fa-check-circle"></i>
                 <span className="font-medium">Home Services</span>
               </div>
+            </div>
+
+            {/* AI Assistant CTA */}
+            <div className="mt-8">
+              <p className="text-lg text-gray-600 mb-4">Or get a personalized moving plan:</p>
+              <Link href="/ai-assistant">
+                <Button size="lg" variant="outline" className="bg-white border-2 border-primary text-primary hover:bg-primary hover:text-white transition-all duration-300">
+                  <i className="fas fa-brain mr-2"></i>
+                  Create AI Moving Journey
+                </Button>
+              </Link>
             </div>
           </div>
         </div>

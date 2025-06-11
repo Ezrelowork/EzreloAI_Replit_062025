@@ -196,13 +196,13 @@ export default function AIAssistant() {
               <Link href="/">
                 <Button variant="ghost" size="sm" className="gap-2">
                   <ArrowLeft className="w-4 h-4" />
-                  Back to Hub
+                  Back to Home
                 </Button>
               </Link>
               <span className="text-gray-300">|</span>
               <Link href="/moving-journey">
                 <Button variant="ghost" size="sm" className="gap-2 text-blue-600 hover:text-blue-700">
-                  Moving Journey
+                  View Journey
                 </Button>
               </Link>
               <div>
