@@ -26,6 +26,7 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import jsPDF from 'jspdf';
 
 interface MovingCompany {
   category: string;
@@ -77,6 +78,27 @@ export default function MovingCompanies() {
   const [hasCompletedActions, setHasCompletedActions] = useState(false);
   const [quotesRequested, setQuotesRequested] = useState<Set<string>>(new Set());
   const [showQuestionnaireForm, setShowQuestionnaireForm] = useState(false);
+  const [questionnaireData, setQuestionnaireData] = useState({
+    currentAddress: "",
+    destinationAddress: "",
+    movingDate: "",
+    homeSize: "",
+    squareFootage: "",
+    currentFloors: "",
+    destinationFloors: "",
+    livingRoomItems: {},
+    bedroomItems: {},
+    kitchenDiningItems: {},
+    largeAppliances: {},
+    specialtyItems: {},
+    smallBoxes: "",
+    mediumBoxes: "",
+    largeBoxes: "",
+    packingServices: "",
+    additionalServices: [],
+    specialInstructions: "",
+    email: ""
+  });
 
   // USPS Address verification function
   const verifyAddress = async (address: string) => {
@@ -289,6 +311,249 @@ export default function MovingCompanies() {
   const canCompleteTask = () => {
     return companies.length > 0 && (hasCompletedActions || quotesRequested.size > 0);
   };
+
+  // Generate PDF from questionnaire data
+  const generatePDF = () => {
+    const doc = new jsPDF();
+    
+    // Header
+    doc.setFontSize(20);
+    doc.setFont(undefined, 'bold');
+    doc.text('Moving Estimate Questionnaire', 20, 30);
+    
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'normal');
+    doc.text('Completed form for accurate moving quotes', 20, 40);
+    doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 20, 50);
+    
+    let yPosition = 70;
+    
+    // Basic Information
+    const basicInfo = [
+      { label: 'Current Address:', value: questionnaireData.currentAddress || `${moveDetails.fromAddress ? moveDetails.fromAddress + ', ' : ''}${moveDetails.fromCity}${moveDetails.fromState ? ', ' + moveDetails.fromState : ''}${moveDetails.fromZip ? ' ' + moveDetails.fromZip : ''}` },
+      { label: 'Destination Address:', value: questionnaireData.destinationAddress || `${moveDetails.toAddress ? moveDetails.toAddress + ', ' : ''}${moveDetails.toCity}${moveDetails.toState ? ', ' + moveDetails.toState : ''}${moveDetails.toZip ? ' ' + moveDetails.toZip : ''}` },
+      { label: 'Moving Date:', value: questionnaireData.movingDate || moveDetails.moveDate },
+      { label: 'Home Size:', value: questionnaireData.homeSize },
+      { label: 'Square Footage:', value: questionnaireData.squareFootage },
+      { label: 'Current Location Access:', value: questionnaireData.currentFloors },
+      { label: 'Destination Access:', value: questionnaireData.destinationFloors }
+    ];
+
+    basicInfo.forEach((item) => {
+      if (yPosition > 250) {
+        doc.addPage();
+        yPosition = 30;
+      }
+      
+      doc.setFontSize(12);
+      doc.setFont(undefined, 'bold');
+      doc.text(item.label, 20, yPosition);
+      yPosition += 8;
+      
+      doc.setFont(undefined, 'normal');
+      doc.setFontSize(11);
+      const value = item.value || 'Not specified';
+      const lines = doc.splitTextToSize(value, 170);
+      doc.text(lines, 25, yPosition);
+      yPosition += (lines.length * 6) + 10;
+    });
+
+    // Items sections
+    const itemSections = [
+      { title: 'Living Room Items', items: questionnaireData.livingRoomItems },
+      { title: 'Bedroom Items', items: questionnaireData.bedroomItems },
+      { title: 'Kitchen & Dining Items', items: questionnaireData.kitchenDiningItems },
+      { title: 'Large Appliances', items: questionnaireData.largeAppliances },
+      { title: 'Specialty Items', items: questionnaireData.specialtyItems }
+    ];
+
+    itemSections.forEach((section) => {
+      const itemList = Object.entries(section.items).filter(([_, qty]) => qty > 0);
+      if (itemList.length > 0) {
+        if (yPosition > 230) {
+          doc.addPage();
+          yPosition = 30;
+        }
+        
+        doc.setFontSize(12);
+        doc.setFont(undefined, 'bold');
+        doc.text(section.title + ':', 20, yPosition);
+        yPosition += 10;
+        
+        doc.setFont(undefined, 'normal');
+        doc.setFontSize(11);
+        itemList.forEach(([item, qty]) => {
+          doc.text(`• ${item}: ${qty}`, 25, yPosition);
+          yPosition += 6;
+        });
+        yPosition += 10;
+      }
+    });
+
+    // Boxes and Services
+    if (questionnaireData.smallBoxes || questionnaireData.mediumBoxes || questionnaireData.largeBoxes) {
+      if (yPosition > 230) {
+        doc.addPage();
+        yPosition = 30;
+      }
+      
+      doc.setFontSize(12);
+      doc.setFont(undefined, 'bold');
+      doc.text('Estimated Boxes:', 20, yPosition);
+      yPosition += 10;
+      
+      doc.setFont(undefined, 'normal');
+      doc.setFontSize(11);
+      if (questionnaireData.smallBoxes) doc.text(`• Small Boxes: ${questionnaireData.smallBoxes}`, 25, yPosition), yPosition += 6;
+      if (questionnaireData.mediumBoxes) doc.text(`• Medium Boxes: ${questionnaireData.mediumBoxes}`, 25, yPosition), yPosition += 6;
+      if (questionnaireData.largeBoxes) doc.text(`• Large Boxes: ${questionnaireData.largeBoxes}`, 25, yPosition), yPosition += 6;
+      yPosition += 10;
+    }
+
+    if (questionnaireData.packingServices) {
+      if (yPosition > 240) {
+        doc.addPage();
+        yPosition = 30;
+      }
+      
+      doc.setFontSize(12);
+      doc.setFont(undefined, 'bold');
+      doc.text('Packing Services:', 20, yPosition);
+      yPosition += 8;
+      
+      doc.setFont(undefined, 'normal');
+      doc.setFontSize(11);
+      doc.text(questionnaireData.packingServices, 25, yPosition);
+      yPosition += 15;
+    }
+
+    if (questionnaireData.additionalServices.length > 0) {
+      if (yPosition > 230) {
+        doc.addPage();
+        yPosition = 30;
+      }
+      
+      doc.setFontSize(12);
+      doc.setFont(undefined, 'bold');
+      doc.text('Additional Services:', 20, yPosition);
+      yPosition += 10;
+      
+      doc.setFont(undefined, 'normal');
+      doc.setFontSize(11);
+      questionnaireData.additionalServices.forEach(service => {
+        doc.text(`• ${service}`, 25, yPosition);
+        yPosition += 6;
+      });
+      yPosition += 10;
+    }
+
+    if (questionnaireData.specialInstructions) {
+      if (yPosition > 230) {
+        doc.addPage();
+        yPosition = 30;
+      }
+      
+      doc.setFontSize(12);
+      doc.setFont(undefined, 'bold');
+      doc.text('Special Instructions:', 20, yPosition);
+      yPosition += 8;
+      
+      doc.setFont(undefined, 'normal');
+      doc.setFontSize(11);
+      const lines = doc.splitTextToSize(questionnaireData.specialInstructions, 170);
+      doc.text(lines, 25, yPosition);
+    }
+
+    return doc;
+  };
+
+  const handleDownloadPDF = () => {
+    const doc = generatePDF();
+    doc.save('moving-estimate-questionnaire.pdf');
+    
+    toast({
+      title: "PDF Downloaded",
+      description: "Your moving questionnaire has been saved as a PDF.",
+    });
+  };
+
+  const handleSaveQuestionnaire = () => {
+    // Save to localStorage for now
+    const savedData = {
+      ...questionnaireData,
+      savedAt: new Date().toISOString(),
+      moveDetails: moveDetails
+    };
+    
+    localStorage.setItem('ezrelo_questionnaire', JSON.stringify(savedData));
+    
+    toast({
+      title: "Questionnaire Saved",
+      description: "Your questionnaire has been saved locally.",
+    });
+    
+    setHasCompletedActions(true);
+  };
+
+  const handleSendPDFToEmail = async () => {
+    if (!questionnaireData.email) {
+      toast({
+        title: "Email Required",
+        description: "Please enter your email address to receive the PDF.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const doc = generatePDF();
+      const pdfBlob = doc.output('blob');
+      
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64PDF = reader.result?.toString().split(',')[1];
+        
+        const response = await apiRequest("POST", "/api/send-questionnaire-email", {
+          email: questionnaireData.email,
+          questionnaire: questionnaireData,
+          pdfData: base64PDF,
+          moveDetails: moveDetails
+        });
+
+        if (response.ok) {
+          toast({
+            title: "PDF Sent Successfully",
+            description: `Your moving questionnaire has been sent to ${questionnaireData.email}`,
+          });
+          setHasCompletedActions(true);
+        } else {
+          throw new Error('Failed to send email');
+        }
+      };
+      
+      reader.readAsDataURL(pdfBlob);
+      
+    } catch (error) {
+      toast({
+        title: "Failed to Send PDF",
+        description: "Unable to send questionnaire. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Load saved questionnaire on component mount
+  useEffect(() => {
+    const savedQuestionnaire = localStorage.getItem('ezrelo_questionnaire');
+    if (savedQuestionnaire) {
+      try {
+        const parsedData = JSON.parse(savedQuestionnaire);
+        setQuestionnaireData(parsedData);
+      } catch (error) {
+        console.log('Failed to load saved questionnaire');
+      }
+    }
+  }, []);
 
   const movingTypes = {
     local: {
@@ -746,8 +1011,8 @@ export default function MovingCompanies() {
                       <Label htmlFor="currentAddress">Current Address</Label>
                       <Input
                         id="currentAddress"
-                        value={`${moveDetails.fromAddress ? moveDetails.fromAddress + ', ' : ''}${moveDetails.fromCity}${moveDetails.fromState ? ', ' + moveDetails.fromState : ''}${moveDetails.fromZip ? ' ' + moveDetails.fromZip : ''}`}
-                        readOnly
+                        value={questionnaireData.currentAddress || `${moveDetails.fromAddress ? moveDetails.fromAddress + ', ' : ''}${moveDetails.fromCity}${moveDetails.fromState ? ', ' + moveDetails.fromState : ''}${moveDetails.fromZip ? ' ' + moveDetails.fromZip : ''}`}
+                        onChange={(e) => setQuestionnaireData({...questionnaireData, currentAddress: e.target.value})}
                         className="bg-gray-50"
                       />
                     </div>
@@ -755,8 +1020,8 @@ export default function MovingCompanies() {
                       <Label htmlFor="destinationAddress">Destination Address</Label>
                       <Input
                         id="destinationAddress"
-                        value={`${moveDetails.toAddress ? moveDetails.toAddress + ', ' : ''}${moveDetails.toCity}${moveDetails.toState ? ', ' + moveDetails.toState : ''}${moveDetails.toZip ? ' ' + moveDetails.toZip : ''}`}
-                        readOnly
+                        value={questionnaireData.destinationAddress || `${moveDetails.toAddress ? moveDetails.toAddress + ', ' : ''}${moveDetails.toCity}${moveDetails.toState ? ', ' + moveDetails.toState : ''}${moveDetails.toZip ? ' ' + moveDetails.toZip : ''}`}
+                        onChange={(e) => setQuestionnaireData({...questionnaireData, destinationAddress: e.target.value})}
                         className="bg-gray-50"
                       />
                     </div>
@@ -765,7 +1030,11 @@ export default function MovingCompanies() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="homeSize">Home Size</Label>
-                      <select className="w-full p-2 border border-gray-300 rounded-md">
+                      <select 
+                        className="w-full p-2 border border-gray-300 rounded-md"
+                        value={questionnaireData.homeSize}
+                        onChange={(e) => setQuestionnaireData({...questionnaireData, homeSize: e.target.value})}
+                      >
                         <option value="">Select home size</option>
                         <option value="studio">Studio</option>
                         <option value="1br">1 Bedroom</option>
@@ -776,18 +1045,34 @@ export default function MovingCompanies() {
                     </div>
                     <div>
                       <Label htmlFor="squareFootage">Square Footage (if known)</Label>
-                      <Input id="squareFootage" type="number" placeholder="e.g., 1200" />
+                      <Input 
+                        id="squareFootage" 
+                        type="number" 
+                        placeholder="e.g., 1200"
+                        value={questionnaireData.squareFootage}
+                        onChange={(e) => setQuestionnaireData({...questionnaireData, squareFootage: e.target.value})}
+                      />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="currentFloors">Current Location Access</Label>
-                      <Input id="currentFloors" placeholder="e.g., 2nd floor, elevator available" />
+                      <Input 
+                        id="currentFloors" 
+                        placeholder="e.g., 2nd floor, elevator available"
+                        value={questionnaireData.currentFloors}
+                        onChange={(e) => setQuestionnaireData({...questionnaireData, currentFloors: e.target.value})}
+                      />
                     </div>
                     <div>
                       <Label htmlFor="destinationFloors">Destination Access</Label>
-                      <Input id="destinationFloors" placeholder="e.g., 1st floor, stairs only" />
+                      <Input 
+                        id="destinationFloors" 
+                        placeholder="e.g., 1st floor, stairs only"
+                        value={questionnaireData.destinationFloors}
+                        onChange={(e) => setQuestionnaireData({...questionnaireData, destinationFloors: e.target.value})}
+                      />
                     </div>
                   </div>
 
@@ -800,9 +1085,34 @@ export default function MovingCompanies() {
                         'Recliner/Armchair', 'Bookshelf', 'Piano', 'Area Rugs'
                       ].map((item) => (
                         <div key={item} className="flex items-center gap-2">
-                          <input type="checkbox" className="w-4 h-4 text-blue-600 rounded" />
+                          <input 
+                            type="checkbox" 
+                            className="w-4 h-4 text-blue-600 rounded"
+                            checked={questionnaireData.livingRoomItems[item] > 0}
+                            onChange={(e) => {
+                              const newItems = { ...questionnaireData.livingRoomItems };
+                              if (e.target.checked) {
+                                newItems[item] = 1;
+                              } else {
+                                newItems[item] = 0;
+                              }
+                              setQuestionnaireData({...questionnaireData, livingRoomItems: newItems});
+                            }}
+                          />
                           <span className="text-sm flex-1">{item}</span>
-                          <Input type="number" min="0" max="20" className="w-16 h-8" placeholder="#" />
+                          <Input 
+                            type="number" 
+                            min="0" 
+                            max="20" 
+                            className="w-16 h-8" 
+                            placeholder="#"
+                            value={questionnaireData.livingRoomItems[item] || ""}
+                            onChange={(e) => {
+                              const newItems = { ...questionnaireData.livingRoomItems };
+                              newItems[item] = parseInt(e.target.value) || 0;
+                              setQuestionnaireData({...questionnaireData, livingRoomItems: newItems});
+                            }}
+                          />
                         </div>
                       ))}
                     </div>
@@ -817,9 +1127,34 @@ export default function MovingCompanies() {
                         'Mattress & Box Spring', 'Wardrobe/Armoire', 'Mirror', 'Desk'
                       ].map((item) => (
                         <div key={item} className="flex items-center gap-2">
-                          <input type="checkbox" className="w-4 h-4 text-blue-600 rounded" />
+                          <input 
+                            type="checkbox" 
+                            className="w-4 h-4 text-blue-600 rounded"
+                            checked={questionnaireData.bedroomItems[item] > 0}
+                            onChange={(e) => {
+                              const newItems = { ...questionnaireData.bedroomItems };
+                              if (e.target.checked) {
+                                newItems[item] = 1;
+                              } else {
+                                newItems[item] = 0;
+                              }
+                              setQuestionnaireData({...questionnaireData, bedroomItems: newItems});
+                            }}
+                          />
                           <span className="text-sm flex-1">{item}</span>
-                          <Input type="number" min="0" max="20" className="w-16 h-8" placeholder="#" />
+                          <Input 
+                            type="number" 
+                            min="0" 
+                            max="20" 
+                            className="w-16 h-8" 
+                            placeholder="#"
+                            value={questionnaireData.bedroomItems[item] || ""}
+                            onChange={(e) => {
+                              const newItems = { ...questionnaireData.bedroomItems };
+                              newItems[item] = parseInt(e.target.value) || 0;
+                              setQuestionnaireData({...questionnaireData, bedroomItems: newItems});
+                            }}
+                          />
                         </div>
                       ))}
                     </div>
@@ -834,9 +1169,34 @@ export default function MovingCompanies() {
                         'Microwave', 'Small Appliances', 'Bar Stools', 'Kitchen Island'
                       ].map((item) => (
                         <div key={item} className="flex items-center gap-2">
-                          <input type="checkbox" className="w-4 h-4 text-blue-600 rounded" />
+                          <input 
+                            type="checkbox" 
+                            className="w-4 h-4 text-blue-600 rounded"
+                            checked={questionnaireData.kitchenDiningItems[item] > 0}
+                            onChange={(e) => {
+                              const newItems = { ...questionnaireData.kitchenDiningItems };
+                              if (e.target.checked) {
+                                newItems[item] = 1;
+                              } else {
+                                newItems[item] = 0;
+                              }
+                              setQuestionnaireData({...questionnaireData, kitchenDiningItems: newItems});
+                            }}
+                          />
                           <span className="text-sm flex-1">{item}</span>
-                          <Input type="number" min="0" max="20" className="w-16 h-8" placeholder="#" />
+                          <Input 
+                            type="number" 
+                            min="0" 
+                            max="20" 
+                            className="w-16 h-8" 
+                            placeholder="#"
+                            value={questionnaireData.kitchenDiningItems[item] || ""}
+                            onChange={(e) => {
+                              const newItems = { ...questionnaireData.kitchenDiningItems };
+                              newItems[item] = parseInt(e.target.value) || 0;
+                              setQuestionnaireData({...questionnaireData, kitchenDiningItems: newItems});
+                            }}
+                          />
                         </div>
                       ))}
                     </div>
@@ -851,9 +1211,34 @@ export default function MovingCompanies() {
                         'Wine Cooler', 'Hot Tub/Spa', 'Exercise Equipment', 'Pool Table'
                       ].map((item) => (
                         <div key={item} className="flex items-center gap-2">
-                          <input type="checkbox" className="w-4 h-4 text-blue-600 rounded" />
+                          <input 
+                            type="checkbox" 
+                            className="w-4 h-4 text-blue-600 rounded"
+                            checked={questionnaireData.largeAppliances[item] > 0}
+                            onChange={(e) => {
+                              const newItems = { ...questionnaireData.largeAppliances };
+                              if (e.target.checked) {
+                                newItems[item] = 1;
+                              } else {
+                                newItems[item] = 0;
+                              }
+                              setQuestionnaireData({...questionnaireData, largeAppliances: newItems});
+                            }}
+                          />
                           <span className="text-sm flex-1">{item}</span>
-                          <Input type="number" min="0" max="20" className="w-16 h-8" placeholder="#" />
+                          <Input 
+                            type="number" 
+                            min="0" 
+                            max="20" 
+                            className="w-16 h-8" 
+                            placeholder="#"
+                            value={questionnaireData.largeAppliances[item] || ""}
+                            onChange={(e) => {
+                              const newItems = { ...questionnaireData.largeAppliances };
+                              newItems[item] = parseInt(e.target.value) || 0;
+                              setQuestionnaireData({...questionnaireData, largeAppliances: newItems});
+                            }}
+                          />
                         </div>
                       ))}
                     </div>
@@ -868,9 +1253,34 @@ export default function MovingCompanies() {
                         'Musical Instruments', 'Outdoor Furniture', 'Grill/BBQ', 'Lawn Mower'
                       ].map((item) => (
                         <div key={item} className="flex items-center gap-2">
-                          <input type="checkbox" className="w-4 h-4 text-blue-600 rounded" />
+                          <input 
+                            type="checkbox" 
+                            className="w-4 h-4 text-blue-600 rounded"
+                            checked={questionnaireData.specialtyItems[item] > 0}
+                            onChange={(e) => {
+                              const newItems = { ...questionnaireData.specialtyItems };
+                              if (e.target.checked) {
+                                newItems[item] = 1;
+                              } else {
+                                newItems[item] = 0;
+                              }
+                              setQuestionnaireData({...questionnaireData, specialtyItems: newItems});
+                            }}
+                          />
                           <span className="text-sm flex-1">{item}</span>
-                          <Input type="number" min="0" max="20" className="w-16 h-8" placeholder="#" />
+                          <Input 
+                            type="number" 
+                            min="0" 
+                            max="20" 
+                            className="w-16 h-8" 
+                            placeholder="#"
+                            value={questionnaireData.specialtyItems[item] || ""}
+                            onChange={(e) => {
+                              const newItems = { ...questionnaireData.specialtyItems };
+                              newItems[item] = parseInt(e.target.value) || 0;
+                              setQuestionnaireData({...questionnaireData, specialtyItems: newItems});
+                            }}
+                          />
                         </div>
                       ))}
                     </div>
@@ -882,22 +1292,47 @@ export default function MovingCompanies() {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                       <div>
                         <Label htmlFor="smallBoxes" className="text-sm">Small Boxes (1.5 cu ft)</Label>
-                        <Input id="smallBoxes" type="number" min="0" placeholder="0" />
+                        <Input 
+                          id="smallBoxes" 
+                          type="number" 
+                          min="0" 
+                          placeholder="0"
+                          value={questionnaireData.smallBoxes}
+                          onChange={(e) => setQuestionnaireData({...questionnaireData, smallBoxes: e.target.value})}
+                        />
                       </div>
                       <div>
                         <Label htmlFor="mediumBoxes" className="text-sm">Medium Boxes (3.0 cu ft)</Label>
-                        <Input id="mediumBoxes" type="number" min="0" placeholder="0" />
+                        <Input 
+                          id="mediumBoxes" 
+                          type="number" 
+                          min="0" 
+                          placeholder="0"
+                          value={questionnaireData.mediumBoxes}
+                          onChange={(e) => setQuestionnaireData({...questionnaireData, mediumBoxes: e.target.value})}
+                        />
                       </div>
                       <div>
                         <Label htmlFor="largeBoxes" className="text-sm">Large Boxes (4.5 cu ft)</Label>
-                        <Input id="largeBoxes" type="number" min="0" placeholder="0" />
+                        <Input 
+                          id="largeBoxes" 
+                          type="number" 
+                          min="0" 
+                          placeholder="0"
+                          value={questionnaireData.largeBoxes}
+                          onChange={(e) => setQuestionnaireData({...questionnaireData, largeBoxes: e.target.value})}
+                        />
                       </div>
                     </div>
                   </div>
 
                   <div>
                     <Label htmlFor="packingServices">Packing Services Needed</Label>
-                    <select className="w-full p-2 border border-gray-300 rounded-md">
+                    <select 
+                      className="w-full p-2 border border-gray-300 rounded-md"
+                      value={questionnaireData.packingServices}
+                      onChange={(e) => setQuestionnaireData({...questionnaireData, packingServices: e.target.value})}
+                    >
                       <option value="">Select packing preference</option>
                       <option value="full">Full packing service</option>
                       <option value="partial">Partial packing (fragiles only)</option>
@@ -917,7 +1352,17 @@ export default function MovingCompanies() {
                         'Cleaning services'
                       ].map((service) => (
                         <label key={service} className="flex items-center space-x-2 text-sm">
-                          <input type="checkbox" className="w-4 h-4 text-blue-600 rounded" />
+                          <input 
+                            type="checkbox" 
+                            className="w-4 h-4 text-blue-600 rounded"
+                            checked={questionnaireData.additionalServices.includes(service)}
+                            onChange={(e) => {
+                              const newServices = e.target.checked 
+                                ? [...questionnaireData.additionalServices, service]
+                                : questionnaireData.additionalServices.filter(s => s !== service);
+                              setQuestionnaireData({...questionnaireData, additionalServices: newServices});
+                            }}
+                          />
                           <span>{service}</span>
                         </label>
                       ))}
@@ -930,28 +1375,58 @@ export default function MovingCompanies() {
                       id="specialInstructions" 
                       placeholder="Narrow doorways, stairs, parking restrictions, fragile items requiring special care, etc."
                       className="min-h-[80px]"
+                      value={questionnaireData.specialInstructions}
+                      onChange={(e) => setQuestionnaireData({...questionnaireData, specialInstructions: e.target.value})}
                     />
                   </div>
 
-                  <div className="flex gap-3 pt-4">
-                    <Button 
-                      type="button"
-                      onClick={() => {
-                        toast({
-                          title: "Questionnaire Saved",
-                          description: "Your information has been saved and can be shared with moving companies.",
-                        });
-                        setShowQuestionnaireForm(false);
-                      }}
-                      className="flex-1 bg-purple-600 hover:bg-purple-700"
-                    >
-                      Save Questionnaire
-                    </Button>
+                  <div>
+                    <Label htmlFor="email">Email Address (optional)</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={questionnaireData.email}
+                      onChange={(e) => setQuestionnaireData({...questionnaireData, email: e.target.value})}
+                      placeholder="Where to send your PDF questionnaire"
+                    />
+                  </div>
+
+                  <div className="flex flex-col gap-3 pt-4">
+                    <div className="flex gap-3">
+                      <Button 
+                        type="button"
+                        onClick={handleSaveQuestionnaire}
+                        className="flex-1 bg-green-600 hover:bg-green-700"
+                      >
+                        <Package className="w-4 h-4 mr-2" />
+                        Save Questionnaire
+                      </Button>
+                      <Button 
+                        type="button"
+                        onClick={handleDownloadPDF}
+                        className="flex-1 bg-blue-600 hover:bg-blue-700"
+                      >
+                        <ExternalLink className="w-4 h-4 mr-2" />
+                        Download PDF
+                      </Button>
+                    </div>
+                    
+                    {questionnaireData.email && (
+                      <Button 
+                        type="button"
+                        onClick={handleSendPDFToEmail}
+                        className="w-full bg-purple-600 hover:bg-purple-700"
+                      >
+                        <Package className="w-4 h-4 mr-2" />
+                        Send PDF to Email
+                      </Button>
+                    )}
+                    
                     <Button 
                       type="button"
                       variant="outline"
                       onClick={() => setShowQuestionnaireForm(false)}
-                      className="px-6"
+                      className="w-full"
                     >
                       Cancel
                     </Button>
