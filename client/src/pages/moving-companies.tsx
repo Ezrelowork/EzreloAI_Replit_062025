@@ -762,36 +762,137 @@ export default function MovingCompanies() {
                     </div>
                   </div>
 
-                  <div>
-                    <Label htmlFor="homeSize">Home Size</Label>
-                    <select className="w-full p-2 border border-gray-300 rounded-md">
-                      <option value="">Select home size</option>
-                      <option value="studio">Studio</option>
-                      <option value="1br">1 Bedroom</option>
-                      <option value="2br">2 Bedroom</option>
-                      <option value="3br">3 Bedroom</option>
-                      <option value="4br+">4+ Bedroom</option>
-                    </select>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="homeSize">Home Size</Label>
+                      <select className="w-full p-2 border border-gray-300 rounded-md">
+                        <option value="">Select home size</option>
+                        <option value="studio">Studio</option>
+                        <option value="1br">1 Bedroom</option>
+                        <option value="2br">2 Bedroom</option>
+                        <option value="3br">3 Bedroom</option>
+                        <option value="4br+">4+ Bedroom</option>
+                      </select>
+                    </div>
+                    <div>
+                      <Label htmlFor="squareFootage">Square Footage (if known)</Label>
+                      <Input id="squareFootage" type="number" placeholder="e.g., 1200" />
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="currentFloors">Floors at Current Location</Label>
-                      <Input id="currentFloors" type="number" min="1" max="10" placeholder="1" />
+                      <Label htmlFor="currentFloors">Current Location Access</Label>
+                      <Input id="currentFloors" placeholder="e.g., 2nd floor, elevator available" />
                     </div>
                     <div>
-                      <Label htmlFor="destinationFloors">Floors at Destination</Label>
-                      <Input id="destinationFloors" type="number" min="1" max="10" placeholder="1" />
+                      <Label htmlFor="destinationFloors">Destination Access</Label>
+                      <Input id="destinationFloors" placeholder="e.g., 1st floor, stairs only" />
                     </div>
                   </div>
 
-                  <div>
-                    <Label htmlFor="majorItems">Major Items Being Moved</Label>
-                    <Textarea 
-                      id="majorItems" 
-                      placeholder="List furniture, appliances, piano, safe, etc."
-                      className="min-h-[80px]"
-                    />
+                  {/* Living Room Items */}
+                  <div className="space-y-3">
+                    <Label className="text-base font-semibold">Living Room Items</Label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {[
+                        'Sofa/Couch', 'Coffee Table', 'End Tables', 'TV Stand/Entertainment Center',
+                        'Recliner/Armchair', 'Bookshelf', 'Piano', 'Area Rugs'
+                      ].map((item) => (
+                        <div key={item} className="flex items-center gap-2">
+                          <input type="checkbox" className="w-4 h-4 text-blue-600 rounded" />
+                          <span className="text-sm flex-1">{item}</span>
+                          <Input type="number" min="0" max="20" className="w-16 h-8" placeholder="#" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Bedroom Items */}
+                  <div className="space-y-3">
+                    <Label className="text-base font-semibold">Bedroom Items</Label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {[
+                        'Queen/King Bed', 'Twin/Full Bed', 'Dresser', 'Nightstand',
+                        'Mattress & Box Spring', 'Wardrobe/Armoire', 'Mirror', 'Desk'
+                      ].map((item) => (
+                        <div key={item} className="flex items-center gap-2">
+                          <input type="checkbox" className="w-4 h-4 text-blue-600 rounded" />
+                          <span className="text-sm flex-1">{item}</span>
+                          <Input type="number" min="0" max="20" className="w-16 h-8" placeholder="#" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Kitchen & Dining Items */}
+                  <div className="space-y-3">
+                    <Label className="text-base font-semibold">Kitchen & Dining Items</Label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {[
+                        'Refrigerator', 'Dining Table', 'Dining Chairs', 'China Cabinet',
+                        'Microwave', 'Small Appliances', 'Bar Stools', 'Kitchen Island'
+                      ].map((item) => (
+                        <div key={item} className="flex items-center gap-2">
+                          <input type="checkbox" className="w-4 h-4 text-blue-600 rounded" />
+                          <span className="text-sm flex-1">{item}</span>
+                          <Input type="number" min="0" max="20" className="w-16 h-8" placeholder="#" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Large Appliances */}
+                  <div className="space-y-3">
+                    <Label className="text-base font-semibold">Large Appliances</Label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {[
+                        'Washer', 'Dryer', 'Dishwasher', 'Freezer',
+                        'Wine Cooler', 'Hot Tub/Spa', 'Exercise Equipment', 'Pool Table'
+                      ].map((item) => (
+                        <div key={item} className="flex items-center gap-2">
+                          <input type="checkbox" className="w-4 h-4 text-blue-600 rounded" />
+                          <span className="text-sm flex-1">{item}</span>
+                          <Input type="number" min="0" max="20" className="w-16 h-8" placeholder="#" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Specialty Items */}
+                  <div className="space-y-3">
+                    <Label className="text-base font-semibold">Specialty Items</Label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {[
+                        'Safe', 'Artwork/Paintings', 'Antiques', 'Gun Safe',
+                        'Musical Instruments', 'Outdoor Furniture', 'Grill/BBQ', 'Lawn Mower'
+                      ].map((item) => (
+                        <div key={item} className="flex items-center gap-2">
+                          <input type="checkbox" className="w-4 h-4 text-blue-600 rounded" />
+                          <span className="text-sm flex-1">{item}</span>
+                          <Input type="number" min="0" max="20" className="w-16 h-8" placeholder="#" />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Boxes and Miscellaneous */}
+                  <div className="space-y-3">
+                    <Label className="text-base font-semibold">Estimated Boxes & Miscellaneous</Label>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <div>
+                        <Label htmlFor="smallBoxes" className="text-sm">Small Boxes (1.5 cu ft)</Label>
+                        <Input id="smallBoxes" type="number" min="0" placeholder="0" />
+                      </div>
+                      <div>
+                        <Label htmlFor="mediumBoxes" className="text-sm">Medium Boxes (3.0 cu ft)</Label>
+                        <Input id="mediumBoxes" type="number" min="0" placeholder="0" />
+                      </div>
+                      <div>
+                        <Label htmlFor="largeBoxes" className="text-sm">Large Boxes (4.5 cu ft)</Label>
+                        <Input id="largeBoxes" type="number" min="0" placeholder="0" />
+                      </div>
+                    </div>
                   </div>
 
                   <div>
@@ -799,27 +900,36 @@ export default function MovingCompanies() {
                     <select className="w-full p-2 border border-gray-300 rounded-md">
                       <option value="">Select packing preference</option>
                       <option value="full">Full packing service</option>
-                      <option value="partial">Partial packing</option>
-                      <option value="self">Self-pack</option>
-                      <option value="fragiles">Fragiles only</option>
+                      <option value="partial">Partial packing (fragiles only)</option>
+                      <option value="supplies">Packing supplies only</option>
+                      <option value="self">Self-pack everything</option>
                     </select>
                   </div>
 
                   <div>
-                    <Label htmlFor="specialItems">Fragile or Specialty Items</Label>
-                    <Textarea 
-                      id="specialItems" 
-                      placeholder="TVs, antiques, artwork, musical instruments, etc."
-                      className="min-h-[60px]"
-                    />
+                    <Label htmlFor="additionalServices">Additional Services</Label>
+                    <div className="space-y-2 mt-2">
+                      {[
+                        'Furniture disassembly/reassembly',
+                        'Appliance disconnection/reconnection',
+                        'Temporary storage',
+                        'Junk removal/disposal',
+                        'Cleaning services'
+                      ].map((service) => (
+                        <label key={service} className="flex items-center space-x-2 text-sm">
+                          <input type="checkbox" className="w-4 h-4 text-blue-600 rounded" />
+                          <span>{service}</span>
+                        </label>
+                      ))}
+                    </div>
                   </div>
 
                   <div>
-                    <Label htmlFor="storage">Storage Requirements</Label>
+                    <Label htmlFor="specialInstructions">Special Instructions or Concerns</Label>
                     <Textarea 
-                      id="storage" 
-                      placeholder="Temporary storage needed? Duration?"
-                      className="min-h-[60px]"
+                      id="specialInstructions" 
+                      placeholder="Narrow doorways, stairs, parking restrictions, fragile items requiring special care, etc."
+                      className="min-h-[80px]"
                     />
                   </div>
 
