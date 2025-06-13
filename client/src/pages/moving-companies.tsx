@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -122,7 +121,7 @@ export default function MovingCompanies() {
     // First, try to extract ZIP code
     const zipMatch = addressString.match(/\b(\d{5}(-\d{4})?)\b/);
     let addressWithoutZip = addressString;
-    
+
     if (zipMatch) {
       zip = zipMatch[1];
       addressWithoutZip = addressString.replace(zipMatch[0], '').trim();
@@ -131,7 +130,7 @@ export default function MovingCompanies() {
     // Check if address has commas (properly formatted)
     if (addressWithoutZip.includes(',')) {
       const parts = addressWithoutZip.split(',').map(part => part.trim());
-      
+
       if (parts.length >= 3) {
         // Format: "123 Main St, Dallas, TX"
         streetAddress = parts[0];
@@ -141,11 +140,11 @@ export default function MovingCompanies() {
         // Format: "123 Main St, Dallas TX" or "Dallas, TX"
         const secondPart = parts[1].trim();
         const stateMatch = secondPart.match(/\b([A-Z]{2})\b$/);
-        
+
         if (stateMatch) {
           state = stateMatch[1];
           const cityPart = secondPart.replace(stateMatch[0], '').trim();
-          
+
           if (cityPart) {
             // Has city in second part
             streetAddress = parts[0];
@@ -160,15 +159,15 @@ export default function MovingCompanies() {
       // No commas - need to parse differently (like "3201 Stonecrop TrailArgyle TX 76226")
       // Try to identify state pattern first
       const stateMatch = addressWithoutZip.match(/\b([A-Z]{2})\b/);
-      
+
       if (stateMatch) {
         state = stateMatch[1];
         const beforeState = addressWithoutZip.substring(0, stateMatch.index).trim();
         const afterState = addressWithoutZip.substring(stateMatch.index + 2).trim();
-        
+
         // Split beforeState to separate street address and city
         const words = beforeState.split(/\s+/);
-        
+
         if (words.length >= 3) {
           // Assume last word before state is city, rest is street address
           city = words[words.length - 1];
@@ -214,7 +213,7 @@ export default function MovingCompanies() {
         // Verify and parse from address
         const verifiedFromAddress = await verifyAddress(aiFromLocation);
         const fromParsed = parseAddress(verifiedFromAddress);
-        
+
         setMoveDetails(prev => ({
           ...prev,
           fromAddress: fromParsed.streetAddress,
@@ -228,7 +227,7 @@ export default function MovingCompanies() {
         // Verify and parse to address
         const verifiedToAddress = await verifyAddress(aiToLocation);
         const toParsed = parseAddress(verifiedToAddress);
-        
+
         setMoveDetails(prev => ({
           ...prev,
           toAddress: toParsed.streetAddress,
@@ -315,19 +314,19 @@ export default function MovingCompanies() {
   // Generate PDF from questionnaire data
   const generatePDF = () => {
     const doc = new jsPDF();
-    
+
     // Header
     doc.setFontSize(20);
     doc.setFont(undefined, 'bold');
     doc.text('Moving Estimate Questionnaire', 20, 30);
-    
+
     doc.setFontSize(12);
     doc.setFont(undefined, 'normal');
     doc.text('Completed form for accurate moving quotes', 20, 40);
     doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 20, 50);
-    
+
     let yPosition = 70;
-    
+
     // Basic Information
     const basicInfo = [
       { label: 'Current Address:', value: questionnaireData.currentAddress || `${moveDetails.fromAddress ? moveDetails.fromAddress + ', ' : ''}${moveDetails.fromCity}${moveDetails.fromState ? ', ' + moveDetails.fromState : ''}${moveDetails.fromZip ? ' ' + moveDetails.fromZip : ''}` },
@@ -344,12 +343,12 @@ export default function MovingCompanies() {
         doc.addPage();
         yPosition = 30;
       }
-      
+
       doc.setFontSize(12);
       doc.setFont(undefined, 'bold');
       doc.text(item.label, 20, yPosition);
       yPosition += 8;
-      
+
       doc.setFont(undefined, 'normal');
       doc.setFontSize(11);
       const value = item.value || 'Not specified';
@@ -374,12 +373,12 @@ export default function MovingCompanies() {
           doc.addPage();
           yPosition = 30;
         }
-        
+
         doc.setFontSize(12);
         doc.setFont(undefined, 'bold');
         doc.text(section.title + ':', 20, yPosition);
         yPosition += 10;
-        
+
         doc.setFont(undefined, 'normal');
         doc.setFontSize(11);
         itemList.forEach(([item, qty]) => {
@@ -396,12 +395,12 @@ export default function MovingCompanies() {
         doc.addPage();
         yPosition = 30;
       }
-      
+
       doc.setFontSize(12);
       doc.setFont(undefined, 'bold');
       doc.text('Estimated Boxes:', 20, yPosition);
       yPosition += 10;
-      
+
       doc.setFont(undefined, 'normal');
       doc.setFontSize(11);
       if (questionnaireData.smallBoxes) doc.text(`• Small Boxes: ${questionnaireData.smallBoxes}`, 25, yPosition), yPosition += 6;
@@ -415,12 +414,12 @@ export default function MovingCompanies() {
         doc.addPage();
         yPosition = 30;
       }
-      
+
       doc.setFontSize(12);
       doc.setFont(undefined, 'bold');
       doc.text('Packing Services:', 20, yPosition);
       yPosition += 8;
-      
+
       doc.setFont(undefined, 'normal');
       doc.setFontSize(11);
       doc.text(questionnaireData.packingServices, 25, yPosition);
@@ -432,12 +431,12 @@ export default function MovingCompanies() {
         doc.addPage();
         yPosition = 30;
       }
-      
+
       doc.setFontSize(12);
       doc.setFont(undefined, 'bold');
       doc.text('Additional Services:', 20, yPosition);
       yPosition += 10;
-      
+
       doc.setFont(undefined, 'normal');
       doc.setFontSize(11);
       questionnaireData.additionalServices.forEach(service => {
@@ -452,12 +451,12 @@ export default function MovingCompanies() {
         doc.addPage();
         yPosition = 30;
       }
-      
+
       doc.setFontSize(12);
       doc.setFont(undefined, 'bold');
       doc.text('Special Instructions:', 20, yPosition);
       yPosition += 8;
-      
+
       doc.setFont(undefined, 'normal');
       doc.setFontSize(11);
       const lines = doc.splitTextToSize(questionnaireData.specialInstructions, 170);
@@ -470,7 +469,7 @@ export default function MovingCompanies() {
   const handleDownloadPDF = () => {
     const doc = generatePDF();
     doc.save('moving-estimate-questionnaire.pdf');
-    
+
     toast({
       title: "PDF Downloaded",
       description: "Your moving questionnaire has been saved as a PDF.",
@@ -484,14 +483,14 @@ export default function MovingCompanies() {
       savedAt: new Date().toISOString(),
       moveDetails: moveDetails
     };
-    
+
     localStorage.setItem('ezrelo_questionnaire', JSON.stringify(savedData));
-    
+
     toast({
       title: "Questionnaire Saved",
       description: "Your questionnaire has been saved locally.",
     });
-    
+
     setHasCompletedActions(true);
   };
 
@@ -508,11 +507,11 @@ export default function MovingCompanies() {
     try {
       const doc = generatePDF();
       const pdfBlob = doc.output('blob');
-      
+
       const reader = new FileReader();
       reader.onloadend = async () => {
         const base64PDF = reader.result?.toString().split(',')[1];
-        
+
         const response = await apiRequest("POST", "/api/send-questionnaire-email", {
           email: questionnaireData.email,
           questionnaire: questionnaireData,
@@ -530,9 +529,9 @@ export default function MovingCompanies() {
           throw new Error('Failed to send email');
         }
       };
-      
+
       reader.readAsDataURL(pdfBlob);
-      
+
     } catch (error) {
       toast({
         title: "Failed to Send PDF",
@@ -797,7 +796,7 @@ export default function MovingCompanies() {
                   <Package className="w-4 h-4 mr-2" />
                   Fill Out Questionnaire
                 </Button>
-                
+
                 <div className="mt-4 p-3 bg-purple-50 rounded-lg border border-purple-200">
                   <p className="text-sm font-medium text-purple-900 mb-2">Key Information Needed:</p>
                   <ul className="text-xs text-purple-800 space-y-1">
@@ -825,12 +824,12 @@ export default function MovingCompanies() {
                   <h4 className="text-sm font-semibold text-blue-900">Best Booking Time</h4>
                   <p className="text-xs text-blue-800">Book 8+ weeks ahead for summer moves, 4+ weeks for off-season</p>
                 </div>
-                
+
                 <div className="p-3 bg-green-50 rounded-lg border border-green-200">
                   <h4 className="text-sm font-semibold text-green-900">Save Money</h4>
                   <p className="text-xs text-green-800">Move mid-month, mid-week, and avoid summer peak season</p>
                 </div>
-                
+
                 <div className="p-3 bg-red-50 rounded-lg border border-red-200">
                   <h4 className="text-sm font-semibold text-red-900">Red Flags</h4>
                   <p className="text-xs text-red-800">Avoid companies requiring large deposits or door-to-door sales</p>
@@ -956,7 +955,7 @@ export default function MovingCompanies() {
                       title: "Moving Company Task Completed!",
                       description: "Returning to your moving journey...",
                     });
-                    
+
                     setTimeout(() => {
                       window.location.href = '/moving-journey';
                     }, 1000);
@@ -972,7 +971,7 @@ export default function MovingCompanies() {
                 <CheckCircle className="w-4 h-4 mr-2" />
                 {canCompleteTask() ? "Complete Moving Company Search" : "Request Quotes First"}
               </Button>
-              
+
               <Button
                 onClick={() => window.location.href = '/moving-journey'}
                 variant="outline"
@@ -987,7 +986,7 @@ export default function MovingCompanies() {
         {/* Questionnaire Form Modal */}
         {showQuestionnaireForm && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg shadow-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="bg-white rounded-lg shadow-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
               <div className="p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-xl font-bold text-gray-900">Moving Estimate Questionnaire</h2>
@@ -1000,7 +999,7 @@ export default function MovingCompanies() {
                     </svg>
                   </button>
                 </div>
-                
+
                 <p className="text-gray-600 mb-6">
                   Fill out this questionnaire to get more accurate quotes from moving companies.
                 </p>
@@ -1108,7 +1107,7 @@ export default function MovingCompanies() {
                             type="number" 
                             min="0" 
                             max="20" 
-                            className="w-12 h-6 text-xs flex-shrink-0" 
+                            className="w-12 h-6 text-xs flex-shrink-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" 
                             placeholder="#"
                             value={questionnaireData.livingRoomItems[item] || ""}
                             onChange={(e) => {
@@ -1152,7 +1151,7 @@ export default function MovingCompanies() {
                             type="number" 
                             min="0" 
                             max="20" 
-                            className="w-12 h-6 text-xs flex-shrink-0" 
+                            className="w-12 h-6 text-xs flex-shrink-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" 
                             placeholder="#"
                             value={questionnaireData.bedroomItems[item] || ""}
                             onChange={(e) => {
@@ -1198,7 +1197,7 @@ export default function MovingCompanies() {
                             type="number" 
                             min="0" 
                             max="20" 
-                            className="w-12 h-6 text-xs flex-shrink-0" 
+                            className="w-12 h-6 text-xs flex-shrink-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" 
                             placeholder="#"
                             value={questionnaireData.kitchenDiningItems[item] || ""}
                             onChange={(e) => {
@@ -1243,7 +1242,7 @@ export default function MovingCompanies() {
                             type="number" 
                             min="0" 
                             max="20" 
-                            className="w-12 h-6 text-xs flex-shrink-0" 
+                            className="w-12 h-6 text-xs flex-shrink-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" 
                             placeholder="#"
                             value={questionnaireData.largeAppliances[item] || ""}
                             onChange={(e) => {
@@ -1287,7 +1286,7 @@ export default function MovingCompanies() {
                             type="number" 
                             min="0" 
                             max="20" 
-                            className="w-12 h-6 text-xs flex-shrink-0" 
+                            className="w-12 h-6 text-xs flex-shrink-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" 
                             placeholder="#"
                             value={questionnaireData.specialtyItems[item] || ""}
                             onChange={(e) => {
@@ -1332,7 +1331,7 @@ export default function MovingCompanies() {
                             type="number" 
                             min="0" 
                             max="20" 
-                            className="w-12 h-6 text-xs flex-shrink-0" 
+                            className="w-12 h-6 text-xs flex-shrink-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" 
                             placeholder="#"
                             value={questionnaireData.livingRoomItems[item] || ""}
                             onChange={(e) => {
@@ -1376,7 +1375,7 @@ export default function MovingCompanies() {
                             type="number" 
                             min="0" 
                             max="20" 
-                            className="w-12 h-6 text-xs flex-shrink-0" 
+                            className="w-12 h-6 text-xs flex-shrink-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" 
                             placeholder="#"
                             value={questionnaireData.bedroomItems[item] || ""}
                             onChange={(e) => {
@@ -1420,7 +1419,7 @@ export default function MovingCompanies() {
                             type="number" 
                             min="0" 
                             max="20" 
-                            className="w-12 h-6 text-xs flex-shrink-0" 
+                            className="w-12 h-6 text-xs flex-shrink-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" 
                             placeholder="#"
                             value={questionnaireData.kitchenDiningItems[item] || ""}
                             onChange={(e) => {
@@ -1466,7 +1465,7 @@ export default function MovingCompanies() {
                             type="number" 
                             min="0" 
                             max="20" 
-                            className="w-12 h-6 text-xs flex-shrink-0" 
+                            className="w-12 h-6 text-xs flex-shrink-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" 
                             placeholder="#"
                             value={questionnaireData.largeAppliances[item] || ""}
                             onChange={(e) => {
@@ -1511,7 +1510,7 @@ export default function MovingCompanies() {
                             type="number" 
                             min="0" 
                             max="20" 
-                            className="w-12 h-6 text-xs flex-shrink-0" 
+                            className="w-12 h-6 text-xs flex-shrink-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" 
                             placeholder="#"
                             value={questionnaireData.specialtyItems[item] || ""}
                             onChange={(e) => {
@@ -1649,7 +1648,7 @@ export default function MovingCompanies() {
                         Download PDF
                       </Button>
                     </div>
-                    
+
                     {questionnaireData.email && (
                       <Button 
                         type="button"
@@ -1660,7 +1659,7 @@ export default function MovingCompanies() {
                         Send PDF to Email
                       </Button>
                     )}
-                    
+
                     <Button 
                       type="button"
                       variant="outline"
