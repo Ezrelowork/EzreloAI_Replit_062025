@@ -581,12 +581,15 @@ export default function MovingCompanies() {
       <div 
         className="moving-background"
         style={{
-          backgroundImage: `url(${movingTruckBg})`
+          backgroundImage: `url(${movingTruckBg})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat'
         }}
       />
       
       {/* Content overlay for better readability */}
-      <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-white/10 pointer-events-none" style={{ zIndex: -1 }} />
+      <div className="absolute inset-0 bg-gradient-to-br from-white/30 via-white/10 to-white/20 pointer-events-none" style={{ zIndex: -5 }} />
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
