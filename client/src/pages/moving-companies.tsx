@@ -587,7 +587,7 @@ export default function MovingCompanies() {
           backgroundRepeat: 'no-repeat'
         }}
       />
-      
+
       {/* Content overlay for better readability */}
       <div className="absolute inset-0 bg-gradient-to-br from-white/30 via-white/10 to-white/20 pointer-events-none" style={{ zIndex: -5 }} />
       <div className="max-w-6xl mx-auto">
@@ -645,6 +645,7 @@ export default function MovingCompanies() {
                 )}
               </Button>
             </div>
+            </div>
           </div>
         </div>
 
@@ -653,7 +654,7 @@ export default function MovingCompanies() {
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="local">Local Movers</TabsTrigger>
             <TabsTrigger value="longDistance">Long Distance</TabsTrigger>
-            <TabsTrigger value="specialty">Specialty</TabsTrigger>
+            <TabsTrigger value="specialty">Specialty Movers</TabsTrigger>
           </TabsList>
         </Tabs>
 
@@ -861,7 +862,7 @@ export default function MovingCompanies() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  <label className="flex items-center space-x-2 text-sm">
+                  <label className="flex items-center space-x-2```text-sm">
                     <input type="checkbox" className="rounded" />
                     <span>Get 3+ written estimates</span>
                   </label>
