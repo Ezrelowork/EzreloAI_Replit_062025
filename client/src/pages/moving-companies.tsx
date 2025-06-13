@@ -1076,18 +1076,22 @@ export default function MovingCompanies() {
                     </div>
                   </div>
 
-                  {/* Living Room Items */}
+                  {/* Living Room / Family Room */}
                   <div className="space-y-3">
-                    <Label className="text-base font-semibold">Living Room Items</Label>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <Label className="text-base font-semibold flex items-center gap-2">
+                      🛋️ Living Room / Family Room
+                    </Label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                       {[
-                        'Sofa/Couch', 'Coffee Table', 'End Tables', 'TV Stand/Entertainment Center',
-                        'Recliner/Armchair', 'Bookshelf', 'Piano', 'Area Rugs'
+                        'Sofas / Couches (sectionals, recliners)', 'Loveseats', 'Armchairs / Accent chairs', 'Coffee tables',
+                        'End tables', 'Entertainment center / TV stand', 'Flat screen TVs (specify size)', 'Bookshelves',
+                        'Lamps (floor and table)', 'Area rugs', 'Ottomans', 'Wall décor / Mirrors',
+                        'Speakers / Sound systems', 'Houseplants'
                       ].map((item) => (
                         <div key={item} className="flex items-center gap-2">
                           <input 
                             type="checkbox" 
-                            className="w-4 h-4 text-blue-600 rounded"
+                            className="w-4 h-4 text-blue-600 rounded flex-shrink-0"
                             checked={questionnaireData.livingRoomItems[item] > 0}
                             onChange={(e) => {
                               const newItems = { ...questionnaireData.livingRoomItems };
@@ -1099,12 +1103,12 @@ export default function MovingCompanies() {
                               setQuestionnaireData({...questionnaireData, livingRoomItems: newItems});
                             }}
                           />
-                          <span className="text-sm flex-1">{item}</span>
+                          <span className="text-xs flex-1 leading-tight">{item}</span>
                           <Input 
                             type="number" 
                             min="0" 
                             max="20" 
-                            className="w-16 h-8" 
+                            className="w-12 h-6 text-xs flex-shrink-0" 
                             placeholder="#"
                             value={questionnaireData.livingRoomItems[item] || ""}
                             onChange={(e) => {
@@ -1118,18 +1122,20 @@ export default function MovingCompanies() {
                     </div>
                   </div>
 
-                  {/* Bedroom Items */}
+                  {/* Dining Room */}
                   <div className="space-y-3">
-                    <Label className="text-base font-semibold">Bedroom Items</Label>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <Label className="text-base font-semibold flex items-center gap-2">
+                      🍽️ Dining Room
+                    </Label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                       {[
-                        'Queen/King Bed', 'Twin/Full Bed', 'Dresser', 'Nightstand',
-                        'Mattress & Box Spring', 'Wardrobe/Armoire', 'Mirror', 'Desk'
+                        'Dining table (specify size)', 'Dining chairs', 'China cabinet / Hutch', 'Sideboard / Buffet',
+                        'Bar cart', 'Rugs', 'Artwork or framed items'
                       ].map((item) => (
                         <div key={item} className="flex items-center gap-2">
                           <input 
                             type="checkbox" 
-                            className="w-4 h-4 text-blue-600 rounded"
+                            className="w-4 h-4 text-blue-600 rounded flex-shrink-0"
                             checked={questionnaireData.bedroomItems[item] > 0}
                             onChange={(e) => {
                               const newItems = { ...questionnaireData.bedroomItems };
@@ -1141,12 +1147,12 @@ export default function MovingCompanies() {
                               setQuestionnaireData({...questionnaireData, bedroomItems: newItems});
                             }}
                           />
-                          <span className="text-sm flex-1">{item}</span>
+                          <span className="text-xs flex-1 leading-tight">{item}</span>
                           <Input 
                             type="number" 
                             min="0" 
                             max="20" 
-                            className="w-16 h-8" 
+                            className="w-12 h-6 text-xs flex-shrink-0" 
                             placeholder="#"
                             value={questionnaireData.bedroomItems[item] || ""}
                             onChange={(e) => {
@@ -1160,18 +1166,22 @@ export default function MovingCompanies() {
                     </div>
                   </div>
 
-                  {/* Kitchen & Dining Items */}
+                  {/* Bedrooms */}
                   <div className="space-y-3">
-                    <Label className="text-base font-semibold">Kitchen & Dining Items</Label>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <Label className="text-base font-semibold flex items-center gap-2">
+                      🛏️ Bedrooms
+                    </Label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                       {[
-                        'Refrigerator', 'Dining Table', 'Dining Chairs', 'China Cabinet',
-                        'Microwave', 'Small Appliances', 'Bar Stools', 'Kitchen Island'
+                        'Beds (twin, full, queen, king, bunk)', 'Mattresses & box springs', 'Headboard / Footboard', 'Nightstands',
+                        'Dressers', 'Armoires', 'Wardrobes / Closet organizers', 'Mirrors',
+                        'Desks or vanities', 'Bedding, linens', 'Lamps', 'Toys (for kids\' rooms)',
+                        'Cribs / Changing tables'
                       ].map((item) => (
                         <div key={item} className="flex items-center gap-2">
                           <input 
                             type="checkbox" 
-                            className="w-4 h-4 text-blue-600 rounded"
+                            className="w-4 h-4 text-blue-600 rounded flex-shrink-0"
                             checked={questionnaireData.kitchenDiningItems[item] > 0}
                             onChange={(e) => {
                               const newItems = { ...questionnaireData.kitchenDiningItems };
@@ -1183,12 +1193,12 @@ export default function MovingCompanies() {
                               setQuestionnaireData({...questionnaireData, kitchenDiningItems: newItems});
                             }}
                           />
-                          <span className="text-sm flex-1">{item}</span>
+                          <span className="text-xs flex-1 leading-tight">{item}</span>
                           <Input 
                             type="number" 
                             min="0" 
                             max="20" 
-                            className="w-16 h-8" 
+                            className="w-12 h-6 text-xs flex-shrink-0" 
                             placeholder="#"
                             value={questionnaireData.kitchenDiningItems[item] || ""}
                             onChange={(e) => {
@@ -1202,18 +1212,21 @@ export default function MovingCompanies() {
                     </div>
                   </div>
 
-                  {/* Large Appliances */}
+                  {/* Kitchen */}
                   <div className="space-y-3">
-                    <Label className="text-base font-semibold">Large Appliances</Label>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <Label className="text-base font-semibold flex items-center gap-2">
+                      🍳 Kitchen
+                    </Label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                       {[
-                        'Washer', 'Dryer', 'Dishwasher', 'Freezer',
-                        'Wine Cooler', 'Hot Tub/Spa', 'Exercise Equipment', 'Pool Table'
+                        'Table & chairs (if eat-in)', 'Bar stools', 'Microwave', 'Small appliances (toaster, blender, etc.)',
+                        'Dishes, glassware', 'Pots & pans', 'Utensils', 'Pantry items',
+                        'Trash can / Recycling bin'
                       ].map((item) => (
                         <div key={item} className="flex items-center gap-2">
                           <input 
                             type="checkbox" 
-                            className="w-4 h-4 text-blue-600 rounded"
+                            className="w-4 h-4 text-blue-600 rounded flex-shrink-0"
                             checked={questionnaireData.largeAppliances[item] > 0}
                             onChange={(e) => {
                               const newItems = { ...questionnaireData.largeAppliances };
@@ -1225,12 +1238,12 @@ export default function MovingCompanies() {
                               setQuestionnaireData({...questionnaireData, largeAppliances: newItems});
                             }}
                           />
-                          <span className="text-sm flex-1">{item}</span>
+                          <span className="text-xs flex-1 leading-tight">{item}</span>
                           <Input 
                             type="number" 
                             min="0" 
                             max="20" 
-                            className="w-16 h-8" 
+                            className="w-12 h-6 text-xs flex-shrink-0" 
                             placeholder="#"
                             value={questionnaireData.largeAppliances[item] || ""}
                             onChange={(e) => {
@@ -1244,18 +1257,20 @@ export default function MovingCompanies() {
                     </div>
                   </div>
 
-                  {/* Specialty Items */}
+                  {/* Laundry Room */}
                   <div className="space-y-3">
-                    <Label className="text-base font-semibold">Specialty Items</Label>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <Label className="text-base font-semibold flex items-center gap-2">
+                      🧺 Laundry Room
+                    </Label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                       {[
-                        'Safe', 'Artwork/Paintings', 'Antiques', 'Gun Safe',
-                        'Musical Instruments', 'Outdoor Furniture', 'Grill/BBQ', 'Lawn Mower'
+                        'Washer', 'Dryer', 'Ironing board', 'Laundry baskets',
+                        'Cleaning supplies', 'Vacuum cleaner', 'Mop / Broom / Swiffer'
                       ].map((item) => (
                         <div key={item} className="flex items-center gap-2">
                           <input 
                             type="checkbox" 
-                            className="w-4 h-4 text-blue-600 rounded"
+                            className="w-4 h-4 text-blue-600 rounded flex-shrink-0"
                             checked={questionnaireData.specialtyItems[item] > 0}
                             onChange={(e) => {
                               const newItems = { ...questionnaireData.specialtyItems };
@@ -1267,12 +1282,236 @@ export default function MovingCompanies() {
                               setQuestionnaireData({...questionnaireData, specialtyItems: newItems});
                             }}
                           />
-                          <span className="text-sm flex-1">{item}</span>
+                          <span className="text-xs flex-1 leading-tight">{item}</span>
                           <Input 
                             type="number" 
                             min="0" 
                             max="20" 
-                            className="w-16 h-8" 
+                            className="w-12 h-6 text-xs flex-shrink-0" 
+                            placeholder="#"
+                            value={questionnaireData.specialtyItems[item] || ""}
+                            onChange={(e) => {
+                              const newItems = { ...questionnaireData.specialtyItems };
+                              newItems[item] = parseInt(e.target.value) || 0;
+                              setQuestionnaireData({...questionnaireData, specialtyItems: newItems});
+                            }}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Office / Study */}
+                  <div className="space-y-3">
+                    <Label className="text-base font-semibold flex items-center gap-2">
+                      🧑‍💻 Office / Study
+                    </Label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      {[
+                        'Desk', 'Office chair', 'Filing cabinets', 'Bookcases',
+                        'Computers / Monitors', 'Printer / Scanner', 'Office supplies', 'Paper shredder',
+                        'Storage bins'
+                      ].map((item) => (
+                        <div key={item} className="flex items-center gap-2">
+                          <input 
+                            type="checkbox" 
+                            className="w-4 h-4 text-blue-600 rounded flex-shrink-0"
+                            checked={questionnaireData.livingRoomItems[item] > 0}
+                            onChange={(e) => {
+                              const newItems = { ...questionnaireData.livingRoomItems };
+                              if (e.target.checked) {
+                                newItems[item] = 1;
+                              } else {
+                                newItems[item] = 0;
+                              }
+                              setQuestionnaireData({...questionnaireData, livingRoomItems: newItems});
+                            }}
+                          />
+                          <span className="text-xs flex-1 leading-tight">{item}</span>
+                          <Input 
+                            type="number" 
+                            min="0" 
+                            max="20" 
+                            className="w-12 h-6 text-xs flex-shrink-0" 
+                            placeholder="#"
+                            value={questionnaireData.livingRoomItems[item] || ""}
+                            onChange={(e) => {
+                              const newItems = { ...questionnaireData.livingRoomItems };
+                              newItems[item] = parseInt(e.target.value) || 0;
+                              setQuestionnaireData({...questionnaireData, livingRoomItems: newItems});
+                            }}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Bathroom(s) */}
+                  <div className="space-y-3">
+                    <Label className="text-base font-semibold flex items-center gap-2">
+                      🛁 Bathroom(s)
+                    </Label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      {[
+                        'Cabinets / Shelving units', 'Towels', 'Toiletries', 'Laundry hampers',
+                        'Shower curtains / bath mats'
+                      ].map((item) => (
+                        <div key={item} className="flex items-center gap-2">
+                          <input 
+                            type="checkbox" 
+                            className="w-4 h-4 text-blue-600 rounded flex-shrink-0"
+                            checked={questionnaireData.bedroomItems[item] > 0}
+                            onChange={(e) => {
+                              const newItems = { ...questionnaireData.bedroomItems };
+                              if (e.target.checked) {
+                                newItems[item] = 1;
+                              } else {
+                                newItems[item] = 0;
+                              }
+                              setQuestionnaireData({...questionnaireData, bedroomItems: newItems});
+                            }}
+                          />
+                          <span className="text-xs flex-1 leading-tight">{item}</span>
+                          <Input 
+                            type="number" 
+                            min="0" 
+                            max="20" 
+                            className="w-12 h-6 text-xs flex-shrink-0" 
+                            placeholder="#"
+                            value={questionnaireData.bedroomItems[item] || ""}
+                            onChange={(e) => {
+                              const newItems = { ...questionnaireData.bedroomItems };
+                              newItems[item] = parseInt(e.target.value) || 0;
+                              setQuestionnaireData({...questionnaireData, bedroomItems: newItems});
+                            }}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Closets / Storage */}
+                  <div className="space-y-3">
+                    <Label className="text-base font-semibold flex items-center gap-2">
+                      🧳 Closets / Storage
+                    </Label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      {[
+                        'Clothing (hanging and boxed)', 'Shoes', 'Suitcases', 'Storage bins',
+                        'Seasonal items (holiday decor, luggage)', 'Safe / Lockbox'
+                      ].map((item) => (
+                        <div key={item} className="flex items-center gap-2">
+                          <input 
+                            type="checkbox" 
+                            className="w-4 h-4 text-blue-600 rounded flex-shrink-0"
+                            checked={questionnaireData.kitchenDiningItems[item] > 0}
+                            onChange={(e) => {
+                              const newItems = { ...questionnaireData.kitchenDiningItems };
+                              if (e.target.checked) {
+                                newItems[item] = 1;
+                              } else {
+                                newItems[item] = 0;
+                              }
+                              setQuestionnaireData({...questionnaireData, kitchenDiningItems: newItems});
+                            }}
+                          />
+                          <span className="text-xs flex-1 leading-tight">{item}</span>
+                          <Input 
+                            type="number" 
+                            min="0" 
+                            max="20" 
+                            className="w-12 h-6 text-xs flex-shrink-0" 
+                            placeholder="#"
+                            value={questionnaireData.kitchenDiningItems[item] || ""}
+                            onChange={(e) => {
+                              const newItems = { ...questionnaireData.kitchenDiningItems };
+                              newItems[item] = parseInt(e.target.value) || 0;
+                              setQuestionnaireData({...questionnaireData, kitchenDiningItems: newItems});
+                            }}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Garage / Shed / Outdoors */}
+                  <div className="space-y-3">
+                    <Label className="text-base font-semibold flex items-center gap-2">
+                      🏡 Garage / Shed / Outdoors
+                    </Label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      {[
+                        'Lawn mower', 'Snow blower', 'Garden tools', 'Power tools',
+                        'Tool chest', 'Bicycles / Scooters', 'Workbenches', 'Sports equipment',
+                        'Patio furniture', 'Grill / BBQ', 'Umbrellas / Outdoor heaters', 'Storage bins / Totes',
+                        'Ladders'
+                      ].map((item) => (
+                        <div key={item} className="flex items-center gap-2">
+                          <input 
+                            type="checkbox" 
+                            className="w-4 h-4 text-blue-600 rounded flex-shrink-0"
+                            checked={questionnaireData.largeAppliances[item] > 0}
+                            onChange={(e) => {
+                              const newItems = { ...questionnaireData.largeAppliances };
+                              if (e.target.checked) {
+                                newItems[item] = 1;
+                              } else {
+                                newItems[item] = 0;
+                              }
+                              setQuestionnaireData({...questionnaireData, largeAppliances: newItems});
+                            }}
+                          />
+                          <span className="text-xs flex-1 leading-tight">{item}</span>
+                          <Input 
+                            type="number" 
+                            min="0" 
+                            max="20" 
+                            className="w-12 h-6 text-xs flex-shrink-0" 
+                            placeholder="#"
+                            value={questionnaireData.largeAppliances[item] || ""}
+                            onChange={(e) => {
+                              const newItems = { ...questionnaireData.largeAppliances };
+                              newItems[item] = parseInt(e.target.value) || 0;
+                              setQuestionnaireData({...questionnaireData, largeAppliances: newItems});
+                            }}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Miscellaneous / Special Items */}
+                  <div className="space-y-3">
+                    <Label className="text-base font-semibold flex items-center gap-2">
+                      🎮 Miscellaneous / Special Items
+                    </Label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                      {[
+                        'Piano (upright, baby grand)', 'Safes', 'Gun cabinets', 'Artwork (high-value)',
+                        'Fish tanks', 'Large mirrors', 'Antiques / Fragile heirlooms', 'Exercise equipment (treadmill, bike, elliptical)',
+                        'Pool table', 'Hot tub (specialist move)', 'Generators', 'Boxes (how many and what size)'
+                      ].map((item) => (
+                        <div key={item} className="flex items-center gap-2">
+                          <input 
+                            type="checkbox" 
+                            className="w-4 h-4 text-blue-600 rounded flex-shrink-0"
+                            checked={questionnaireData.specialtyItems[item] > 0}
+                            onChange={(e) => {
+                              const newItems = { ...questionnaireData.specialtyItems };
+                              if (e.target.checked) {
+                                newItems[item] = 1;
+                              } else {
+                                newItems[item] = 0;
+                              }
+                              setQuestionnaireData({...questionnaireData, specialtyItems: newItems});
+                            }}
+                          />
+                          <span className="text-xs flex-1 leading-tight">{item}</span>
+                          <Input 
+                            type="number" 
+                            min="0" 
+                            max="20" 
+                            className="w-12 h-6 text-xs flex-shrink-0" 
                             placeholder="#"
                             value={questionnaireData.specialtyItems[item] || ""}
                             onChange={(e) => {
