@@ -26,6 +26,7 @@ import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import jsPDF from 'jspdf';
+import movingTruckBg from '@/assets/moving-truck-background.jpg';
 
 interface MovingCompany {
   category: string;
@@ -575,7 +576,17 @@ export default function MovingCompanies() {
   const currentType = movingTypes[selectedTab as keyof typeof movingTypes];
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-6">
+    <div className="min-h-screen relative py-8 px-6">
+      {/* Blurred Moving Background */}
+      <div 
+        className="moving-background"
+        style={{
+          backgroundImage: `url(${movingTruckBg})`
+        }}
+      />
+      
+      {/* Content overlay for better readability */}
+      <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-white/10 pointer-events-none" style={{ zIndex: -1 }} />
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
