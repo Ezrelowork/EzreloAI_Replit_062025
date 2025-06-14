@@ -23,14 +23,17 @@ function RoutePreserver() {
   const [location, setLocation] = useLocation();
 
   useEffect(() => {
-    // Save current route to sessionStorage
-    sessionStorage.setItem('currentRoute', location);
+    // Save current route to sessionStorage, but don't interfere with initial load
+    if (location !== '/') {
+      sessionStorage.setItem('currentRoute', location);
+    }
   }, [location]);
 
   useEffect(() => {
-    // On app initialization, restore route if it was saved
+    // On app initialization, restore route only if we're not already on a specific route
     const savedRoute = sessionStorage.getItem('currentRoute');
-    if (savedRoute && savedRoute !== location && savedRoute !== '/') {
+    if (savedRoute && savedRoute !== location && savedRoute !== '/' && location === '/') {
+      // Only restore if we're currently on the home page and have a saved non-home route
       setLocation(savedRoute);
     }
   }, []);
