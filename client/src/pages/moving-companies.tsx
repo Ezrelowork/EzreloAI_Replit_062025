@@ -579,7 +579,27 @@ export default function MovingCompanies() {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <Button variant="ghost" onClick={() => window.history.back()} className="mb-6">
+          <Button 
+            variant="ghost" 
+            onClick={() => {
+              const urlParams = new URLSearchParams(window.location.search);
+              const from = urlParams.get('from');
+              const to = urlParams.get('to');
+              const date = urlParams.get('date');
+              
+              let journeyUrl = '/moving-journey';
+              if (from || to || date) {
+                const params = new URLSearchParams();
+                if (from) params.set('from', from);
+                if (to) params.set('to', to);
+                if (date) params.set('date', date);
+                journeyUrl += `?${params.toString()}`;
+              }
+              
+              window.location.href = journeyUrl;
+            }}
+            className="mb-6"
+          >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Journey
           </Button>
