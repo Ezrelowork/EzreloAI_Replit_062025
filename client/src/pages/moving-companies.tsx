@@ -862,7 +862,7 @@ export default function MovingCompanies() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  <label className="flex items-center space-x-2```text-sm">
+                  <label className="flex items-center space-x-2 text-sm">
                     <input type="checkbox" className="rounded" />
                     <span>Get 3+ written estimates</span>
                   </label>
@@ -997,6 +997,8 @@ export default function MovingCompanies() {
             </div>
           </div>
         )}
+
+        </div>
 
         {/* Questionnaire Form Modal */}
         {showQuestionnaireForm && (
