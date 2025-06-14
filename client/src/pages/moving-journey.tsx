@@ -102,7 +102,7 @@ export default function MovingJourney() {
       week: "Week 4",
       category: "Healthcare",
       completed: false,
-      position: { x: "936px", y: "216px" }, // 78% of 1200px = 936px, 27% of 800px = 216px
+      position: { x: "936px", y: "236px" }, // 78% of 1200px = 936px, moved down 20px from 216px to 236px
       icon: Stethoscope
     },
     {
@@ -113,7 +113,7 @@ export default function MovingJourney() {
       week: "Week 5",
       category: "Family",
       completed: false,
-      position: { x: "600px", y: "144px" }, // 50% of 1200px = 600px, 18% of 800px = 144px
+      position: { x: "600px", y: "164px" }, // 50% of 1200px = 600px, moved down 20px from 144px to 164px
       icon: GraduationCap
     }
   ];
