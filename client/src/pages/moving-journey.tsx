@@ -207,7 +207,7 @@ export default function MovingJourney() {
       </div>
 
       {/* Main Journey Container */}
-      <div className="relative overflow-hidden bg-gray-100" style={{ height: 'calc(100vh - 200px)' }}>
+      <div className="relative overflow-auto bg-gray-100" style={{ height: 'calc(100vh - 200px)' }}>
         {/* Highway Background - Fixed 1200x800 */}
         <div 
           ref={containerRef}
@@ -218,9 +218,9 @@ export default function MovingJourney() {
             backgroundImage: `url(${highwayBackground})`,
             backgroundSize: '1200px 800px',
             backgroundPosition: '0 0',
-            left: '50%',
-            top: '50%',
-            transform: 'translate(-50%, -50%)'
+            left: '0',
+            top: '0',
+            transform: 'none'
           }}
         >
           {/* Dynamic Highway Signs */}
