@@ -55,21 +55,6 @@ export default function MovingJourney() {
   const [selectedTask, setSelectedTask] = useState<MovingTask | null>(null);
   const { isOpen: isTaskModalOpen, currentTask, openModal: openTaskModal, closeModal: closeTaskModal } = useTaskModal();
   const containerRef = useRef<HTMLDivElement>(null);
-  const [containerDimensions, setContainerDimensions] = useState({ width: 0, height: 0 });
-
-  // Responsive positioning system
-  useEffect(() => {
-    const updateDimensions = () => {
-      if (containerRef.current) {
-        const { width, height } = containerRef.current.getBoundingClientRect();
-        setContainerDimensions({ width, height });
-      }
-    };
-
-    updateDimensions();
-    window.addEventListener('resize', updateDimensions);
-    return () => window.removeEventListener('resize', updateDimensions);
-  }, []);
 
   // Layout is now locked and finalized
 
@@ -223,7 +208,7 @@ export default function MovingJourney() {
 
       {/* Main Journey Container */}
       <div className="relative overflow-hidden" style={{ height: 'calc(100vh - 200px)' }}>
-        {/* Highway Background with SVG Overlay */}
+        {/* Highway Background */}
         <div 
           ref={containerRef}
           className="relative w-full h-full bg-cover bg-center bg-no-repeat"
@@ -232,79 +217,38 @@ export default function MovingJourney() {
             backgroundSize: 'cover'
           }}
         >
-          {/* SVG Overlay for Road Anchoring */}
-          <svg 
-            className="absolute inset-0 w-full h-full pointer-events-none"
-            viewBox="0 0 100 100"
-            preserveAspectRatio="none"
-          >
-            <defs>
-              {/* Define road path that matches the background image */}
-              <path 
-                id="roadPath" 
-                d="M 10 85 Q 25 75 35 78 Q 50 82 65 75 Q 80 65 85 45 Q 88 25 82 15"
-                fill="none"
-                stroke="transparent"
-                strokeWidth="8"
-              />
-            </defs>
-            
-            {/* Visual road path for debugging (remove in production) */}
-            <use 
-              href="#roadPath" 
-              stroke="rgba(255,0,0,0.2)" 
-              strokeWidth="0.5"
-              fill="none"
-            />
-          </svg>
-
-          {/* Dynamic Highway Signs - Anchored to Road Features */}
-          {movingTasks.map((task, index) => {
-            // Calculate position along the road path
-            const roadProgress = (index + 1) / (movingTasks.length + 1);
-            const roadPositions = [
-              { x: "15%", y: "82%" }, // Start of road
-              { x: "30%", y: "76%" }, // First curve
-              { x: "50%", y: "78%" }, // Middle section
-              { x: "70%", y: "70%" }, // Second curve
-              { x: "82%", y: "25%" }  // End section
-            ];
-            
-            const position = roadPositions[index] || task.position;
-            
-            return (
-              <div
-                key={task.id}
-                className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer hover:scale-105 transition-all duration-300"
-                style={{
-                  left: position.x,
-                  top: position.y,
-                  zIndex: 10
-                }}
+          {/* Dynamic Highway Signs */}
+          {movingTasks.map((task) => (
+            <div
+              key={task.id}
+              className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer hover:scale-105 transition-all duration-300"
+              style={{
+                left: task.position.x,
+                top: task.position.y,
+              }}
+              onClick={() => handleSignClick(task)}
+            >
+              <DynamicHighwaySign
+                title={task.title}
+                description={task.description}
+                week={task.week}
+                priority={task.priority}
+                completed={completedTasks.has(task.id)}
                 onClick={() => handleSignClick(task)}
-              >
-                <DynamicHighwaySign
-                  title={task.title}
-                  description={task.description}
-                  week={task.week}
-                  priority={task.priority}
-                  completed={completedTasks.has(task.id)}
-                  onClick={() => handleSignClick(task)}
-                />
-              </div>
-            );
-          })}
+              />
+            </div>
+          ))}
 
-          {/* Journey Path Indicators - Anchored to Road */}
+          {/* Journey Path Indicators */}
           <div className="absolute inset-0 pointer-events-none">
-            {/* Start indicator - anchored to road start */}
-            <div className="absolute transform -translate-x-1/2 -translate-y-1/2 bg-green-500 text-white px-4 py-2 rounded-full font-semibold shadow-lg" style={{ left: "10%", top: "85%" }}>
+            {/* Start indicator */}
+            <div className="absolute transform -translate-x-1/2 -translate-y-1/2 bg-green-500 text-white px-4 py-2 rounded-full font-semibold shadow-lg" style={{ left: "8%", top: "80%" }}>
               <MapPin className="w-4 h-4 inline mr-2" />
               Start Here
             </div>
 
-            {/* End indicator - anchored to road end */}
-            <div className="absolute transform -translate-x-1/2 -translate-y-1/2 bg-blue-500 text-white px-4 py-2 rounded-full font-semibold shadow-lg" style={{ left: "82%", top: "15%" }}>
+            {/* End indicator */}
+            <div className="absolute transform -translate-x-1/2 -translate-y-1/2 bg-blue-500 text-white px-4 py-2 rounded-full font-semibold shadow-lg" style={{ left: "85%", top: "10%" }}>
               <Home className="w-4 h-4 inline mr-2" />
               New Home
             </div>
