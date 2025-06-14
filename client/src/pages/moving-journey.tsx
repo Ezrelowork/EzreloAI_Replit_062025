@@ -69,7 +69,7 @@ export default function MovingJourney() {
       week: "Week 1",
       category: "Core Moving",
       completed: false,
-      position: { x: "300px", y: "600px" }, // 25% of 1200px = 300px, 75% of 800px = 600px
+      position: { x: "250px", y: "600px" }, // Custom positioning: 250px from left, 600px from top
       icon: Truck
     },
     {
