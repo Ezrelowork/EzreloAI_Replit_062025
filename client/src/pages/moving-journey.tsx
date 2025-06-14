@@ -216,16 +216,15 @@ export default function MovingJourney() {
             backgroundSize: 'cover'
           }}
         >
-          {/* Dynamic Highway Signs */}
+          {/* Dynamic Highway Signs - positioned over background signs */}
           {movingTasks.map((task) => (
             <div
               key={task.id}
-              className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer hover:scale-105 transition-all duration-300"
+              className="absolute transform -translate-x-1/2 -translate-y-1/2"
               style={{
                 left: task.position.x,
                 top: task.position.y,
               }}
-              onClick={() => handleSignClick(task)}
             >
               <DynamicHighwaySign
                 title={task.title}
