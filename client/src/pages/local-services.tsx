@@ -34,6 +34,7 @@ export default function LocalServices() {
   const [showResults, setShowResults] = useState(false);
   const [searchLocation, setSearchLocation] = useState('');
   const [hasCompletedActions, setHasCompletedActions] = useState(false);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>(['schools', 'healthcare', 'pharmacies', 'veterinary', 'gyms', 'banks', 'storage']);
   const { toast } = useToast();
 
   // Load location from URL params or localStorage
@@ -63,11 +64,20 @@ export default function LocalServices() {
       return;
     }
 
+    if (selectedCategories.length === 0) {
+      toast({
+        title: "Select Services",
+        description: "Please select at least one service category to search for.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
     try {
       const response = await apiRequest('POST', '/api/search-local-services', {
         location: location.trim(),
-        serviceTypes: ['schools', 'healthcare', 'pharmacies', 'veterinary', 'gyms', 'banks', 'storage']
+        serviceTypes: selectedCategories
       });
       
       if (response.ok) {
@@ -130,6 +140,29 @@ export default function LocalServices() {
     if (cat.includes('storage') || cat.includes('warehouse')) return 'bg-indigo-100 text-indigo-800';
     if (cat.includes('grocery') || cat.includes('shopping')) return 'bg-pink-100 text-pink-800';
     return 'bg-gray-100 text-gray-800';
+  };
+
+  const toggleCategory = (categoryKey: string) => {
+    setSelectedCategories(prev => {
+      if (prev.includes(categoryKey)) {
+        return prev.filter(cat => cat !== categoryKey);
+      } else {
+        return [...prev, categoryKey];
+      }
+    });
+  };
+
+  const getServiceCategoryName = (key: string) => {
+    const categoryMap = {
+      'schools': 'Schools & Daycares',
+      'healthcare': 'Doctors & Clinics', 
+      'pharmacies': 'Pharmacies',
+      'veterinary': 'Veterinarians',
+      'gyms': 'Gyms & Fitness',
+      'banks': 'Banks & Credit Unions',
+      'storage': 'Storage Facilities'
+    };
+    return categoryMap[key as keyof typeof categoryMap] || key;
   };
 
   return (
@@ -210,16 +243,26 @@ export default function LocalServices() {
               </Button>
             </div>
             <div className="mt-4 text-sm text-gray-600">
-              <p className="font-medium mb-2">We'll find essential services including:</p>
+              <p className="font-medium mb-2">Select services to search for:</p>
               <div className="flex flex-wrap gap-2">
-                <Badge variant="outline">Schools & Daycares</Badge>
-                <Badge variant="outline">Doctors & Clinics</Badge>
-                <Badge variant="outline">Pharmacies</Badge>
-                <Badge variant="outline">Veterinarians</Badge>
-                <Badge variant="outline">Gyms & Fitness</Badge>
-                <Badge variant="outline">Banks & Credit Unions</Badge>
-                <Badge variant="outline">Storage Facilities</Badge>
+                {['schools', 'healthcare', 'pharmacies', 'veterinary', 'gyms', 'banks', 'storage'].map((categoryKey) => (
+                  <Badge
+                    key={categoryKey}
+                    variant={selectedCategories.includes(categoryKey) ? "default" : "outline"}
+                    className={`cursor-pointer transition-all hover:scale-105 ${
+                      selectedCategories.includes(categoryKey) 
+                        ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                        : 'hover:bg-blue-50 hover:border-blue-300'
+                    }`}
+                    onClick={() => toggleCategory(categoryKey)}
+                  >
+                    {getServiceCategoryName(categoryKey)}
+                  </Badge>
+                ))}
               </div>
+              <p className="text-xs mt-2 text-gray-500">
+                Click categories to toggle them on/off. Selected categories will be searched.
+              </p>
             </div>
           </CardContent>
         </Card>
