@@ -95,15 +95,15 @@ export default function MovingJourney() {
       icon: FileText
     },
     {
-      id: "healthcare-transfer",
-      title: "Transfer Healthcare",
-      description: "Find new doctors and transfer medical records",
+      id: "local-services",
+      title: "Local Services",
+      description: "Find schools, healthcare, gyms, and essential services",
       priority: "medium",
       week: "Week 4",
-      category: "Healthcare",
+      category: "Community",
       completed: false,
       position: { x: "936px", y: "236px" }, // 78% of 1200px = 936px, moved down 20px from 216px to 236px
-      icon: Stethoscope
+      icon: Building
     },
     {
       id: "school-enrollment",
@@ -131,6 +131,26 @@ export default function MovingJourney() {
   };
 
   const handleSignClick = (task: MovingTask) => {
+    // Navigate directly to local-services page for Local Services task
+    if (task.id === "local-services") {
+      const urlParams = new URLSearchParams(window.location.search);
+      const from = urlParams.get('from');
+      const to = urlParams.get('to');
+      const date = urlParams.get('date');
+      
+      let servicesUrl = '/local-services';
+      if (from || to || date) {
+        const params = new URLSearchParams();
+        if (from) params.set('from', from);
+        if (to) params.set('to', to);
+        if (date) params.set('date', date);
+        servicesUrl += `?${params.toString()}`;
+      }
+      
+      window.location.href = servicesUrl;
+      return;
+    }
+    
     setSelectedTask(task);
     openTaskModal(task);
   };
