@@ -944,41 +944,54 @@ export default function MovingCompanies() {
           </Card>
         )}
 
-        {/* Task Completion Bar */}
+        {/* Task Completion Section */}
         {companies.length > 0 && (
-          <div className="fixed bottom-6 left-1/2 transform -translate-x-1/2 z-50">
-            <div className="bg-white rounded-lg shadow-lg border p-4 flex items-center gap-4">
-              <Button
-                onClick={() => {
-                  if (canCompleteTask()) {
-                    toast({
-                      title: "Moving Company Task Completed!",
-                      description: "Returning to your moving journey...",
-                    });
+          <div className="mt-8 pt-6 border-t border-gray-200">
+            <div className="bg-white rounded-lg shadow-sm border p-6">
+              <div className="text-center mb-4">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Ready to Move Forward?
+                </h3>
+                <p className="text-gray-600 text-sm">
+                  {canCompleteTask() 
+                    ? "You've successfully researched moving companies and requested quotes." 
+                    : "Request quotes from at least one moving company to complete this task."}
+                </p>
+              </div>
+              
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <Button
+                  onClick={() => {
+                    if (canCompleteTask()) {
+                      toast({
+                        title: "Moving Company Task Completed!",
+                        description: "Returning to your moving journey...",
+                      });
 
-                    setTimeout(() => {
-                      window.location.href = '/moving-journey';
-                    }, 1000);
-                  }
-                }}
-                disabled={!canCompleteTask()}
-                className={`font-medium py-2 px-6 rounded-lg text-sm shadow-sm transition-all ${
-                  canCompleteTask() 
-                    ? "bg-green-600 hover:bg-green-700 text-white" 
-                    : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                }`}
-              >
-                <CheckCircle className="w-4 h-4 mr-2" />
-                {canCompleteTask() ? "Complete Moving Company Search" : "Request Quotes First"}
-              </Button>
+                      setTimeout(() => {
+                        window.location.href = '/moving-journey';
+                      }, 1000);
+                    }
+                  }}
+                  disabled={!canCompleteTask()}
+                  className={`font-medium py-3 px-8 rounded-lg text-sm shadow-sm transition-all w-full sm:w-auto ${
+                    canCompleteTask() 
+                      ? "bg-green-600 hover:bg-green-700 text-white" 
+                      : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  }`}
+                >
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                  {canCompleteTask() ? "Complete Moving Company Search" : "Request Quotes First"}
+                </Button>
 
-              <Button
-                onClick={() => window.location.href = '/moving-journey'}
-                variant="outline"
-                className="border-blue-300 text-blue-700 hover:bg-blue-50 font-medium py-2 px-4 rounded-lg text-sm shadow-sm transition-all"
-              >
-                Return to Journey
-              </Button>
+                <Button
+                  onClick={() => window.location.href = '/moving-journey'}
+                  variant="outline"
+                  className="border-blue-300 text-blue-700 hover:bg-blue-50 font-medium py-3 px-6 rounded-lg text-sm shadow-sm transition-all w-full sm:w-auto"
+                >
+                  Return to Journey
+                </Button>
+              </div>
             </div>
           </div>
         )}
