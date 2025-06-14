@@ -58,7 +58,7 @@ export default function MovingJourney() {
 
   // Layout is now locked and finalized
 
-  // Define moving tasks with highway positions - alternating above and below the road
+  // Define moving tasks with highway positions - Fixed pixel positions within 1200x800 container
   // LOCKED POSITIONS - DO NOT REVERT: User specified exact coordinates
   const movingTasks: MovingTask[] = [
     {
@@ -69,7 +69,7 @@ export default function MovingJourney() {
       week: "Week 1",
       category: "Core Moving",
       completed: false,
-      position: { x: "25%", y: "75%" }, // Above road, left side
+      position: { x: "300px", y: "600px" }, // 25% of 1200px = 300px, 75% of 800px = 600px
       icon: Truck
     },
     {
@@ -80,7 +80,7 @@ export default function MovingJourney() {
       week: "Week 2",
       category: "Essential Services",
       completed: false,
-      position: { x: "70%", y: "70%" }, // Below road, center-right
+      position: { x: "840px", y: "560px" }, // 70% of 1200px = 840px, 70% of 800px = 560px
       icon: Zap
     },
     {
@@ -91,7 +91,7 @@ export default function MovingJourney() {
       week: "Week 3",
       category: "Administrative",
       completed: false,
-      position: { x: "38%", y: "45%" }, // Above road, center
+      position: { x: "456px", y: "360px" }, // 38% of 1200px = 456px, 45% of 800px = 360px
       icon: FileText
     },
     {
@@ -102,7 +102,7 @@ export default function MovingJourney() {
       week: "Week 4",
       category: "Healthcare",
       completed: false,
-      position: { x: "78%", y: "27%" }, // Below road, right side
+      position: { x: "936px", y: "216px" }, // 78% of 1200px = 936px, 27% of 800px = 216px
       icon: Stethoscope
     },
     {
@@ -113,7 +113,7 @@ export default function MovingJourney() {
       week: "Week 5",
       category: "Family",
       completed: false,
-      position: { x: "50%", y: "18%" }, // Above road, right side
+      position: { x: "600px", y: "144px" }, // 50% of 1200px = 600px, 18% of 800px = 144px
       icon: GraduationCap
     }
   ];
@@ -245,13 +245,13 @@ export default function MovingJourney() {
           {/* Journey Path Indicators */}
           <div className="absolute inset-0 pointer-events-none">
             {/* Start indicator */}
-            <div className="absolute transform -translate-x-1/2 -translate-y-1/2 bg-green-500 text-white px-4 py-2 rounded-full font-semibold shadow-lg" style={{ left: "8%", top: "80%" }}>
+            <div className="absolute transform -translate-x-1/2 -translate-y-1/2 bg-green-500 text-white px-4 py-2 rounded-full font-semibold shadow-lg" style={{ left: "96px", top: "640px" }}>
               <MapPin className="w-4 h-4 inline mr-2" />
               Start Here
             </div>
 
             {/* End indicator */}
-            <div className="absolute transform -translate-x-1/2 -translate-y-1/2 bg-blue-500 text-white px-4 py-2 rounded-full font-semibold shadow-lg" style={{ left: "85%", top: "10%" }}>
+            <div className="absolute transform -translate-x-1/2 -translate-y-1/2 bg-blue-500 text-white px-4 py-2 rounded-full font-semibold shadow-lg" style={{ left: "1020px", top: "80px" }}>
               <Home className="w-4 h-4 inline mr-2" />
               New Home
             </div>
