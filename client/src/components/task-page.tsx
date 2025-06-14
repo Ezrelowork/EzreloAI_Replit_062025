@@ -1077,7 +1077,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                       variant="outline"
                       onClick={() => setShowQuestionnaireForm(false)}
                     >
-                      Cancel
+                      Close
                     </Button>
                   </div>
                   <Button
