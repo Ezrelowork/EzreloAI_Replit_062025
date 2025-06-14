@@ -221,13 +221,12 @@ export default function MovingJourney() {
           {movingTasks.map((task) => (
             <div
               key={task.id}
-              className="absolute"
+              className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer hover:scale-105 transition-all duration-300"
               style={{
-                left: `${parseFloat(task.position.x) * 19.2}px`,
-                top: `${parseFloat(task.position.y) * 10.8}px`,
-                transform: 'translate(-50%, -50%)',
-                position: 'absolute'
+                left: task.position.x,
+                top: task.position.y,
               }}
+              onClick={() => handleSignClick(task)}
             >
               <DynamicHighwaySign
                 title={task.title}
