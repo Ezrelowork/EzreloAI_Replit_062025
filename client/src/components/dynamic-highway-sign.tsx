@@ -39,8 +39,8 @@ export const DynamicHighwaySign: React.FC<DynamicSignProps> = ({
     <div 
       className={`relative ${className}`}
     >
-      {/* Custom blank sign background - 35% larger */}
-      <div className="relative w-64 h-44">
+      {/* Custom blank sign background - viewport-based scaling */}
+      <div className="relative w-[20vw] h-[14vw] min-w-[200px] min-h-[138px] max-w-[320px] max-h-[220px]">
         <img 
           src={blankSignPath} 
           alt="Highway Sign" 
