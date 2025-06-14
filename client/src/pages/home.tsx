@@ -73,7 +73,7 @@ export default function Home() {
                 <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-primary/10 text-primary mb-6">
                   <i className="fas fa-comments text-2xl"></i>
                 </div>
-                <div className="bg-primary text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold mb-4 mx-auto">1</div>
+              
                 <h3 className="text-xl font-semibold text-gray-900 mb-3">Tell Us About Your Move</h3>
                 <p className="text-gray-600">
                   Share your moving details with our AI assistant - where you're going, family size, timeline, and priorities.
@@ -86,7 +86,7 @@ export default function Home() {
                 <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-primary/10 text-primary mb-6">
                   <i className="fas fa-route text-2xl"></i>
                 </div>
-                <div className="bg-primary text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold mb-4 mx-auto">2</div>
+            
                 <h3 className="text-xl font-semibold text-gray-900 mb-3">Get Your Visual Journey</h3>
                 <p className="text-gray-600">
                   Watch as your personalized moving plan transforms into an interactive highway with clickable signs for each task.
@@ -99,7 +99,7 @@ export default function Home() {
                 <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-primary/10 text-primary mb-6">
                   <i className="fas fa-check-circle text-2xl"></i>
                 </div>
-                <div className="bg-primary text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold mb-4 mx-auto">3</div>
+              
                 <h3 className="text-xl font-semibold text-gray-900 mb-3">Complete Your Tasks</h3>
                 <p className="text-gray-600">
                   Click on highway signs to find services, compare providers, and track your progress as you prepare for your move.
