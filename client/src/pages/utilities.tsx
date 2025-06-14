@@ -266,7 +266,7 @@ export default function Utilities() {
         <div className="mb-8">
           <Button variant="ghost" onClick={() => window.history.back()} className="mb-4">
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Dashboard
+            Back to Journey
           </Button>
 
           <div className="text-center">
