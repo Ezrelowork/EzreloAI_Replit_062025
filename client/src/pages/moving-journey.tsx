@@ -7,7 +7,7 @@ import { TaskPage } from "@/components/task-page";
 import { DynamicHighwaySign } from "@/components/dynamic-highway-sign";
 
 // Import highway background
-import highwayBackground from "@assets/highway-background.png";
+import highwayBackground from "@assets/highway-background_1749934977058.png";
 
 import { 
   ArrowLeft,
@@ -58,8 +58,7 @@ export default function MovingJourney() {
 
   // Layout is now locked and finalized
 
-  // Define moving tasks with highway positions - alternating above and below the road
-  // LOCKED POSITIONS - DO NOT REVERT: User specified exact coordinates
+  // Define moving tasks positioned to align with highway signs in the background image
   const movingTasks: MovingTask[] = [
     {
       id: "moving-company",
@@ -69,7 +68,7 @@ export default function MovingJourney() {
       week: "Week 1",
       category: "Core Moving",
       completed: false,
-      position: { x: "25%", y: "75%" }, // Above road, left side
+      position: { x: "15%", y: "65%" }, // Aligns with left highway sign
       icon: Truck
     },
     {
@@ -80,7 +79,7 @@ export default function MovingJourney() {
       week: "Week 2",
       category: "Essential Services",
       completed: false,
-      position: { x: "70%", y: "70%" }, // Below road, center-right
+      position: { x: "35%", y: "35%" }, // Aligns with center-left highway sign
       icon: Zap
     },
     {
@@ -91,7 +90,7 @@ export default function MovingJourney() {
       week: "Week 3",
       category: "Administrative",
       completed: false,
-      position: { x: "38%", y: "45%" }, // Above road, center
+      position: { x: "52%", y: "80%" }, // Aligns with bottom center highway sign
       icon: FileText
     },
     {
@@ -102,7 +101,7 @@ export default function MovingJourney() {
       week: "Week 4",
       category: "Healthcare",
       completed: false,
-      position: { x: "78%", y: "27%" }, // Below road, right side
+      position: { x: "75%", y: "55%" }, // Aligns with right center highway sign
       icon: Stethoscope
     },
     {
@@ -113,7 +112,7 @@ export default function MovingJourney() {
       week: "Week 5",
       category: "Family",
       completed: false,
-      position: { x: "50%", y: "18%" }, // Above road, right side
+      position: { x: "85%", y: "25%" }, // Aligns with top right highway sign
       icon: GraduationCap
     }
   ];
