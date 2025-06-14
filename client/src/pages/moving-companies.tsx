@@ -1699,7 +1699,7 @@ export default function MovingCompanies() {
                       onClick={() => setShowQuestionnaireForm(false)}
                       className="w-full"
                     >
-                      Cancel
+                      Close
                     </Button>
                   </div>
                 </form>

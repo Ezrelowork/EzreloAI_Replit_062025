@@ -139,14 +139,14 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
   // Function to fetch Google reviews for a specific company
   const fetchGoogleReviews = async (companyName: string, location: string, countOnly = false) => {
     if (googleReviewsData[companyName] || loadingReviews[companyName]) return;
-    
+
     setLoadingReviews(prev => ({ ...prev, [companyName]: true }));
-    
+
     try {
       const endpoint = countOnly ? 
         `/api/google-reviews/${encodeURIComponent(companyName)}?location=${encodeURIComponent(location || '')}&countOnly=true` :
         `/api/google-reviews/${encodeURIComponent(companyName)}?location=${encodeURIComponent(location || '')}`;
-      
+
       const response = await apiRequest('GET', endpoint);
       const data = await response.json();
       setGoogleReviewsData(prev => ({ ...prev, [companyName]: data }));
@@ -256,7 +256,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
     const fromLocation = localStorage.getItem('aiFromLocation') || 'Austin, TX';
     const toLocation = localStorage.getItem('aiToLocation') || 'Dallas, TX';
     const moveDate = localStorage.getItem('aiMoveDate') || '2024-08-15';
-    
+
     setMoveData({
       from: fromLocation,
       to: toLocation,
@@ -297,7 +297,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
       // Parse from and to locations
       const [fromCity, fromState] = moveData.from.split(', ');
       const [toCity, toState] = moveData.to.split(', ');
-      
+
       const response = await apiRequest("POST", "/api/moving-companies", {
         fromCity,
         fromState,
@@ -337,7 +337,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
       setUtilities(services);
       setSearchType('utilities');
       setShowResults(true);
-      
+
       // Cache the results for future visits
       localStorage.setItem(`utilities_${moveData.to}`, JSON.stringify(services));
     },
@@ -365,7 +365,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
       setHousingServices(services);
       setSearchType('housing');
       setShowResults(true);
-      
+
       // Cache the results for future visits
       localStorage.setItem(`housing_${moveData.to}`, JSON.stringify(services));
     },
@@ -386,7 +386,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
         action: action,
         userAddress: moveData.from
       });
-      
+
       if (action === 'website_visit') {
         window.open(company.website, '_blank');
         setHasCompletedActions(true); // Mark progress for website visits
@@ -418,7 +418,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
           projectId: movingProject.id,
           moverData: company
         });
-        
+
         // Mark that user has completed meaningful actions
         setHasCompletedActions(true);
       }
@@ -433,28 +433,28 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
 
   const generateMovingQuestionnairePDF = () => {
     const doc = new jsPDF();
-    
+
     // Header
     doc.setFontSize(20);
     doc.setFont(undefined, 'bold');
     doc.text('Moving Estimate Questionnaire', 20, 30);
-    
+
     doc.setFontSize(12);
     doc.setFont(undefined, 'normal');
     doc.text('Complete this form to get accurate moving quotes from professionals', 20, 40);
-    
+
     let yPosition = 60;
-    
+
     // Pre-filled information from moveData
     if (moveData.from || moveData.to || moveData.date) {
       doc.setFontSize(14);
       doc.setFont(undefined, 'bold');
       doc.text('Your Moving Details:', 20, yPosition);
       yPosition += 15;
-      
+
       doc.setFontSize(12);
       doc.setFont(undefined, 'normal');
-      
+
       if (moveData.from) {
         doc.text(`Current Location: ${moveData.from}`, 25, yPosition);
         yPosition += 10;
@@ -468,7 +468,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
         yPosition += 15;
       }
     }
-    
+
     // Questions section
     const questions = [
       { q: '1. Current Address:', detail: 'Include full address with unit/apartment number' },
@@ -483,29 +483,29 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
       { q: '10. Storage Requirements:', detail: 'Temporary storage needed? Duration: ___' },
       { q: '11. Parking & Access:', detail: 'Truck access, elevators, stairs, permits needed?' }
     ];
-    
+
     doc.setFontSize(14);
     doc.setFont(undefined, 'bold');
     doc.text('Questions for Moving Companies:', 20, yPosition);
     yPosition += 15;
-    
+
     questions.forEach((item) => {
       // Check if we need a new page
       if (yPosition > 250) {
         doc.addPage();
         yPosition = 30;
       }
-      
+
       doc.setFontSize(12);
       doc.setFont(undefined, 'bold');
       doc.text(item.q, 20, yPosition);
       yPosition += 8;
-      
+
       doc.setFont(undefined, 'normal');
       doc.setFontSize(10);
       doc.text(item.detail, 25, yPosition);
       yPosition += 15;
-      
+
       // Add lines for writing
       doc.setDrawColor(200, 200, 200);
       for (let i = 0; i < 3; i++) {
@@ -513,28 +513,28 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
       }
       yPosition += 20;
     });
-    
+
     // Add new page for additional notes
     doc.addPage();
     doc.setFontSize(14);
     doc.setFont(undefined, 'bold');
     doc.text('Additional Notes & Special Requirements:', 20, 30);
-    
+
     // Add lines for notes
     doc.setDrawColor(200, 200, 200);
     for (let i = 0; i < 20; i++) {
       doc.line(20, 50 + (i * 10), 190, 50 + (i * 10));
     }
-    
+
     // Footer
     yPosition = 270;
     doc.setFontSize(10);
     doc.setFont(undefined, 'italic');
     doc.text('Tip: Having this information ready will help you get more accurate quotes faster!', 20, yPosition);
-    
+
     // Save the PDF
     doc.save('moving-estimate-questionnaire.pdf');
-    
+
     toast({
       title: "PDF Downloaded",
       description: "Your moving questionnaire has been saved as a PDF.",
@@ -543,19 +543,19 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
 
   const generateFilledPDF = () => {
     const doc = new jsPDF();
-    
+
     // Header
     doc.setFontSize(20);
     doc.setFont(undefined, 'bold');
     doc.text('Moving Estimate Questionnaire', 20, 30);
-    
+
     doc.setFontSize(12);
     doc.setFont(undefined, 'normal');
     doc.text('Completed form for accurate moving quotes', 20, 40);
     doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 20, 50);
-    
+
     let yPosition = 70;
-    
+
     // User's answers
     const responses = [
       { label: 'Current Address:', value: questionnaireData.currentAddress || moveData.from },
@@ -579,12 +579,12 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
         doc.addPage();
         yPosition = 30;
       }
-      
+
       doc.setFontSize(12);
       doc.setFont(undefined, 'bold');
       doc.text(item.label, 20, yPosition);
       yPosition += 8;
-      
+
       doc.setFont(undefined, 'normal');
       doc.setFontSize(11);
       const value = item.value || 'Not specified';
@@ -610,12 +610,12 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
       // Generate PDF with filled data
       const doc = generateFilledPDF();
       const pdfBlob = doc.output('blob');
-      
+
       // Convert to base64 for sending
       const reader = new FileReader();
       reader.onloadend = async () => {
         const base64PDF = reader.result?.toString().split(',')[1];
-        
+
         // Send email with PDF attachment
         const response = await apiRequest("POST", "/api/send-questionnaire-email", {
           email: questionnaireData.email,
@@ -626,7 +626,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
 
         if (response.ok) {
           console.log('PDF sent successfully, now saving questionnaire...');
-          
+
           // Create or get moving project and save questionnaire
           let projectToUse = movingProject;
           if (!projectToUse?.id) {
@@ -648,7 +648,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
               console.error('Failed to create project:', projectResponse.status);
             }
           }
-          
+
           if (projectToUse?.id) {
             console.log('Archiving questionnaire for project:', projectToUse.id);
             try {
@@ -659,7 +659,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                 type: "email_pdf"
               });
               console.log('Archive response:', archiveResponse.status);
-              
+
               if (archiveResponse.ok) {
                 console.log('Questionnaire archived successfully');
                 // Refresh current questionnaire
@@ -673,21 +673,21 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
           } else {
             console.error('No project available to save questionnaire');
           }
-          
+
           toast({
             title: "PDF Sent Successfully",
             description: `Your moving questionnaire has been sent to ${questionnaireData.email}`,
           });
-          
+
           // Close form but keep data
           setShowQuestionnaireForm(false);
           // Don't reset the data - it's now saved in the project
           setHasCompletedActions(true); // Mark progress for questionnaire completion
         }
       };
-      
+
       reader.readAsDataURL(pdfBlob);
-      
+
     } catch (error) {
       toast({
         title: "Failed to Send PDF",
@@ -708,7 +708,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
     }
 
     setIsSharing(true);
-    
+
     try {
       // Generate professional mover outreach
       const response = await apiRequest("POST", "/api/share-with-movers", {
@@ -723,7 +723,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
           title: "AI Outreach Complete!",
           description: "Your move details have been sent to our top recommended movers. Expect quotes within 24 hours.",
         });
-        
+
         // Create or get moving project and save questionnaire
         let projectToUse = movingProject;
         if (!projectToUse?.id) {
@@ -741,14 +741,14 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
             setMovingProject(projectToUse);
           }
         }
-        
+
         if (projectToUse?.id) {
           await apiRequest("POST", "/api/archive-questionnaire", {
             projectId: projectToUse.id,
             questionnaire: questionnaireData,
             type: "ai_outreach"
           });
-          
+
           await apiRequest("POST", "/api/communication", {
             projectId: projectToUse.id,
             communicationType: "ai_outreach",
@@ -756,11 +756,11 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
             notes: `Ezrelo AI automatically shared comprehensive move details with ${movingCompanies.slice(0, 3).length} premium movers. Includes detailed inventory, preferences, and timeline.`,
             contactPerson: "Ezrelo AI Assistant"
           });
-          
+
           // Refresh current questionnaire
           refreshCurrentQuestionnaire();
         }
-        
+
         setShowQuestionnaireForm(false);
         // Don't reset data - it's saved in the project
       }
@@ -826,7 +826,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                   </svg>
                 </button>
               </div>
-              
+
               {/* Progress Bar */}
               <div className="mb-6">
                 <div className="flex justify-between text-sm text-gray-600 mb-2">
@@ -856,8 +856,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                     <Label htmlFor="destinationAddress">Destination Address</Label>
                     <Input
                       id="destinationAddress"
-                      value={questionnaireData.destinationAddress || moveData.to}
-                      onChange={(e) => setQuestionnaireData({...questionnaireData, destinationAddress: e.target.value})}
+                      value={questionnaireData.destinationAddress || moveData.to}                      onChange={(e) => setQuestionnaireData({...questionnaireData, destinationAddress: e.target.value})}
                       placeholder="Full address with unit number"
                     />
                   </div>
@@ -1156,7 +1155,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                 </div>
               </div>
             </div>
-            
+
             {/* Right Section - Progress (1/3 width) */}
             <div className="w-1/3">
               <h3 className="text-sm font-bold text-gray-900 mb-3 text-right">Progress</h3>
@@ -1169,19 +1168,19 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                     {selectedMover ? '75' : currentQuestionnaire ? '50' : '25'}%
                   </span>
                 </div>
-                
+
                 {/* Progress Bar with Milestone Markers */}
                 <div className="relative">
                   <div className="w-full bg-gray-200 rounded-full h-3 relative">
                     {/* Progress Fill */}
                     <div className="bg-blue-600 h-3 rounded-full transition-all duration-500" style={{ width: `${selectedMover ? '75' : currentQuestionnaire ? '50' : '25'}%` }}></div>
-                    
+
                     {/* Milestone Markers - Quarters */}
                     <div className="absolute top-0 left-1/4 w-0.5 h-3 bg-gray-400 transform -translate-x-0.5"></div>
                     <div className="absolute top-0 left-2/4 w-0.5 h-3 bg-gray-400 transform -translate-x-0.5"></div>
                     <div className="absolute top-0 left-3/4 w-0.5 h-3 bg-gray-400 transform -translate-x-0.5"></div>
                   </div>
-                  
+
                   {/* Milestone Labels with Dynamic Status */}
                   <div className="grid grid-cols-4 gap-1 text-xs mt-1">
                     <span className={`flex items-center gap-1 text-left ${movingCompanies.length > 0 ? 'text-green-600 font-medium' : 'text-gray-500'}`}>
@@ -1227,7 +1226,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
             <ArrowLeft className="w-3 h-3 mr-1" />
             Journey
           </Button>
-          
+
           {/* Stage-based primary action button */}
           {!currentQuestionnaire ? (
             <Button
@@ -1257,9 +1256,9 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
               Book Mover
             </Button>
           )}
-          
 
-          
+
+
           <Button
             onClick={() => {
               if (canCompleteTask()) {
@@ -1267,14 +1266,14 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                   title: "Task Completed!",
                   description: "Returning to your moving journey...",
                 });
-                
+
                 // Zoom back to journey page with preserved context
                 setTimeout(() => {
                   const urlParams = new URLSearchParams(window.location.search);
                   const from = urlParams.get('from');
                   const to = urlParams.get('to');
                   const date = urlParams.get('date');
-                  
+
                   let journeyUrl = '/moving-journey';
                   if (from || to || date) {
                     const params = new URLSearchParams();
@@ -1283,7 +1282,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                     if (date) params.set('date', date);
                     journeyUrl += `?${params.toString()}`;
                   }
-                  
+
                   setLocation(journeyUrl);
                 }, 1000); // Brief delay for cinematic effect
               }
@@ -1298,7 +1297,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
             <CheckCircle className="w-3 h-3 mr-1" />
             {canCompleteTask() ? "Complete" : "Complete Task First"}
           </Button>
-          
+
 
         </div>
 
@@ -1325,7 +1324,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                       const isLoadingReviews = loadingReviews[company.provider];
                       const displayRating = googleData?.rating || company.rating;
                       const totalReviews = googleData?.totalReviews || 0;
-                      
+
                       const toggleReviews = () => {
                         if (!googleData && !isLoadingReviews) {
                           fetchGoogleReviews(company.provider, moveData.to);
@@ -1345,7 +1344,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                               <span className="text-base font-bold text-green-600">{company.estimatedCost}</span>
                             )}
                           </div>
-                          
+
                           <div className="flex items-center gap-3 mb-3">
                             <div className="flex items-center gap-1">
                               {[...Array(5)].map((_, i) => (
@@ -1392,7 +1391,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                                `Google Reviews (${totalReviews})` :
                                'Google Reviews'}
                             </button>
-                            
+
                             {isExpanded && googleData?.reviews && googleData.reviews.length > 0 && (
                               <div className="space-y-3 max-h-64 overflow-y-auto">
                                 {googleData.reviews.slice(0, 3).map((review: any, idx: number) => (
@@ -1471,7 +1470,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
           {/* Moving Organization Sidebar */}
           <div className="w-full max-w-[40%]">
             <div className="space-y-4">
-              
+
               {/* Moving Estimate Questionnaire */}
               <div className="bg-white rounded-lg shadow-md border p-4">
                 <h3 className="text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
@@ -1506,7 +1505,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                       Your Questionnaire
                     </button>
                   )}
-                  
+
                   {/* Questionnaire Summary */}
                   {currentQuestionnaire && (
                     <div className="p-3 bg-green-50 rounded border border-green-200">
@@ -1516,7 +1515,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                       </div>
                     </div>
                   )}
-                  
+
                   <div className="bg-purple-50 p-3 rounded">
                     <div className="text-sm font-medium text-purple-900 mb-2">Key Information Needed:</div>
                     <div className="text-xs text-purple-700 space-y-1">
