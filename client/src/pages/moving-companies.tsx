@@ -26,7 +26,6 @@ import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import jsPDF from 'jspdf';
-import movingTruckBg from '@/assets/moving-truck-background.jpg';
 
 interface MovingCompany {
   category: string;
@@ -576,20 +575,7 @@ export default function MovingCompanies() {
   const currentType = movingTypes[selectedTab as keyof typeof movingTypes];
 
   return (
-    <div className="min-h-screen relative py-8 px-6">
-      {/* Blurred Moving Background */}
-      <div 
-        className="moving-background"
-        style={{
-          backgroundImage: `url(${movingTruckBg})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat'
-        }}
-      />
-
-      {/* Content overlay for better readability */}
-      <div className="absolute inset-0 bg-gradient-to-br from-white/30 via-white/10 to-white/20 pointer-events-none" style={{ zIndex: -5 }} />
+    <div className="min-h-screen bg-gray-50 py-8 px-6">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-8">
@@ -645,7 +631,6 @@ export default function MovingCompanies() {
                 )}
               </Button>
             </div>
-            </div>
           </div>
         </div>
 
@@ -654,7 +639,7 @@ export default function MovingCompanies() {
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="local">Local Movers</TabsTrigger>
             <TabsTrigger value="longDistance">Long Distance</TabsTrigger>
-            <TabsTrigger value="specialty">Specialty Movers</TabsTrigger>
+            <TabsTrigger value="specialty">Specialty</TabsTrigger>
           </TabsList>
         </Tabs>
 
@@ -997,9 +982,8 @@ export default function MovingCompanies() {
             </div>
           </div>
         )}
-      </div>
 
-      {/* Questionnaire Form Modal */}
+        {/* Questionnaire Form Modal */}
         {showQuestionnaireForm && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-lg shadow-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
