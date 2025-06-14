@@ -98,23 +98,12 @@ export default function MovingJourney() {
       id: "local-services",
       title: "Local Services",
       description: "Find schools, healthcare, gyms, and essential services",
-      priority: "medium",
+      priority: "low",
       week: "Week 4",
       category: "Community",
       completed: false,
-      position: { x: "936px", y: "236px" }, // 78% of 1200px = 936px, moved down 20px from 216px to 236px
-      icon: Building
-    },
-    {
-      id: "school-enrollment",
-      title: "School Enrollment",
-      description: "Enroll children in new schools and transfer records",
-      priority: "low",
-      week: "Week 5",
-      category: "Family",
-      completed: false,
       position: { x: "600px", y: "164px" }, // 50% of 1200px = 600px, moved down 20px from 144px to 164px
-      icon: GraduationCap
+      icon: Building
     }
   ];
 
