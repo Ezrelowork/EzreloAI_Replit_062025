@@ -998,7 +998,7 @@ export default function MovingCompanies() {
           </div>
         )}
 
-        </div>
+      </div>
 
         {/* Questionnaire Form Modal */}
         {showQuestionnaireForm && (
