@@ -36,7 +36,7 @@ export default function LocalServices() {
   const [hasCompletedActions, setHasCompletedActions] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [resultsPerPage] = useState(5);
+  const [resultsPerPage] = useState(50); // Increased from 5
   const { toast } = useToast();
 
   // Load location from URL params or localStorage

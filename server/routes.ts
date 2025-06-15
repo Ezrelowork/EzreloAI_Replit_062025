@@ -780,7 +780,10 @@ Only include real companies that actually serve ${fromLocation} to ${toLocation}
         }
       });
 
-    } catch (error) {
+    } catch (error
+The code will be modified to remove result limits and increase Google Places API limits.
+```
+) {
       console.error("Moving companies search error:", error);
       res.status(500).json({ 
         error: "Search failed",
