@@ -777,8 +777,7 @@ Only include real companies that actually serve ${fromLocation} to ${toLocation}
             gemini: process.env.GOOGLE_AI_API_KEY ? "available" : "unavailable",
             googlePlaces: process.env.GOOGLE_API_KEY ? "available" : "unavailable"
           }
-        }.
-``````text
+        }
       });
 
     } catch (error) {
@@ -1602,8 +1601,10 @@ Only include real providers that actually serve this location.`;
       console.error("Error updating task:", error);
       res.status(500).json({ error: "Failed to update task" });
     }
-  });// Add communication log
-  app.post("/api/communication/:taskId", async (req, res) => {
+  });
+
+  // Add communication log
+  app.post("/api/communication", async (req, res) => {
     try {
       const communication = await storage.createCommunication(req.body);
       res.json({ communication });
