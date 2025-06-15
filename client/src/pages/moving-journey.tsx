@@ -69,7 +69,7 @@ export default function MovingJourney() {
       week: "Week 1",
       category: "Core Moving",
       completed: false,
-      position: { x: "245px", y: "570px" }, // Custom positioning: moved right 15px (230->245) and up 10px (580->570)
+      position: { x: "290px", y: "550px" }, // Custom positioning: moved right 15px (230->245) and up 10px (580->570)
       icon: Truck
     },
     {
@@ -80,7 +80,7 @@ export default function MovingJourney() {
       week: "Week 2",
       category: "Essential Services",
       completed: false,
-      position: { x: "865px", y: "530px" }, // moved right 25px (840->865) and up 30px (560->530)
+      position: { x: "865px", y: "470px" }, // moved right 25px (840->865) and up 30px (560->530)
       icon: Zap
     },
     {
@@ -102,7 +102,7 @@ export default function MovingJourney() {
       week: "Week 4",
       category: "Community",
       completed: false,
-      position: { x: "630px", y: "164px" }, // moved right 30px (600->630)
+      position: { x: "650px", y: "175px" }, // moved right 30px (600->630)
       icon: Building
     }
   ];
