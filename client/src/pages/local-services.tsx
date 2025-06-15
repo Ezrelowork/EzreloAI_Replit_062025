@@ -37,7 +37,7 @@ export default function LocalServices() {
   const [hasCompletedActions, setHasCompletedActions] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [resultsPerPage] = useState(50); // Increased from 5
+  const [resultsPerPage] = useState(10); // 10 results per page
   const [selectedProvider, setSelectedProvider] = useState<LocalService | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isMapModalOpen, setIsMapModalOpen] = useState(false);
@@ -91,8 +91,8 @@ export default function LocalServices() {
 
       if (response.ok) {
         const data = await response.json();
-        // Limit to maximum 15 results and reset to page 1
-        setProviders((data.services || []).slice(0, 15));
+        // Limit to maximum 20 results and reset to page 1
+        setProviders((data.services || []).slice(0, 20));
         setCurrentPage(1);
         setShowResults(true);
         setHasCompletedActions(true); // Mark search as completed action

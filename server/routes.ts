@@ -1291,7 +1291,7 @@ Only include real providers that actually serve this location.`;
           const statePattern = /\b[A-Z]{2}\b/;
           let streetEndIndex = words.length;
 
-          for (let i = 0; i < words.length; i++) {
+          for (let i = 0;i < words.length; i++) {
             if (statePattern.test(words[i])) {
               streetEndIndex = i;
               break;
@@ -1603,6 +1603,7 @@ Only include real providers that actually serve this location.`;
     }
   });
 
+  ```tool_code
   // Add communication log
   app.post("/api/communication", async (req, res) => {
     try {
@@ -2032,14 +2033,15 @@ Only include real providers that actually serve this location.`;
         const seenBankNames = new Set();
 
         // Search with each query to get both nationwide and local options
-        for (const searchQuery of searchQueries) {
+        
+        for (const query of searchQueries) {
           try {
-            console.log(`Searching for: ${searchQuery}`);
-            const places = await searchGooglePlaces(searchQuery);
-            console.log(`Found ${places?.length || 0} places for query: ${searchQuery}`);
+            console.log(`Searching for: ${query}`);
+            const places = await searchGooglePlaces(query);
+            console.log(`Found ${places?.length || 0} places for query: ${query}`);
 
             if (places && places.length > 0) {
-              for (const place of places.slice(0, 20)) {
+              for (const place of places.slice(0, 25)) {
                 // Skip duplicates by place_id
                 if (seenPlaces.has(place.place_id)) {
                   continue;
