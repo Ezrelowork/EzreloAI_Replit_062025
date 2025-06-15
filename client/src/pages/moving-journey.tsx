@@ -3,7 +3,7 @@ import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { TaskModal, useTaskModal } from "@/components/task-modal";
-import { TaskPage } from "@/components/task-page";
+import { AllTasksPage } from "@/components/all-tasks-page";
 import { DynamicHighwaySign } from "@/components/dynamic-highway-sign";
 
 // Import highway background
@@ -129,20 +129,8 @@ export default function MovingJourney() {
   const progressPercentage = (completedCount / totalTasks) * 100;
 
   if (showTaskPage) {
-    // Create a default task for the task page view
-    const defaultTask = {
-      id: "all-tasks",
-      title: "All Moving Tasks",
-      description: "View and manage all your moving tasks in one place",
-      priority: "medium" as const,
-      week: "Ongoing",
-      category: "Task Management"
-    };
-    
     return (
-      <TaskPage 
-        task={defaultTask}
-        onComplete={() => setShowTaskPage(false)}
+      <AllTasksPage 
         onBack={() => setShowTaskPage(false)} 
       />
     );
