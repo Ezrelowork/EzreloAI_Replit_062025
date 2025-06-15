@@ -375,13 +375,15 @@ export default function AIAssistant() {
                   View Journey
                 </Button>
               </Link>
-              <div>
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+                  <svg width="20" height="20" fill="white" viewBox="0 0 24 24">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                  </svg>
+                </div>
                 <h1 className="text-2xl font-bold text-gray-900">
-                  AI Relocation Assistant
+                  AI Relocation Concierge: Get your personalized strategy and action plan
                 </h1>
-                <p className="text-sm text-gray-600">
-                  Create your personalized moving plan
-                </p>
               </div>
             </div>
           </div>
