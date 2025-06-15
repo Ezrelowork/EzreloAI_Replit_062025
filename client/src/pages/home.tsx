@@ -10,44 +10,52 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-center items-center py-4">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center">
+              <div className="w-12 h-12 bg-gradient-to-br from-green-600 to-emerald-700 rounded-xl flex items-center justify-center">
                 <svg width="28" height="28" fill="white" viewBox="0 0 24 24">
                   <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
                 </svg>
               </div>
-              <span className="text-3xl font-bold text-primary">Ezrelo</span>
+              <span className="text-3xl font-bold text-green-600">Ezrelo</span>
             </div>
           </div>
         </div>
       </header>
 
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-primary/5 via-white to-primary/10 py-16 md:py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="bg-gradient-to-br from-green-50 via-emerald-50 to-green-100 py-16 md:py-24 relative overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-20">
+          <svg className="w-full h-full" viewBox="0 0 800 600" fill="none">
+            <path d="M0 400 Q200 350 400 380 Q600 410 800 360 L800 600 L0 600 Z" fill="#10b981" opacity="0.3"/>
+            <path d="M0 450 Q300 400 500 430 Q700 460 800 420 L800 600 L0 600 Z" fill="#059669" opacity="0.2"/>
+          </svg>
+        </div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="text-center">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
-              Relocate <span className="text-primary">Intelligently</span>
+              Relocate <span className="text-green-600">Intelligently</span>
             </h1>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-12">
+            <p className="text-xl text-gray-700 max-w-3xl mx-auto mb-12">
               Enter your new address and let Ezrelo find and set up all the essential services you need for a seamless move.
             </p>
 
             {/* Service Highlights */}
-            <div className="flex flex-wrap justify-center gap-6 text-primary">
-              <div className="flex items-center space-x-2">
-                <i className="fas fa-check-circle"></i>
+            <div className="flex flex-wrap justify-center gap-6 text-green-600">
+              <div className="flex items-center space-x-2 bg-white/60 px-4 py-2 rounded-full shadow-sm">
+                <i className="fas fa-check-circle text-green-500"></i>
                 <span className="font-medium">Utilities</span>
               </div>
-              <div className="flex items-center space-x-2">
-                <i className="fas fa-check-circle"></i>
+              <div className="flex items-center space-x-2 bg-white/60 px-4 py-2 rounded-full shadow-sm">
+                <i className="fas fa-check-circle text-green-500"></i>
                 <span className="font-medium">Internet</span>
               </div>
-              <div className="flex items-center space-x-2">
-                <i className="fas fa-check-circle"></i>
+              <div className="flex items-center space-x-2 bg-white/60 px-4 py-2 rounded-full shadow-sm">
+                <i className="fas fa-check-circle text-green-500"></i>
                 <span className="font-medium">Healthcare</span>
               </div>
-              <div className="flex items-center space-x-2">
-                <i className="fas fa-check-circle"></i>
+              <div className="flex items-center space-x-2 bg-white/60 px-4 py-2 rounded-full shadow-sm">
+                <i className="fas fa-check-circle text-green-500"></i>
                 <span className="font-medium">Home Services</span>
               </div>
             </div>
@@ -123,72 +131,72 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-0 shadow-md hover:shadow-lg transition-shadow duration-200">
+            <Card className="bg-gradient-to-br from-emerald-50 to-green-100 border-0 shadow-md hover:shadow-lg transition-shadow duration-200">
               <CardContent className="p-8">
-                <div className="text-blue-600 mb-4">
+                <div className="text-emerald-600 mb-4">
                   <i className="fas fa-brain text-4xl"></i>
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-3">AI-Powered Planning</h3>
-                <p className="text-gray-600 mb-4">Get a personalized moving timeline and task list based on your specific situation and needs.</p>
-                <ul className="text-gray-600 space-y-2">
+                <p className="text-gray-700 mb-4">Get a personalized moving timeline and task list based on your specific situation and needs.</p>
+                <ul className="text-gray-700 space-y-2">
                   <li className="flex items-center">
-                    <i className="fas fa-check text-green-500 mr-2"></i>
+                    <i className="fas fa-check text-green-600 mr-2"></i>
                     <span>Custom timeline</span>
                   </li>
                   <li className="flex items-center">
-                    <i className="fas fa-check text-green-500 mr-2"></i>
+                    <i className="fas fa-check text-green-600 mr-2"></i>
                     <span>Task prioritization</span>
                   </li>
                   <li className="flex items-center">
-                    <i className="fas fa-check text-green-500 mr-2"></i>
+                    <i className="fas fa-check text-green-600 mr-2"></i>
                     <span>Budget guidance</span>
                   </li>
                 </ul>
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-0 shadow-md hover:shadow-lg transition-shadow duration-200">
+            <Card className="bg-gradient-to-br from-green-50 to-emerald-100 border-0 shadow-md hover:shadow-lg transition-shadow duration-200">
               <CardContent className="p-8">
                 <div className="text-green-600 mb-4">
                   <i className="fas fa-map-marked-alt text-4xl"></i>
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-3">Visual Journey</h3>
-                <p className="text-gray-600 mb-4">Transform your moving plan into an interactive highway with clickable signs for each task.</p>
-                <ul className="text-gray-600 space-y-2">
+                <p className="text-gray-700 mb-4">Transform your moving plan into an interactive highway with clickable signs for each task.</p>
+                <ul className="text-gray-700 space-y-2">
                   <li className="flex items-center">
-                    <i className="fas fa-check text-green-500 mr-2"></i>
+                    <i className="fas fa-check text-green-600 mr-2"></i>
                     <span>Interactive map</span>
                   </li>
                   <li className="flex items-center">
-                    <i className="fas fa-check text-green-500 mr-2"></i>
+                    <i className="fas fa-check text-green-600 mr-2"></i>
                     <span>Progress tracking</span>
                   </li>
                   <li className="flex items-center">
-                    <i className="fas fa-check text-green-500 mr-2"></i>
+                    <i className="fas fa-check text-green-600 mr-2"></i>
                     <span>Visual milestones</span>
                   </li>
                 </ul>
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-purple-50 to-violet-50 border-0 shadow-md hover:shadow-lg transition-shadow duration-200">
+            <Card className="bg-gradient-to-br from-teal-50 to-green-100 border-0 shadow-md hover:shadow-lg transition-shadow duration-200">
               <CardContent className="p-8">
-                <div className="text-purple-600 mb-4">
+                <div className="text-teal-600 mb-4">
                   <i className="fas fa-network-wired text-4xl"></i>
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-3">Service Connections</h3>
-                <p className="text-gray-600 mb-4">Find and connect with local service providers for all your moving needs.</p>
-                <ul className="text-gray-600 space-y-2">
+                <p className="text-gray-700 mb-4">Find and connect with local service providers for all your moving needs.</p>
+                <ul className="text-gray-700 space-y-2">
                   <li className="flex items-center">
-                    <i className="fas fa-check text-green-500 mr-2"></i>
+                    <i className="fas fa-check text-green-600 mr-2"></i>
                     <span>Local providers</span>
                   </li>
                   <li className="flex items-center">
-                    <i className="fas fa-check text-green-500 mr-2"></i>
+                    <i className="fas fa-check text-green-600 mr-2"></i>
                     <span>Price comparison</span>
                   </li>
                   <li className="flex items-center">
-                    <i className="fas fa-check text-green-500 mr-2"></i>
+                    <i className="fas fa-check text-green-600 mr-2"></i>
                     <span>Direct booking</span>
                   </li>
                 </ul>
@@ -199,17 +207,25 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="bg-gradient-to-r from-primary to-primary/80 py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <section className="bg-gradient-to-r from-green-600 to-emerald-600 py-16 relative overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <svg className="w-full h-full" viewBox="0 0 800 400" fill="none">
+            <path d="M0 200 Q200 150 400 180 Q600 210 800 160 L800 400 L0 400 Z" fill="white"/>
+            <path d="M0 250 Q300 200 500 230 Q700 260 800 220 L800 400 L0 400 Z" fill="white" opacity="0.5"/>
+          </svg>
+        </div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative">
           <h2 className="text-3xl font-extrabold text-white sm:text-4xl mb-6">
             Ready to simplify your move?
           </h2>
-          <p className="text-xl text-blue-100 mb-8 max-w-3xl mx-auto">
+          <p className="text-xl text-green-100 mb-8 max-w-3xl mx-auto">
             Let our AI create a personalized moving journey just for you. Get started in minutes and never miss an important task again.
           </p>
           <Link href="/ai-assistant">
             <Button 
-              className="bg-white text-primary hover:bg-gray-50 px-8 py-4 text-lg"
+              className="bg-white text-green-600 hover:bg-green-50 px-8 py-4 text-lg shadow-lg hover:shadow-xl transition-all duration-300"
               size="lg"
             >
               Get Started Now
