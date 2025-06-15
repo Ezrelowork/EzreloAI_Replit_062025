@@ -43,9 +43,12 @@ export default function LocalServices() {
     const fromParam = urlParams.get('from') || localStorage.getItem('aiFromLocation') || '';
     const toParam = urlParams.get('to') || localStorage.getItem('aiToLocation') || '';
     
-    // Use destination for local services search
-    if (toParam) {
-      setSearchLocation(toParam);
+    // Use destination for local services search - prioritize URL params over localStorage
+    const destinationAddress = toParam || localStorage.getItem('aiToLocation') || '';
+    
+    if (destinationAddress && destinationAddress !== 'undefined' && destinationAddress.trim() !== '') {
+      console.log('Auto-filling destination address:', destinationAddress);
+      setSearchLocation(destinationAddress);
     }
   }, []);
 
