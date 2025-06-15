@@ -1606,7 +1606,8 @@ Only include real providers that actually serve this location.`;
     try {
       const communication = await storage.createCommunication(req.body);
       res.json({ communication });
-    } catch (error: "Error creating communication:", error);
+    } catch (error) {
+      console.error("Error creating communication:", error);
       res.status(500).json({ error: "Failed to create communication" });
     }
   });
