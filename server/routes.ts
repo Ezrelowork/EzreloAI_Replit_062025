@@ -2012,8 +2012,8 @@ Only include real providers that actually serve this location.`;
         // Sort by priority score (nationwide companies first, then by rating)
         categoryResults.sort((a, b) => b.priorityScore - a.priorityScore);
 
-        // Take top 5 results for this category (reduced for pagination)
-        localServices.push(...categoryResults.slice(0, 5));
+        // Add all results for this category
+        localServices.push(...categoryResults);
 
         console.log(`${category}: Found ${categoryResults.length} total, ${categoryResults.filter(s => s.isNationwide).length} nationwide companies`);
       }
