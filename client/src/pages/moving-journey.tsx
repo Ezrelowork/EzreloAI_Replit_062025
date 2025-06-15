@@ -129,7 +129,23 @@ export default function MovingJourney() {
   const progressPercentage = (completedCount / totalTasks) * 100;
 
   if (showTaskPage) {
-    return <TaskPage onBack={() => setShowTaskPage(false)} />;
+    // Create a default task for the task page view
+    const defaultTask = {
+      id: "all-tasks",
+      title: "All Moving Tasks",
+      description: "View and manage all your moving tasks in one place",
+      priority: "medium" as const,
+      week: "Ongoing",
+      category: "Task Management"
+    };
+    
+    return (
+      <TaskPage 
+        task={defaultTask}
+        onComplete={() => setShowTaskPage(false)}
+        onBack={() => setShowTaskPage(false)} 
+      />
+    );
   }
 
   return (
