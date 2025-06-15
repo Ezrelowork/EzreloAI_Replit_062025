@@ -145,12 +145,12 @@ export default function MovingJourney() {
             <div className="flex items-center space-x-4">
               <Link href="/ai-assistant">
                 <div className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">
-                  <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center">
+                  <div className="w-8 h-8 bg-gradient-to-br from-green-600 to-green-700 rounded-xl flex items-center justify-center">
                     <svg width="20" height="20" fill="white" viewBox="0 0 24 24">
                       <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
                     </svg>
                   </div>
-                  <span className="text-2xl font-bold text-blue-600">Ezrelo</span>
+                  <span className="text-2xl font-bold text-green-600">Ezrelo</span>
                 </div>
               </Link>
               <div className="border-l border-gray-300 pl-4">
@@ -166,7 +166,7 @@ export default function MovingJourney() {
               </Badge>
               <Button
                 onClick={() => setShowTaskPage(true)}
-                className="bg-blue-600 hover:bg-blue-700"
+                className="bg-green-600 hover:bg-green-700"
               >
                 <Clipboard className="w-4 h-4 mr-2" />
                 View All Tasks
