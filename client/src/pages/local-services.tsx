@@ -40,6 +40,8 @@ export default function LocalServices() {
   const [resultsPerPage] = useState(50); // Increased from 5
   const [selectedProvider, setSelectedProvider] = useState<LocalService | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isMapModalOpen, setIsMapModalOpen] = useState(false);
+  const [selectedAddress, setSelectedAddress] = useState<string>('');
   const { toast } = useToast();
 
   // Load location from URL params or localStorage
@@ -129,6 +131,34 @@ export default function LocalServices() {
     } else if (provider.website) {
       window.open(provider.website, '_blank');
     }
+  };
+
+  const handleAddressClick = (address: string) => {
+    setSelectedAddress(address);
+    setIsMapModalOpen(true);
+    setHasCompletedActions(true);
+  };
+
+  const openInMapApp = (app: string) => {
+    const encodedAddress = encodeURIComponent(selectedAddress);
+    let url = '';
+
+    switch (app) {
+      case 'google':
+        url = `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`;
+        break;
+      case 'apple':
+        url = `http://maps.apple.com/?q=${encodedAddress}`;
+        break;
+      case 'waze':
+        url = `https://waze.com/ul?q=${encodedAddress}`;
+        break;
+      default:
+        return;
+    }
+
+    window.open(url, '_blank');
+    setIsMapModalOpen(false);
   };
 
   const getCategoryIcon = (category: string) => {
@@ -350,7 +380,15 @@ export default function LocalServices() {
                                     {provider.address && (
                                       <div className="flex items-center gap-1 truncate">
                                         <MapPin className="w-4 h-4 flex-shrink-0" />
-                                        <span className="truncate">{provider.address}</span>
+                                        <button
+                                          onClick={(e) => {
+                                            e.stopPropagation();
+                                            handleAddressClick(provider.address);
+                                          }}
+                                          className="truncate text-blue-600 hover:text-blue-800 underline cursor-pointer text-left"
+                                        >
+                                          {provider.address}
+                                        </button>
                                       </div>
                                     )}
                                   </div>
@@ -449,6 +487,73 @@ export default function LocalServices() {
           </div>
         )}
 
+        {/* Map App Selection Modal */}
+        <Dialog open={isMapModalOpen} onOpenChange={setIsMapModalOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <MapPin className="w-5 h-5 text-blue-600" />
+                Open Address in Maps
+              </DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm text-gray-600">
+                Choose which map application to use:
+              </p>
+              <div className="bg-gray-50 p-3 rounded-lg">
+                <p className="text-sm font-medium text-gray-900">{selectedAddress}</p>
+              </div>
+              <div className="grid grid-cols-1 gap-2">
+                <Button
+                  onClick={() => openInMapApp('google')}
+                  variant="outline"
+                  className="justify-start h-12"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                      <MapPin className="w-4 h-4 text-green-600" />
+                    </div>
+                    <div className="text-left">
+                      <div className="font-medium">Google Maps</div>
+                      <div className="text-xs text-gray-500">Web & Mobile</div>
+                    </div>
+                  </div>
+                </Button>
+                <Button
+                  onClick={() => openInMapApp('apple')}
+                  variant="outline"
+                  className="justify-start h-12"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                      <MapPin className="w-4 h-4 text-blue-600" />
+                    </div>
+                    <div className="text-left">
+                      <div className="font-medium">Apple Maps</div>
+                      <div className="text-xs text-gray-500">iOS & macOS</div>
+                    </div>
+                  </div>
+                </Button>
+                <Button
+                  onClick={() => openInMapApp('waze')}
+                  variant="outline"
+                  className="justify-start h-12"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                      <Car className="w-4 h-4 text-purple-600" />
+                    </div>
+                    <div className="text-left">
+                      <div className="font-medium">Waze</div>
+                      <div className="text-xs text-gray-500">Navigation & Traffic</div>
+                    </div>
+                  </div>
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
         {/* Provider Details Modal */}
         <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
           <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
@@ -502,7 +607,12 @@ export default function LocalServices() {
                       {selectedProvider.address && (
                         <div className="flex items-center gap-2">
                           <MapPin className="w-4 h-4 text-gray-500" />
-                          <span>{selectedProvider.address}</span>
+                          <button
+                            onClick={() => handleAddressClick(selectedProvider.address)}
+                            className="text-blue-600 hover:text-blue-800 underline cursor-pointer text-left"
+                          >
+                            {selectedProvider.address}
+                          </button>
                         </div>
                       )}
                       {selectedProvider.website && selectedProvider.website !== `https://www.google.com/search?q=${encodeURIComponent(selectedProvider.provider)}` && (
