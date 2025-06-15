@@ -234,6 +234,7 @@ async function searchGooglePlaces(searchQuery: string, location?: string): Promi
   const params = new URLSearchParams({
     query: query.trim(),
     key: process.env.GOOGLE_API_KEY!,
+    radius: '32186', // 20 miles in meters (20 * 1609.34)
     // Add timestamp for cache busting
     timestamp: Date.now().toString()
   });
@@ -2011,8 +2012,8 @@ Only include real providers that actually serve this location.`;
         // Sort by priority score (nationwide companies first, then by rating)
         categoryResults.sort((a, b) => b.priorityScore - a.priorityScore);
         
-        // Take top 10 results for this category
-        localServices.push(...categoryResults.slice(0, 10));
+        // Take top 5 results for this category (reduced for pagination)
+        localServices.push(...categoryResults.slice(0, 5));
 
         console.log(`${category}: Found ${categoryResults.length} total, ${categoryResults.filter(s => s.isNationwide).length} nationwide companies`);
       }

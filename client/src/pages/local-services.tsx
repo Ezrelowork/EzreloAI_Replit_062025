@@ -35,6 +35,8 @@ export default function LocalServices() {
   const [searchLocation, setSearchLocation] = useState('');
   const [hasCompletedActions, setHasCompletedActions] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [resultsPerPage] = useState(5);
   const { toast } = useToast();
 
   // Load location from URL params or localStorage
@@ -84,7 +86,9 @@ export default function LocalServices() {
       
       if (response.ok) {
         const data = await response.json();
-        setProviders(data.services || []);
+        // Limit to maximum 15 results and reset to page 1
+        setProviders((data.services || []).slice(0, 15));
+        setCurrentPage(1);
         setShowResults(true);
         setHasCompletedActions(true); // Mark search as completed action
       }
@@ -282,7 +286,7 @@ export default function LocalServices() {
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">
-                Found {providers.length} Local Services in {searchLocation}
+                Found {providers.length} Local Services in {searchLocation} (within 20 miles)
               </h2>
               <Button variant="outline" onClick={() => handleSearch()}>
                 Search Again
@@ -298,8 +302,14 @@ export default function LocalServices() {
                 </CardContent>
               </Card>
             ) : (
-              <div className="grid gap-6">
-                {providers.map((provider, index) => {
+              <>
+                <div className="grid gap-6">
+                  {(() => {
+                    const startIndex = (currentPage - 1) * resultsPerPage;
+                    const endIndex = startIndex + resultsPerPage;
+                    const currentProviders = providers.slice(startIndex, endIndex);
+                    
+                    return currentProviders.map((provider, index) => {
                   const IconComponent = getCategoryIcon(provider.category);
                   
                   return (
@@ -462,8 +472,58 @@ export default function LocalServices() {
                       </CardContent>
                     </Card>
                   );
-                })}
-              </div>
+                  })()}
+                </div>
+                
+                {/* Pagination Controls */}
+                {providers.length > resultsPerPage && (
+                  <div className="flex items-center justify-center space-x-4 mt-8">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                      disabled={currentPage === 1}
+                    >
+                      Previous
+                    </Button>
+                    
+                    <div className="flex items-center space-x-2">
+                      {(() => {
+                        const totalPages = Math.ceil(providers.length / resultsPerPage);
+                        const pages = [];
+                        for (let i = 1; i <= totalPages; i++) {
+                          pages.push(
+                            <Button
+                              key={i}
+                              variant={currentPage === i ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => setCurrentPage(i)}
+                              className={currentPage === i ? "bg-blue-600 text-white" : ""}
+                            >
+                              {i}
+                            </Button>
+                          );
+                        }
+                        return pages;
+                      })()}
+                    </div>
+                    
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(prev => Math.min(Math.ceil(providers.length / resultsPerPage), prev + 1))}
+                      disabled={currentPage === Math.ceil(providers.length / resultsPerPage)}
+                    >
+                      Next
+                    </Button>
+                  </div>
+                )}
+                
+                {/* Results Info */}
+                <div className="text-center text-sm text-gray-600 mt-4">
+                  Showing {Math.min((currentPage - 1) * resultsPerPage + 1, providers.length)} - {Math.min(currentPage * resultsPerPage, providers.length)} of {providers.length} results
+                </div>
+              </>
             )}
           </div>
         )}
