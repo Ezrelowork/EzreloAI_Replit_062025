@@ -1,8 +1,12 @@
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useState } from "react";
 
 export default function Home() {
+  const [showTerms, setShowTerms] = useState(false);
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -256,7 +260,7 @@ export default function Home() {
                 <li><a href="#" className="hover:text-white transition-colors">Support</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">Partnerships</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Terms of Service</a></li>
+                <li><button onClick={() => setShowTerms(true)} className="hover:text-white transition-colors">Terms of Service</button></li>
               </ul>
             </div>
           </div>
@@ -265,6 +269,101 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {/* Terms of Service Modal */}
+      <Dialog open={showTerms} onOpenChange={setShowTerms}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold text-green-600">Ezrelo Terms of Service</DialogTitle>
+          </DialogHeader>
+          <div className="prose prose-sm max-w-none">
+            <p className="text-gray-600 mb-6"><strong>Effective Date:</strong> [Insert Date]</p>
+            
+            <p className="mb-6">Welcome to Ezrelo! These Terms of Service ("Terms") govern your access to and use of the Ezrelo website, mobile application, and related services (collectively, the "Services") provided by Ezrelo, Inc. ("Ezrelo," "we," "our," or "us"). By accessing or using our Services, you agree to be bound by these Terms. If you do not agree to these Terms, you may not use our Services.</p>
+
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">1. Use of Services</h3>
+                <p className="text-gray-700">Ezrelo provides users with AI-assisted tools to streamline the relocation process, including personalized recommendations for services like moving, utilities, internet, healthcare, and more. You agree to use our Services only for lawful purposes and in accordance with these Terms.</p>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">2. Eligibility</h3>
+                <p className="text-gray-700">You must be at least 18 years of age to use the Services. By using Ezrelo, you represent and warrant that you are 18 or older and have the legal capacity to enter into these Terms.</p>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">3. Account Registration</h3>
+                <p className="text-gray-700">Some features may require creating an account. You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account.</p>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">4. AI-Generated Content Disclaimer</h3>
+                <p className="text-gray-700">Ezrelo leverages AI technologies, including but not limited to OpenAI's GPT and Google APIs, to generate recommendations and summaries. These outputs are provided for informational purposes only and do not constitute professional advice. Users are encouraged to verify all information before making decisions.</p>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">5. Third-Party Services and Links</h3>
+                <p className="text-gray-700">Ezrelo provides links to and information about third-party service providers. We do not control, endorse, or assume responsibility for any third-party content or services. Any dealings with third parties are solely between you and the third party.</p>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">6. User Conduct</h3>
+                <p className="text-gray-700 mb-2">You agree not to:</p>
+                <ul className="list-disc list-inside text-gray-700 space-y-1">
+                  <li>Misuse our Services or interfere with their proper functioning;</li>
+                  <li>Use the Services to distribute spam or malicious content;</li>
+                  <li>Attempt to reverse-engineer or exploit our AI tools or platform.</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">7. Intellectual Property</h3>
+                <p className="text-gray-700">All content and materials on Ezrelo, including text, graphics, logos, and software, are the property of Ezrelo or its licensors and are protected by intellectual property laws. You may not use our trademarks or content without express permission.</p>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">8. Termination</h3>
+                <p className="text-gray-700">We reserve the right to suspend or terminate your access to the Services at our sole discretion, with or without notice, if we believe you have violated these Terms.</p>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">9. Disclaimer of Warranties</h3>
+                <p className="text-gray-700">The Services are provided "as is" and "as available." We disclaim all warranties, express or implied, including warranties of merchantability, fitness for a particular purpose, and non-infringement. We do not guarantee that the Services will be uninterrupted or error-free.</p>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">10. Limitation of Liability</h3>
+                <p className="text-gray-700">To the fullest extent permitted by law, Ezrelo shall not be liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of profits or revenues, whether incurred directly or indirectly.</p>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">11. Changes to Terms</h3>
+                <p className="text-gray-700">We may revise these Terms from time to time. If we make material changes, we will provide notice through our Services or by other means. Your continued use of the Services after the changes become effective constitutes your acceptance of the revised Terms.</p>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">12. Governing Law</h3>
+                <p className="text-gray-700">These Terms shall be governed by the laws of the State of [Your State], without regard to its conflict of law provisions.</p>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-3">13. Contact Us</h3>
+                <p className="text-gray-700 mb-2">If you have any questions about these Terms, please contact us at:</p>
+                <div className="text-gray-700">
+                  <p>Ezrelo, Inc.</p>
+                  <p>[Insert Contact Address]</p>
+                  <p>Email: [Insert Contact Email]</p>
+                </div>
+              </div>
+
+              <div className="text-center pt-6 border-t">
+                <p className="text-green-600 font-medium">Thank you for using Ezrelo!</p>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
