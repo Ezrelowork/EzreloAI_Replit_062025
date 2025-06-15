@@ -367,13 +367,7 @@ export default function AIAssistant() {
               </Link>
               <span className="text-gray-300">|</span>
               <Link href="/moving-journey">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="gap-2 text-blue-600 hover:text-blue-700"
-                >
-                  View Journey
-                </Button>
+                
               </Link>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">
