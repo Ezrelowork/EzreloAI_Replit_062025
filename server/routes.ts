@@ -779,7 +779,8 @@ Only include real companies that actually serve ${fromLocation} to ${toLocation}
 
     } catch (error) {
       console.error("Moving companies search error:", error);
-      res.status(500).json({ 
+      res.status(500).json```text
+({ 
         error: "Search failed",
         companies: []
       });
@@ -1883,18 +1884,18 @@ Only include real providers that actually serve this location.`;
   // Helper function to get priority score for sorting
   function getPriorityScore(name: string, category: string, rating: number): number {
     let score = 0;
-    
+
     // Boost nationwide companies significantly
     if (isNationwideCompany(name, category)) {
       score += 1000;
     }
-    
+
     // Add rating boost (0-50 points based on rating)
     score += (rating || 0) * 10;
-    
+
     // Add small boost for user rating count (if available)
     score += 5;
-    
+
     return score;
   }
 
@@ -2011,7 +2012,7 @@ Only include real providers that actually serve this location.`;
 
         // Sort by priority score (nationwide companies first, then by rating)
         categoryResults.sort((a, b) => b.priorityScore - a.priorityScore);
-        
+
         // Take top 5 results for this category (reduced for pagination)
         localServices.push(...categoryResults.slice(0, 5));
 
