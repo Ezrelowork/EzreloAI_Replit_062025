@@ -230,7 +230,10 @@ function getPrograms(category: string): string[] {
 // Google Places API functions for live reviews
 async function searchGooglePlaces(searchQuery: string, location?: string): Promise<any> {
   const baseUrl = 'https://maps.googleapis.com/maps/api/place/textsearch/json';
-  const query = location ? `${searchQuery} ${location}` : searchQuery;
+  // Only append location if the search query doesn't already contain it
+  const query = (location && !searchQuery.toLowerCase().includes(location.toLowerCase())) 
+    ? `${searchQuery} ${location}` 
+    : searchQuery;
   const params = new URLSearchParams({
     query: query.trim(),
     key: process.env.GOOGLE_API_KEY!,
@@ -1966,7 +1969,7 @@ Only include real providers that actually serve this location.`;
         for (const searchQuery of searchQueries) {
           try {
             console.log(`Searching for: ${searchQuery}`);
-            const places = await searchGooglePlaces(searchQuery, location);
+            const places = await searchGooglePlaces(searchQuery);
             console.log(`Found ${places?.length || 0} places for query: ${searchQuery}`);
 
             if (places && places.length > 0) {
