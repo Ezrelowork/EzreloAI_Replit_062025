@@ -91,7 +91,7 @@ export default function MovingJourney() {
       week: "Week 3",
       category: "Administrative",
       completed: false,
-      position: { x: "456px", y: "360px" }, // 38% of 1200px = 456px, 45% of 800px = 360px
+      position: { x: "456px", y: "335px" }, // moved up 25px (360->335)
       icon: FileText
     },
     {
@@ -102,7 +102,7 @@ export default function MovingJourney() {
       week: "Week 4",
       category: "Community",
       completed: false,
-      position: { x: "600px", y: "164px" }, // 50% of 1200px = 600px, moved down 20px from 144px to 164px
+      position: { x: "630px", y: "164px" }, // moved right 30px (600->630)
       icon: Building
     }
   ];
