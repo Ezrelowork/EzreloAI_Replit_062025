@@ -310,168 +310,169 @@ export default function LocalServices() {
                     const currentProviders = providers.slice(startIndex, endIndex);
                     
                     return currentProviders.map((provider, index) => {
-                  const IconComponent = getCategoryIcon(provider.category);
-                  
-                  return (
-                    <Card key={index} className="hover:shadow-lg transition-shadow">
-                      <CardContent className="p-6">
-                        <div className="flex items-start justify-between mb-4">
-                          <div className="flex items-start gap-4">
-                            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                              <IconComponent className="w-6 h-6 text-blue-600" />
-                            </div>
-                            <div>
-                              <div className="flex items-center gap-2 mb-1">
-                                <h3 className="text-lg font-semibold">{provider.provider}</h3>
-                                <Badge className={getCategoryColor(provider.category)}>
-                                  {provider.category}
-                                </Badge>
-                              </div>
-                              {provider.rating > 0 && (
-                                <div className="flex items-center gap-1 mb-2">
-                                  <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                                  <span className="text-sm font-medium">{provider.rating.toFixed(1)}</span>
+                      const IconComponent = getCategoryIcon(provider.category);
+                      
+                      return (
+                        <Card key={index} className="hover:shadow-lg transition-shadow">
+                          <CardContent className="p-6">
+                            <div className="flex items-start justify-between mb-4">
+                              <div className="flex items-start gap-4">
+                                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                  <IconComponent className="w-6 h-6 text-blue-600" />
                                 </div>
-                              )}
-                              <p className="text-gray-600 mb-3">{provider.description}</p>
+                                <div>
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <h3 className="text-lg font-semibold">{provider.provider}</h3>
+                                    <Badge className={getCategoryColor(provider.category)}>
+                                      {provider.category}
+                                    </Badge>
+                                  </div>
+                                  {provider.rating > 0 && (
+                                    <div className="flex items-center gap-1 mb-2">
+                                      <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                                      <span className="text-sm font-medium">{provider.rating.toFixed(1)}</span>
+                                    </div>
+                                  )}
+                                  <p className="text-gray-600 mb-3">{provider.description}</p>
+                                  
+                                  {provider.address && (
+                                    <div className="flex items-center gap-1 mb-2 text-sm text-gray-600">
+                                      <MapPin className="w-4 h-4" />
+                                      <span>{provider.address}</span>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
                               
-                              {provider.address && (
-                                <div className="flex items-center gap-1 mb-2 text-sm text-gray-600">
-                                  <MapPin className="w-4 h-4" />
-                                  <span>{provider.address}</span>
+                              <div className="text-right">
+                                <div className="text-lg font-semibold text-green-600 mb-1">
+                                  {provider.estimatedCost}
                                 </div>
-                              )}
+                                {provider.availability && (
+                                  <div className="text-sm text-gray-500">
+                                    {provider.availability}
+                                  </div>
+                                )}
+                                {provider.hours && (
+                                  <div className="text-sm text-gray-500">
+                                    {provider.hours}
+                                  </div>
+                                )}
+                              </div>
                             </div>
-                          </div>
-                          
-                          <div className="text-right">
-                            <div className="text-lg font-semibold text-green-600 mb-1">
-                              {provider.estimatedCost}
-                            </div>
-                            {provider.availability && (
-                              <div className="text-sm text-gray-500">
-                                {provider.availability}
+
+                            {/* Insurance Information */}
+                            {provider.insurance && provider.insurance.length > 0 && (
+                              <div className="mb-4">
+                                <h4 className="text-sm font-medium text-gray-700 mb-2">Insurance Accepted:</h4>
+                                <div className="flex flex-wrap gap-1">
+                                  {provider.insurance.slice(0, 4).map((ins, idx) => (
+                                    <Badge key={idx} variant="secondary" className="text-xs">
+                                      {ins}
+                                    </Badge>
+                                  ))}
+                                  {provider.insurance.length > 4 && (
+                                    <Badge variant="secondary" className="text-xs">
+                                      +{provider.insurance.length - 4} more
+                                    </Badge>
+                                  )}
+                                </div>
                               </div>
                             )}
-                            {provider.hours && (
-                              <div className="text-sm text-gray-500">
-                                {provider.hours}
+
+                            {/* Specialties or Programs */}
+                            {provider.specialties && provider.specialties.length > 0 && (
+                              <div className="mb-4">
+                                <h4 className="text-sm font-medium text-gray-700 mb-2">
+                                  {provider.category.includes('School') ? 'Programs:' : 'Specialties:'}
+                                </h4>
+                                <div className="flex flex-wrap gap-1">
+                                  {provider.specialties.slice(0, 4).map((specialty, idx) => (
+                                    <Badge key={idx} variant="secondary" className="text-xs">
+                                      {specialty}
+                                    </Badge>
+                                  ))}
+                                  {provider.specialties.length > 4 && (
+                                    <Badge variant="secondary" className="text-xs">
+                                      +{provider.specialties.length - 4} more
+                                    </Badge>
+                                  )}
+                                </div>
                               </div>
                             )}
-                          </div>
-                        </div>
 
-                        {/* Insurance Information */}
-                        {provider.insurance && provider.insurance.length > 0 && (
-                          <div className="mb-4">
-                            <h4 className="text-sm font-medium text-gray-700 mb-2">Insurance Accepted:</h4>
-                            <div className="flex flex-wrap gap-1">
-                              {provider.insurance.slice(0, 4).map((ins, idx) => (
-                                <Badge key={idx} variant="secondary" className="text-xs">
-                                  {ins}
-                                </Badge>
-                              ))}
-                              {provider.insurance.length > 4 && (
-                                <Badge variant="secondary" className="text-xs">
-                                  +{provider.insurance.length - 4} more
-                                </Badge>
-                              )}
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Specialties or Programs */}
-                        {provider.specialties && provider.specialties.length > 0 && (
-                          <div className="mb-4">
-                            <h4 className="text-sm font-medium text-gray-700 mb-2">
-                              {provider.category.includes('School') ? 'Programs:' : 'Specialties:'}
-                            </h4>
-                            <div className="flex flex-wrap gap-1">
-                              {provider.specialties.slice(0, 4).map((specialty, idx) => (
-                                <Badge key={idx} variant="secondary" className="text-xs">
-                                  {specialty}
-                                </Badge>
-                              ))}
-                              {provider.specialties.length > 4 && (
-                                <Badge variant="secondary" className="text-xs">
-                                  +{provider.specialties.length - 4} more
-                                </Badge>
-                              )}
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Services */}
-                        {provider.services && provider.services.length > 0 && (
-                          <div className="mb-4">
-                            <h4 className="text-sm font-medium text-gray-700 mb-2">Services:</h4>
-                            <div className="flex flex-wrap gap-1">
-                              {provider.services.slice(0, 4).map((service, idx) => (
-                                <Badge key={idx} variant="secondary" className="text-xs">
-                                  {service}
-                                </Badge>
-                              ))}
-                              {provider.services.length > 4 && (
-                                <Badge variant="secondary" className="text-xs">
-                                  +{provider.services.length - 4} more
-                                </Badge>
-                              )}
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Action Buttons */}
-                        <div className="flex items-center justify-between pt-2">
-                          <div className="flex flex-col gap-2 text-sm text-gray-600">
-                            <div className="flex items-center gap-4">
-                              {provider.phone && (
-                                <div className="flex items-center gap-1">
-                                  <Phone className="w-4 h-4" />
-                                  <span>{provider.phone}</span>
+                            {/* Services */}
+                            {provider.services && provider.services.length > 0 && (
+                              <div className="mb-4">
+                                <h4 className="text-sm font-medium text-gray-700 mb-2">Services:</h4>
+                                <div className="flex flex-wrap gap-1">
+                                  {provider.services.slice(0, 4).map((service, idx) => (
+                                    <Badge key={idx} variant="secondary" className="text-xs">
+                                      {service}
+                                    </Badge>
+                                  ))}
+                                  {provider.services.length > 4 && (
+                                    <Badge variant="secondary" className="text-xs">
+                                      +{provider.services.length - 4} more
+                                    </Badge>
+                                  )}
                                 </div>
-                              )}
-                            </div>
-                            {provider.website && provider.website !== `https://www.google.com/search?q=${encodeURIComponent(provider.provider)}` && (
-                              <div className="flex items-center gap-1">
-                                <Globe className="w-4 h-4" />
-                                <a 
-                                  href={provider.website} 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  className="text-blue-600 hover:text-blue-800 underline"
-                                  onClick={() => setHasCompletedActions(true)}
+                              </div>
+                            )}
+
+                            {/* Action Buttons */}
+                            <div className="flex items-center justify-between pt-2">
+                              <div className="flex flex-col gap-2 text-sm text-gray-600">
+                                <div className="flex items-center gap-4">
+                                  {provider.phone && (
+                                    <div className="flex items-center gap-1">
+                                      <Phone className="w-4 h-4" />
+                                      <span>{provider.phone}</span>
+                                    </div>
+                                  )}
+                                </div>
+                                {provider.website && provider.website !== `https://www.google.com/search?q=${encodeURIComponent(provider.provider)}` && (
+                                  <div className="flex items-center gap-1">
+                                    <Globe className="w-4 h-4" />
+                                    <a 
+                                      href={provider.website} 
+                                      target="_blank" 
+                                      rel="noopener noreferrer"
+                                      className="text-blue-600 hover:text-blue-800 underline"
+                                      onClick={() => setHasCompletedActions(true)}
+                                    >
+                                      {provider.website.replace(/^https?:\/\//, '').replace(/\/$/, '')}
+                                    </a>
+                                  </div>
+                                )}
+                              </div>
+                              
+                              <div className="flex gap-2">
+                                {provider.phone && (
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm"
+                                    onClick={() => {
+                                      window.open(`tel:${provider.phone}`, '_self');
+                                      setHasCompletedActions(true); // Mark progress for phone calls
+                                    }}
+                                  >
+                                    Call Now
+                                  </Button>
+                                )}
+                                <Button 
+                                  size="sm"
+                                  onClick={() => handleProviderClick(provider)}
+                                  className="bg-blue-600 hover:bg-blue-700 text-white"
                                 >
-                                  {provider.website.replace(/^https?:\/\//, '').replace(/\/$/, '')}
-                                </a>
+                                  {provider.category.includes('School') ? 'Learn More' : 'Get Info'}
+                                </Button>
                               </div>
-                            )}
-                          </div>
-                          
-                          <div className="flex gap-2">
-                            {provider.phone && (
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                onClick={() => {
-                                  window.open(`tel:${provider.phone}`, '_self');
-                                  setHasCompletedActions(true); // Mark progress for phone calls
-                                }}
-                              >
-                                Call Now
-                              </Button>
-                            )}
-                            <Button 
-                              size="sm"
-                              onClick={() => handleProviderClick(provider)}
-                              className="bg-blue-600 hover:bg-blue-700 text-white"
-                            >
-                              {provider.category.includes('School') ? 'Learn More' : 'Get Info'}
-                            </Button>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
+                            </div>
+                          </CardContent>
+                        </Card>
+                      );
+                    });
                   })()}
                 </div>
                 
