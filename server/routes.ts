@@ -1601,9 +1601,7 @@ Only include real providers that actually serve this location.`;
       console.error("Error updating task:", error);
       res.status(500).json({ error: "Failed to update task" });
     }
-  });
-
-  // Add communication log
+  });// Add communication log
   app.post("/api/communication", async (req, res) => {
     try {
       const communication = await storage.createCommunication(req.body);
@@ -2012,8 +2010,18 @@ Only include real providers that actually serve this location.`;
           }
         }
 
-        // Sort by priority score (nationwide companies first, then by rating)
-        categoryResults.sort((a, b) => b.priorityScore - a.priorityScore);
+        // Sort by priority score (nationwide companies first), then by rating
+        categoryResults.sort((a, b) => {
+          if (b.priorityScore !== a.priorityScore) {
+            return b.priorityScore - a.priorityScore;
+          }
+          // If same priority, sort by rating
+          if ((b.rating || 0) !== (a.rating || 0)) {
+            return (b.rating || 0) - (a.rating || 0);
+          }
+          // Finally sort alphabetically for consistency
+          return a.provider.localeCompare(b.provider);
+        });
 
         // Add all results for this category
         localServices.push(...categoryResults);
