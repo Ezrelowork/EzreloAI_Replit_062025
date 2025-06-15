@@ -1845,6 +1845,58 @@ Only include real providers that actually serve this location.`;
     }
   });
 
+  // Helper function to identify nationwide companies
+  function isNationwideCompany(name: string, category: string): boolean {
+    const nationwideCompanies = {
+      'Fitness Center': [
+        'Planet Fitness', 'LA Fitness', 'Anytime Fitness', '24 Hour Fitness', 'Gold\'s Gym',
+        'Crunch Fitness', 'Snap Fitness', 'Fitness 19', 'Blink Fitness', 'Pure Gym',
+        'Club 4 Fitness', 'Orangetheory', 'F45', 'CrossFit'
+      ],
+      'Pharmacy': [
+        'CVS', 'Walgreens', 'Rite Aid', 'Walmart Pharmacy', 'Safeway Pharmacy',
+        'Kroger Pharmacy', 'Costco Pharmacy', 'Sam\'s Club Pharmacy', 'Target Pharmacy',
+        'Albertsons Pharmacy', 'Publix Pharmacy', 'Meijer Pharmacy'
+      ],
+      'Bank': [
+        'Bank of America', 'Wells Fargo', 'Chase', 'JPMorgan Chase', 'Citibank',
+        'U.S. Bank', 'PNC Bank', 'Capital One', 'TD Bank', 'BB&T', 'Truist',
+        'Fifth Third Bank', 'Regions Bank', 'KeyBank', 'SunTrust', 'Citizens Bank',
+        'HSBC', 'American Express', 'Discover Bank'
+      ],
+      'Storage Facility': [
+        'Public Storage', 'Extra Space Storage', 'Life Storage', 'CubeSmart',
+        'U-Haul Storage', 'StorageMart', 'Simply Self Storage', 'Safeguard Self Storage',
+        'National Storage Affiliates', 'Redwood Storage', 'Access Self Storage',
+        'Storage King', 'Maxi Mini Storage', 'Storage Express'
+      ]
+    };
+
+    const companies = nationwideCompanies[category as keyof typeof nationwideCompanies] || [];
+    return companies.some(company => 
+      name.toLowerCase().includes(company.toLowerCase()) ||
+      company.toLowerCase().includes(name.toLowerCase())
+    );
+  }
+
+  // Helper function to get priority score for sorting
+  function getPriorityScore(name: string, category: string, rating: number): number {
+    let score = 0;
+    
+    // Boost nationwide companies significantly
+    if (isNationwideCompany(name, category)) {
+      score += 1000;
+    }
+    
+    // Add rating boost (0-50 points based on rating)
+    score += (rating || 0) * 10;
+    
+    // Add small boost for user rating count (if available)
+    score += 5;
+    
+    return score;
+  }
+
   // Local services search endpoint
   app.post("/api/search-local-services", async (req, res) => {
     try {
@@ -1858,78 +1910,111 @@ Only include real providers that actually serve this location.`;
 
       // Search for each service type
       for (const serviceType of serviceTypes) {
-        let searchQuery = '';
+        let searchQueries = [];
         let category = '';
 
         switch (serviceType) {
           case 'schools':
-            searchQuery = `elementary schools in ${location}`;
+            searchQueries = [`elementary schools in ${location}`];
             category = 'Elementary School';
             break;
           case 'healthcare':
-            searchQuery = `family doctors in ${location}`;
+            searchQueries = [`family doctors in ${location}`];
             category = 'Family Medicine';
             break;
           case 'pharmacies':
-            searchQuery = `pharmacies in ${location}`;
+            searchQueries = [
+              `CVS Walgreens Rite Aid pharmacy ${location}`,
+              `pharmacies in ${location}`
+            ];
             category = 'Pharmacy';
             break;
           case 'veterinary':
-            searchQuery = `veterinary clinics in ${location}`;
+            searchQueries = [`veterinary clinics in ${location}`];
             category = 'Veterinary Clinic';
             break;
           case 'gyms':
-            searchQuery = `gyms fitness centers in ${location}`;
+            searchQueries = [
+              `Planet Fitness LA Fitness Anytime Fitness gym ${location}`,
+              `gyms fitness centers in ${location}`
+            ];
             category = 'Fitness Center';
             break;
           case 'banks':
-            searchQuery = `banks credit unions in ${location}`;
+            searchQueries = [
+              `Bank of America Wells Fargo Chase Citibank ${location}`,
+              `banks credit unions in ${location}`
+            ];
             category = 'Bank';
             break;
           case 'storage':
-            searchQuery = `self storage facilities in ${location}`;
+            searchQueries = [
+              `Public Storage Extra Space Life Storage CubeSmart ${location}`,
+              `self storage facilities in ${location}`
+            ];
             category = 'Storage Facility';
             break;
           default:
             continue;
         }
 
-        try {
-          console.log(`Searching for: ${searchQuery} in ${location}`);
-          const places = await searchGooglePlaces(searchQuery, location);
-          console.log(`Found ${places?.length || 0} places for ${category}`);
+        const categoryResults = [];
+        const seenPlaces = new Set();
 
-          if (places && places.length > 0) {
-            const limitedPlaces = places.slice(0, 10); // Increased to 10 per category for comprehensive coverage
+        // Search with each query to get both nationwide and local options
+        for (const searchQuery of searchQueries) {
+          try {
+            console.log(`Searching for: ${searchQuery}`);
+            const places = await searchGooglePlaces(searchQuery, location);
+            console.log(`Found ${places?.length || 0} places for query: ${searchQuery}`);
 
-            for (const place of limitedPlaces) {
-              const details = await getPlaceDetails(place.place_id);
+            if (places && places.length > 0) {
+              for (const place of places.slice(0, 15)) {
+                // Skip duplicates
+                if (seenPlaces.has(place.place_id)) {
+                  continue;
+                }
+                seenPlaces.add(place.place_id);
 
-              if (details) {
-                localServices.push({
-                  category,
-                  provider: place.name,
-                  phone: details.formatted_phone_number || 'Contact for availability',
-                  description: getServiceDescription(category, location),
-                  website: details.website || `https://www.google.com/search?q=${encodeURIComponent(place.name)}`,
-                  referralUrl: details.website || `https://www.google.com/search?q=${encodeURIComponent(place.name)}`,
-                  services: getLocalServicesByCategory(category),
-                  estimatedCost: getLocalServiceCost(category),
-                  rating: details.rating || 0,
-                  specialties: getLocalServiceSpecialties(category),
-                  availability: getServiceHours(category),
-                  address: details.formatted_address || '',
-                  hours: details.opening_hours?.weekday_text?.join(', ') || 'Call for hours',
-                  insurance: getInsuranceInfo(category),
-                  ageGroups: getAgeGroups(category),
-                  programs: getPrograms(category)
-                });
+                const details = await getPlaceDetails(place.place_id);
+
+                if (details) {
+                  const service = {
+                    category,
+                    provider: place.name,
+                    phone: details.formatted_phone_number || 'Contact for availability',
+                    description: getServiceDescription(category, location),
+                    website: details.website || `https://www.google.com/search?q=${encodeURIComponent(place.name)}`,
+                    referralUrl: details.website || `https://www.google.com/search?q=${encodeURIComponent(place.name)}`,
+                    services: getLocalServicesByCategory(category),
+                    estimatedCost: getLocalServiceCost(category),
+                    rating: details.rating || 0,
+                    specialties: getLocalServiceSpecialties(category),
+                    availability: getServiceHours(category),
+                    address: details.formatted_address || '',
+                    hours: details.opening_hours?.weekday_text?.join(', ') || 'Call for hours',
+                    insurance: getInsuranceInfo(category),
+                    ageGroups: getAgeGroups(category),
+                    programs: getPrograms(category),
+                    priorityScore: getPriorityScore(place.name, category, details.rating || 0),
+                    isNationwide: isNationwideCompany(place.name, category)
+                  };
+                  categoryResults.push(service);
+                }
               }
             }
+          } catch (error) {
+            console.error(`Error searching for query "${searchQuery}":`, error);
           }
-        } catch (error) {
-          console.error(`Error searching for ${serviceType}:`, error);
         }
+
+        // Sort by priority score (nationwide companies first, then by rating)
+        categoryResults.sort((a, b) => b.priorityScore - a.priorityScore);
+        
+        // Take top 10 results for this category
+        localServices.push(...categoryResults.slice(0, 10));
+
+        console.log(`${category}: Found ${categoryResults.length} total, ${categoryResults.filter(s => s.isNationwide).length} nationwide companies`);
       }
 
       res.json({ services: localServices });
