@@ -369,13 +369,82 @@ export default function AIAssistant() {
               <Link href="/moving-journey">
                 
               </Link>
-              <div>
-                <h1 className="text-2xl font-bold text-gray-900">
-                  AI Relocation Concierge
-                </h1>
-                <p className="text-sm text-gray-600">
-                  Create your personalized moving plan with our AI engine
-                </p>
+              <div className="flex items-center gap-4">
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900">
+                    AI Relocation Concierge
+                  </h1>
+                  <p className="text-sm text-gray-600">
+                    Create your personalized moving plan with our AI engine
+                  </p>
+                </div>
+                <svg
+                  className="w-12 h-12"
+                  viewBox="0 0 48 48"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  {/* AI Brain Core */}
+                  <circle
+                    cx="24"
+                    cy="24"
+                    r="20"
+                    fill="url(#brainGradient)"
+                    stroke="#1e40af"
+                    strokeWidth="2"
+                  />
+
+                  {/* Neural Network Connections */}
+                  <g stroke="#3b82f6" strokeWidth="1.5" opacity="0.8">
+                    <path
+                      d="M12 18 L20 14 L28 18 L36 14"
+                      fill="none"
+                      strokeLinecap="round"
+                    />
+                    <path
+                      d="M12 30 L20 34 L28 30 L36 34"
+                      fill="none"
+                      strokeLinecap="round"
+                    />
+                    <path d="M16 24 L32 24" fill="none" strokeLinecap="round" />
+                  </g>
+
+                  {/* Neural Nodes */}
+                  <circle cx="12" cy="18" r="2" fill="#1e40af" />
+                  <circle cx="20" cy="14" r="2" fill="#3b82f6" />
+                  <circle cx="28" cy="18" r="2" fill="#1e40af" />
+                  <circle cx="36" cy="14" r="2" fill="#3b82f6" />
+                  <circle cx="16" cy="24" r="2" fill="#60a5fa" />
+                  <circle cx="32" cy="24" r="2" fill="#60a5fa" />
+                  <circle cx="12" cy="30" r="2" fill="#1e40af" />
+                  <circle cx="20" cy="34" r="2" fill="#3b82f6" />
+                  <circle cx="28" cy="30" r="2" fill="#1e40af" />
+                  <circle cx="36" cy="34" r="2" fill="#3b82f6" />
+
+                  {/* Central Processing Unit */}
+                  <rect
+                    x="20"
+                    y="20"
+                    width="8"
+                    height="8"
+                    rx="2"
+                    fill="#ffffff"
+                    stroke="#1e40af"
+                    strokeWidth="1.5"
+                  />
+                  <circle cx="22" cy="22" r="1" fill="#1e40af" />
+                  <circle cx="26" cy="22" r="1" fill="#1e40af" />
+                  <circle cx="22" cy="26" r="1" fill="#3b82f6" />
+                  <circle cx="26" cy="26" r="1" fill="#3b82f6" />
+
+                  {/* Gradient Definition */}
+                  <defs>
+                    <radialGradient id="brainGradient" cx="0.3" cy="0.3">
+                      <stop offset="0%" stopColor="#dbeafe" />
+                      <stop offset="100%" stopColor="#bfdbfe" />
+                    </radialGradient>
+                  </defs>
+                </svg>
               </div>
             </div>
           </div>
@@ -383,78 +452,7 @@ export default function AIAssistant() {
       </div>
 
       <div className="max-w-4xl mx-auto p-6">
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center mb-4">
-            <svg
-              className="w-12 h-12 mr-3"
-              viewBox="0 0 48 48"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              {/* AI Brain Core */}
-              <circle
-                cx="24"
-                cy="24"
-                r="20"
-                fill="url(#brainGradient)"
-                stroke="#1e40af"
-                strokeWidth="2"
-              />
-
-              {/* Neural Network Connections */}
-              <g stroke="#3b82f6" strokeWidth="1.5" opacity="0.8">
-                <path
-                  d="M12 18 L20 14 L28 18 L36 14"
-                  fill="none"
-                  strokeLinecap="round"
-                />
-                <path
-                  d="M12 30 L20 34 L28 30 L36 34"
-                  fill="none"
-                  strokeLinecap="round"
-                />
-                <path d="M16 24 L32 24" fill="none" strokeLinecap="round" />
-              </g>
-
-              {/* Neural Nodes */}
-              <circle cx="12" cy="18" r="2" fill="#1e40af" />
-              <circle cx="20" cy="14" r="2" fill="#3b82f6" />
-              <circle cx="28" cy="18" r="2" fill="#1e40af" />
-              <circle cx="36" cy="14" r="2" fill="#3b82f6" />
-              <circle cx="16" cy="24" r="2" fill="#60a5fa" />
-              <circle cx="32" cy="24" r="2" fill="#60a5fa" />
-              <circle cx="12" cy="30" r="2" fill="#1e40af" />
-              <circle cx="20" cy="34" r="2" fill="#3b82f6" />
-              <circle cx="28" cy="30" r="2" fill="#1e40af" />
-              <circle cx="36" cy="34" r="2" fill="#3b82f6" />
-
-              {/* Central Processing Unit */}
-              <rect
-                x="20"
-                y="20"
-                width="8"
-                height="8"
-                rx="2"
-                fill="#ffffff"
-                stroke="#1e40af"
-                strokeWidth="1.5"
-              />
-              <circle cx="22" cy="22" r="1" fill="#1e40af" />
-              <circle cx="26" cy="22" r="1" fill="#1e40af" />
-              <circle cx="22" cy="26" r="1" fill="#3b82f6" />
-              <circle cx="26" cy="26" r="1" fill="#3b82f6" />
-
-              {/* Gradient Definition */}
-              <defs>
-                <radialGradient id="brainGradient" cx="0.3" cy="0.3">
-                  <stop offset="0%" stopColor="#dbeafe" />
-                  <stop offset="100%" stopColor="#bfdbfe" />
-                </radialGradient>
-              </defs>
-            </svg>
-            
-          </div>
-            </div>
+        
 
         {!aiResponse ? (
           <Card>
