@@ -414,7 +414,7 @@ export default function Documentation() {
                               disabled={isCompleted}
                               className={isCompleted ? 
                                 "bg-green-600 text-white cursor-default" : 
-                                "bg-blue-600 hover:bg-blue-700 text-white"
+                                "bg-green-600 hover:bg-green-700 text-white"
                               }
                             >
                               {isCompleted ? (
@@ -498,7 +498,7 @@ export default function Documentation() {
                 window.location.href = journeyUrl;
               }}
               variant="outline"
-              className="border-blue-300 text-blue-700 hover:bg-blue-50 font-medium py-2 px-4 rounded-lg text-sm shadow-sm transition-all"
+              className="border-green-300 text-green-700 hover:bg-green-50 font-medium py-2 px-4 rounded-lg text-sm shadow-sm transition-all"
             >
               Return to Journey
             </Button>

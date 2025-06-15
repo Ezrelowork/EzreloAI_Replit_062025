@@ -856,7 +856,8 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                     <Label htmlFor="destinationAddress">Destination Address</Label>
                     <Input
                       id="destinationAddress"
-                      value={questionnaireData.destinationAddress || moveData.to}                      onChange={(e) => setQuestionnaireData({...questionnaireData, destinationAddress: e.target.value})}
+                      value={questionnaireData.destinationAddress || moveData.to}                      onChange={(e) => setQuestionnaire<previous_generation>```python
+Data({...questionnaireData, destinationAddress: e.target.value})}
                       placeholder="Full address with unit number"
                     />
                   </div>
@@ -1564,6 +1565,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                     'Check insurance coverage',
                     'Read reviews & references', 
                     'Verify license & bonding',
+                    ```python
                     'Understand pricing structure',
                     'Confirm moving date'
                   ].map((item, index) => (

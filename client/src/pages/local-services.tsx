@@ -232,7 +232,7 @@ export default function LocalServices() {
 
                   window.location.href = journeyUrl;
                 }}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 text-green-700 hover:text-green-800"
               >
                 <ArrowLeft className="w-4 h-4" />
                 Back to Journey
@@ -268,7 +268,7 @@ export default function LocalServices() {
               <Button 
                 onClick={() => handleSearch()}
                 disabled={isLoading}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-6"
+                className="bg-green-600 hover:bg-green-700 text-white px-6"
               >
                 {isLoading ? (
                   <div className="flex items-center gap-2">
@@ -292,8 +292,8 @@ export default function LocalServices() {
                     variant={selectedCategory === categoryKey ? "default" : "outline"}
                     className={`cursor-pointer transition-all hover:scale-105 ${
                       selectedCategory === categoryKey
-                        ? 'bg-blue-600 text-white hover:bg-blue-700' 
-                        : 'hover:bg-blue-50 hover:border-blue-300'
+                        ? 'bg-green-600 text-white hover:bg-green-700' 
+                        : 'hover:bg-green-50 hover:border-green-300'
                     }`}
                     onClick={() => toggleCategory(categoryKey)}
                   >
@@ -311,7 +311,7 @@ export default function LocalServices() {
         {/* Loading State */}
         {isLoading && (
           <div className="text-center py-12">
-            <div className="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto mb-4" />
+            <div className="animate-spin w-8 h-8 border-4 border-green-600 border-t-transparent rounded-full mx-auto mb-4" />
             <p className="text-gray-600">Finding local services in your area...</p>
           </div>
         )}
@@ -406,7 +406,7 @@ export default function LocalServices() {
                                     e.stopPropagation();
                                     handleProviderClick(provider);
                                   }}
-                                  className="bg-blue-600 hover:bg-blue-700 text-white mt-1"
+                                  className="bg-green-600 hover:bg-green-700 text-white mt-1"
                                 >
                                   View Details
                                 </Button>
@@ -442,7 +442,7 @@ export default function LocalServices() {
                               variant={currentPage === i ? "default" : "outline"}
                               size="sm"
                               onClick={() => setCurrentPage(i)}
-                              className={currentPage === i ? "bg-blue-600 text-white" : ""}
+                              className={currentPage === i ? "bg-green-600 text-white" : ""}
                             >
                               {i}
                             </Button>
@@ -482,7 +482,7 @@ export default function LocalServices() {
             <Button 
               onClick={() => handleSearch()}
               disabled={!searchLocation.trim()}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
+              className="bg-green-600 hover:bg-green-700 text-white"
             >
               Start Search
             </Button>
@@ -715,7 +715,7 @@ export default function LocalServices() {
                   )}
                   <Button 
                     onClick={() => handleContactClick(selectedProvider)}
-                    className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2"
+                    className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
                   >
                     <Globe className="w-4 h-4" />
                     {selectedProvider.category.includes('School') ? 'Learn More' : 'Get Info'}

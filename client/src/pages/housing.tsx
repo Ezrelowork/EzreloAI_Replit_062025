@@ -449,7 +449,7 @@ export default function Housing() {
                 window.location.href = journeyUrl;
               }}
               variant="outline"
-              className="border-blue-300 text-blue-700 hover:bg-blue-50 font-medium py-2 px-4 rounded-lg text-sm shadow-sm transition-all"
+              className="border-green-300 text-green-700 hover:bg-green-50 font-medium py-2 px-4 rounded-lg text-sm shadow-sm transition-all"
             >
               Return to Journey
             </Button>

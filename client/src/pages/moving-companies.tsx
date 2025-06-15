@@ -1007,7 +1007,7 @@ export default function MovingCompanies() {
                 <Button
                   onClick={() => window.location.href = '/moving-journey'}
                   variant="outline"
-                  className="border-blue-300 text-blue-700 hover:bg-blue-50 font-medium py-3 px-6 rounded-lg text-sm shadow-sm transition-all w-full sm:w-auto"
+                  className="border-green-300 text-green-700 hover:bg-green-50 font-medium py-3 px-6 rounded-lg text-sm shadow-sm transition-all w-full sm:w-auto"
                 >
                   Return to Journey
                 </Button>
@@ -1675,7 +1675,7 @@ export default function MovingCompanies() {
                       <Button 
                         type="button"
                         onClick={handleDownloadPDF}
-                        className="flex-1 bg-blue-600 hover:bg-blue-700"
+                        className="flex-1 bg-green-600 hover:bg-green-700"
                       >
                         <ExternalLink className="w-4 h-4 mr-2" />
                         Download PDF
