@@ -29,6 +29,8 @@ interface LocalService {
 }
 
 export default function LocalServices() {
+  const toParam = (param: string) => param.toLowerCase().replace(/\s+/g, '-');
+
   const [, setLocation] = useLocation();
   const [providers, setProviders] = useState<LocalService[]>([]);
   const [isLoading, setIsLoading] = useState(false);

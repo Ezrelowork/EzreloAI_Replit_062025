@@ -1603,7 +1603,6 @@ Only include real providers that actually serve this location.`;
     }
   });
 
-  ```tool_code
   // Add communication log
   app.post("/api/communication", async (req, res) => {
     try {
