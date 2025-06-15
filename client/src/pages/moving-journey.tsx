@@ -139,14 +139,16 @@ export default function MovingJourney() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-4">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center">
-                  <svg width="20" height="20" fill="white" viewBox="0 0 24 24">
-                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                  </svg>
+              <Link href="/ai-assistant">
+                <div className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">
+                  <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center">
+                    <svg width="20" height="20" fill="white" viewBox="0 0 24 24">
+                      <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                    </svg>
+                  </div>
+                  <span className="text-2xl font-bold text-blue-600">Ezrelo</span>
                 </div>
-                <span className="text-2xl font-bold text-blue-600">Ezrelo</span>
-              </div>
+              </Link>
               <div className="border-l border-gray-300 pl-4">
                 <h1 className="text-2xl font-bold text-gray-900">Your Moving Journey</h1>
                 <p className="text-sm text-gray-600">
@@ -164,15 +166,6 @@ export default function MovingJourney() {
               >
                 <Clipboard className="w-4 h-4 mr-2" />
                 View All Tasks
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setLocation('/')}
-                className="text-gray-600 hover:text-gray-900"
-              >
-                <Home className="w-4 h-4 mr-2" />
-                Home
               </Button>
             </div>
           </div>
