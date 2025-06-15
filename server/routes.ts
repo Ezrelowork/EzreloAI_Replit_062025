@@ -777,7 +777,8 @@ Only include real companies that actually serve ${fromLocation} to ${toLocation}
             gemini: process.env.GOOGLE_AI_API_KEY ? "available" : "unavailable",
             googlePlaces: process.env.GOOGLE_API_KEY ? "available" : "unavailable"
           }
-        }
+        }.
+``````text
       });
 
     } catch (error) {
@@ -1602,7 +1603,7 @@ Only include real providers that actually serve this location.`;
       res.status(500).json({ error: "Failed to update task" });
     }
   });// Add communication log
-  app.post("/api/communication", async (req, res) => {
+  app.post("/api/communication/:taskId", async (req, res) => {
     try {
       const communication = await storage.createCommunication(req.body);
       res.json({ communication });
@@ -1877,24 +1878,24 @@ Only include real providers that actually serve this location.`;
 
     const companies = nationwideCompanies[category as keyof typeof nationwideCompanies] || [];
     const lowerName = name.toLowerCase();
-    
+
     // Stricter matching to avoid false positives
     return companies.some(company => {
       const lowerCompany = company.toLowerCase();
-      
+
       // Exact match or company name contains the nationwide company name
       if (lowerName.includes(lowerCompany)) {
         return true;
       }
-      
+
       // For multi-word companies, check if all significant words are present
       const companyWords = lowerCompany.split(' ').filter(word => word.length > 2);
       const nameWords = lowerName.split(' ');
-      
+
       if (companyWords.length > 1) {
         return companyWords.every(word => nameWords.some(nameWord => nameWord.includes(word)));
       }
-      
+
       return false;
     });
   }
@@ -1906,7 +1907,7 @@ Only include real providers that actually serve this location.`;
     // Special boost for major banks
     if (category === 'Bank') {
       const lowerName = name.toLowerCase();
-      
+
       // Top tier major banks (highest priority) - more comprehensive matching
       if (lowerName.includes('bank of america') || lowerName.includes('bofa')) {
         score += 3100; // Highest priority for Bank of America
@@ -2008,10 +2009,9 @@ Only include real providers that actually serve this location.`;
             break;
           case 'banks':
             searchQueries = [
-              `Bank of America Wells Fargo Chase Citibank ${location}`,
-              `U.S. Bank PNC Capital One ${location}`,
-              `banks near ${location}`,
-              `credit unions near ${location}`
+              `banks ${location}`,
+              `credit unions ${location}`,
+              `financial institutions ${location}`
             ];
             category = 'Bank';
             break;
@@ -2051,7 +2051,7 @@ Only include real providers that actually serve this location.`;
                     .replace(/\s+(bank|atm|branch|location).*$/i, '')
                     .replace(/\s+/g, ' ')
                     .trim();
-                  
+
                   if (seenBankNames.has(normalizedName)) {
                     continue;
                   }
