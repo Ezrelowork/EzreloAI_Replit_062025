@@ -129,7 +129,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
           <div className="space-y-3">
             {/* Moving Company Actions */}
             {task.title.toLowerCase().includes('moving') && (
-              <div className="flex items-center justify-between p-4 bg-blue-50 rounded-2xl border border-blue-200">
+              <div className="flex items-center justify-between p-4 bg-green-50 rounded-2xl border border-green-200">
                 <div>
                   <div className="font-semibold text-gray-900">Find & Book Moving Companies</div>
                   <div className="text-sm text-gray-600">Get quotes from professional movers</div>
@@ -151,7 +151,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
                     onClose();
                     setLocation(finalRoute);
                   }}
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-xl flex items-center gap-2"
+                  className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded-xl flex items-center gap-2"
                 >
                   Find Movers
                   <ArrowRight className="w-4 h-4" />
@@ -161,7 +161,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 
             {/* Default Action for Other Tasks */}
             {!task.title.toLowerCase().includes('moving') && (
-              <div className="flex items-center justify-between p-4 bg-blue-50 rounded-2xl border border-blue-200">
+              <div className="flex items-center justify-between p-4 bg-green-50 rounded-2xl border border-green-200">
                 <div>
                   <div className="font-semibold text-gray-900">Ready to start this task?</div>
                   <div className="text-sm text-gray-600">Access tools and resources to complete this step</div>
@@ -194,7 +194,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
                     onClose();
                     setLocation(finalRoute);
                   }}
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-xl flex items-center gap-2"
+                  className="bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded-xl flex items-center gap-2"
                 >
                   Start Task
                   <ArrowRight className="w-4 h-4" />
