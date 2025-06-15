@@ -22,15 +22,7 @@ export default function Home() {
       </header>
 
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-green-50 via-emerald-50 to-green-100 py-16 md:py-24 relative overflow-hidden">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-20">
-          <svg className="w-full h-full" viewBox="0 0 800 600" fill="none">
-            <path d="M0 400 Q200 350 400 380 Q600 410 800 360 L800 600 L0 600 Z" fill="#10b981" opacity="0.3"/>
-            <path d="M0 450 Q300 400 500 430 Q700 460 800 420 L800 600 L0 600 Z" fill="#059669" opacity="0.2"/>
-          </svg>
-        </div>
-
+      <section className="bg-gradient-to-br from-green-50 via-emerald-10 to-green-300 py-16 md:py-24 relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="text-center">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
@@ -41,7 +33,7 @@ export default function Home() {
             </p>
 
             {/* Service Highlights */}
-            <div className="flex flex-wrap justify-center gap-6 text-green-600">
+            <div className="flex flex-wrap justify-center gap-6 text-green-800">
               <div className="flex items-center space-x-2 bg-white/60 px-4 py-2 rounded-full shadow-sm">
                 <i className="fas fa-check-circle text-green-500"></i>
                 <span className="font-medium">Utilities</span>
@@ -78,7 +70,7 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <Card className="text-center hover:shadow-md transition-shadow duration-200">
               <CardContent className="p-8">
-                <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-primary/4 text-primary mb-6">
+                <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-primary/4 text-emerald-600">
                   <i className="fas fa-comments text-2xl"></i>
                 </div>
 
@@ -91,7 +83,7 @@ export default function Home() {
 
             <Card className="text-center hover:shadow-md transition-shadow duration-200">
               <CardContent className="p-8">
-                <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-primary/4 text-primary mb-6">
+                <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-primary/4 text-emerald-600">
                   <i className="fas fa-route text-2xl"></i>
                 </div>
 
@@ -104,7 +96,7 @@ export default function Home() {
 
             <Card className="text-center hover:shadow-md transition-shadow duration-200">
               <CardContent className="p-8">
-                <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-primary/4 text-primary mb-6">
+                <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-primary/4 text-emerald-600">
                   <i className="fas fa-check-circle text-2xl"></i>
                 </div>
 
@@ -206,94 +198,12 @@ export default function Home() {
         </div>
       </section>
 
-      <section id="ai-assistant" className="py-16 bg-gray-50">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* AI Assistant Integration - Centered */}
-          <div className="text-center">
-            {/* AI Brain Icon and Title */}
-            <div className="flex items-center justify-center mb-4">
-              <svg
-                className="w-12 h-12 mr-3"
-                viewBox="0 0 48 48"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                {/* AI Brain Core */}
-                <circle
-                  cx="24"
-                  cy="24"
-                  r="20"
-                  fill="url(#brainGradient)"
-                  stroke="#1e40af"
-                  strokeWidth="2"
-                />
-
-                {/* Neural Network Connections */}
-                <g stroke="#3b82f6" strokeWidth="1.5" opacity="0.8">
-                  <path
-                    d="M12 18 L20 14 L28 18 L36 14"
-                    fill="none"
-                    strokeLinecap="round"
-                  />
-                  <path
-                    d="M12 30 L20 34 L28 30 L36 34"
-                    fill="none"
-                    strokeLinecap="round"
-                  />
-                  <path d="M16 24 L32 24" fill="none" strokeLinecap="round" />
-                </g>
-
-                {/* Neural Nodes */}
-                <circle cx="12" cy="18" r="2" fill="#1e40af" />
-                <circle cx="20" cy="14" r="2" fill="#3b82f6" />
-                <circle cx="28" cy="18" r="2" fill="#1e40af" />
-                <circle cx="36" cy="14" r="2" fill="#3b82f6" />
-                <circle cx="16" cy="24" r="2" fill="#60a5fa" />
-                <circle cx="32" cy="24" r="2" fill="#60a5fa" />
-                <circle cx="12" cy="30" r="2" fill="#1e40af" />
-                <circle cx="20" cy="34" r="2" fill="#3b82f6" />
-                <circle cx="28" cy="30" r="2" fill="#1e40af" />
-                <circle cx="36" cy="34" r="2" fill="#3b82f6" />
-
-                {/* Central Processing Unit */}
-                <rect
-                  x="20"
-                  y="20"
-                  width="8"
-                  height="8"
-                  rx="2"
-                  fill="#ffffff"
-                  stroke="#1e40af"
-                  strokeWidth="1.5"
-                />
-                <circle cx="22" cy="22" r="1" fill="#1e40af" />
-                <circle cx="26" cy="22" r="1" fill="#1e40af" />
-                <circle cx="22" cy="26" r="1" fill="#3b82f6" />
-                <circle cx="26" cy="26" r="1" fill="#3b82f6" />
-
-                {/* Gradient Definition */}
-                <defs>
-                  <radialGradient id="brainGradient" cx="0.3" cy="0.3">
-                    <stop offset="0%" stopColor="#dbeafe" />
-                    <stop offset="100%" stopColor="#bfdbfe" />
-                  </radialGradient>
-                </defs>
-              </svg>
-              <h1 className="text-3xl font-bold text-gray-900">AI Assistant</h1>
-            </div>
-          </div>
-        </div>
-      </section>
+     
 
       {/* CTA Section */}
       <section className="bg-gradient-to-r from-green-600 to-emerald-600 py-16 relative overflow-hidden">
         {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-10">
-          <svg className="w-full h-full" viewBox="0 0 800 400" fill="none">
-            <path d="M0 200 Q200 150 400 180 Q600 210 800 160 L800 400 L0 400 Z" fill="white"/>
-            <path d="M0 250 Q300 200 500 230 Q700 260 800 220 L800 400 L0 400 Z" fill="white" opacity="0.5"/>
-          </svg>
-        </div>
+        
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative">
           <h2 className="text-3xl font-extrabold text-white sm:text-4xl mb-6">
@@ -304,7 +214,7 @@ export default function Home() {
           </p>
           <Link href="/ai-assistant">
             <Button 
-              className="bg-white text-green-600 hover:bg-green-50 px-8 py-4 text-lg shadow-lg hover:shadow-xl transition-all duration-300"
+              className="bg-white text-green-800 hover:bg-green-50 px-8 py-4 text-lg shadow-lg hover:shadow-xl transition-all duration-300"
               size="lg"
             >
               Get Started Now
@@ -315,7 +225,7 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
+      <footer className="bg-gray-800 text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>

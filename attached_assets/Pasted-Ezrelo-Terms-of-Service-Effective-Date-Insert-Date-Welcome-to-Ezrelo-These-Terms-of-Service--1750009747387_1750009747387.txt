@@ -1,0 +1,94 @@
+Ezrelo Terms of Service
+
+Effective Date: [Insert Date]
+
+Welcome to Ezrelo! These Terms of Service (“Terms”) govern your access to and use of the Ezrelo website, mobile application, and related services (collectively, the “Services”) provided by Ezrelo, Inc. (“Ezrelo,” “we,” “our,” or “us”). By accessing or using our Services, you agree to be bound by these Terms. If you do not agree to these Terms, you may not use our Services.
+
+⸻
+
+1. Use of Services
+
+Ezrelo provides users with AI-assisted tools to streamline the relocation process, including personalized recommendations for services like moving, utilities, internet, healthcare, and more. You agree to use our Services only for lawful purposes and in accordance with these Terms.
+
+⸻
+
+2. Eligibility
+
+You must be at least 18 years of age to use the Services. By using Ezrelo, you represent and warrant that you are 18 or older and have the legal capacity to enter into these Terms.
+
+⸻
+
+3. Account Registration
+
+Some features may require creating an account. You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account.
+
+⸻
+
+4. AI-Generated Content Disclaimer
+
+Ezrelo leverages AI technologies, including but not limited to OpenAI’s GPT and Google APIs, to generate recommendations and summaries. These outputs are provided for informational purposes only and do not constitute professional advice. Users are encouraged to verify all information before making decisions.
+
+⸻
+
+5. Third-Party Services and Links
+
+Ezrelo provides links to and information about third-party service providers. We do not control, endorse, or assume responsibility for any third-party content or services. Any dealings with third parties are solely between you and the third party.
+
+⸻
+
+6. User Conduct
+
+You agree not to:
+	•	Misuse our Services or interfere with their proper functioning;
+	•	Use the Services to distribute spam or malicious content;
+	•	Attempt to reverse-engineer or exploit our AI tools or platform.
+
+⸻
+
+7. Intellectual Property
+
+All content and materials on Ezrelo, including text, graphics, logos, and software, are the property of Ezrelo or its licensors and are protected by intellectual property laws. You may not use our trademarks or content without express permission.
+
+⸻
+
+8. Termination
+
+We reserve the right to suspend or terminate your access to the Services at our sole discretion, with or without notice, if we believe you have violated these Terms.
+
+⸻
+
+9. Disclaimer of Warranties
+
+The Services are provided “as is” and “as available.” We disclaim all warranties, express or implied, including warranties of merchantability, fitness for a particular purpose, and non-infringement. We do not guarantee that the Services will be uninterrupted or error-free.
+
+⸻
+
+10. Limitation of Liability
+
+To the fullest extent permitted by law, Ezrelo shall not be liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of profits or revenues, whether incurred directly or indirectly.
+
+⸻
+
+11. Changes to Terms
+
+We may revise these Terms from time to time. If we make material changes, we will provide notice through our Services or by other means. Your continued use of the Services after the changes become effective constitutes your acceptance of the revised Terms.
+
+⸻
+
+12. Governing Law
+
+These Terms shall be governed by the laws of the State of [Your State], without regard to its conflict of law provisions.
+
+⸻
+
+13. Contact Us
+
+If you have any questions about these Terms, please contact us at:
+
+Ezrelo, Inc.
+[Insert Contact Address]
+Email: [Insert Contact Email]
+
+⸻
+
+Thank you for using Ezrelo!
