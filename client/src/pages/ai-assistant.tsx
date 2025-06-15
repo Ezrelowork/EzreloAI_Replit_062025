@@ -391,7 +391,7 @@ export default function AIAssistant() {
                     r="20"
                     fill="url(#brainGradient)"
                     stroke="#1e40af"
-                    strokeWidth="2"
+                    strokeWidth="1"
                   />
 
                   {/* Neural Network Connections */}
