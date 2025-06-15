@@ -1894,13 +1894,28 @@ Only include real providers that actually serve this location.`;
 
     // Special boost for major banks
     if (category === 'Bank') {
-      const majorBanks = ['Bank of America', 'Wells Fargo', 'Chase', 'JPMorgan', 'Citibank', 'Citi', 'U.S. Bank', 'US Bank'];
       const lowerName = name.toLowerCase();
       
-      if (majorBanks.some(bank => lowerName.includes(bank.toLowerCase()))) {
-        score += 2000; // Extra boost for major national banks
-      } else if (isNationwideCompany(name, category)) {
-        score += 1500; // High boost for other nationwide banks
+      // Top tier major banks (highest priority)
+      const topTierBanks = ['bank of america', 'wells fargo', 'chase', 'jpmorgan'];
+      if (topTierBanks.some(bank => lowerName.includes(bank))) {
+        score += 3000;
+      }
+      // Second tier major banks
+      else if (['citibank', 'citi', 'u.s. bank', 'us bank', 'pnc'].some(bank => lowerName.includes(bank))) {
+        score += 2500;
+      }
+      // Other nationwide banks
+      else if (isNationwideCompany(name, category)) {
+        score += 2000;
+      }
+      // Regional banks and credit unions
+      else if (lowerName.includes('credit union') || lowerName.includes('community') || lowerName.includes('federal')) {
+        score += 1000;
+      }
+      // Local banks
+      else {
+        score += 500;
       }
     } else {
       // Boost nationwide companies significantly for other categories
@@ -1909,11 +1924,8 @@ Only include real providers that actually serve this location.`;
       }
     }
 
-    // Add rating boost (0-50 points based on rating)
-    score += (rating || 0) * 10;
-
-    // Add small boost for user rating count (if available)
-    score += 5;
+    // Add rating boost (0-100 points based on rating)
+    score += (rating || 0) * 20;
 
     return score;
   }
@@ -1963,8 +1975,8 @@ Only include real providers that actually serve this location.`;
             break;
           case 'banks':
             searchQueries = [
-              `Bank of America Wells Fargo Chase Citibank ${location}`,
-              `banks credit unions in ${location}`
+              `banks near ${location}`,
+              `credit unions near ${location}`
             ];
             category = 'Bank';
             break;
@@ -1981,6 +1993,7 @@ Only include real providers that actually serve this location.`;
 
         const categoryResults = [];
         const seenPlaces = new Set();
+        const seenBankNames = new Set();
 
         // Search with each query to get both nationwide and local options
         for (const searchQuery of searchQueries) {
@@ -1990,12 +2003,25 @@ Only include real providers that actually serve this location.`;
             console.log(`Found ${places?.length || 0} places for query: ${searchQuery}`);
 
             if (places && places.length > 0) {
-              for (const place of places.slice(0, 15)) {
-                // Skip duplicates
+              for (const place of places.slice(0, 20)) {
+                // Skip duplicates by place_id
                 if (seenPlaces.has(place.place_id)) {
                   continue;
                 }
                 seenPlaces.add(place.place_id);
+
+                // For banks, also check for duplicate bank names (to avoid multiple branches of same bank)
+                if (category === 'Bank') {
+                  const normalizedName = place.name.toLowerCase()
+                    .replace(/\s+(bank|atm|branch|location).*$/i, '')
+                    .replace(/\s+/g, ' ')
+                    .trim();
+                  
+                  if (seenBankNames.has(normalizedName)) {
+                    continue;
+                  }
+                  seenBankNames.add(normalizedName);
+                }
 
                 const details = await getPlaceDetails(place.place_id);
 
