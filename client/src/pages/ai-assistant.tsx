@@ -653,7 +653,7 @@ export default function AIAssistant() {
                 <Button
                   type="submit"
                   disabled={generatePlan.isPending}
-                  className="w-full"
+                  className="w-full bg-green-600 hover:bg-green-700"
                   size="lg"
                 >
                   {generatePlan.isPending
