@@ -34,7 +34,7 @@ export default function LocalServices() {
   const [showResults, setShowResults] = useState(false);
   const [searchLocation, setSearchLocation] = useState('');
   const [hasCompletedActions, setHasCompletedActions] = useState(false);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>(['schools', 'healthcare', 'pharmacies', 'veterinary', 'gyms', 'banks', 'storage']);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const { toast } = useToast();
 
   // Load location from URL params or localStorage
@@ -46,7 +46,6 @@ export default function LocalServices() {
     // Use destination for local services search
     if (toParam) {
       setSearchLocation(toParam);
-      handleSearch(toParam);
     }
   }, []);
 
