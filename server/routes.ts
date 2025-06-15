@@ -710,7 +710,7 @@ Only include real companies that actually serve ${fromLocation} to ${toLocation}
       // Format all companies with consistent structure and proximity scoring
       const formattedCompanies = allCompanies.map((company, index) => {
         let proximityScore = 50; // Default score
-        
+
         // Higher proximity score for companies explicitly serving the origin location
         if (company.category?.includes("Local") || 
             company.category?.includes("Google Verified") ||
@@ -718,19 +718,19 @@ Only include real companies that actually serve ${fromLocation} to ${toLocation}
             company.description?.toLowerCase().includes(fromCity.toLowerCase())) {
           proximityScore = 90;
         }
-        
+
         // Medium score for regional companies
         if (company.category?.includes("Regional") ||
             company.description?.toLowerCase().includes(fromState.toLowerCase())) {
           proximityScore = 70;
         }
-        
+
         // Lower score for national companies (still important but not location-specific)
         if (company.category?.includes("National") || 
             company.category?.includes("Alternative")) {
           proximityScore = 30;
         }
-        
+
         // Boost score for highly rated local companies
         if (proximityScore >= 70 && company.rating >= 4.0) {
           proximityScore += 10;
@@ -786,7 +786,9 @@ Only include real companies that actually serve ${fromLocation} to ${toLocation}
   });
 
   // AI Recommendations endpoint
-  app.post("/api/ai-recommendations", async (req, res) => {
+  appThis change increases the number of local service results from Google Places API from 3 to 10 per category.
+```
+.post("/api/ai-recommendations", async (req, res) => {
     try {
       const { query, fromLocation, toLocation, moveDate, familySize, budget, priorities } = req.body;
 
@@ -1263,7 +1265,7 @@ Only include real providers that actually serve this location.`;
       // First, identify where the street address likely ends
       const addressParts = normalizedAddress.split(',');
       let streetPart = addressParts[0] || normalizedAddress;
-      
+
       if (addressParts.length > 1) {
         // Apply suffix abbreviations only to the street address part (before first comma)
         streetPart = streetPart
@@ -1275,7 +1277,7 @@ Only include real providers that actually serve this location.`;
           .replace(/\b(Drive|Dr\.?)\s*$/gi, 'Dr')
           .replace(/\b(Lane|Ln\.?)\s*$/gi, 'Ln')
           .replace(/\b(Court|Ct\.?)\s*$/gi, 'Ct');
-        
+
         // Reconstruct the address
         normalizedAddress = streetPart + ', ' + addressParts.slice(1).join(', ');
       } else {
@@ -1286,14 +1288,14 @@ Only include real providers that actually serve this location.`;
           // Look for state pattern to identify where street address ends
           const statePattern = /\b[A-Z]{2}\b/;
           let streetEndIndex = words.length;
-          
+
           for (let i = 0; i < words.length; i++) {
             if (statePattern.test(words[i])) {
               streetEndIndex = i;
               break;
             }
           }
-          
+
           // Only abbreviate suffix-like words that appear at the end of the street portion
           if (streetEndIndex > 2) {
             const possibleSuffix = words[streetEndIndex - 2]; // Word before city
@@ -1318,7 +1320,7 @@ Only include real providers that actually serve this location.`;
       if (normalizedAddress.includes(',')) {
         // Address already has commas, just clean up extra spaces around commas
         normalizedAddress = normalizedAddress.replace(/\s*,\s*/g, ', ');
-        
+
         // Ensure proper capitalization for USPS standards
         normalizedAddress = normalizedAddress.replace(/\b\w+/g, word => {
           // Keep state abbreviations uppercase
@@ -1338,15 +1340,15 @@ Only include real providers that actually serve this location.`;
 
           // Split the part before state/zip into words
           const words = beforeStateZip.split(/\s+/);
-          
+
           if (words.length >= 4) {
             // Try to intelligently separate street address from city
             // Look for patterns like "123 Main Street CityName" -> "123 Main Street, CityName"
-            
+
             // Find the likely boundary between street and city
             let streetEndIndex = -1;
             const streetSuffixes = ['St', 'Ave', 'Rd', 'Blvd', 'Trl', 'Dr', 'Ln', 'Ct', 'Way', 'Pl', 'Pkwy', 'Cir'];
-            
+
             // Look for street suffix to determine where street ends
             for (let i = 1; i < words.length - 1; i++) {
               if (streetSuffixes.includes(words[i])) {
@@ -1354,7 +1356,7 @@ Only include real providers that actually serve this location.`;
                 break;
               }
             }
-            
+
             if (streetEndIndex > 0 && streetEndIndex < words.length - 1) {
               // Found a street suffix, split there
               const streetPart = words.slice(0, streetEndIndex + 1).join(' ');
@@ -1364,7 +1366,7 @@ Only include real providers that actually serve this location.`;
               // No clear street suffix found, assume last word(s) are city
               // For cases like "3201 Stonecrop TrailArgyle" - need to handle concatenated city names
               const lastWord = words[words.length - 1];
-              
+
               // Check if last word might be a concatenated "StreetCity" pattern
               if (lastWord.length > 8 && /^[A-Z][a-z]+[A-Z][a-z]+/.test(lastWord)) {
                 // Looks like concatenated street+city, try to split it
@@ -1604,8 +1606,7 @@ Only include real providers that actually serve this location.`;
     try {
       const communication = await storage.createCommunication(req.body);
       res.json({ communication });
-    } catch (error) {
-      console.error("Error creating communication:", error);
+    } catch (error: "Error creating communication:", error);
       res.status(500).json({ error: "Failed to create communication" });
     }
   });
@@ -1900,7 +1901,7 @@ Only include real providers that actually serve this location.`;
           console.log(`Found ${places?.length || 0} places for ${category}`);
 
           if (places && places.length > 0) {
-            const limitedPlaces = places.slice(0, 3); // Limit to 3 per category
+            const limitedPlaces = places.slice(0, 10); // Increased to 10 per category for comprehensive coverage
 
             for (const place of limitedPlaces) {
               const details = await getPlaceDetails(place.place_id);
