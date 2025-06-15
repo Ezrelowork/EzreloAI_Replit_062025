@@ -1861,10 +1861,11 @@ Only include real providers that actually serve this location.`;
         'Albertsons Pharmacy', 'Publix Pharmacy', 'Meijer Pharmacy'
       ],
       'Bank': [
-        'Bank of America', 'Wells Fargo', 'Chase', 'JPMorgan Chase', 'Citibank',
-        'U.S. Bank', 'PNC Bank', 'Capital One', 'TD Bank', 'BB&T', 'Truist',
-        'Fifth Third Bank', 'Regions Bank', 'KeyBank', 'SunTrust', 'Citizens Bank',
-        'HSBC', 'American Express', 'Discover Bank'
+        'Bank of America', 'Wells Fargo', 'Chase', 'JPMorgan Chase', 'Citibank', 'Citi',
+        'U.S. Bank', 'US Bank', 'PNC Bank', 'PNC', 'Capital One', 'TD Bank', 'BB&T', 'Truist',
+        'Fifth Third Bank', 'Fifth Third', 'Regions Bank', 'Regions', 'KeyBank', 'Key Bank',
+        'SunTrust', 'Citizens Bank', 'Citizens', 'HSBC', 'American Express', 'Discover Bank',
+        'Navy Federal', 'USAA', 'Ally Bank', 'Ally', 'Charles Schwab', 'Schwab', 'Fidelity'
       ],
       'Storage Facility': [
         'Public Storage', 'Extra Space Storage', 'Life Storage', 'CubeSmart',
@@ -1875,19 +1876,37 @@ Only include real providers that actually serve this location.`;
     };
 
     const companies = nationwideCompanies[category as keyof typeof nationwideCompanies] || [];
-    return companies.some(company => 
-      name.toLowerCase().includes(company.toLowerCase()) ||
-      company.toLowerCase().includes(name.toLowerCase())
-    );
+    const lowerName = name.toLowerCase();
+    
+    // More flexible matching for banks
+    return companies.some(company => {
+      const lowerCompany = company.toLowerCase();
+      // Check if company name is contained in the result name or vice versa
+      return lowerName.includes(lowerCompany) || lowerCompany.includes(lowerName) ||
+             // Also check for partial matches (e.g., "Wells Fargo Bank" contains "Wells Fargo")
+             lowerName.split(' ').some(word => lowerCompany.split(' ').includes(word) && word.length > 3);
+    });
   }
 
   // Helper function to get priority score for sorting
   function getPriorityScore(name: string, category: string, rating: number): number {
     let score = 0;
 
-    // Boost nationwide companies significantly
-    if (isNationwideCompany(name, category)) {
-      score += 1000;
+    // Special boost for major banks
+    if (category === 'Bank') {
+      const majorBanks = ['Bank of America', 'Wells Fargo', 'Chase', 'JPMorgan', 'Citibank', 'Citi', 'U.S. Bank', 'US Bank'];
+      const lowerName = name.toLowerCase();
+      
+      if (majorBanks.some(bank => lowerName.includes(bank.toLowerCase()))) {
+        score += 2000; // Extra boost for major national banks
+      } else if (isNationwideCompany(name, category)) {
+        score += 1500; // High boost for other nationwide banks
+      }
+    } else {
+      // Boost nationwide companies significantly for other categories
+      if (isNationwideCompany(name, category)) {
+        score += 1000;
+      }
     }
 
     // Add rating boost (0-50 points based on rating)
@@ -2026,7 +2045,18 @@ Only include real providers that actually serve this location.`;
         // Add all results for this category
         localServices.push(...categoryResults);
 
-        console.log(`${category}: Found ${categoryResults.length} total, ${categoryResults.filter(s => s.isNationwide).length} nationwide companies`);
+        if (category === 'Bank') {
+          console.log(`${category}: Found ${categoryResults.length} total results`);
+          console.log(`Nationwide banks found: ${categoryResults.filter(s => s.isNationwide).length}`);
+          console.log(`Top 5 results by priority:`, categoryResults.slice(0, 5).map(s => ({
+            name: s.provider,
+            priority: s.priorityScore,
+            isNationwide: s.isNationwide,
+            rating: s.rating
+          })));
+        } else {
+          console.log(`${category}: Found ${categoryResults.length} total, ${categoryResults.filter(s => s.isNationwide).length} nationwide companies`);
+        }
       }
 
       res.json({ services: localServices });
