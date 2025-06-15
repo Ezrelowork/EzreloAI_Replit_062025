@@ -1878,13 +1878,24 @@ Only include real providers that actually serve this location.`;
     const companies = nationwideCompanies[category as keyof typeof nationwideCompanies] || [];
     const lowerName = name.toLowerCase();
     
-    // More flexible matching for banks
+    // Stricter matching to avoid false positives
     return companies.some(company => {
       const lowerCompany = company.toLowerCase();
-      // Check if company name is contained in the result name or vice versa
-      return lowerName.includes(lowerCompany) || lowerCompany.includes(lowerName) ||
-             // Also check for partial matches (e.g., "Wells Fargo Bank" contains "Wells Fargo")
-             lowerName.split(' ').some(word => lowerCompany.split(' ').includes(word) && word.length > 3);
+      
+      // Exact match or company name contains the nationwide company name
+      if (lowerName.includes(lowerCompany)) {
+        return true;
+      }
+      
+      // For multi-word companies, check if all significant words are present
+      const companyWords = lowerCompany.split(' ').filter(word => word.length > 2);
+      const nameWords = lowerName.split(' ');
+      
+      if (companyWords.length > 1) {
+        return companyWords.every(word => nameWords.some(nameWord => nameWord.includes(word)));
+      }
+      
+      return false;
     });
   }
 
@@ -1896,21 +1907,43 @@ Only include real providers that actually serve this location.`;
     if (category === 'Bank') {
       const lowerName = name.toLowerCase();
       
-      // Top tier major banks (highest priority)
-      const topTierBanks = ['bank of america', 'wells fargo', 'chase', 'jpmorgan'];
-      if (topTierBanks.some(bank => lowerName.includes(bank))) {
+      // Top tier major banks (highest priority) - more comprehensive matching
+      if (lowerName.includes('bank of america') || lowerName.includes('bofa')) {
+        score += 3100; // Highest priority for Bank of America
+      }
+      else if (lowerName.includes('wells fargo')) {
+        score += 3050;
+      }
+      else if (lowerName.includes('chase') && !lowerName.includes('chase bank')) {
+        score += 3000;
+      }
+      else if (lowerName.includes('jpmorgan') || lowerName.includes('jp morgan')) {
         score += 3000;
       }
       // Second tier major banks
-      else if (['citibank', 'citi', 'u.s. bank', 'us bank', 'pnc'].some(bank => lowerName.includes(bank))) {
+      else if (lowerName.includes('citibank') || (lowerName.includes('citi') && !lowerName.includes('citizens'))) {
         score += 2500;
       }
-      // Other nationwide banks
+      else if (lowerName.includes('u.s. bank') || lowerName.includes('us bank')) {
+        score += 2450;
+      }
+      else if (lowerName.includes('pnc') && lowerName.includes('bank')) {
+        score += 2400;
+      }
+      // Other major nationwide banks
+      else if (lowerName.includes('capital one') || lowerName.includes('td bank') || lowerName.includes('truist')) {
+        score += 2300;
+      }
+      // Other nationwide banks (check against our list)
       else if (isNationwideCompany(name, category)) {
         score += 2000;
       }
-      // Regional banks and credit unions
-      else if (lowerName.includes('credit union') || lowerName.includes('community') || lowerName.includes('federal')) {
+      // Credit unions (should be lower priority than major banks)
+      else if (lowerName.includes('credit union') || lowerName.includes('federal credit')) {
+        score += 1500;
+      }
+      // Regional and community banks
+      else if (lowerName.includes('community') || lowerName.includes('regional') || lowerName.includes('state bank')) {
         score += 1000;
       }
       // Local banks
@@ -1975,6 +2008,8 @@ Only include real providers that actually serve this location.`;
             break;
           case 'banks':
             searchQueries = [
+              `Bank of America Wells Fargo Chase Citibank ${location}`,
+              `U.S. Bank PNC Capital One ${location}`,
               `banks near ${location}`,
               `credit unions near ${location}`
             ];
@@ -2074,12 +2109,15 @@ Only include real providers that actually serve this location.`;
         if (category === 'Bank') {
           console.log(`${category}: Found ${categoryResults.length} total results`);
           console.log(`Nationwide banks found: ${categoryResults.filter(s => s.isNationwide).length}`);
-          console.log(`Top 5 results by priority:`, categoryResults.slice(0, 5).map(s => ({
+          console.log(`All bank results:`, categoryResults.map(s => ({
             name: s.provider,
             priority: s.priorityScore,
             isNationwide: s.isNationwide,
             rating: s.rating
           })));
+          console.log(`Bank of America specifically found:`, categoryResults.filter(s => 
+            s.provider.toLowerCase().includes('bank of america') || s.provider.toLowerCase().includes('bofa')
+          ));
         } else {
           console.log(`${category}: Found ${categoryResults.length} total, ${categoryResults.filter(s => s.isNationwide).length} nationwide companies`);
         }
