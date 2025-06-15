@@ -261,7 +261,7 @@ export default function LocalServices() {
                 ))}
               </div>
               <p className="text-xs mt-2 text-gray-500">
-                Click categories to toggle them on/off. Selected categories will be searched.
+                Click categories to toggle them on/off. Selected category will be searched.
               </p>
             </div>
           </CardContent>
