@@ -786,9 +786,7 @@ Only include real companies that actually serve ${fromLocation} to ${toLocation}
   });
 
   // AI Recommendations endpoint
-  appThis change increases the number of local service results from Google Places API from 3 to 10 per category.
-```
-.post("/api/ai-recommendations", async (req, res) => {
+  app.post("/api/ai-recommendations", async (req, res) => {
     try {
       const { query, fromLocation, toLocation, moveDate, familySize, budget, priorities } = req.body;
 
