@@ -80,7 +80,7 @@ export default function MovingJourney() {
       week: "Week 2",
       category: "Essential Services",
       completed: false,
-      position: { x: "840px", y: "560px" }, // 70% of 1200px = 840px, 70% of 800px = 560px
+      position: { x: "865px", y: "530px" }, // moved right 25px (840->865) and up 30px (560->530)
       icon: Zap
     },
     {
