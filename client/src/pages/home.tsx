@@ -78,7 +78,8 @@ export default function Home() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <Card className="text-center hover:shadow-md transition-shadow duration-200">
               <CardContent className="p-8">
-                <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-primary/10 text-primary mb-6">
+                
+                <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-[#FFC857] text-primary mb-6">
                   <i className="fas fa-comments text-2xl"></i>
                 </div>
 
@@ -91,7 +92,8 @@ export default function Home() {
 
             <Card className="text-center hover:shadow-md transition-shadow duration-200">
               <CardContent className="p-8">
-                <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-primary/10 text-primary mb-6">
+                
+                <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-[#FFC857] text-primary mb-6">
                   <i className="fas fa-route text-2xl"></i>
                 </div>
 
@@ -104,7 +106,8 @@ export default function Home() {
 
             <Card className="text-center hover:shadow-md transition-shadow duration-200">
               <CardContent className="p-8">
-                <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-primary/10 text-primary mb-6">
+                
+                <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-[#FFC857] text-primary mb-6">
                   <i className="fas fa-check-circle text-2xl"></i>
                 </div>
 
