@@ -46,7 +46,7 @@ export default function LocalServices() {
     const to = urlParams.get('to') || localStorage.getItem('aiToLocation') || '';
 
     // Use destination for local services search - prioritize URL params over localStorage
-    const destinationAddress = toParam || localStorage.getItem('aiToLocation') || '';
+    const destinationAddress = to || localStorage.getItem('aiToLocation') || '';
 
     if (destinationAddress && destinationAddress !== 'undefined' && destinationAddress.trim() !== '') {
       console.log('Auto-filling destination address:', destinationAddress);
