@@ -34,7 +34,7 @@ export default function LocalServices() {
   const [showResults, setShowResults] = useState(false);
   const [searchLocation, setSearchLocation] = useState('');
   const [hasCompletedActions, setHasCompletedActions] = useState(false);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [currentPage, setCurrentPage] = useState(1);
   const [resultsPerPage] = useState(5);
   const { toast } = useToast();
@@ -42,12 +42,12 @@ export default function LocalServices() {
   // Load location from URL params or localStorage
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const fromParam = urlParams.get('from') || localStorage.getItem('aiFromLocation') || '';
-    const toParam = urlParams.get('to') || localStorage.getItem('aiToLocation') || '';
-    
+    const from = urlParams.get('from') || localStorage.getItem('aiFromLocation') || '';
+    const to = urlParams.get('to') || localStorage.getItem('aiToLocation') || '';
+
     // Use destination for local services search - prioritize URL params over localStorage
     const destinationAddress = toParam || localStorage.getItem('aiToLocation') || '';
-    
+
     if (destinationAddress && destinationAddress !== 'undefined' && destinationAddress.trim() !== '') {
       console.log('Auto-filling destination address:', destinationAddress);
       setSearchLocation(destinationAddress);
@@ -68,10 +68,10 @@ export default function LocalServices() {
       return;
     }
 
-    if (selectedCategories.length === 0) {
+    if (!selectedCategory) {
       toast({
         title: "Select Services",
-        description: "Please select at least one service category to search for.",
+        description: "Please select a service category to search for.",
         variant: "destructive",
       });
       return;
@@ -81,9 +81,9 @@ export default function LocalServices() {
     try {
       const response = await apiRequest('POST', '/api/search-local-services', {
         location: location.trim(),
-        serviceTypes: selectedCategories
+        serviceTypes: [selectedCategory]
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         // Limit to maximum 15 results and reset to page 1
@@ -106,7 +106,7 @@ export default function LocalServices() {
 
   const handleProviderClick = (provider: LocalService) => {
     setHasCompletedActions(true); // Mark provider interaction
-    
+
     // Track referral click
     apiRequest('POST', '/api/track-referral', {
       provider: provider.provider,
@@ -149,13 +149,7 @@ export default function LocalServices() {
   };
 
   const toggleCategory = (categoryKey: string) => {
-    setSelectedCategories(prev => {
-      if (prev.includes(categoryKey)) {
-        return prev.filter(cat => cat !== categoryKey);
-      } else {
-        return [...prev, categoryKey];
-      }
-    });
+    setSelectedCategory(prev => (prev === categoryKey ? '' : categoryKey));
   };
 
   const getServiceCategoryName = (key: string) => {
@@ -185,7 +179,7 @@ export default function LocalServices() {
                   const from = urlParams.get('from');
                   const to = urlParams.get('to');
                   const date = urlParams.get('date');
-                  
+
                   let journeyUrl = '/moving-journey';
                   if (from || to || date) {
                     const params = new URLSearchParams();
@@ -194,7 +188,7 @@ export default function LocalServices() {
                     if (date) params.set('date', date);
                     journeyUrl += `?${params.toString()}`;
                   }
-                  
+
                   window.location.href = journeyUrl;
                 }}
                 className="flex items-center gap-2"
@@ -254,9 +248,9 @@ export default function LocalServices() {
                 {['schools', 'healthcare', 'pharmacies', 'veterinary', 'gyms', 'banks', 'storage'].map((categoryKey) => (
                   <Badge
                     key={categoryKey}
-                    variant={selectedCategories.includes(categoryKey) ? "default" : "outline"}
+                    variant={selectedCategory === categoryKey ? "default" : "outline"}
                     className={`cursor-pointer transition-all hover:scale-105 ${
-                      selectedCategories.includes(categoryKey) 
+                      selectedCategory === categoryKey
                         ? 'bg-blue-600 text-white hover:bg-blue-700' 
                         : 'hover:bg-blue-50 hover:border-blue-300'
                     }`}
@@ -308,10 +302,10 @@ export default function LocalServices() {
                     const startIndex = (currentPage - 1) * resultsPerPage;
                     const endIndex = startIndex + resultsPerPage;
                     const currentProviders = providers.slice(startIndex, endIndex);
-                    
+
                     return currentProviders.map((provider, index) => {
                       const IconComponent = getCategoryIcon(provider.category);
-                      
+
                       return (
                         <Card key={index} className="hover:shadow-lg transition-shadow">
                           <CardContent className="p-6">
@@ -334,7 +328,7 @@ export default function LocalServices() {
                                     </div>
                                   )}
                                   <p className="text-gray-600 mb-3">{provider.description}</p>
-                                  
+
                                   {provider.address && (
                                     <div className="flex items-center gap-1 mb-2 text-sm text-gray-600">
                                       <MapPin className="w-4 h-4" />
@@ -343,7 +337,7 @@ export default function LocalServices() {
                                   )}
                                 </div>
                               </div>
-                              
+
                               <div className="text-right">
                                 <div className="text-lg font-semibold text-green-600 mb-1">
                                   {provider.estimatedCost}
@@ -446,7 +440,7 @@ export default function LocalServices() {
                                   </div>
                                 )}
                               </div>
-                              
+
                               <div className="flex gap-2">
                                 {provider.phone && (
                                   <Button 
@@ -475,7 +469,7 @@ export default function LocalServices() {
                     });
                   })()}
                 </div>
-                
+
                 {/* Pagination Controls */}
                 {providers.length > resultsPerPage && (
                   <div className="flex items-center justify-center space-x-4 mt-8">
@@ -487,7 +481,7 @@ export default function LocalServices() {
                     >
                       Previous
                     </Button>
-                    
+
                     <div className="flex items-center space-x-2">
                       {(() => {
                         const totalPages = Math.ceil(providers.length / resultsPerPage);
@@ -508,7 +502,7 @@ export default function LocalServices() {
                         return pages;
                       })()}
                     </div>
-                    
+
                     <Button
                       variant="outline"
                       size="sm"
@@ -519,7 +513,7 @@ export default function LocalServices() {
                     </Button>
                   </div>
                 )}
-                
+
                 {/* Results Info */}
                 <div className="text-center text-sm text-gray-600 mt-4">
                   Showing {Math.min((currentPage - 1) * resultsPerPage + 1, providers.length)} - {Math.min(currentPage * resultsPerPage, providers.length)} of {providers.length} results
@@ -546,7 +540,7 @@ export default function LocalServices() {
           </div>
         )}
 
-        
+
       </div>
     </div>
   );
