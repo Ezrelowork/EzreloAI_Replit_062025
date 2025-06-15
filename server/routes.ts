@@ -779,8 +779,7 @@ Only include real companies that actually serve ${fromLocation} to ${toLocation}
 
     } catch (error) {
       console.error("Moving companies search error:", error);
-      res.status(500).json```text
-({ 
+      res.status(500).json({ 
         error: "Search failed",
         companies: []
       });
