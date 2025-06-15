@@ -377,10 +377,10 @@ export default function AIAssistant() {
               </Link>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">
-                  AI Relocation Assistant
+                  AI Relocation Concierge
                 </h1>
                 <p className="text-sm text-gray-600">
-                  Create your personalized moving plan
+                  Create your personalized moving plan with our AI engine
                 </p>
               </div>
             </div>
@@ -401,7 +401,7 @@ export default function AIAssistant() {
               <circle
                 cx="24"
                 cy="24"
-                r="16"
+                r="20"
                 fill="url(#brainGradient)"
                 stroke="#1e40af"
                 strokeWidth="2"
@@ -458,14 +458,9 @@ export default function AIAssistant() {
                 </radialGradient>
               </defs>
             </svg>
-            <h1 className="text-3xl font-bold text-gray-900">
-              AI Relocation Concierge
-            </h1>
+            
           </div>
-          <p className="text-lg text-gray-600">
-            Get your personalized moving strategy and action plan
-          </p>
-        </div>
+            </div>
 
         {!aiResponse ? (
           <Card>
