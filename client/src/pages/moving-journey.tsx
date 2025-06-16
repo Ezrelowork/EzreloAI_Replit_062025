@@ -442,7 +442,7 @@ To begin your moving journey, click the "Hire Moving Company" sign below. This i
       </header>
 
       {/* Main Journey Container */}
-      <div className="relative overflow-auto bg-gray-100 mt-20" style={{ height: 'calc(100vh - 160px)' }}>
+      <div className="relative bg-gray-100 mt-20" style={{ height: 'calc(100vh - 160px)', overflow: 'hidden' }}>
         {/* Edit Mode Indicator */}
         {isEditMode && (
           <div className="absolute top-4 left-4 z-50 bg-red-600 text-white px-4 py-2 rounded-lg shadow-lg animate-pulse">
