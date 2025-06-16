@@ -564,29 +564,7 @@ To begin your moving journey, click the "Hire Moving Company" sign below. This i
         </div>
       </div>
 
-      {/* Legend */}
-      <div className="bg-white/90 backdrop-blur-lg border-t border-gray-100 p-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-wrap items-center justify-center gap-6 text-sm">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-red-500 rounded-full"></div>
-              <span>High Priority</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
-              <span>Medium Priority</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-              <span>Low Priority</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 text-green-600" />
-              <span>Completed</span>
-            </div>
-          </div>
-        </div>
-      </div>
+     
 
       {/* Task Modal */}
       {currentTask && (
