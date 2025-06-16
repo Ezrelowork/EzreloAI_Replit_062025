@@ -77,6 +77,7 @@ export default function MovingCompanies() {
   const [hasCompletedActions, setHasCompletedActions] = useState(false);
   const [quotesRequested, setQuotesRequested] = useState<Set<string>>(new Set());
   const [showQuestionnaireForm, setShowQuestionnaireForm] = useState(false);
+  const [isGeneratingEmail, setIsGeneratingEmail] = useState<string | null>(null);
   const [questionnaireData, setQuestionnaireData] = useState({
     currentAddress: "",
     destinationAddress: "",
@@ -305,6 +306,65 @@ export default function MovingCompanies() {
       window.open(company.website, '_blank');
       setHasCompletedActions(true);
     }
+  };
+
+  // AI-powered quote request
+  const requestAIQuote = useMutation({
+    mutationFn: async (company: MovingCompany) => {
+      // Check if questionnaire is filled out
+      const hasBasicInfo = questionnaireData.homeSize && questionnaireData.packingServices;
+      
+      if (!hasBasicInfo) {
+        throw new Error('questionnaire_required');
+      }
+
+      const response = await apiRequest("POST", "/api/share-with-movers", {
+        questionnaire: questionnaireData,
+        moveDetails: {
+          from: `${moveDetails.fromAddress ? moveDetails.fromAddress + ', ' : ''}${moveDetails.fromCity}${moveDetails.fromState ? ', ' + moveDetails.fromState : ''}${moveDetails.fromZip ? ' ' + moveDetails.fromZip : ''}`,
+          to: `${moveDetails.toAddress ? moveDetails.toAddress + ', ' : ''}${moveDetails.toCity}${moveDetails.toState ? ', ' + moveDetails.toState : ''}${moveDetails.toZip ? ' ' + moveDetails.toZip : ''}`,
+          date: moveDetails.moveDate
+        },
+        selectedMovers: [company],
+        customerEmail: questionnaireData.email,
+        customerName: "Ezrelo Customer"
+      });
+      
+      return response.json();
+    },
+    onSuccess: (data, company) => {
+      setQuotesRequested(prev => new Set(prev).add(company.provider));
+      setHasCompletedActions(true);
+      setIsGeneratingEmail(null);
+      
+      toast({
+        title: "AI Quote Request Sent!",
+        description: `Professional email sent to ${company.provider} with your detailed requirements`,
+      });
+    },
+    onError: (error: any, company) => {
+      setIsGeneratingEmail(null);
+      
+      if (error.message === 'questionnaire_required') {
+        toast({
+          title: "Questionnaire Required",
+          description: "Please fill out the questionnaire first to send AI-generated quote requests",
+          variant: "destructive",
+        });
+        setShowQuestionnaireForm(true);
+      } else {
+        toast({
+          title: "Request Failed",
+          description: "Unable to send AI quote request. Please try the regular quote button.",
+          variant: "destructive",
+        });
+      }
+    },
+  });
+
+  const handleAIQuoteRequest = (company: MovingCompany) => {
+    setIsGeneratingEmail(company.provider);
+    requestAIQuote.mutate(company);
   };
 
   const canCompleteTask = () => {
@@ -757,34 +817,60 @@ export default function MovingCompanies() {
                           )}
 
                           {/* Action Buttons */}
-                          <div className="flex gap-3 pt-2">
-                            <Button 
-                              onClick={() => handleCompanyClick(company, "Get Quote")}
-                              className="flex-1"
-                              variant={quotesRequested.has(company.provider) ? "secondary" : "default"}
-                            >
-                              <ExternalLink className="w-4 h-4 mr-2" />
-                              {quotesRequested.has(company.provider) ? "Quote Requested" : "Get Quote"}
-                            </Button>
-                            <Button 
-                              variant="outline" 
-                              onClick={() => handleCompanyClick(company, "Visit Website")}
-                            >
-                              <Globe className="w-4 h-4 mr-2" />
-                              Website
-                            </Button>
-                            {company.phone && (
+                          <div className="flex gap-2 pt-2">
+                            <div className="flex flex-col gap-2 flex-1">
+                              <Button 
+                                onClick={() => handleAIQuoteRequest(company)}
+                                className="w-full bg-purple-600 hover:bg-purple-700"
+                                disabled={isGeneratingEmail === company.provider || quotesRequested.has(company.provider)}
+                              >
+                                {isGeneratingEmail === company.provider ? (
+                                  <>
+                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                    Generating...
+                                  </>
+                                ) : quotesRequested.has(company.provider) ? (
+                                  <>
+                                    <CheckCircle className="w-4 h-4 mr-2" />
+                                    AI Quote Sent
+                                  </>
+                                ) : (
+                                  <>
+                                    <Package className="w-4 h-4 mr-2" />
+                                    Get AI Quote
+                                  </>
+                                )}
+                              </Button>
+                              <Button 
+                                onClick={() => handleCompanyClick(company, "Get Quote")}
+                                variant="outline"
+                                className="w-full text-xs"
+                              >
+                                <ExternalLink className="w-3 h-3 mr-1" />
+                                Manual Quote
+                              </Button>
+                            </div>
+                            <div className="flex flex-col gap-2">
                               <Button 
                                 variant="outline" 
-                                onClick={() => {
-                                  window.open(`tel:${company.phone}`, '_self');
-                                  setHasCompletedActions(true);
-                                }}
+                                onClick={() => handleCompanyClick(company, "Visit Website")}
+                                className="px-3"
                               >
-                                <Phone className="w-4 h-4 mr-2" />
-                                Call
+                                <Globe className="w-4 h-4" />
                               </Button>
-                            )}
+                              {company.phone && (
+                                <Button 
+                                  variant="outline" 
+                                  onClick={() => {
+                                    window.open(`tel:${company.phone}`, '_self');
+                                    setHasCompletedActions(true);
+                                  }}
+                                  className="px-3"
+                                >
+                                  <Phone className="w-4 h-4" />
+                                </Button>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </CardContent>
@@ -805,7 +891,7 @@ export default function MovingCompanies() {
                   Estimate Questionnaire
                 </CardTitle>
                 <CardDescription>
-                  Prepare for accurate moving quotes by having these details ready when you call.
+                  Fill this out to send AI-generated professional emails to movers for instant quote requests.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -814,18 +900,18 @@ export default function MovingCompanies() {
                   className="w-full bg-purple-600 hover:bg-purple-700 text-white"
                 >
                   <Package className="w-4 h-4 mr-2" />
-                  Fill Out Questionnaire
+                  Enable AI Quotes
                 </Button>
 
                 <div className="mt-4 p-3 bg-purple-50 rounded-lg border border-purple-200">
-                  <p className="text-sm font-medium text-purple-900 mb-2">Key Information Needed:</p>
+                  <p className="text-sm font-medium text-purple-900 mb-2">🤖 AI Quote Benefits:</p>
                   <ul className="text-xs text-purple-800 space-y-1">
-                    <li>• Current and destination addresses</li>
-                    <li>• Moving date and home size</li>
-                    <li>• Number of floors at each location</li>
-                    <li>• Major items and inventory list</li>
-                    <li>• Packing service preferences</li>
-                    <li>• Special items and storage needs</li>
+                    <li>• Professional emails sent instantly</li>
+                    <li>• Complete move details included</li>
+                    <li>• Inventory automatically formatted</li>
+                    <li>• No phone calls or forms needed</li>
+                    <li>• Faster response from movers</li>
+                    <li>• Higher quality quotes received</li>
                   </ul>
                 </div>
               </CardContent>
