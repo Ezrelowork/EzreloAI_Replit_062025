@@ -481,30 +481,41 @@ To begin your moving journey, click the "Hire Moving Company" sign below. This i
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Reset Journey
               </Button>
-              <div className="flex flex-col items-end">
-                <Button
-                  onClick={() => setShowTaskPage(true)}
-                  className="bg-green-600 hover:bg-green-700"
-                >
-                  <Clipboard className="w-4 h-4 mr-2" />
-                  View All Tasks
-                </Button>
-                
-                {/* Streamlined Progress Bar */}
-                <div className="flex items-center gap-2 mt-2">
-                  <div className="flex items-center gap-1">
-                    <div className="w-4 h-4 bg-gradient-to-r from-blue-500 to-green-500 rounded-full flex items-center justify-center">
-                      <span className="text-xs font-bold text-white">{Math.round(progressPercentage)}%</span>
-                    </div>
-                    <span className="text-xs font-medium text-gray-700">{completedCount}/{totalTasks}</span>
+              <Button
+                onClick={() => setShowTaskPage(true)}
+                className="bg-green-600 hover:bg-green-700"
+              >
+                <Clipboard className="w-4 h-4 mr-2" />
+                View All Tasks
+              </Button>
+            </div>
+          </div>
+          
+          {/* Full-width Progress Bar at bottom of header */}
+          <div className="border-t border-gray-100 bg-gradient-to-r from-blue-50 to-green-50 px-4 sm:px-6 lg:px-8 py-3">
+            <div className="max-w-7xl mx-auto">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-green-500 rounded-full flex items-center justify-center shadow-sm">
+                    <span className="text-sm font-bold text-white">{Math.round(progressPercentage)}%</span>
                   </div>
-                  <div className="w-24 bg-gray-200 rounded-full h-1.5">
-                    <div 
-                      className="bg-gradient-to-r from-blue-500 to-green-500 h-1.5 rounded-full transition-all duration-500"
-                      style={{ width: `${progressPercentage}%` }}
-                    />
+                  <div>
+                    <div className="text-sm font-semibold text-gray-800">Journey Progress</div>
+                    <div className="text-xs text-gray-600">{completedCount} of {totalTasks} tasks completed</div>
                   </div>
                 </div>
+                <div className="flex items-center gap-2 text-xs text-gray-600">
+                  <Bot className="w-4 h-4 text-blue-600" />
+                  <span>AI Guided Experience</span>
+                </div>
+              </div>
+              
+              {/* Large Progress Bar */}
+              <div className="w-full bg-white rounded-full h-3 shadow-inner border border-gray-200">
+                <div 
+                  className="bg-gradient-to-r from-blue-500 via-blue-600 to-green-500 h-3 rounded-full transition-all duration-700 ease-out shadow-sm"
+                  style={{ width: `${progressPercentage}%` }}
+                />
               </div>
             </div>
           </div>
