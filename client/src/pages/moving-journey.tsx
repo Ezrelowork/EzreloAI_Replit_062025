@@ -94,10 +94,13 @@ export default function MovingJourney() {
 
   // Layout is now locked and finalized
 
-  // Define moving tasks with highway positions - Fixed pixel positions within 1200x800 container
-  // LOCKED POSITIONS - DO NOT REVERT: User specified exact coordinates
-  const movingTasks: MovingTask[] = [
-    {
+  // Dynamic task state - starts empty, populated by AI interactions
+  const [dynamicTasks, setDynamicTasks] = useState<MovingTask[]>([]);
+  const [lastAddedTask, setLastAddedTask] = useState<string | null>(null);
+
+  // Available task templates that AI can activate
+  const availableTaskTemplates: Record<string, MovingTask> = {
+    "moving-company": {
       id: "moving-company",
       title: "Hire Moving Company",
       description: "Research and book professional movers for your relocation",
@@ -105,10 +108,10 @@ export default function MovingJourney() {
       week: "Week 1",
       category: "Core Moving",
       completed: false,
-      position: { x: "290px", y: "550px" }, // Custom positioning: moved right 15px (230->245) and up 10px (580->570)
+      position: { x: "220px", y: "450px" }, // Left side for immediate action
       icon: Truck
     },
-    {
+    "utilities-setup": {
       id: "utilities-setup",
       title: "Set Up Utilities",
       description: "Arrange electricity, gas, water, and internet services",
@@ -116,10 +119,10 @@ export default function MovingJourney() {
       week: "Week 2",
       category: "Essential Services",
       completed: false,
-      position: { x: "865px", y: "470px" }, // moved right 25px (840->865) and up 30px (560->530)
+      position: { x: "600px", y: "350px" }, // Middle section
       icon: Zap
     },
-    {
+    "address-change": {
       id: "address-change",
       title: "Change Address",
       description: "Update address with banks, employers, and subscriptions",
@@ -127,10 +130,10 @@ export default function MovingJourney() {
       week: "Week 3",
       category: "Administrative",
       completed: false,
-      position: { x: "456px", y: "335px" }, // moved up 25px (360->335)
+      position: { x: "800px", y: "250px" }, // Right section
       icon: FileText
     },
-    {
+    "local-services": {
       id: "local-services",
       title: "Local Services",
       description: "Find schools, healthcare, gyms, and essential services",
@@ -138,10 +141,34 @@ export default function MovingJourney() {
       week: "Week 4",
       category: "Community",
       completed: false,
-      position: { x: "650px", y: "175px" }, // moved right 30px (600->630)
+      position: { x: "950px", y: "150px" }, // Far right
       icon: Building
     }
-  ];
+  };
+
+  // Function to add task from AI conversation
+  const addTaskFromAI = (taskId: string, isHighPriority = false) => {
+    const template = availableTaskTemplates[taskId];
+    if (!template) return;
+
+    const newTask = {
+      ...template,
+      // Make high priority tasks larger and more prominent
+      position: isHighPriority ? 
+        { x: "180px", y: "400px" } : // Large prominent position
+        template.position
+    };
+
+    setDynamicTasks(prev => {
+      if (prev.find(t => t.id === taskId)) return prev; // Don't duplicate
+      return [...prev, newTask];
+    });
+    
+    setLastAddedTask(taskId);
+    
+    // Clear the highlight after animation
+    setTimeout(() => setLastAddedTask(null), 3000);
+  };
 
   const toggleTaskCompletion = (taskId: string) => {
     setCompletedTasks(prev => {
@@ -161,10 +188,10 @@ export default function MovingJourney() {
   };
 
   const completedCount = completedTasks.size;
-  const totalTasks = movingTasks.length;
-  const progressPercentage = (completedCount / totalTasks) * 100;
+  const totalTasks = dynamicTasks.length;
+  const progressPercentage = totalTasks > 0 ? (completedCount / totalTasks) * 100 : 0;
 
-  // AI Conversation Mutation
+  // AI Conversation Mutation with task creation
   const aiConversationMutation = useMutation({
     mutationFn: async (message: string) => {
       const response = await apiRequest("POST", "/api/ai-conversation", {
@@ -173,12 +200,20 @@ export default function MovingJourney() {
           taskType: "moving-journey",
           taskTitle: "Moving Journey Overview",
           moveData,
-          conversationHistory: conversation.slice(-5)
+          conversationHistory: conversation.slice(-5),
+          currentTasks: dynamicTasks.map(t => t.id)
         }
       });
       return await response.json();
     },
     onSuccess: (data) => {
+      // Check if AI wants to create tasks
+      if (data.createTasks && Array.isArray(data.createTasks)) {
+        data.createTasks.forEach((taskId: string) => {
+          addTaskFromAI(taskId, data.highPriority || false);
+        });
+      }
+
       const aiMessage = {
         id: Date.now().toString(),
         role: 'assistant' as const,
@@ -222,22 +257,19 @@ export default function MovingJourney() {
       const welcomeMessage = {
         id: 'welcome',
         role: 'assistant' as const,
-        message: `Hi! I'm your AI moving assistant. I can see you're moving from ${moveData.from} to ${moveData.to}${moveData.date ? ` on ${new Date(moveData.date).toLocaleDateString()}` : ''}. 
+        message: `Welcome to your personalized moving journey! I'm your AI assistant, and I'll help create your path step by step.
 
-I can help you with:
-• Finding the best moving companies
-• Setting up utilities and services
-• Creating a personalized timeline
-• Answering questions about your new location
-• Prioritizing tasks based on your move date
+${moveData.from && moveData.to ? `I can see you're moving from ${moveData.from} to ${moveData.to}${moveData.date ? ` on ${new Date(moveData.date).toLocaleDateString()}` : ''}.` : 'Tell me about your move, and I\'ll start building your journey!'}
 
-What would you like help with today?`,
+As we chat, I'll add highway signs to your journey for each task we discuss. The more urgent tasks will appear larger and closer to help you prioritize.
+
+What would you like to tackle first?`,
         timestamp: new Date(),
         suggestions: [
-          "Find moving companies",
-          "Set up utilities",
+          "I need to find movers",
+          "Help me plan my timeline", 
           "What should I do first?",
-          "Tell me about my new area"
+          "I need to set up utilities"
         ]
       };
       setConversation([welcomeMessage]);
@@ -380,25 +412,46 @@ What would you like help with today?`,
             transform: 'none'
           }}
         >
-          {/* Dynamic Highway Signs with AI Enhancement */}
-          {movingTasks.map((task) => (
+          {/* Dynamic Highway Signs - Appear from AI conversations */}
+          {dynamicTasks.map((task) => (
             <div
               key={task.id}
-              className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer hover:scale-105 transition-all duration-300 group"
+              className={`absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer hover:scale-105 transition-all duration-500 group ${
+                lastAddedTask === task.id ? 'animate-bounce scale-110' : ''
+              }`}
               style={{
                 left: task.position.x,
                 top: task.position.y,
+                // Make recently added tasks larger and more prominent
+                transform: lastAddedTask === task.id ? 
+                  'translate(-50%, -50%) scale(1.2)' : 
+                  'translate(-50%, -50%)',
+                zIndex: lastAddedTask === task.id ? 30 : 20
               }}
               onClick={() => handleSignClick(task)}
             >
-              <DynamicHighwaySign
-                title={task.title}
-                description={task.description}
-                week={task.week}
-                priority={task.priority}
-                completed={completedTasks.has(task.id)}
-                onClick={() => handleSignClick(task)}
-              />
+              <div className={lastAddedTask === task.id ? 'relative' : ''}>
+                {/* Glow effect for new tasks */}
+                {lastAddedTask === task.id && (
+                  <div className="absolute inset-0 bg-blue-400 rounded-lg blur-xl opacity-50 animate-pulse scale-110"></div>
+                )}
+                
+                <DynamicHighwaySign
+                  title={task.title}
+                  description={task.description}
+                  week={task.week}
+                  priority={task.priority}
+                  completed={completedTasks.has(task.id)}
+                  onClick={() => handleSignClick(task)}
+                />
+                
+                {/* New task indicator */}
+                {lastAddedTask === task.id && (
+                  <div className="absolute -top-4 -right-4 bg-green-500 text-white text-xs px-2 py-1 rounded-full font-bold animate-pulse">
+                    NEW!
+                  </div>
+                )}
+              </div>
               
               {/* AI Smart Suggestion Tooltip */}
               <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
@@ -417,6 +470,20 @@ What would you like help with today?`,
               </div>
             </div>
           ))}
+
+          {/* Empty journey prompt when no tasks */}
+          {dynamicTasks.length === 0 && (
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="text-center bg-white/90 backdrop-blur-sm rounded-xl p-8 shadow-lg border-2 border-dashed border-blue-300">
+                <Bot className="w-12 h-12 text-blue-600 mx-auto mb-4" />
+                <h3 className="text-xl font-bold text-gray-800 mb-2">Your Journey Awaits</h3>
+                <p className="text-gray-600 mb-4">Chat with AI to start building your personalized moving plan!</p>
+                <div className="text-sm text-blue-600 animate-pulse">
+                  → Chat to add highway signs to your journey
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Journey Path Indicators */}
           <div className="absolute inset-0 pointer-events-none">
@@ -474,7 +541,7 @@ What would you like help with today?`,
         />
       )}
 
-      {/* AI Chat Float Button - More Prominent */}
+      {/* AI Chat Float Button - Enhanced with dynamic prompts */}
       {!showAIChat && (
         <div className="fixed bottom-6 right-6 z-50">
           <div className="relative">
@@ -490,8 +557,18 @@ What would you like help with today?`,
             </div>
           </div>
           <div className="bg-white rounded-lg shadow-lg p-3 mt-2 max-w-xs">
-            <p className="text-sm font-medium text-gray-800">🤖 AI Assistant Ready!</p>
-            <p className="text-xs text-gray-600">Click to get personalized moving help</p>
+            <p className="text-sm font-medium text-gray-800">
+              {dynamicTasks.length === 0 ? 
+                "🚀 Start Your Journey!" : 
+                `🎯 ${dynamicTasks.length} tasks created!`
+              }
+            </p>
+            <p className="text-xs text-gray-600">
+              {dynamicTasks.length === 0 ? 
+                "Chat to build your moving plan!" : 
+                "Chat to add more tasks"
+              }
+            </p>
           </div>
         </div>
       )}
