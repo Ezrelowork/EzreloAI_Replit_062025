@@ -578,13 +578,19 @@ To begin your moving journey, click the "Hire Moving Company" sign below. This i
                           const today = new Date();
                           const timeDiff = moveDate.getTime() - today.getTime();
                           const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+                          const formattedDate = moveDate.toLocaleDateString('en-US', { 
+                            weekday: 'long', 
+                            year: 'numeric', 
+                            month: 'long', 
+                            day: 'numeric' 
+                          });
                           
                           if (daysDiff > 0) {
-                            return `${daysDiff} days until move date`;
+                            return `${daysDiff} days until move date: ${formattedDate}`;
                           } else if (daysDiff === 0) {
-                            return "Moving day is today!";
+                            return `Moving day is today! ${formattedDate}`;
                           } else {
-                            return `Moved ${Math.abs(daysDiff)} days ago`;
+                            return `Moved ${Math.abs(daysDiff)} days ago: ${formattedDate}`;
                           }
                         })()}
                       </p>
