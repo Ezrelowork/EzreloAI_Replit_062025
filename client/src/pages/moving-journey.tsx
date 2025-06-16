@@ -720,23 +720,7 @@ To begin your moving journey, click the "Hire Moving Company" sign below. This i
                 </div>
               )}
 
-              {/* AI Smart Suggestion Tooltip */}
-              {!isEditMode && (
-                <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
-                  <div className="bg-blue-600 text-white text-xs rounded-lg px-3 py-2 whitespace-nowrap shadow-lg">
-                    <div className="flex items-center gap-2">
-                      <Bot className="w-3 h-3" />
-                      <span>
-                        {task.id === 'moving-company' && 'AI found 12 local movers for you'}
-                        {task.id === 'utilities-setup' && 'AI can help setup all utilities'}
-                        {task.id === 'address-change' && 'AI knows 23+ places to update'}
-                        {task.id === 'local-services' && 'AI found schools & services in Missoula'}
-                      </span>
-                    </div>
-                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-blue-600"></div>
-                  </div>
-                </div>
-              )}
+              
             </div>
           ))}
 
