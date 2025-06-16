@@ -899,7 +899,7 @@ To begin your moving journey, click the "Hire Moving Company" sign below. This i
                 <DynamicHighwaySign
                   title={task.title}
                   description={task.description}
-                  week={task.week}
+                  week={completedTasks.has(task.id) ? "Complete" : task.week}
                   priority={task.priority}
                   completed={completedTasks.has(task.id)}
                   onClick={() => handleSignClick(task)}
