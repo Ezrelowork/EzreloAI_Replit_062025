@@ -73,7 +73,11 @@ interface ConversationMessage {
 export default function MovingJourney() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
-  const [completedTasks, setCompletedTasks] = useState<Set<string>>(new Set());
+  const [completedTasks, setCompletedTasks] = useState<Set<string>>(() => {
+    // Load completed tasks from localStorage on initial load
+    const saved = localStorage.getItem('completedTasks');
+    return saved ? new Set(JSON.parse(saved)) : new Set();
+  });
   const [showTaskPage, setShowTaskPage] = useState(false);
   const [selectedTask, setSelectedTask] = useState<MovingTask | null>(null);
   const { isOpen: isTaskModalOpen, currentTask, openModal: openTaskModal, closeModal: closeTaskModal } = useTaskModal();
@@ -97,7 +101,11 @@ export default function MovingJourney() {
   // Layout is now locked and finalized
 
   // Dynamic task state - starts empty, populated by AI interactions
-  const [dynamicTasks, setDynamicTasks] = useState<MovingTask[]>([]);
+  const [dynamicTasks, setDynamicTasks] = useState<MovingTask[]>(() => {
+    // Load dynamic tasks from localStorage on initial load
+    const saved = localStorage.getItem('dynamicTasks');
+    return saved ? JSON.parse(saved) : [];
+  });
   const [lastAddedTask, setLastAddedTask] = useState<string | null>(null);
 
   // Available task templates that AI can activate
@@ -163,7 +171,11 @@ export default function MovingJourney() {
 
     setDynamicTasks(prev => {
       if (prev.find(t => t.id === taskId)) return prev; // Don't duplicate
-      return [...prev, newTask];
+      const newTasks = [...prev, newTask];
+      
+      // Save to localStorage
+      localStorage.setItem('dynamicTasks', JSON.stringify(newTasks));
+      return newTasks;
     });
 
     setLastAddedTask(taskId);
@@ -213,6 +225,9 @@ export default function MovingJourney() {
           }, 1000);
         }
       }
+      
+      // Save to localStorage
+      localStorage.setItem('completedTasks', JSON.stringify(Array.from(newSet)));
       return newSet;
     });
   };
@@ -276,11 +291,15 @@ To begin your moving journey, click the "Hire Moving Company" sign below. This i
 
   // Load initial tasks and show welcome modal
   useEffect(() => {
-    addTaskFromAI("moving-company");
-    // Show welcome modal after a brief delay
-    setTimeout(() => {
-      initializeAIModal();
-    }, 1000);
+    // Only add moving-company if no tasks exist yet
+    const existingTasks = localStorage.getItem('dynamicTasks');
+    if (!existingTasks || JSON.parse(existingTasks).length === 0) {
+      addTaskFromAI("moving-company");
+      // Show welcome modal after a brief delay for new users
+      setTimeout(() => {
+        initializeAIModal();
+      }, 1000);
+    }
   }, []);
 
   if (showTaskPage) {
