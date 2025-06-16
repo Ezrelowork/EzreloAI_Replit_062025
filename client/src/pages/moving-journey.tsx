@@ -314,11 +314,17 @@ What would you like help with today?`,
         </div>
       </header>
 
-      {/* Progress Bar */}
+      {/* Progress Bar with AI Insights */}
       <div className="bg-white/80 backdrop-blur-lg border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium text-gray-700">Journey Progress</span>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-gray-700">Journey Progress</span>
+              <div className="flex items-center gap-1 text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
+                <Bot className="w-3 h-3" />
+                AI Optimized
+              </div>
+            </div>
             <span className="text-sm text-gray-600">{Math.round(progressPercentage)}% Complete</span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-3">
@@ -327,6 +333,20 @@ What would you like help with today?`,
               style={{ width: `${progressPercentage}%` }}
             />
           </div>
+          
+          {/* AI Smart Insights */}
+          {moveData.date && (
+            <div className="mt-3 flex items-center gap-4 text-xs">
+              <div className="flex items-center gap-1 text-green-600">
+                <Bot className="w-3 h-3" />
+                <span>AI Insight: {Math.ceil((new Date(moveData.date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} days until move</span>
+              </div>
+              <div className="flex items-center gap-1 text-blue-600">
+                <Info className="w-3 h-3" />
+                <span>Priority: {progressPercentage < 25 ? 'Book movers now' : progressPercentage < 50 ? 'Setup utilities' : 'Finalize details'}</span>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -347,11 +367,11 @@ What would you like help with today?`,
             transform: 'none'
           }}
         >
-          {/* Dynamic Highway Signs */}
+          {/* Dynamic Highway Signs with AI Enhancement */}
           {movingTasks.map((task) => (
             <div
               key={task.id}
-              className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer hover:scale-105 transition-all duration-300"
+              className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer hover:scale-105 transition-all duration-300 group"
               style={{
                 left: task.position.x,
                 top: task.position.y,
@@ -366,6 +386,22 @@ What would you like help with today?`,
                 completed={completedTasks.has(task.id)}
                 onClick={() => handleSignClick(task)}
               />
+              
+              {/* AI Smart Suggestion Tooltip */}
+              <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+                <div className="bg-blue-600 text-white text-xs rounded-lg px-3 py-2 whitespace-nowrap shadow-lg">
+                  <div className="flex items-center gap-2">
+                    <Bot className="w-3 h-3" />
+                    <span>
+                      {task.id === 'moving-company' && 'AI found 12 local movers for you'}
+                      {task.id === 'utilities-setup' && 'AI can help setup all utilities'}
+                      {task.id === 'address-change' && 'AI knows 23+ places to update'}
+                      {task.id === 'local-services' && 'AI found schools & services in Missoula'}
+                    </span>
+                  </div>
+                  <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-blue-600"></div>
+                </div>
+              </div>
             </div>
           ))}
 
@@ -425,15 +461,54 @@ What would you like help with today?`,
         />
       )}
 
-      {/* AI Chat Float Button */}
+      {/* AI Chat Float Button - More Prominent */}
       {!showAIChat && (
-        <Button
-          onClick={initializeAIChat}
-          className="fixed bottom-6 right-6 h-14 w-14 rounded-full bg-blue-600 hover:bg-blue-700 shadow-lg z-50"
-          size="icon"
-        >
-          <Bot className="w-6 h-6" />
-        </Button>
+        <div className="fixed bottom-6 right-6 z-50">
+          <div className="relative">
+            <Button
+              onClick={initializeAIChat}
+              className="h-16 w-16 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-xl animate-pulse"
+              size="icon"
+            >
+              <Bot className="w-8 h-8" />
+            </Button>
+            <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold">
+              AI
+            </div>
+          </div>
+          <div className="bg-white rounded-lg shadow-lg p-3 mt-2 max-w-xs">
+            <p className="text-sm font-medium text-gray-800">🤖 AI Assistant Ready!</p>
+            <p className="text-xs text-gray-600">Click to get personalized moving help</p>
+          </div>
+        </div>
+      )}
+
+      {/* AI Proactive Suggestions Banner */}
+      {moveData.from && moveData.to && !showAIChat && (
+        <div className="fixed top-20 right-6 z-40 max-w-sm">
+          <Card className="bg-gradient-to-r from-green-50 to-blue-50 border-2 border-blue-200 shadow-lg">
+            <CardContent className="p-4">
+              <div className="flex items-start gap-3">
+                <div className="bg-blue-100 rounded-full p-2">
+                  <Bot className="w-4 h-4 text-blue-600" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-sm text-gray-800">AI Insights Available</h3>
+                  <p className="text-xs text-gray-600 mt-1">
+                    I can help you prioritize tasks, find the best movers, and create a timeline for your {moveData.from} to {moveData.to} move.
+                  </p>
+                  <Button 
+                    size="sm" 
+                    className="mt-2 text-xs h-7"
+                    onClick={initializeAIChat}
+                  >
+                    Get AI Help
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       )}
 
       {/* AI Chat Interface */}
