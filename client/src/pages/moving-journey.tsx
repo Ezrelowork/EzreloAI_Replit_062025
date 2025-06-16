@@ -214,6 +214,35 @@ export default function MovingJourney() {
         });
       }
 
+      // Parse AI message for task keywords and add relevant tasks
+      const messageText = data.message.toLowerCase();
+      const userMessage = currentMessage.toLowerCase();
+      
+      // Check for utilities-related keywords
+      if ((messageText.includes('utilities') || messageText.includes('electricity') || 
+           messageText.includes('power') || messageText.includes('gas') || 
+           messageText.includes('water') || messageText.includes('internet') ||
+           userMessage.includes('utilities') || userMessage.includes('electricity') ||
+           userMessage.includes('power') || userMessage.includes('set up utilities')) && 
+          !dynamicTasks.find(t => t.id === 'utilities-setup')) {
+        addTaskFromAI('utilities-setup', true);
+      }
+
+      // Check for address change keywords
+      if ((messageText.includes('address change') || messageText.includes('update address') ||
+           messageText.includes('change address') || userMessage.includes('address')) &&
+          !dynamicTasks.find(t => t.id === 'address-change')) {
+        addTaskFromAI('address-change');
+      }
+
+      // Check for local services keywords
+      if ((messageText.includes('local services') || messageText.includes('schools') ||
+           messageText.includes('healthcare') || messageText.includes('doctors') ||
+           userMessage.includes('local') || userMessage.includes('services')) &&
+          !dynamicTasks.find(t => t.id === 'local-services')) {
+        addTaskFromAI('local-services');
+      }
+
       const aiMessage = {
         id: Date.now().toString(),
         role: 'assistant' as const,
