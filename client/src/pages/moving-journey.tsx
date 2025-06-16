@@ -296,6 +296,21 @@ What would you like help with today?`,
                 <p className="text-sm text-gray-600">
                   Click signs to explore tasks and track progress
                 </p>
+                {moveData.from && moveData.to && (
+                  <div className="mt-2 p-2 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg border border-blue-200">
+                    <div className="flex items-start gap-2">
+                      <div className="bg-blue-100 rounded-full p-1">
+                        <Bot className="w-3 h-3 text-blue-600" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-xs text-gray-700 font-medium">AI Insights Available</p>
+                        <p className="text-xs text-gray-600">
+                          I can help you prioritize tasks, find the best movers, and create a timeline for your {moveData.from} to {moveData.to} move.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
             <div className="flex items-center space-x-4">
@@ -483,33 +498,7 @@ What would you like help with today?`,
         </div>
       )}
 
-      {/* AI Proactive Suggestions Banner */}
-      {moveData.from && moveData.to && !showAIChat && (
-        <div className="fixed top-20 right-6 z-40 max-w-sm">
-          <Card className="bg-gradient-to-r from-green-50 to-blue-50 border-2 border-blue-200 shadow-lg">
-            <CardContent className="p-4">
-              <div className="flex items-start gap-3">
-                <div className="bg-blue-100 rounded-full p-2">
-                  <Bot className="w-4 h-4 text-blue-600" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-sm text-gray-800">AI Insights Available</h3>
-                  <p className="text-xs text-gray-600 mt-1">
-                    I can help you prioritize tasks, find the best movers, and create a timeline for your {moveData.from} to {moveData.to} move.
-                  </p>
-                  <Button 
-                    size="sm" 
-                    className="mt-2 text-xs h-7"
-                    onClick={initializeAIChat}
-                  >
-                    Get AI Help
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
+      
 
       {/* AI Chat Interface */}
       {showAIChat && (
