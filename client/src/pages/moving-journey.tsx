@@ -119,7 +119,7 @@ export default function MovingJourney() {
       week: "Week 2",
       category: "Essential Services",
       completed: false,
-      position: { x: "600px", y: "350px" }, // Middle section
+      position: { x: "700px", y: "400px" }, // Middle section
       icon: Zap
     },
     "address-change": {
@@ -155,7 +155,7 @@ export default function MovingJourney() {
       ...template,
       // Make high priority tasks larger and more prominent
       position: isHighPriority ? 
-        { x: "180px", y: "400px" } : // Large prominent position
+        { x: "230px", y: "570px" } : // Large prominent position
         template.position
     };
 
@@ -436,15 +436,9 @@ What would you like to tackle first?`,
                     <div className="bg-green-500 text-white px-4 py-2 rounded-full font-bold text-sm shadow-lg animate-pulse">
                       Start Here
                     </div>
-                    <div className="text-green-600 font-semibold text-xs mt-1 animate-bounce">
-                      Step 1
-                    </div>
+                   
                     {/* Arrow pointing to sign */}
-                    <div className="flex justify-center mt-1">
-                      <svg className="w-4 h-4 text-green-500 animate-bounce" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L11 6.414V16a1 1 0 11-2 0V6.414L7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3z" clipRule="evenodd" />
-                      </svg>
-                    </div>
+                   
                   </div>
                 )}
 
@@ -490,20 +484,7 @@ What would you like to tackle first?`,
             </div>
           )}
 
-          {/* Journey Path Indicators */}
-          <div className="absolute inset-0 pointer-events-none">
-            {/* Start indicator */}
-            <div className="absolute transform -translate-x-1/2 -translate-y-1/2 bg-green-500 text-white px-4 py-2 rounded-full font-semibold shadow-lg" style={{ left: "96px", top: "640px" }}>
-              <MapPin className="w-4 h-4 inline mr-2" />
-              Start Here
-            </div>
-
-            {/* End indicator */}
-            <div className="absolute transform -translate-x-1/2 -translate-y-1/2 bg-blue-500 text-white px-4 py-2 rounded-full font-semibold shadow-lg" style={{ left: "1020px", top: "80px" }}>
-              <Home className="w-4 h-4 inline mr-2" />
-              New Home
-            </div>
-          </div>
+         
         </div>
       </div>
 
