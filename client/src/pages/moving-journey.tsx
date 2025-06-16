@@ -364,7 +364,7 @@ To begin your moving journey, click the "Hire Moving Company" sign below. This i
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-lg shadow-sm sticky top-0 z-40 border-b border-gray-100">
+      <header className="bg-white/80 backdrop-blur-lg shadow-sm sticky top-0 z-50 border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-4">
@@ -465,7 +465,8 @@ To begin your moving journey, click the "Hire Moving Company" sign below. This i
             backgroundPosition: '0 0',
             left: '0',
             top: '0',
-            transform: 'none'
+            transform: 'none',
+            zIndex: 10
           }}
           onMouseMove={handleDragMove}
           onMouseUp={handleDragEnd}
