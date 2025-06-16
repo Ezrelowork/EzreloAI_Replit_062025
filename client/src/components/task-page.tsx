@@ -106,7 +106,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
   const [isSharing, setIsSharing] = useState(false);
   const [savedQuestionnaires, setSavedQuestionnaires] = useState<any[]>([]);
   const [hasCompletedActions, setHasCompletedActions] = useState(false);
-  
+
   // Conversational AI State
   const [conversationMode, setConversationMode] = useState(false);
   const [conversation, setConversation] = useState<Array<{
@@ -156,9 +156,9 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
         suggestions: data.suggestions,
         data: data.actionData
       };
-      
+
       setConversation(prev => [...prev, aiMessage]);
-      
+
       // Execute any AI-suggested actions
       if (data.actionData) {
         handleAIActions(data.actionData);
@@ -1013,8 +1013,7 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
                     <Label htmlFor="destinationAddress">Destination Address</Label>
                     <Input
                       id="destinationAddress"
-                      value={questionnaireData.destinationAddress || moveData.to}                      onChange={(e) => setQuestionnaire<previous_generation>```python
-Data({...questionnaireData, destinationAddress: e.target.value})}
+                      value={questionnaireData.destinationAddress || moveData.to}                      onChange={(e) => setQuestionnaireData({...questionnaireData, destinationAddress: e.target.value})}
                       placeholder="Full address with unit number"
                     />
                   </div>
@@ -1281,36 +1280,45 @@ Data({...questionnaireData, destinationAddress: e.target.value})}
                   <span className="text-gray-600 text-sm font-medium">Timeline: {task.week}</span>
                   <span className="text-gray-600 text-sm font-medium">Category: {task.category}</span>
                 </div>
-                <div className="space-y-1">
+                
+<div className="space-y-1">
                   <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
                     <MapPin className="w-4 h-4 text-blue-600" />
                     <span>{moveData.from}</span>
                     <span className="text-blue-600">→</span>
                     <span>{moveData.to}</span>
-                    <span className="text-gray-500 text-xs ml-3">Move Date: {new Date(moveData.date).toLocaleDateString()}</span>
                   </div>
-                  {/* Status Information */}
-                  <div className="min-h-[24px] flex items-center gap-2">
-                    {showResults && searchType === 'moving' && movingCompanies.length > 0 && (
-                      <div className="flex items-center gap-1 text-xs text-green-700 bg-green-50 px-2 py-1 rounded-md w-fit">
-                        <CheckCircle className="w-3 h-3" />
-                        <span>{movingCompanies.length} providers (cached)</span>
-                      </div>
-                    )}
-                    {showResults && searchType === 'utilities' && utilities.length > 0 && (
-                      <div className="flex items-center gap-1 text-xs text-green-700 bg-green-50 px-2 py-1 rounded-md w-fit">
-                        <CheckCircle className="w-3 h-3" />
-                        <span>{utilities.length} services (cached)</span>
-                      </div>
-                    )}
-                    {showResults && searchType === 'housing' && housingServices.length > 0 && (
-                      <div className="flex items-center gap-1 text-xs text-green-700 bg-green-50 px-2 py-1 rounded-md w-fit">
-                        <CheckCircle className="w-3 h-3" />
-                        <span>{housingServices.length} services (cached)</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
+                  {moveData.date && (
+                    <div className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                      <Clock className="w-4 h-4 text-orange-600" />
+                      <span>
+                        {(() => {
+                          const moveDate = new Date(moveData.date);
+                          const today = new Date();
+                          const daysUntilMove = Math.ceil((moveDate.getTime() - today.getTime()) / (1000 * 3600 * 24));
+
+                          // Define when this task should be completed (days before move)
+                          const taskTimelines: Record<string, number> = {
+                            "moving-company": 42, // 6 weeks before
+                            "utilities-setup": 21,  // 3 weeks before
+                            "address-change": 14,   // 2 weeks before
+                            "local-services": 7     // 1 week before
+                          };
+
+                          const daysBeforeMove = taskTimelines[task.id] || 7;
+                          const dueDate = daysUntilMove - daysBeforeMove;
+
+                          if (dueDate > 0) {
+                            return `Due in ${dueDate} days`;
+                          } else if (dueDate === 0) {
+                            return "Due today";
+                          } else {
+                            return `Overdue by ${Math.abs(dueDate)} days`;
+                          }
+                        })()}
+                      </span>
+                    </div>
+                  )}</div>
               </div>
             </div>
 
@@ -1540,7 +1548,7 @@ Data({...questionnaireData, destinationAddress: e.target.value})}
                       )}
                     </div>
                   ))}
-                  
+
                   {isAIThinking && (
                     <div className="flex gap-3 justify-start">
                       <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
@@ -1836,7 +1844,6 @@ Data({...questionnaireData, destinationAddress: e.target.value})}
                     'Check insurance coverage',
                     'Read reviews & references', 
                     'Verify license & bonding',
-                    ```python
                     'Understand pricing structure',
                     'Confirm moving date'
                   ].map((item, index) => (

@@ -121,6 +121,34 @@ export default function MovingJourney() {
 
   const savedPositions = loadSavedPositions();
 
+  // Calculate days until task is due based on move date
+  const calculateTaskDueDate = (taskId: string, moveDate: string) => {
+    if (!moveDate) return "Set move date";
+    
+    const moveDateObj = new Date(moveDate);
+    const today = new Date();
+    const daysUntilMove = Math.ceil((moveDateObj.getTime() - today.getTime()) / (1000 * 3600 * 24));
+    
+    // Define when each task should be completed (days before move)
+    const taskTimelines: Record<string, number> = {
+      "moving-company": 42, // 6 weeks before
+      "utilities-setup": 21,  // 3 weeks before
+      "address-change": 14,   // 2 weeks before
+      "local-services": 7     // 1 week before
+    };
+    
+    const daysBeforeMove = taskTimelines[taskId] || 7;
+    const dueDate = daysUntilMove - daysBeforeMove;
+    
+    if (dueDate > 0) {
+      return `Due in ${dueDate} days`;
+    } else if (dueDate === 0) {
+      return "Due today";
+    } else {
+      return `Overdue by ${Math.abs(dueDate)} days`;
+    }
+  };
+
   // Available task templates that AI can activate
   const availableTaskTemplates: Record<string, MovingTask> = {
     "moving-company": {
@@ -128,7 +156,7 @@ export default function MovingJourney() {
       title: "Hire Moving Company",
       description: "Research and book professional movers for your relocation",
       priority: "high",
-      week: "Week 1",
+      week: calculateTaskDueDate("moving-company", moveData.date),
       category: "Core Moving",
       completed: false,
       position: savedPositions["moving-company"] || { x: "300px", y: "650px" }, // Starting position on the left
@@ -139,7 +167,7 @@ export default function MovingJourney() {
       title: "Set Up Utilities",
       description: "Arrange electricity, gas, water, and internet services",
       priority: "high", 
-      week: "Week 2",
+      week: calculateTaskDueDate("utilities-setup", moveData.date),
       category: "Essential Services",
       completed: false,
       position: savedPositions["utilities-setup"] || { x: "500px", y: "450px" }, // Middle-left section
@@ -150,7 +178,7 @@ export default function MovingJourney() {
       title: "Change Address",
       description: "Update address with banks, employers, and subscriptions",
       priority: "medium",
-      week: "Week 3",
+      week: calculateTaskDueDate("address-change", moveData.date),
       category: "Administrative",
       completed: false,
       position: savedPositions["address-change"] || { x: "700px", y: "300px" }, // Middle-right section
@@ -161,7 +189,7 @@ export default function MovingJourney() {
       title: "Local Services",
       description: "Find schools, healthcare, gyms, and essential services",
       priority: "low",
-      week: "Week 4",
+      week: calculateTaskDueDate("local-services", moveData.date),
       category: "Community",
       completed: false,
       position: savedPositions["local-services"] || { x: "900px", y: "200px" }, // End position on the right
@@ -181,6 +209,8 @@ export default function MovingJourney() {
 
     const newTask = {
       ...template,
+      // Recalculate the week/due date when adding task
+      week: calculateTaskDueDate(taskId, moveData.date),
       // Use saved position if it exists, otherwise use template/priority position
       position: existingSavedTask?.position || 
         (isHighPriority ? 
@@ -201,6 +231,26 @@ export default function MovingJourney() {
 
     // Clear the highlight after animation
     setTimeout(() => setLastAddedTask(null), 3000);
+  };
+
+  // Check for overdue tasks and trigger AI reminders
+  const checkForOverdueTasks = () => {
+    if (!moveData.date) return;
+
+    const overdueTasks = dynamicTasks.filter(task => {
+      if (completedTasks.has(task.id)) return false;
+      const dueText = calculateTaskDueDate(task.id, moveData.date);
+      return dueText.includes("Overdue");
+    });
+
+    if (overdueTasks.length > 0) {
+      const overdueTaskNames = overdueTasks.map(t => t.title).join(", ");
+      showAIGuidance(
+        "⚠️ Urgent: Overdue Tasks Detected",
+        `I've noticed you have ${overdueTasks.length} overdue task${overdueTasks.length > 1 ? 's' : ''}:\n\n${overdueTaskNames}\n\nThese tasks are critical for a smooth move and should be completed as soon as possible. Would you like me to help you prioritize and tackle these tasks?`,
+        ["Help me prioritize", "Show task details", "I'll handle this later"]
+      );
+    }
   };
 
   // Handle drag start
@@ -459,6 +509,58 @@ The standard sequence (Movers → Utilities → Address → Local Services) is o
 Would you like to customize your approach?`,
           ["Yes, help me reorder", "I'll stick with recommendations", "Tell me more about dependencies"]
         );
+      } else if (suggestion.toLowerCase().includes("help me prioritize") || suggestion.toLowerCase().includes("prioritize")) {
+        const overdueTasks = dynamicTasks.filter(task => {
+          if (completedTasks.has(task.id)) return false;
+          const dueText = calculateTaskDueDate(task.id, moveData.date);
+          return dueText.includes("Overdue");
+        });
+
+        const dueSoonTasks = dynamicTasks.filter(task => {
+          if (completedTasks.has(task.id)) return false;
+          const dueText = calculateTaskDueDate(task.id, moveData.date);
+          return dueText.includes("Due today") || 
+                 (dueText.includes("Due in") && parseInt(dueText.split(" ")[2]) <= 3);
+        });
+
+        let priorityMessage = "Here's your task priority breakdown:\n\n";
+        
+        if (overdueTasks.length > 0) {
+          priorityMessage += `🚨 **URGENT - Overdue Tasks:**\n`;
+          overdueTasks.forEach(task => {
+            priorityMessage += `• ${task.title} - ${calculateTaskDueDate(task.id, moveData.date)}\n`;
+          });
+          priorityMessage += "\n";
+        }
+
+        if (dueSoonTasks.length > 0) {
+          priorityMessage += `⚠️ **HIGH PRIORITY - Due Soon:**\n`;
+          dueSoonTasks.forEach(task => {
+            priorityMessage += `• ${task.title} - ${calculateTaskDueDate(task.id, moveData.date)}\n`;
+          });
+          priorityMessage += "\n";
+        }
+
+        const upcomingTasks = dynamicTasks.filter(task => {
+          if (completedTasks.has(task.id)) return false;
+          const dueText = calculateTaskDueDate(task.id, moveData.date);
+          return dueText.includes("Due in") && parseInt(dueText.split(" ")[2]) > 3;
+        });
+
+        if (upcomingTasks.length > 0) {
+          priorityMessage += `📅 **UPCOMING TASKS:**\n`;
+          upcomingTasks.forEach(task => {
+            priorityMessage += `• ${task.title} - ${calculateTaskDueDate(task.id, moveData.date)}\n`;
+          });
+        }
+
+        priorityMessage += "\n**Recommendation:** Focus on overdue and urgent tasks first, then work through upcoming tasks in order.";
+
+        showAIGuidance(
+          "Task Priority Guide 📋",
+          priorityMessage,
+          ["Start with most urgent", "Show task details", "I understand"]
+        );
       } else {
         // Generic response for other suggestions
         showAIGuidance(
@@ -538,6 +640,35 @@ To begin your moving journey, click the "Hire Moving Company" sign below. This i
     }
   }, []);
 
+  // Check for overdue tasks and refresh countdowns when move date or tasks change
+  useEffect(() => {
+    if (moveData.date && dynamicTasks.length > 0) {
+      // Update all task due dates
+      setDynamicTasks(prev => prev.map(task => ({
+        ...task,
+        week: calculateTaskDueDate(task.id, moveData.date)
+      })));
+
+      // Check for overdue tasks every time the data changes
+      const checkTimer = setTimeout(() => {
+        checkForOverdueTasks();
+      }, 2000);
+
+      return () => clearTimeout(checkTimer);
+    }
+  }, [moveData.date, dynamicTasks.length]);
+
+  // Set up daily reminder check for overdue tasks
+  useEffect(() => {
+    const dailyCheck = setInterval(() => {
+      if (moveData.date && dynamicTasks.length > 0) {
+        checkForOverdueTasks();
+      }
+    }, 24 * 60 * 60 * 1000); // Check once per day
+
+    return () => clearInterval(dailyCheck);
+  }, [moveData.date, dynamicTasks, completedTasks]);
+
   if (showTaskPage) {
     return (
       <AllTasksPage 
@@ -572,28 +703,64 @@ To begin your moving journey, click the "Hire Moving Company" sign below. This i
                       {moveData.from} → {moveData.to}
                     </p>
                     {moveData.date && (
-                      <p className="text-sm font-semibold text-blue-600 mt-1">
+                      <div className="mt-1 space-y-1">
+                        <p className="text-sm font-semibold text-blue-600">
+                          {(() => {
+                            const moveDate = new Date(moveData.date);
+                            const today = new Date();
+                            const timeDiff = moveDate.getTime() - today.getTime();
+                            const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+                            const formattedDate = moveDate.toLocaleDateString('en-US', { 
+                              weekday: 'long', 
+                              year: 'numeric', 
+                              month: 'long', 
+                              day: 'numeric' 
+                            });
+                            
+                            if (daysDiff > 0) {
+                              return `${daysDiff} days until move date: ${formattedDate}`;
+                            } else if (daysDiff === 0) {
+                              return `Moving day is today! ${formattedDate}`;
+                            } else {
+                              return `Moved ${Math.abs(daysDiff)} days ago: ${formattedDate}`;
+                            }
+                          })()}
+                        </p>
+                        
+                        {/* Task urgency indicators */}
                         {(() => {
-                          const moveDate = new Date(moveData.date);
-                          const today = new Date();
-                          const timeDiff = moveDate.getTime() - today.getTime();
-                          const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
-                          const formattedDate = moveDate.toLocaleDateString('en-US', { 
-                            weekday: 'long', 
-                            year: 'numeric', 
-                            month: 'long', 
-                            day: 'numeric' 
+                          const urgentTasks = dynamicTasks.filter(task => {
+                            if (completedTasks.has(task.id)) return false;
+                            const dueText = calculateTaskDueDate(task.id, moveData.date);
+                            return dueText.includes("Overdue") || dueText.includes("Due today") || 
+                                   (dueText.includes("Due in") && parseInt(dueText.split(" ")[2]) <= 3);
                           });
-                          
-                          if (daysDiff > 0) {
-                            return `${daysDiff} days until move date: ${formattedDate}`;
-                          } else if (daysDiff === 0) {
-                            return `Moving day is today! ${formattedDate}`;
-                          } else {
-                            return `Moved ${Math.abs(daysDiff)} days ago: ${formattedDate}`;
+
+                          if (urgentTasks.length > 0) {
+                            const overdueCount = urgentTasks.filter(task => 
+                              calculateTaskDueDate(task.id, moveData.date).includes("Overdue")
+                            ).length;
+                            
+                            const dueSoonCount = urgentTasks.length - overdueCount;
+
+                            return (
+                              <div className="flex items-center gap-2 text-xs">
+                                {overdueCount > 0 && (
+                                  <span className="bg-red-100 text-red-700 px-2 py-1 rounded-full font-medium animate-pulse">
+                                    {overdueCount} Overdue
+                                  </span>
+                                )}
+                                {dueSoonCount > 0 && (
+                                  <span className="bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full font-medium">
+                                    {dueSoonCount} Due Soon
+                                  </span>
+                                )}
+                              </div>
+                            );
                           }
+                          return null;
                         })()}
-                      </p>
+                      </div>
                     )}
                   </div>
                 )}
