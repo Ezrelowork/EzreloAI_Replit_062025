@@ -801,8 +801,8 @@ To begin your moving journey, click the "Hire Moving Company" sign below. This i
       {/* AI Modal */}
       {showAIModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <Card className="w-full max-w-2xl mx-auto shadow-2xl">
-            <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-lg">
+          <Card className="w-full max-w-2xl mx-auto shadow-2xl h-[600px] flex flex-col">
+            <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-lg flex-shrink-0">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
@@ -823,8 +823,8 @@ To begin your moving journey, click the "Hire Moving Company" sign below. This i
                 </Button>
               </div>
             </CardHeader>
-            <CardContent className="p-6">
-              <div className="space-y-4">
+            <CardContent className="p-6 flex-1 overflow-hidden flex flex-col">
+              <div className="flex-1 overflow-y-auto space-y-4">
                 <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
                   {aiModalContent.message}
                 </p>
@@ -844,15 +844,15 @@ To begin your moving journey, click the "Hire Moving Company" sign below. This i
                     ))}
                   </div>
                 )}
-                
-                <div className="flex justify-end pt-4">
-                  <Button
-                    onClick={() => setShowAIModal(false)}
-                    className="bg-blue-600 hover:bg-blue-700"
-                  >
-                    Got it!
-                  </Button>
-                </div>
+              </div>
+              
+              <div className="flex justify-end pt-4 border-t mt-4 flex-shrink-0">
+                <Button
+                  onClick={() => setShowAIModal(false)}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  Got it!
+                </Button>
               </div>
             </CardContent>
           </Card>
