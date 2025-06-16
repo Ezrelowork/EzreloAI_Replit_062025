@@ -163,9 +163,9 @@ export default function MovingJourney() {
       if (prev.find(t => t.id === taskId)) return prev; // Don't duplicate
       return [...prev, newTask];
     });
-    
+
     setLastAddedTask(taskId);
-    
+
     // Clear the highlight after animation
     setTimeout(() => setLastAddedTask(null), 3000);
   };
@@ -298,6 +298,11 @@ What would you like to tackle first?`,
     });
   }, []);
 
+  // Load initial tasks
+  useEffect(() => {
+      addTaskFromAI("moving-company", true);
+  }, []);
+
   if (showTaskPage) {
     return (
       <AllTasksPage 
@@ -325,7 +330,7 @@ What would you like to tackle first?`,
               </Link>
               <div className="border-l border-gray-300 pl-4">
                 <h1 className="text-2xl font-bold text-gray-900">Your Moving Journey</h1>
-               
+
                 {moveData.from && moveData.to && (
                   <div className="mt-2 p-2 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg border border-blue-200">
                     <div className="flex items-start gap-2">
@@ -378,7 +383,7 @@ What would you like to tackle first?`,
               style={{ width: `${progressPercentage}%` }}
             />
           </div>
-          
+
           {/* AI Smart Insights */}
           {moveData.date && (
             <div className="mt-3 flex items-center gap-4 text-xs">
@@ -435,7 +440,7 @@ What would you like to tackle first?`,
                 {lastAddedTask === task.id && (
                   <div className="absolute inset-0 bg-blue-400 rounded-lg blur-xl opacity-50 animate-pulse scale-110"></div>
                 )}
-                
+
                 <DynamicHighwaySign
                   title={task.title}
                   description={task.description}
@@ -444,7 +449,7 @@ What would you like to tackle first?`,
                   completed={completedTasks.has(task.id)}
                   onClick={() => handleSignClick(task)}
                 />
-                
+
                 {/* New task indicator */}
                 {lastAddedTask === task.id && (
                   <div className="absolute -top-4 -right-4 bg-green-500 text-white text-xs px-2 py-1 rounded-full font-bold animate-pulse">
@@ -452,7 +457,7 @@ What would you like to tackle first?`,
                   </div>
                 )}
               </div>
-              
+
               {/* AI Smart Suggestion Tooltip */}
               <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
                 <div className="bg-blue-600 text-white text-xs rounded-lg px-3 py-2 whitespace-nowrap shadow-lg">
@@ -558,22 +563,16 @@ What would you like to tackle first?`,
           </div>
           <div className="bg-white rounded-lg shadow-lg p-3 mt-2 max-w-xs">
             <p className="text-sm font-medium text-gray-800">
-              {dynamicTasks.length === 0 ? 
-                "🚀 Start Your Journey!" : 
-                `🎯 ${dynamicTasks.length} tasks created!`
-              }
+              🎯 Ready to help with your move!
             </p>
             <p className="text-xs text-gray-600">
-              {dynamicTasks.length === 0 ? 
-                "Chat to build your moving plan!" : 
-                "Chat to add more tasks"
-              }
+              Chat to get personalized moving advice
             </p>
           </div>
         </div>
       )}
 
-      
+
 
       {/* AI Chat Interface */}
       {showAIChat && (
