@@ -1725,22 +1725,31 @@ Only include real providers that actually serve this location.`;
     try {
       const { message, context } = req.body;
 
-      // Build context-aware prompt that includes "json" for OpenAI requirements
-      let systemPrompt = `You are an AI assistant helping with relocation tasks. Be helpful, conversational, and provide actionable advice. Always respond in JSON format with 'message', 'suggestions' array, and optional 'actionData' fields.`;
+      // Build context-aware prompt for moving journey task creation
+      let systemPrompt = `You are an AI assistant helping with moving journey planning. Your job is to be conversational and help users build their moving journey by creating highway sign tasks.
 
-      if (context?.taskType === 'moving-companies') {
-        systemPrompt += `\n\nThe user is looking for moving companies. Help them understand pricing, what to look for, and how to get quotes.`;
-      } else if (context?.taskType === 'utilities') {
-        systemPrompt += `\n\nThe user is setting up utilities for their new home. Help them understand which utilities to set up, timing, and provider options.`;
-      } else if (context?.taskType === 'moving-journey') {
-        systemPrompt += `\n\nThe user is on their moving journey overview page. Help them prioritize tasks, understand timelines, and navigate their relocation process. You can guide them to specific task pages or provide general moving advice.`;
-      }
+When users ask about moving-related topics, you can create tasks for them by including a "createTasks" array in your response with task IDs from these available templates:
+- "moving-company" - For finding and hiring movers
+- "utilities-setup" - For setting up electricity, internet, gas, water
+- "address-change" - For updating address with banks, employers, etc.
+- "local-services" - For finding schools, healthcare, gyms, services
+
+Always respond in JSON format with:
+{
+  "message": "Your conversational response",
+  "suggestions": ["Question 1", "Question 2", "Question 3"],
+  "createTasks": ["task-id-1", "task-id-2"] (optional),
+  "highPriority": true/false (optional, makes tasks appear larger)
+}
+
+Be encouraging and helpful. When users mention specific needs, suggest creating relevant tasks.`;
 
       if (context?.moveData) {
-        systemPrompt += `\n\nMove Details:
+        systemPrompt += `\n\nMove Context:
 - From: ${context.moveData.from || 'Not specified'}
 - To: ${context.moveData.to || 'Not specified'}
-- Date: ${context.moveData.date || 'Not specified'}`;
+- Date: ${context.moveData.date || 'Not specified'}
+- Current tasks: ${context.currentTasks || []}`;
       }
 
       if (!process.env.OPENAI_API_KEY) {
@@ -1753,48 +1762,6 @@ Only include real providers that actually serve this location.`;
 
       const OpenAI = (await import('openai')).default;
       const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-
-      // Build context-aware prompt
-      // let systemPrompt = `You are an expert AI moving and relocation assistant for Ezrelo. You help users with all aspects of their move in a conversational, personalized way.
-
-      // Your personality: Helpful, knowledgeable, and encouraging. You make complex moving decisions feel manageable.
-
-      // Current context:
-      // - Task: ${context.taskTitle}
-      // - Moving from: ${context.moveData?.from || 'Not specified'}
-      // - Moving to: ${context.moveData?.to || 'Not specified'}
-      // - Move date: ${context.moveData?.date || 'Not specified'}
-
-      // Guidelines:
-      // 1. Be conversational and personal - ask follow-up questions
-      // 2. Provide specific, actionable advice
-      // 3. If discussing moving companies, reference the ${context.currentCompanies?.length || 0} providers we found
-      // 4. Always include 2-3 relevant suggestions for the user's next question
-      // 5. Keep responses concise but comprehensive
-      // 6. Suggest specific actions when appropriate (search, questionnaire, contact providers)
-      // 7. Use the user's specific move details to personalize advice
-
-      // Response format: JSON with 'message', 'suggestions' array, and optional 'actionData' for triggering app actions.`;
-
-      // Add task-specific context
-      // if (context.taskType === 'moving') {
-      //   systemPrompt += `\n\nMoving Company Context:
-      // - ${context.currentCompanies?.length || 0} companies found
-      // - Selected mover: ${context.selectedMover ? context.selectedMover.provider : 'None yet'}
-      // - Available companies: ${context.currentCompanies?.map(c => c.provider).join(', ') || 'None loaded'}
-
-      // You can suggest actions like:
-      // - "search_movers" to find companies
-      // - "show_questionnaire" to help with estimates
-      // - "recommend_mover" with specific company name`;
-      // }
-
-      // Include conversation history for context
-      // let conversationContext = '';
-      // if (context.conversationHistory && context.conversationHistory.length > 0) {
-      //   conversationContext = '\n\nRecent conversation:\n' + 
-      //     context.conversationHistory.map(msg => `${msg.role}: ${msg.message}`).join('\n');
-      // }
 
       const completion = await openai.chat.completions.create({
         model: "gpt-4o",
@@ -1813,10 +1780,12 @@ Only include real providers that actually serve this location.`;
       const response = {
         message: aiResponse.message || "I understand you're working on your move. How can I help you with that?",
         suggestions: aiResponse.suggestions || [
-          "Tell me more about your move",
-          "What are your biggest concerns?",
-          "Help me find providers"
+          "I need to find movers",
+          "Help me set up utilities", 
+          "What should I do first?"
         ],
+        createTasks: aiResponse.createTasks || [],
+        highPriority: aiResponse.highPriority || false,
         actionData: aiResponse.actionData || null
       };
 
