@@ -567,9 +567,29 @@ To begin your moving journey, click the "Hire Moving Company" sign below. This i
                 <h1 className="text-2xl font-bold text-gray-900">Your Moving Journey</h1>
 
                 {moveData.from && moveData.to && (
-                  <p className="text-sm text-gray-600 mt-1">
-                    {moveData.from} → {moveData.to}
-                  </p>
+                  <div className="mt-1">
+                    <p className="text-sm text-gray-600">
+                      {moveData.from} → {moveData.to}
+                    </p>
+                    {moveData.date && (
+                      <p className="text-sm font-semibold text-blue-600 mt-1">
+                        {(() => {
+                          const moveDate = new Date(moveData.date);
+                          const today = new Date();
+                          const timeDiff = moveDate.getTime() - today.getTime();
+                          const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
+                          
+                          if (daysDiff > 0) {
+                            return `${daysDiff} days until move date`;
+                          } else if (daysDiff === 0) {
+                            return "Moving day is today!";
+                          } else {
+                            return `Moved ${Math.abs(daysDiff)} days ago`;
+                          }
+                        })()}
+                      </p>
+                    )}
+                  </div>
                 )}
               </div>
             </div>
