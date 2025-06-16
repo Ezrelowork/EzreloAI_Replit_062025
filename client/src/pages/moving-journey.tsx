@@ -332,6 +332,157 @@ export default function MovingJourney() {
     setShowAIModal(true);
   };
 
+  // Handle AI suggestion clicks
+  const handleAISuggestion = (suggestion: string) => {
+    // Close the current modal
+    setShowAIModal(false);
+    
+    // Process the suggestion and show appropriate response
+    setTimeout(() => {
+      if (suggestion.toLowerCase().includes("tell me more about the process")) {
+        showAIGuidance(
+          "Your Moving Process Explained 📋",
+          `Here's how your personalized moving journey works:
+
+**Step-by-Step Process:**
+1. **Start with Moving Company** - Secure professional movers first (this unlocks everything else)
+2. **Set Up Utilities** - Once movers are booked, arrange electricity, gas, water, and internet
+3. **Change Your Address** - After utilities are planned, notify banks, employers, and services
+4. **Find Local Services** - Finally, discover schools, healthcare, and community resources
+
+**Why This Order?**
+• Moving companies book up fast, especially during peak seasons
+• Utilities need 1-2 weeks lead time for activation
+• Address changes are easier once you have confirmed move dates
+• Local services can be researched closer to your move date
+
+**Your Progress:**
+Each completed task automatically unlocks the next step and triggers personalized AI guidance. The highway signs appear as you progress, creating your unique moving roadmap.`,
+          ["Got it, let's continue!", "What if I need to change the order?", "How long does each step take?"]
+        );
+      } else if (suggestion.toLowerCase().includes("timeline") || suggestion.toLowerCase().includes("what's my timeline")) {
+        const moveDate = moveData.date ? new Date(moveData.date).toLocaleDateString() : "your selected date";
+        showAIGuidance(
+          "Your Moving Timeline 📅",
+          `Based on your move ${moveDate !== "your selected date" ? `on ${moveDate}` : ""}, here's your recommended timeline:
+
+**6-8 Weeks Before:**
+• Get moving company quotes and book your movers
+• Start researching utilities for your new location
+
+**4-6 Weeks Before:**
+• Finalize moving company contract
+• Schedule utility connections for your new home
+• Begin change of address notifications
+
+**2-4 Weeks Before:**
+• Complete all address changes
+• Confirm utility activation dates
+• Research local services and schools
+
+**1-2 Weeks Before:**
+• Final confirmations with all service providers
+• Complete any remaining local service setups
+• Prepare for moving day
+
+**Moving Day & After:**
+• Supervise the move
+• Verify all utilities are working
+• Register with local services as needed
+
+${moveDate !== "your selected date" ? `Your move date gives you ${Math.ceil((new Date(moveData.date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} days to complete these steps.` : "Set your move date to get a personalized countdown!"}`,
+          ["This timeline works for me", "I need to move faster", "What if I'm behind schedule?"]
+        );
+      } else if (suggestion.toLowerCase().includes("ready to start") || suggestion.toLowerCase().includes("i'm ready")) {
+        showAIGuidance(
+          "Let's Get Started! 🚀",
+          `Perfect! You're ready to begin your moving journey. Here's your next step:
+
+**Step 1: Hire Moving Company**
+Click on the "Hire Moving Company" highway sign below to:
+• Get quotes from local professional movers
+• Compare prices and services
+• Book your moving date
+
+**Why Start Here?**
+Moving companies are the backbone of your relocation. Good movers book up quickly, especially during peak season (May-September), so securing them first ensures you have professional help on your chosen date.
+
+**What Happens Next?**
+Once you complete the moving company step, I'll automatically add the next highway sign for setting up utilities, and guide you through each subsequent step.
+
+Ready to click that first highway sign? 🛣️`,
+          ["Yes, let's find movers!", "I want to do this myself", "What if I can't find good movers?"]
+        );
+      } else if (suggestion.toLowerCase().includes("continue journey") || suggestion.toLowerCase().includes("continue")) {
+        showAIGuidance(
+          "Journey Continues! 🛣️",
+          `Great progress! You're building momentum on your moving journey.
+
+**Your Current Status:**
+• ${completedTasks.size} out of ${dynamicTasks.length} tasks completed
+• ${Math.round(progressPercentage)}% of your journey finished
+
+**Next Steps:**
+Look for highway signs marked "To Do" - these are your priority tasks. Complete them in order for the smoothest moving experience.
+
+**Need Help?**
+• Click any highway sign to see detailed instructions
+• Use the AI help button (bottom right) for guidance anytime
+• Your progress is automatically saved as you work
+
+Keep up the excellent work! Each completed task gets you closer to a successful move. 🎯`,
+          ["Show me what's next", "I have a question", "Back to journey"]
+        );
+      } else if (suggestion.toLowerCase().includes("change the order") || suggestion.toLowerCase().includes("different order")) {
+        showAIGuidance(
+          "Customizing Your Journey Order 🔄",
+          `I understand you might want to tackle tasks in a different order! Here's what you need to know:
+
+**Recommended vs. Custom Order:**
+The standard sequence (Movers → Utilities → Address → Local Services) is optimized for most situations, but you can adapt it:
+
+**Alternative Approaches:**
+• **DIY Move:** Skip professional movers, focus on truck rental and utilities
+• **Rushed Timeline:** Handle utilities and movers simultaneously
+• **Flexible Timeline:** Address changes can happen earlier if you have confirmed dates
+
+**Using Edit Mode:**
+• Click "Edit Positions" to move highway signs around
+• This changes the visual layout but doesn't affect task dependencies
+• You can complete tasks in any order you prefer
+
+**Important Notes:**
+• Some tasks have natural dependencies (need move date before scheduling utilities)
+• The AI guidance adapts to your chosen sequence
+• Progress tracking works regardless of completion order
+
+Would you like to customize your approach?`,
+          ["Yes, help me reorder", "I'll stick with recommendations", "Tell me more about dependencies"]
+        );
+      } else {
+        // Generic response for other suggestions
+        showAIGuidance(
+          "I'm Here to Help! 🤖",
+          `Thanks for that input! I'm continuously learning to provide better guidance for your moving journey.
+
+**What I Can Help With:**
+• Step-by-step moving guidance
+• Timeline planning and recommendations
+• Task prioritization and sequencing
+• Local service recommendations
+• Moving company selection advice
+
+**Current Journey Status:**
+You have ${dynamicTasks.length} highway signs on your journey, with ${completedTasks.size} completed tasks.
+
+**Getting Started:**
+Click on any highway sign to begin that task, or select from the suggestions below for more specific guidance.`,
+          ["Help me prioritize tasks", "I have a specific question", "Continue with my journey"]
+        );
+      }
+    }, 300);
+  };
+
   // Initialize AI modal on first visit
   const initializeAIModal = () => {
     const welcomeMessage = `Welcome to your personalized moving journey! I'm your AI assistant, and I'll guide you step by step through your relocation.
@@ -675,8 +826,8 @@ To begin your moving journey, click the "Hire Moving Company" sign below. This i
                         key={idx}
                         variant="outline"
                         size="sm"
-                        onClick={() => setShowAIModal(false)}
-                        className="text-sm"
+                        onClick={() => handleAISuggestion(suggestion)}
+                        className="text-sm hover:bg-blue-50 hover:border-blue-300 transition-colors"
                       >
                         {suggestion}
                       </Button>
