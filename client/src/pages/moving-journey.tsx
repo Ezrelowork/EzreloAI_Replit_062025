@@ -86,11 +86,13 @@ export default function MovingJourney() {
     toAddress: ''
   });
 
-  // AI Chat State
-  const [showAIChat, setShowAIChat] = useState(false);
-  const [isMinimized, setIsMinimized] = useState(false);
-  const [conversation, setConversation] = useState<ConversationMessage[]>([]);
-  const [currentMessage, setCurrentMessage] = useState('');
+  // AI Modal State
+  const [showAIModal, setShowAIModal] = useState(false);
+  const [aiModalContent, setAiModalContent] = useState({
+    title: "Welcome to Your Moving Journey",
+    message: "",
+    suggestions: [] as string[]
+  });
 
   // Layout is now locked and finalized
 
@@ -177,6 +179,39 @@ export default function MovingJourney() {
         newSet.delete(taskId);
       } else {
         newSet.add(taskId);
+        
+        // Trigger AI guidance based on completed task
+        if (taskId === 'moving-company' && !dynamicTasks.find(t => t.id === 'utilities-setup')) {
+          // Add utilities task and show AI guidance
+          addTaskFromAI('utilities-setup');
+          setTimeout(() => {
+            showAIGuidance(
+              "Great Progress! 🎉",
+              "Excellent work booking your moving company! Now that you have your movers secured, it's time to focus on setting up utilities at your new home.\n\nI've added the 'Set Up Utilities' sign to your journey. This includes arranging electricity, gas, water, and internet services.\n\nClick on the utilities sign to get started with setting up your essential services.",
+              ["Set up utilities now", "What utilities do I need?", "Continue journey"]
+            );
+          }, 1000);
+        } else if (taskId === 'utilities-setup' && !dynamicTasks.find(t => t.id === 'address-change')) {
+          // Add address change task
+          addTaskFromAI('address-change');
+          setTimeout(() => {
+            showAIGuidance(
+              "Utilities Complete! ⚡",
+              "Perfect! Your utilities are all set up. Next, you'll want to update your address with important organizations like banks, employers, and subscription services.\n\nI've added the 'Change Address' sign to help you notify everyone about your move.",
+              ["Update addresses now", "Who should I notify?", "Continue journey"]
+            );
+          }, 1000);
+        } else if (taskId === 'address-change' && !dynamicTasks.find(t => t.id === 'local-services')) {
+          // Add local services task
+          addTaskFromAI('local-services');
+          setTimeout(() => {
+            showAIGuidance(
+              "Address Updates Done! 📮",
+              "Wonderful! You've updated your address everywhere. Now let's help you get settled by finding local services like schools, healthcare providers, and other essentials in your new area.\n\nI've added the 'Local Services' sign to complete your moving journey.",
+              ["Find local services", "What do I need locally?", "Complete journey"]
+            );
+          }, 1000);
+        }
       }
       return newSet;
     });
@@ -191,119 +226,31 @@ export default function MovingJourney() {
   const totalTasks = dynamicTasks.length;
   const progressPercentage = totalTasks > 0 ? (completedCount / totalTasks) * 100 : 0;
 
-  // AI Conversation Mutation with task creation
-  const aiConversationMutation = useMutation({
-    mutationFn: async (message: string) => {
-      const response = await apiRequest("POST", "/api/ai-conversation", {
-        message,
-        context: {
-          taskType: "moving-journey",
-          taskTitle: "Moving Journey Overview",
-          moveData,
-          conversationHistory: conversation.slice(-5),
-          currentTasks: dynamicTasks.map(t => t.id)
-        }
-      });
-      return await response.json();
-    },
-    onSuccess: (data) => {
-      // Check if AI wants to create tasks
-      if (data.createTasks && Array.isArray(data.createTasks)) {
-        data.createTasks.forEach((taskId: string) => {
-          addTaskFromAI(taskId, data.highPriority || false);
-        });
-      }
-
-      // Parse AI message for task keywords and add relevant tasks
-      const messageText = data.message.toLowerCase();
-      const userMessage = currentMessage.toLowerCase();
-      
-      // Check for utilities-related keywords
-      if ((messageText.includes('utilities') || messageText.includes('electricity') || 
-           messageText.includes('power') || messageText.includes('gas') || 
-           messageText.includes('water') || messageText.includes('internet') ||
-           userMessage.includes('utilities') || userMessage.includes('electricity') ||
-           userMessage.includes('power') || userMessage.includes('set up utilities')) && 
-          !dynamicTasks.find(t => t.id === 'utilities-setup')) {
-        addTaskFromAI('utilities-setup');
-      }
-
-      // Check for address change keywords
-      if ((messageText.includes('address change') || messageText.includes('update address') ||
-           messageText.includes('change address') || userMessage.includes('address')) &&
-          !dynamicTasks.find(t => t.id === 'address-change')) {
-        addTaskFromAI('address-change');
-      }
-
-      // Check for local services keywords
-      if ((messageText.includes('local services') || messageText.includes('schools') ||
-           messageText.includes('healthcare') || messageText.includes('doctors') ||
-           userMessage.includes('local') || userMessage.includes('services')) &&
-          !dynamicTasks.find(t => t.id === 'local-services')) {
-        addTaskFromAI('local-services');
-      }
-
-      const aiMessage = {
-        id: Date.now().toString(),
-        role: 'assistant' as const,
-        message: data.message,
-        timestamp: new Date(),
-        suggestions: data.suggestions,
-        data: data.actionData
-      };
-
-      setConversation(prev => [...prev, aiMessage]);
-    },
-    onError: (error) => {
-      console.error('AI conversation error:', error);
-      const errorMessage = {
-        id: Date.now().toString(),
-        role: 'assistant' as const,
-        message: "I'm having trouble processing that. Could you try rephrasing your question?",
-        timestamp: new Date()
-      };
-      setConversation(prev => [...prev, errorMessage]);
-    }
-  });
-
-  const handleSendMessage = () => {
-    if (!currentMessage.trim()) return;
-
-    const userMessage = {
-      id: Date.now().toString(),
-      role: 'user' as const,
-      message: currentMessage,
-      timestamp: new Date()
-    };
-
-    setConversation(prev => [...prev, userMessage]);
-    aiConversationMutation.mutate(currentMessage);
-    setCurrentMessage('');
+  // AI Modal Content Management
+  const showAIGuidance = (title: string, message: string, suggestions: string[] = []) => {
+    setAiModalContent({ title, message, suggestions });
+    setShowAIModal(true);
   };
 
-  const initializeAIChat = () => {
-    if (conversation.length === 0) {
-      const welcomeMessage = {
-        id: 'welcome',
-        role: 'assistant' as const,
-        message: `Welcome to your personalized moving journey! I'm your AI assistant, and I'll help create your path step by step.
+  // Initialize AI modal on first visit
+  const initializeAIModal = () => {
+    const welcomeMessage = `Welcome to your personalized moving journey! I'm your AI assistant, and I'll guide you step by step through your relocation.
 
-${moveData.from && moveData.to ? `I can see you're moving from ${moveData.from} to ${moveData.to}${moveData.date ? ` on ${new Date(moveData.date).toLocaleDateString()}` : ''}.` : 'Tell me about your move, and I\'ll start building your journey!'}
+${moveData.from && moveData.to ? `I can see you're moving from ${moveData.from} to ${moveData.to}${moveData.date ? ` on ${new Date(moveData.date).toLocaleDateString()}` : ''}.` : ''}
 
-As we chat, I'll add highway signs to your journey for each task we discuss. The more urgent tasks will appear larger and closer to help you prioritize.
+Here's how this works:
+• I've placed highway signs along your journey for each moving task
+• Start by clicking the "Hire Moving Company" sign to secure your movers
+• As you complete each task, I'll guide you to the next step
+• Each completed task unlocks new signs on your journey
 
-What would you like to tackle first?`,
-        timestamp: new Date(),
-        suggestions: [
-          "I need to find movers",
-          "Help me plan my timeline", 
-          "What should I do first?",
-          "I need to set up utilities"
-        ]
-      };
-      setConversation([welcomeMessage]);
-    }
-    setShowAIChat(true);
+To begin your moving journey, click the "Hire Moving Company" sign below. This is your most important first step!`;
+
+    showAIGuidance("Welcome to Your Moving Journey! 🚛", welcomeMessage, [
+      "I'm ready to start!",
+      "Tell me more about the process",
+      "What's my timeline?"
+    ]);
   };
 
   // Load AI data and URL params
@@ -327,9 +274,13 @@ What would you like to tackle first?`,
     });
   }, []);
 
-  // Load initial tasks
+  // Load initial tasks and show welcome modal
   useEffect(() => {
-      addTaskFromAI("moving-company");
+    addTaskFromAI("moving-company");
+    // Show welcome modal after a brief delay
+    setTimeout(() => {
+      initializeAIModal();
+    }, 1000);
   }, []);
 
   if (showTaskPage) {
@@ -556,135 +507,76 @@ What would you like to tackle first?`,
         />
       )}
 
-      {/* AI Chat Float Button - Enhanced with dynamic prompts */}
-      {!showAIChat && (
-        <div className="fixed bottom-6 right-6 z-50">
-          <div className="relative">
-            <Button
-              onClick={initializeAIChat}
-              className="h-16 w-16 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-xl animate-pulse"
-              size="icon"
-            >
-              <Bot className="w-8 h-8" />
-            </Button>
-            <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center font-bold">
-              AI
-            </div>
-          </div>
-          <div className="bg-white rounded-lg shadow-lg p-3 mt-2 max-w-xs">
-            <p className="text-sm font-medium text-gray-800">
-              🎯 Ready to help with your move!
-            </p>
-            <p className="text-xs text-gray-600">
-              Chat to get personalized moving advice
-            </p>
-          </div>
-        </div>
-      )}
+      {/* AI Help Button */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <Button
+          onClick={initializeAIModal}
+          className="h-14 w-14 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 shadow-xl"
+          size="icon"
+        >
+          <Bot className="w-6 h-6" />
+        </Button>
+      </div>
 
 
 
-      {/* AI Chat Interface */}
-      {showAIChat && (
-        <div className={`fixed bottom-6 right-6 z-50 transition-all duration-300 ${
-          isMinimized ? 'w-80 h-16' : 'w-96 h-[500px]'
-        }`}>
-          <Card className="h-full flex flex-col shadow-xl border-2 border-blue-200">
-            {/* Chat Header */}
-            <div className="flex items-center justify-between p-4 bg-blue-600 text-white rounded-t-lg">
-              <div className="flex items-center gap-2">
-                <Bot className="w-5 h-5" />
-                <span className="font-medium">AI Moving Assistant</span>
-              </div>
-              <div className="flex items-center gap-2">
+      {/* AI Modal */}
+      {showAIModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <Card className="w-full max-w-2xl mx-auto shadow-2xl">
+            <CardHeader className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-lg">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                    <Bot className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-white">{aiModalContent.title}</CardTitle>
+                    <CardDescription className="text-blue-100">Your AI Moving Guide</CardDescription>
+                  </div>
+                </div>
                 <Button
-                  size="sm"
                   variant="ghost"
-                  onClick={() => setIsMinimized(!isMinimized)}
-                  className="text-white hover:bg-blue-700 h-8 w-8 p-0"
-                >
-                  {isMinimized ? <Maximize2 className="w-4 h-4" /> : <Minimize2 className="w-4 h-4" />}
-                </Button>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={() => setShowAIChat(false)}
-                  className="text-white hover:bg-blue-700 h-8 w-8 p-0"
+                  size="icon"
+                  onClick={() => setShowAIModal(false)}
+                  className="text-white hover:bg-white/20 h-8 w-8"
                 >
                   <X className="w-4 h-4" />
                 </Button>
               </div>
-            </div>
-
-            {!isMinimized && (
-              <>
-                {/* Chat Messages */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
-                  {conversation.map((msg) => (
-                    <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`max-w-[80%] p-3 rounded-lg ${
-                        msg.role === 'user' 
-                          ? 'bg-blue-600 text-white' 
-                          : 'bg-white border border-gray-200 text-gray-900'
-                      }`}>
-                        <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
-
-                        {msg.suggestions && msg.suggestions.length > 0 && (
-                          <div className="flex flex-wrap gap-2 mt-3">
-                            {msg.suggestions.map((suggestion, idx) => (
-                              <Button
-                                key={idx}
-                                size="sm"
-                                variant="outline"
-                                className="text-xs h-7 px-2"
-                                onClick={() => {
-                                  setCurrentMessage(suggestion);
-                                  handleSendMessage();
-                                }}
-                              >
-                                {suggestion}
-                              </Button>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-
-                  {aiConversationMutation.isPending && (
-                    <div className="flex justify-start">
-                      <div className="bg-white border border-gray-200 text-gray-900 p-3 rounded-lg">
-                        <div className="flex items-center gap-2">
-                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
-                          <span className="text-sm">AI is thinking...</span>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Chat Input */}
-                <div className="p-4 border-t border-gray-200 bg-white rounded-b-lg">
-                  <div className="flex gap-2">
-                    <Input
-                      value={currentMessage}
-                      onChange={(e) => setCurrentMessage(e.target.value)}
-                      placeholder="Ask me anything about your move..."
-                      onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
-                      className="flex-1"
-                    />
-                    <Button
-                      onClick={handleSendMessage}
-                      disabled={!currentMessage.trim() || aiConversationMutation.isPending}
-                      size="icon"
-                      className="bg-blue-600 hover:bg-blue-700"
-                    >
-                      <Send className="w-4 h-4" />
-                    </Button>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="space-y-4">
+                <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                  {aiModalContent.message}
+                </p>
+                
+                {aiModalContent.suggestions.length > 0 && (
+                  <div className="flex flex-wrap gap-2 pt-4 border-t">
+                    {aiModalContent.suggestions.map((suggestion, idx) => (
+                      <Button
+                        key={idx}
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowAIModal(false)}
+                        className="text-sm"
+                      >
+                        {suggestion}
+                      </Button>
+                    ))}
                   </div>
+                )}
+                
+                <div className="flex justify-end pt-4">
+                  <Button
+                    onClick={() => setShowAIModal(false)}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    Got it!
+                  </Button>
                 </div>
-              </>
-            )}
+              </div>
+            </CardContent>
           </Card>
         </div>
       )}
