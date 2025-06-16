@@ -166,12 +166,18 @@ export default function MovingJourney() {
     const template = availableTaskTemplates[taskId];
     if (!template) return;
 
+    // Check if there's a saved position for this task in localStorage
+    const savedTasks = localStorage.getItem('dynamicTasks');
+    const existingSavedTasks = savedTasks ? JSON.parse(savedTasks) : [];
+    const existingSavedTask = existingSavedTasks.find((t: MovingTask) => t.id === taskId);
+
     const newTask = {
       ...template,
-      // Make high priority tasks larger and more prominent
-      position: isHighPriority ? 
-        { x: "230px", y: "570px" } : // Large prominent position
-        template.position
+      // Use saved position if it exists, otherwise use template/priority position
+      position: existingSavedTask?.position || 
+        (isHighPriority ? 
+          { x: "230px", y: "570px" } : // Large prominent position
+          template.position)
     };
 
     setDynamicTasks(prev => {
