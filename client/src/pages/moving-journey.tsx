@@ -475,10 +475,12 @@ To begin your moving journey, click the "Hire Moving Company" sign below. This i
                   
                   // Add the initial task back with proper positioning
                   setTimeout(() => {
+                    // Reload saved positions to get the most current template position
+                    const currentSavedPositions = loadSavedPositions();
                     const initialTask = {
                       ...availableTaskTemplates["moving-company"],
-                      // Use a good default position for the first task
-                      position: { x: "200px", y: "550px" }
+                      // Use saved template position if available, otherwise use template default
+                      position: currentSavedPositions["moving-company"] || availableTaskTemplates["moving-company"].position
                     };
                     
                     setDynamicTasks([initialTask]);
