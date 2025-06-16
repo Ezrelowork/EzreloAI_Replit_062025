@@ -329,7 +329,7 @@ What would you like to tackle first?`,
 
   // Load initial tasks
   useEffect(() => {
-      addTaskFromAI("moving-company", true);
+      addTaskFromAI("moving-company");
   }, []);
 
   if (showTaskPage) {
