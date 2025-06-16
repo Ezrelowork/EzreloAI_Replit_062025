@@ -5,6 +5,13 @@ import { Badge } from "@/components/ui/badge";
 import { TaskModal, useTaskModal } from "@/components/task-modal";
 import { AllTasksPage } from "@/components/all-tasks-page";
 import { DynamicHighwaySign } from "@/components/dynamic-highway-sign";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 // Import highway background
 import highwayBackground from "@assets/highway-background.png";
@@ -33,7 +40,13 @@ import {
   Key,
   Users,
   CreditCard,
-  Clipboard
+  Clipboard,
+  MessageCircle,
+  Send,
+  Bot,
+  X,
+  Minimize2,
+  Maximize2
 } from "lucide-react";
 
 interface MovingTask {
@@ -48,13 +61,36 @@ interface MovingTask {
   icon: any;
 }
 
+interface ConversationMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  message: string;
+  timestamp: Date;
+  suggestions?: string[];
+  data?: any;
+}
+
 export default function MovingJourney() {
+  const { toast } = useToast();
   const [, setLocation] = useLocation();
   const [completedTasks, setCompletedTasks] = useState<Set<string>>(new Set());
   const [showTaskPage, setShowTaskPage] = useState(false);
   const [selectedTask, setSelectedTask] = useState<MovingTask | null>(null);
   const { isOpen: isTaskModalOpen, currentTask, openModal: openTaskModal, closeModal: closeTaskModal } = useTaskModal();
   const containerRef = useRef<HTMLDivElement>(null);
+  const [moveData, setMoveData] = useState({
+    from: '',
+    to: '',
+    date: '',
+    fromAddress: '',
+    toAddress: ''
+  });
+
+  // AI Chat State
+  const [showAIChat, setShowAIChat] = useState(false);
+  const [isMinimized, setIsMinimized] = useState(false);
+  const [conversation, setConversation] = useState<ConversationMessage[]>([]);
+  const [currentMessage, setCurrentMessage] = useState('');
 
   // Layout is now locked and finalized
 
@@ -127,6 +163,108 @@ export default function MovingJourney() {
   const completedCount = completedTasks.size;
   const totalTasks = movingTasks.length;
   const progressPercentage = (completedCount / totalTasks) * 100;
+
+  // AI Conversation Mutation
+  const aiConversationMutation = useMutation({
+    mutationFn: async (message: string) => {
+      const response = await apiRequest("POST", "/api/ai-conversation", {
+        message,
+        context: {
+          taskType: "moving-journey",
+          taskTitle: "Moving Journey Overview",
+          moveData,
+          conversationHistory: conversation.slice(-5)
+        }
+      });
+      return await response.json();
+    },
+    onSuccess: (data) => {
+      const aiMessage = {
+        id: Date.now().toString(),
+        role: 'assistant' as const,
+        message: data.message,
+        timestamp: new Date(),
+        suggestions: data.suggestions,
+        data: data.actionData
+      };
+
+      setConversation(prev => [...prev, aiMessage]);
+    },
+    onError: (error) => {
+      console.error('AI conversation error:', error);
+      const errorMessage = {
+        id: Date.now().toString(),
+        role: 'assistant' as const,
+        message: "I'm having trouble processing that. Could you try rephrasing your question?",
+        timestamp: new Date()
+      };
+      setConversation(prev => [...prev, errorMessage]);
+    }
+  });
+
+  const handleSendMessage = () => {
+    if (!currentMessage.trim()) return;
+
+    const userMessage = {
+      id: Date.now().toString(),
+      role: 'user' as const,
+      message: currentMessage,
+      timestamp: new Date()
+    };
+
+    setConversation(prev => [...prev, userMessage]);
+    aiConversationMutation.mutate(currentMessage);
+    setCurrentMessage('');
+  };
+
+  const initializeAIChat = () => {
+    if (conversation.length === 0) {
+      const welcomeMessage = {
+        id: 'welcome',
+        role: 'assistant' as const,
+        message: `Hi! I'm your AI moving assistant. I can see you're moving from ${moveData.from} to ${moveData.to}${moveData.date ? ` on ${new Date(moveData.date).toLocaleDateString()}` : ''}. 
+
+I can help you with:
+• Finding the best moving companies
+• Setting up utilities and services
+• Creating a personalized timeline
+• Answering questions about your new location
+• Prioritizing tasks based on your move date
+
+What would you like help with today?`,
+        timestamp: new Date(),
+        suggestions: [
+          "Find moving companies",
+          "Set up utilities",
+          "What should I do first?",
+          "Tell me about my new area"
+        ]
+      };
+      setConversation([welcomeMessage]);
+    }
+    setShowAIChat(true);
+  };
+
+  // Load AI data and URL params
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const fromParam = urlParams.get('from');
+    const toParam = urlParams.get('to');
+    const dateParam = urlParams.get('date');
+
+    // Load from localStorage if not in URL
+    const aiFromLocation = localStorage.getItem('aiFromLocation');
+    const aiToLocation = localStorage.getItem('aiToLocation');
+    const aiMoveDate = localStorage.getItem('aiMoveDate');
+
+    setMoveData({
+      from: fromParam || aiFromLocation || '',
+      to: toParam || aiToLocation || '',
+      date: dateParam || aiMoveDate || '',
+      fromAddress: fromParam || aiFromLocation || '',
+      toAddress: toParam || aiToLocation || ''
+    });
+  }, []);
 
   if (showTaskPage) {
     return (
@@ -285,6 +423,122 @@ export default function MovingJourney() {
             }
           }}
         />
+      )}
+
+      {/* AI Chat Float Button */}
+      {!showAIChat && (
+        <Button
+          onClick={initializeAIChat}
+          className="fixed bottom-6 right-6 h-14 w-14 rounded-full bg-blue-600 hover:bg-blue-700 shadow-lg z-50"
+          size="icon"
+        >
+          <Bot className="w-6 h-6" />
+        </Button>
+      )}
+
+      {/* AI Chat Interface */}
+      {showAIChat && (
+        <div className={`fixed bottom-6 right-6 z-50 transition-all duration-300 ${
+          isMinimized ? 'w-80 h-16' : 'w-96 h-[500px]'
+        }`}>
+          <Card className="h-full flex flex-col shadow-xl border-2 border-blue-200">
+            {/* Chat Header */}
+            <div className="flex items-center justify-between p-4 bg-blue-600 text-white rounded-t-lg">
+              <div className="flex items-center gap-2">
+                <Bot className="w-5 h-5" />
+                <span className="font-medium">AI Moving Assistant</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setIsMinimized(!isMinimized)}
+                  className="text-white hover:bg-blue-700 h-8 w-8 p-0"
+                >
+                  {isMinimized ? <Maximize2 className="w-4 h-4" /> : <Minimize2 className="w-4 h-4" />}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setShowAIChat(false)}
+                  className="text-white hover:bg-blue-700 h-8 w-8 p-0"
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+
+            {!isMinimized && (
+              <>
+                {/* Chat Messages */}
+                <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
+                  {conversation.map((msg) => (
+                    <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                      <div className={`max-w-[80%] p-3 rounded-lg ${
+                        msg.role === 'user' 
+                          ? 'bg-blue-600 text-white' 
+                          : 'bg-white border border-gray-200 text-gray-900'
+                      }`}>
+                        <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
+
+                        {msg.suggestions && msg.suggestions.length > 0 && (
+                          <div className="flex flex-wrap gap-2 mt-3">
+                            {msg.suggestions.map((suggestion, idx) => (
+                              <Button
+                                key={idx}
+                                size="sm"
+                                variant="outline"
+                                className="text-xs h-7 px-2"
+                                onClick={() => {
+                                  setCurrentMessage(suggestion);
+                                  handleSendMessage();
+                                }}
+                              >
+                                {suggestion}
+                              </Button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+
+                  {aiConversationMutation.isPending && (
+                    <div className="flex justify-start">
+                      <div className="bg-white border border-gray-200 text-gray-900 p-3 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                          <span className="text-sm">AI is thinking...</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Chat Input */}
+                <div className="p-4 border-t border-gray-200 bg-white rounded-b-lg">
+                  <div className="flex gap-2">
+                    <Input
+                      value={currentMessage}
+                      onChange={(e) => setCurrentMessage(e.target.value)}
+                      placeholder="Ask me anything about your move..."
+                      onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && handleSendMessage()}
+                      className="flex-1"
+                    />
+                    <Button
+                      onClick={handleSendMessage}
+                      disabled={!currentMessage.trim() || aiConversationMutation.isPending}
+                      size="icon"
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      <Send className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              </>
+            )}
+          </Card>
+        </div>
       )}
     </div>
   );

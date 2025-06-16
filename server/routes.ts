@@ -780,6 +780,8 @@ Only include real companies that actually serve ${fromLocation} to ${toLocation}
         }
       });
 
+    }```text
+
     } catch (error) {
       console.error("Moving companies search error:", error);
       res.status(500).json({ 
@@ -1720,10 +1722,28 @@ Only include real providers that actually serve this location.`;
     }
   });
 
-  // AI Conversation endpoint for intelligent task assistance
+  // AI Conversation endpoint
   app.post("/api/ai-conversation", async (req, res) => {
     try {
       const { message, context } = req.body;
+
+      // Build context-aware prompt
+      let systemPrompt = `You are an AI assistant helping with relocation tasks. Be helpful, conversational, and provide actionable advice.`;
+
+      if (context?.taskType === 'moving-companies') {
+        systemPrompt += `\n\nThe user is looking for moving companies. Help them understand pricing, what to look for, and how to get quotes.`;
+      } else if (context?.taskType === 'utilities') {
+        systemPrompt += `\n\nThe user is setting up utilities for their new home. Help them understand which utilities to set up, timing, and provider options.`;
+      } else if (context?.taskType === 'moving-journey') {
+        systemPrompt += `\n\nThe user is on their moving journey overview page. Help them prioritize tasks, understand timelines, and navigate their relocation process. You can guide them to specific task pages or provide general moving advice.`;
+      }
+
+      if (context?.moveData) {
+        systemPrompt += `\n\nMove Details:
+- From: ${context.moveData.from || 'Not specified'}
+- To: ${context.moveData.to || 'Not specified'}
+- Date: ${context.moveData.date || 'Not specified'}`;
+      }
 
       if (!process.env.OPENAI_API_KEY) {
         return res.status(503).json({ 
@@ -1737,51 +1757,51 @@ Only include real providers that actually serve this location.`;
       const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
       // Build context-aware prompt
-      let systemPrompt = `You are an expert AI moving and relocation assistant for Ezrelo. You help users with all aspects of their move in a conversational, personalized way.
+      // let systemPrompt = `You are an expert AI moving and relocation assistant for Ezrelo. You help users with all aspects of their move in a conversational, personalized way.
 
-Your personality: Helpful, knowledgeable, and encouraging. You make complex moving decisions feel manageable.
+      // Your personality: Helpful, knowledgeable, and encouraging. You make complex moving decisions feel manageable.
 
-Current context:
-- Task: ${context.taskTitle}
-- Moving from: ${context.moveData?.from || 'Not specified'}
-- Moving to: ${context.moveData?.to || 'Not specified'}
-- Move date: ${context.moveData?.date || 'Not specified'}
+      // Current context:
+      // - Task: ${context.taskTitle}
+      // - Moving from: ${context.moveData?.from || 'Not specified'}
+      // - Moving to: ${context.moveData?.to || 'Not specified'}
+      // - Move date: ${context.moveData?.date || 'Not specified'}
 
-Guidelines:
-1. Be conversational and personal - ask follow-up questions
-2. Provide specific, actionable advice
-3. If discussing moving companies, reference the ${context.currentCompanies?.length || 0} providers we found
-4. Always include 2-3 relevant suggestions for the user's next question
-5. Keep responses concise but comprehensive
-6. Suggest specific actions when appropriate (search, questionnaire, contact providers)
-7. Use the user's specific move details to personalize advice
+      // Guidelines:
+      // 1. Be conversational and personal - ask follow-up questions
+      // 2. Provide specific, actionable advice
+      // 3. If discussing moving companies, reference the ${context.currentCompanies?.length || 0} providers we found
+      // 4. Always include 2-3 relevant suggestions for the user's next question
+      // 5. Keep responses concise but comprehensive
+      // 6. Suggest specific actions when appropriate (search, questionnaire, contact providers)
+      // 7. Use the user's specific move details to personalize advice
 
-Response format: JSON with 'message', 'suggestions' array, and optional 'actionData' for triggering app actions.`;
+      // Response format: JSON with 'message', 'suggestions' array, and optional 'actionData' for triggering app actions.`;
 
       // Add task-specific context
-      if (context.taskType === 'moving') {
-        systemPrompt += `\n\nMoving Company Context:
-- ${context.currentCompanies?.length || 0} companies found
-- Selected mover: ${context.selectedMover ? context.selectedMover.provider : 'None yet'}
-- Available companies: ${context.currentCompanies?.map(c => c.provider).join(', ') || 'None loaded'}
+      // if (context.taskType === 'moving') {
+      //   systemPrompt += `\n\nMoving Company Context:
+      // - ${context.currentCompanies?.length || 0} companies found
+      // - Selected mover: ${context.selectedMover ? context.selectedMover.provider : 'None yet'}
+      // - Available companies: ${context.currentCompanies?.map(c => c.provider).join(', ') || 'None loaded'}
 
-You can suggest actions like:
-- "search_movers" to find companies
-- "show_questionnaire" to help with estimates
-- "recommend_mover" with specific company name`;
-      }
+      // You can suggest actions like:
+      // - "search_movers" to find companies
+      // - "show_questionnaire" to help with estimates
+      // - "recommend_mover" with specific company name`;
+      // }
 
       // Include conversation history for context
-      let conversationContext = '';
-      if (context.conversationHistory && context.conversationHistory.length > 0) {
-        conversationContext = '\n\nRecent conversation:\n' + 
-          context.conversationHistory.map(msg => `${msg.role}: ${msg.message}`).join('\n');
-      }
+      // let conversationContext = '';
+      // if (context.conversationHistory && context.conversationHistory.length > 0) {
+      //   conversationContext = '\n\nRecent conversation:\n' + 
+      //     context.conversationHistory.map(msg => `${msg.role}: ${msg.message}`).join('\n');
+      // }
 
       const completion = await openai.chat.completions.create({
         model: "gpt-4o",
         messages: [
-          { role: "system", content: systemPrompt + conversationContext },
+          { role: "system", content: systemPrompt },
           { role: "user", content: message }
         ],
         response_format: { type: "json_object" },
@@ -1806,7 +1826,7 @@ You can suggest actions like:
 
     } catch (error) {
       console.error("AI Conversation error:", error);
-      
+
       // Provide helpful fallback responses
       const fallbackResponse = {
         message: "I'm having a bit of trouble processing that right now. Let me help you with some common moving questions instead.",
@@ -2134,7 +2154,7 @@ You can suggest actions like:
         const seenBankNames = new Set();
 
         // Search with each query to get both nationwide and local options
-        
+
         for (const query of searchQueries) {
           try {
             console.log(`Searching for: ${query}`);
