@@ -118,7 +118,7 @@ export default function MovingJourney() {
       week: "Week 1",
       category: "Core Moving",
       completed: false,
-      position: { x: "220px", y: "750px" }, // Left side for immediate action
+      position: { x: "300px", y: "650px" }, // Starting position on the left
       icon: Truck
     },
     "utilities-setup": {
@@ -129,7 +129,7 @@ export default function MovingJourney() {
       week: "Week 2",
       category: "Essential Services",
       completed: false,
-      position: { x: "800px", y: "600px" }, // Middle section
+      position: { x: "500px", y: "450px" }, // Middle-left section
       icon: Zap
     },
     "address-change": {
@@ -140,7 +140,7 @@ export default function MovingJourney() {
       week: "Week 3",
       category: "Administrative",
       completed: false,
-      position: { x: "800px", y: "250px" }, // Right section
+      position: { x: "700px", y: "300px" }, // Middle-right section
       icon: FileText
     },
     "local-services": {
@@ -151,7 +151,7 @@ export default function MovingJourney() {
       week: "Week 4",
       category: "Community",
       completed: false,
-      position: { x: "750px", y: "150px" }, // Far right
+      position: { x: "900px", y: "200px" }, // End position on the right
       icon: Building
     }
   };
