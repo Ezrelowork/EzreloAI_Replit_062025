@@ -489,17 +489,25 @@ To begin your moving journey, click the "Hire Moving Company" sign below. This i
               onMouseDown={isEditMode ? (e) => handleDragStart(e, task.id) : undefined}
             >
               <div className="relative">
-                {/* Animated Step Indicator for first task (moving company) */}
-                {task.id === 'moving-company' && (
-                  <div className="absolute -top-16 left-1/2 transform -translate-x-1/2 text-center">
-                    <div className="bg-green-500 text-white px-4 py-2 rounded-full font-bold text-sm shadow-lg animate-pulse">
-                      Start Here
-                    </div>
-                   
-                    {/* Arrow pointing to sign */}
-                   
-                  </div>
-                )}
+                {/* Progressive Step Indicator */}
+                {(() => {
+                  // Find the next incomplete task
+                  const incompleteTasks = dynamicTasks.filter(t => !completedTasks.has(t.id));
+                  const nextTask = incompleteTasks.length > 0 ? incompleteTasks[0] : null;
+                  
+                  // Show indicator on the next task to complete
+                  if (nextTask && task.id === nextTask.id) {
+                    const isFirstTask = task.id === 'moving-company';
+                    return (
+                      <div className="absolute -top-16 left-1/2 transform -translate-x-1/2 text-center">
+                        <div className="bg-green-500 text-white px-4 py-2 rounded-full font-bold text-sm shadow-lg animate-pulse">
+                          {isFirstTask ? 'Start Here' : 'To Do'}
+                        </div>
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
 
                 <DynamicHighwaySign
                   title={task.title}
