@@ -399,9 +399,28 @@ To begin your moving journey, click the "Hire Moving Company" sign below. This i
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <Badge variant="secondary" className="text-sm">
-                {completedCount}/{totalTasks} Completed
-              </Badge>
+              {/* Compact Progress Indicator - takes up right 1/3 */}
+              <div className="flex items-center gap-3 bg-gradient-to-r from-blue-50 to-green-50 px-4 py-2 rounded-lg border border-blue-200">
+                <div className="flex items-center gap-2">
+                  <div className="w-6 h-6 bg-gradient-to-r from-blue-500 to-green-500 rounded-full flex items-center justify-center">
+                    <span className="text-xs font-bold text-white">{Math.round(progressPercentage)}%</span>
+                  </div>
+                  <div className="text-sm">
+                    <div className="font-medium text-gray-800">{completedCount}/{totalTasks} Tasks</div>
+                    <div className="text-xs text-gray-600 flex items-center gap-1">
+                      <Bot className="w-3 h-3" />
+                      AI Guided
+                    </div>
+                  </div>
+                </div>
+                <div className="w-16 bg-gray-200 rounded-full h-2">
+                  <div 
+                    className="bg-gradient-to-r from-blue-500 to-green-500 h-2 rounded-full transition-all duration-500"
+                    style={{ width: `${progressPercentage}%` }}
+                  />
+                </div>
+              </div>
+              
               <Button
                 onClick={() => setIsEditMode(!isEditMode)}
                 variant={isEditMode ? "destructive" : "outline"}
@@ -419,47 +438,11 @@ To begin your moving journey, click the "Hire Moving Company" sign below. This i
               </Button>
             </div>
           </div>
-          
-          {/* Journey Progress - moved into header */}
-          <div className="py-4 border-t border-gray-200">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium text-gray-700">Journey Progress</span>
-                <div className="flex items-center gap-1 text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
-                  <Bot className="w-3 h-3" />
-                  AI Optimized
-                </div>
-              </div>
-              <span className="text-sm text-gray-600">{Math.round(progressPercentage)}% Complete</span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-3">
-              <div 
-                className="bg-gradient-to-r from-blue-500 to-green-500 h-3 rounded-full transition-all duration-500"
-                style={{ width: `${progressPercentage}%` }}
-              />
-            </div>
-
-            {/* AI Smart Insights */}
-            {moveData.date && (
-              <div className="mt-3 flex items-center gap-4 text-xs">
-                <div className="flex items-center gap-1 text-green-600">
-                  <Bot className="w-3 h-3" />
-                  <span>AI Insight: {Math.ceil((new Date(moveData.date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24))} days until move</span>
-                </div>
-                <div className="flex items-center gap-1 text-blue-600">
-                  <Info className="w-3 h-3" />
-                  <span>Priority: {progressPercentage < 25 ? 'Book movers now' : progressPercentage < 50 ? 'Setup utilities' : 'Finalize details'}</span>
-                </div>
-              </div>
-            )}
-          </div>
         </div>
       </header>
 
-      
-
       {/* Main Journey Container */}
-      <div className="relative overflow-auto bg-gray-100" style={{ height: 'calc(100vh - 240px)' }}>
+      <div className="relative overflow-auto bg-gray-100" style={{ height: 'calc(100vh - 80px)' }}>
         {/* Edit Mode Indicator */}
         {isEditMode && (
           <div className="absolute top-4 left-4 z-50 bg-red-600 text-white px-4 py-2 rounded-lg shadow-lg animate-pulse">
