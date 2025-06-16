@@ -445,9 +445,17 @@ To begin your moving journey, click the "Hire Moving Company" sign below. This i
                   setCompletedTasks(new Set());
                   setDynamicTasks([]);
                   
-                  // Add the initial task back
+                  // Add the initial task back with proper positioning
                   setTimeout(() => {
-                    addTaskFromAI("moving-company");
+                    const initialTask = {
+                      ...availableTaskTemplates["moving-company"],
+                      // Use a good default position for the first task
+                      position: { x: "200px", y: "550px" }
+                    };
+                    
+                    setDynamicTasks([initialTask]);
+                    localStorage.setItem('dynamicTasks', JSON.stringify([initialTask]));
+                    
                     // Show welcome modal after reset
                     setTimeout(() => {
                       initializeAIModal();
