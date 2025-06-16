@@ -98,6 +98,11 @@ export default function MovingJourney() {
     suggestions: [] as string[]
   });
 
+  // Position editing state
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [draggedTask, setDraggedTask] = useState<string | null>(null);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+
   // Layout is now locked and finalized
 
   // Dynamic task state - starts empty, populated by AI interactions
@@ -182,6 +187,52 @@ export default function MovingJourney() {
 
     // Clear the highlight after animation
     setTimeout(() => setLastAddedTask(null), 3000);
+  };
+
+  // Handle drag start
+  const handleDragStart = (e: React.MouseEvent, taskId: string) => {
+    if (!isEditMode) return;
+    
+    const rect = e.currentTarget.getBoundingClientRect();
+    const containerRect = containerRef.current?.getBoundingClientRect();
+    if (!containerRect) return;
+
+    setDraggedTask(taskId);
+    setDragOffset({
+      x: e.clientX - rect.left - rect.width / 2,
+      y: e.clientY - rect.top - rect.height / 2
+    });
+  };
+
+  // Handle drag move
+  const handleDragMove = (e: React.MouseEvent) => {
+    if (!isEditMode || !draggedTask || !containerRef.current) return;
+    
+    const containerRect = containerRef.current.getBoundingClientRect();
+    const x = e.clientX - containerRect.left - dragOffset.x;
+    const y = e.clientY - containerRect.top - dragOffset.y;
+
+    // Update task position
+    setDynamicTasks(prev => prev.map(task => 
+      task.id === draggedTask 
+        ? { ...task, position: { x: `${Math.max(0, Math.min(1200, x))}px`, y: `${Math.max(0, Math.min(800, y))}px` } }
+        : task
+    ));
+  };
+
+  // Handle drag end
+  const handleDragEnd = () => {
+    if (draggedTask) {
+      // Save updated positions to localStorage
+      const updatedTasks = dynamicTasks.map(task => 
+        task.id === draggedTask 
+          ? { ...task, position: task.position }
+          : task
+      );
+      localStorage.setItem('dynamicTasks', JSON.stringify(updatedTasks));
+    }
+    setDraggedTask(null);
+    setDragOffset({ x: 0, y: 0 });
   };
 
   const toggleTaskCompletion = (taskId: string) => {
@@ -352,6 +403,14 @@ To begin your moving journey, click the "Hire Moving Company" sign below. This i
                 {completedCount}/{totalTasks} Completed
               </Badge>
               <Button
+                onClick={() => setIsEditMode(!isEditMode)}
+                variant={isEditMode ? "destructive" : "outline"}
+                className={isEditMode ? "bg-red-600 hover:bg-red-700" : ""}
+              >
+                <Wrench className="w-4 h-4 mr-2" />
+                {isEditMode ? "Exit Edit" : "Edit Positions"}
+              </Button>
+              <Button
                 onClick={() => setShowTaskPage(true)}
                 className="bg-green-600 hover:bg-green-700"
               >
@@ -401,10 +460,20 @@ To begin your moving journey, click the "Hire Moving Company" sign below. This i
 
       {/* Main Journey Container */}
       <div className="relative overflow-auto bg-gray-100" style={{ height: 'calc(100vh - 200px)' }}>
+        {/* Edit Mode Indicator */}
+        {isEditMode && (
+          <div className="absolute top-4 left-4 z-50 bg-red-600 text-white px-4 py-2 rounded-lg shadow-lg animate-pulse">
+            <div className="flex items-center gap-2">
+              <Wrench className="w-4 h-4" />
+              <span className="font-semibold">Edit Mode: Drag signs to reposition</span>
+            </div>
+          </div>
+        )}
+
         {/* Highway Background - Fixed 1200x800 */}
         <div 
           ref={containerRef}
-          className="absolute bg-no-repeat"
+          className={`absolute bg-no-repeat ${isEditMode ? 'cursor-crosshair' : ''}`}
           style={{
             width: '1200px',
             height: '800px',
@@ -415,18 +484,26 @@ To begin your moving journey, click the "Hire Moving Company" sign below. This i
             top: '0',
             transform: 'none'
           }}
+          onMouseMove={handleDragMove}
+          onMouseUp={handleDragEnd}
+          onMouseLeave={handleDragEnd}
         >
           {/* Dynamic Highway Signs - Appear from AI conversations */}
           {dynamicTasks.map((task, index) => (
             <div
               key={task.id}
-              className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer hover:scale-105 transition-all duration-500 group"
+              className={`absolute transform -translate-x-1/2 -translate-y-1/2 transition-all duration-500 group ${
+                isEditMode 
+                  ? 'cursor-move hover:scale-110 hover:z-50' 
+                  : 'cursor-pointer hover:scale-105'
+              } ${draggedTask === task.id ? 'z-50 scale-110' : ''}`}
               style={{
                 left: task.position.x,
                 top: task.position.y,
-                zIndex: 20
+                zIndex: draggedTask === task.id ? 50 : 20
               }}
-              onClick={() => handleSignClick(task)}
+              onClick={isEditMode ? undefined : () => handleSignClick(task)}
+              onMouseDown={isEditMode ? (e) => handleDragStart(e, task.id) : undefined}
             >
               <div className="relative">
                 {/* Animated Step Indicator for first task (moving company) */}
@@ -451,21 +528,30 @@ To begin your moving journey, click the "Hire Moving Company" sign below. This i
                 />
               </div>
 
-              {/* AI Smart Suggestion Tooltip */}
-              <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
-                <div className="bg-blue-600 text-white text-xs rounded-lg px-3 py-2 whitespace-nowrap shadow-lg">
-                  <div className="flex items-center gap-2">
-                    <Bot className="w-3 h-3" />
-                    <span>
-                      {task.id === 'moving-company' && 'AI found 12 local movers for you'}
-                      {task.id === 'utilities-setup' && 'AI can help setup all utilities'}
-                      {task.id === 'address-change' && 'AI knows 23+ places to update'}
-                      {task.id === 'local-services' && 'AI found schools & services in Missoula'}
-                    </span>
-                  </div>
-                  <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-blue-600"></div>
+              {/* Edit Mode Position Display */}
+              {isEditMode && (
+                <div className="absolute -top-12 left-1/2 transform -translate-x-1/2 bg-yellow-500 text-black text-xs rounded px-2 py-1 font-mono whitespace-nowrap">
+                  x: {parseInt(task.position.x)}, y: {parseInt(task.position.y)}
                 </div>
-              </div>
+              )}
+
+              {/* AI Smart Suggestion Tooltip */}
+              {!isEditMode && (
+                <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+                  <div className="bg-blue-600 text-white text-xs rounded-lg px-3 py-2 whitespace-nowrap shadow-lg">
+                    <div className="flex items-center gap-2">
+                      <Bot className="w-3 h-3" />
+                      <span>
+                        {task.id === 'moving-company' && 'AI found 12 local movers for you'}
+                        {task.id === 'utilities-setup' && 'AI can help setup all utilities'}
+                        {task.id === 'address-change' && 'AI knows 23+ places to update'}
+                        {task.id === 'local-services' && 'AI found schools & services in Missoula'}
+                      </span>
+                    </div>
+                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-l-transparent border-r-transparent border-t-blue-600"></div>
+                  </div>
+                </div>
+              )}
             </div>
           ))}
 
