@@ -418,27 +418,34 @@ What would you like to tackle first?`,
           }}
         >
           {/* Dynamic Highway Signs - Appear from AI conversations */}
-          {dynamicTasks.map((task) => (
+          {dynamicTasks.map((task, index) => (
             <div
               key={task.id}
-              className={`absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer hover:scale-105 transition-all duration-500 group ${
-                lastAddedTask === task.id ? 'animate-bounce scale-110' : ''
-              }`}
+              className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer hover:scale-105 transition-all duration-500 group"
               style={{
                 left: task.position.x,
                 top: task.position.y,
-                // Make recently added tasks larger and more prominent
-                transform: lastAddedTask === task.id ? 
-                  'translate(-50%, -50%) scale(1.2)' : 
-                  'translate(-50%, -50%)',
-                zIndex: lastAddedTask === task.id ? 30 : 20
+                zIndex: 20
               }}
               onClick={() => handleSignClick(task)}
             >
-              <div className={lastAddedTask === task.id ? 'relative' : ''}>
-                {/* Glow effect for new tasks */}
-                {lastAddedTask === task.id && (
-                  <div className="absolute inset-0 bg-blue-400 rounded-lg blur-xl opacity-50 animate-pulse scale-110"></div>
+              <div className="relative">
+                {/* Animated Step Indicator for first task (moving company) */}
+                {task.id === 'moving-company' && (
+                  <div className="absolute -top-16 left-1/2 transform -translate-x-1/2 text-center">
+                    <div className="bg-green-500 text-white px-4 py-2 rounded-full font-bold text-sm shadow-lg animate-pulse">
+                      Start Here
+                    </div>
+                    <div className="text-green-600 font-semibold text-xs mt-1 animate-bounce">
+                      Step 1
+                    </div>
+                    {/* Arrow pointing to sign */}
+                    <div className="flex justify-center mt-1">
+                      <svg className="w-4 h-4 text-green-500 animate-bounce" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L11 6.414V16a1 1 0 11-2 0V6.414L7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3z" clipRule="evenodd" />
+                      </svg>
+                    </div>
+                  </div>
                 )}
 
                 <DynamicHighwaySign
@@ -449,13 +456,6 @@ What would you like to tackle first?`,
                   completed={completedTasks.has(task.id)}
                   onClick={() => handleSignClick(task)}
                 />
-
-                {/* New task indicator */}
-                {lastAddedTask === task.id && (
-                  <div className="absolute -top-4 -right-4 bg-green-500 text-white text-xs px-2 py-1 rounded-full font-bold animate-pulse">
-                    NEW!
-                  </div>
-                )}
               </div>
 
               {/* AI Smart Suggestion Tooltip */}
