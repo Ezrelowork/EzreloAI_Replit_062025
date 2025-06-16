@@ -204,8 +204,27 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 
             <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl">
               <div>
-                <div className="font-semibold text-gray-900">Mark as completed</div>
-                <div className="text-sm text-gray-600">Already finished? Update your progress</div>
+                <div className="font-semibold text-gray-900">
+                  {/* Check if task is completed by looking at localStorage */}
+                  {(() => {
+                    const completedTasks = localStorage.getItem('completedTasks');
+                    const completedSet = completedTasks ? new Set(JSON.parse(completedTasks)) : new Set();
+                    const isCompleted = completedSet.has(task.id);
+                    
+                    return isCompleted ? "Undo completion" : "Mark as completed";
+                  })()}
+                </div>
+                <div className="text-sm text-gray-600">
+                  {(() => {
+                    const completedTasks = localStorage.getItem('completedTasks');
+                    const completedSet = completedTasks ? new Set(JSON.parse(completedTasks)) : new Set();
+                    const isCompleted = completedSet.has(task.id);
+                    
+                    return isCompleted 
+                      ? "Click to mark this task as incomplete and return it to your active list" 
+                      : "Already finished? Update your progress";
+                  })()}
+                </div>
               </div>
               <Button
                 onClick={() => {
@@ -215,7 +234,13 @@ export const TaskModal: React.FC<TaskModalProps> = ({
                 variant="outline"
                 className="border-gray-300 text-gray-700 hover:bg-gray-100 font-semibold px-6 py-2 rounded-xl"
               >
-                Mark Done
+                {(() => {
+                  const completedTasks = localStorage.getItem('completedTasks');
+                  const completedSet = completedTasks ? new Set(JSON.parse(completedTasks)) : new Set();
+                  const isCompleted = completedSet.has(task.id);
+                  
+                  return isCompleted ? "Undo" : "Mark Done";
+                })()}
               </Button>
             </div>
           </div>
