@@ -780,7 +780,6 @@ Only include real companies that actually serve ${fromLocation} to ${toLocation}
         }
       });
 
-    }
     } catch (error) {
       console.error("Moving companies search error:", error);
       res.status(500).json({ 
@@ -1605,7 +1604,7 @@ Only include real providers that actually serve this location.`;
   });
 
   // Add communication log
-  app.post("/api/communication", async (req, res){
+  app.post("/api/communication", async (req, res) => {
     try {
       const communication = await storage.createCommunication(req.body);
       res.json({ communication });
