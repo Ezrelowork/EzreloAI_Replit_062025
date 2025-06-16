@@ -225,7 +225,7 @@ export default function MovingJourney() {
            userMessage.includes('utilities') || userMessage.includes('electricity') ||
            userMessage.includes('power') || userMessage.includes('set up utilities')) && 
           !dynamicTasks.find(t => t.id === 'utilities-setup')) {
-        addTaskFromAI('utilities-setup', true);
+        addTaskFromAI('utilities-setup');
       }
 
       // Check for address change keywords
