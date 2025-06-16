@@ -1725,8 +1725,8 @@ Only include real providers that actually serve this location.`;
     try {
       const { message, context } = req.body;
 
-      // Build context-aware prompt
-      let systemPrompt = `You are an AI assistant helping with relocation tasks. Be helpful, conversational, and provide actionable advice.`;
+      // Build context-aware prompt that includes "json" for OpenAI requirements
+      let systemPrompt = `You are an AI assistant helping with relocation tasks. Be helpful, conversational, and provide actionable advice. Always respond in JSON format with 'message', 'suggestions' array, and optional 'actionData' fields.`;
 
       if (context?.taskType === 'moving-companies') {
         systemPrompt += `\n\nThe user is looking for moving companies. Help them understand pricing, what to look for, and how to get quotes.`;
