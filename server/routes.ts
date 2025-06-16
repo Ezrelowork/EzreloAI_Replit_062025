@@ -892,7 +892,7 @@ Provide strategic relocation overview in JSON format:
   "estimatedTotalCost": "Total cost estimate"
 }
 
-Focus on actionable recommendations specific to moving from \${fromLocation} to \${toLocation}.`;
+Focus on actionable recommendations specific to moving from ${fromLocation} to ${toLocation}.`;
 
       const userPrompt = `Help me plan my relocation:
 
