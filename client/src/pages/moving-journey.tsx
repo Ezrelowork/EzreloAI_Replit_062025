@@ -416,19 +416,9 @@ To begin your moving journey, click the "Hire Moving Company" sign below. This i
                 <h1 className="text-2xl font-bold text-gray-900">Your Moving Journey</h1>
 
                 {moveData.from && moveData.to && (
-                  <div className="mt-2 p-2 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg border border-blue-200">
-                    <div className="flex items-start gap-2">
-                      <div className="bg-blue-100 rounded-full p-1">
-                        <Bot className="w-3 h-3 text-blue-600" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-xs text-gray-700 font-medium">AI Insights Available</p>
-                        <p className="text-xs text-gray-600">
-                          I can help you prioritize tasks, find the best movers, and create a timeline for your {moveData.from} to {moveData.to} move.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+                  <p className="text-sm text-gray-600 mt-1">
+                    {moveData.from} → {moveData.to}
+                  </p>
                 )}
               </div>
             </div>
@@ -490,40 +480,40 @@ To begin your moving journey, click the "Hire Moving Company" sign below. This i
               </Button>
             </div>
           </div>
-          
-          {/* Full-width Progress Bar at bottom of header */}
-          <div className="border-t border-gray-100 bg-gradient-to-r from-blue-50 to-green-50 px-4 sm:px-6 lg:px-8 py-3">
-            <div className="max-w-7xl mx-auto">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-green-500 rounded-full flex items-center justify-center shadow-sm">
-                    <span className="text-sm font-bold text-white">{Math.round(progressPercentage)}%</span>
-                  </div>
-                  <div>
-                    <div className="text-sm font-semibold text-gray-800">Journey Progress</div>
-                    <div className="text-xs text-gray-600">{completedCount} of {totalTasks} tasks completed</div>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2 text-xs text-gray-600">
-                  <Bot className="w-4 h-4 text-blue-600" />
-                  <span>AI Guided Experience</span>
-                </div>
-              </div>
-              
-              {/* Large Progress Bar */}
-              <div className="w-full bg-white rounded-full h-3 shadow-inner border border-gray-200">
-                <div 
-                  className="bg-gradient-to-r from-blue-500 via-blue-600 to-green-500 h-3 rounded-full transition-all duration-700 ease-out shadow-sm"
-                  style={{ width: `${progressPercentage}%` }}
-                />
-              </div>
-            </div>
-          </div>
         </div>
       </header>
 
+      {/* Transparent Progress Bar Overlay */}
+      <div className="fixed top-20 left-0 right-0 z-40 bg-white/80 backdrop-blur-sm border-b border-gray-200/50 px-4 sm:px-6 lg:px-8 py-3">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-green-500 rounded-full flex items-center justify-center shadow-sm">
+                <span className="text-sm font-bold text-white">{Math.round(progressPercentage)}%</span>
+              </div>
+              <div>
+                <div className="text-sm font-semibold text-gray-800">Journey Progress</div>
+                <div className="text-xs text-gray-600">{completedCount} of {totalTasks} tasks completed</div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 text-xs text-gray-600">
+              <Bot className="w-4 h-4 text-blue-600" />
+              <span>AI Guided Experience</span>
+            </div>
+          </div>
+          
+          {/* Large Progress Bar */}
+          <div className="w-full bg-white/50 rounded-full h-3 shadow-inner border border-gray-200/50">
+            <div 
+              className="bg-gradient-to-r from-blue-500 via-blue-600 to-green-500 h-3 rounded-full transition-all duration-700 ease-out shadow-sm"
+              style={{ width: `${progressPercentage}%` }}
+            />
+          </div>
+        </div>
+      </div>
+
       {/* Main Journey Container */}
-      <div className="relative bg-gray-100" style={{ height: 'calc(100vh - 80px)', overflow: 'hidden' }}>
+      <div className="relative bg-gray-100" style={{ height: 'calc(100vh - 80px)', overflow: 'hidden', paddingTop: '80px' }}>
         {/* Edit Mode Indicator */}
         {isEditMode && (
           <div className="absolute top-4 left-4 z-50 bg-red-600 text-white px-4 py-2 rounded-lg shadow-lg animate-pulse">
