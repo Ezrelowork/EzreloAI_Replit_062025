@@ -430,6 +430,36 @@ To begin your moving journey, click the "Hire Moving Company" sign below. This i
                 {isEditMode ? "Exit Edit" : "Edit Positions"}
               </Button>
               <Button
+                onClick={() => {
+                  // Clear all saved progress
+                  localStorage.removeItem('completedTasks');
+                  localStorage.removeItem('dynamicTasks');
+                  
+                  // Reset state
+                  setCompletedTasks(new Set());
+                  setDynamicTasks([]);
+                  
+                  // Add the initial task back
+                  setTimeout(() => {
+                    addTaskFromAI("moving-company");
+                    // Show welcome modal after reset
+                    setTimeout(() => {
+                      initializeAIModal();
+                    }, 500);
+                  }, 100);
+                  
+                  toast({
+                    title: "Journey Reset",
+                    description: "Your moving journey has been reset. Welcome back!",
+                  });
+                }}
+                variant="outline"
+                className="border-orange-300 text-orange-700 hover:bg-orange-50"
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Reset Journey
+              </Button>
+              <Button
                 onClick={() => setShowTaskPage(true)}
                 className="bg-green-600 hover:bg-green-700"
               >
