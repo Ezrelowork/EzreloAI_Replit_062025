@@ -113,6 +113,14 @@ export default function MovingJourney() {
   });
   const [lastAddedTask, setLastAddedTask] = useState<string | null>(null);
 
+  // Load saved template positions
+  const loadSavedPositions = () => {
+    const savedPositions = localStorage.getItem('taskTemplatePositions');
+    return savedPositions ? JSON.parse(savedPositions) : {};
+  };
+
+  const savedPositions = loadSavedPositions();
+
   // Available task templates that AI can activate
   const availableTaskTemplates: Record<string, MovingTask> = {
     "moving-company": {
@@ -123,7 +131,7 @@ export default function MovingJourney() {
       week: "Week 1",
       category: "Core Moving",
       completed: false,
-      position: { x: "300px", y: "650px" }, // Starting position on the left
+      position: savedPositions["moving-company"] || { x: "300px", y: "650px" }, // Starting position on the left
       icon: Truck
     },
     "utilities-setup": {
@@ -134,7 +142,7 @@ export default function MovingJourney() {
       week: "Week 2",
       category: "Essential Services",
       completed: false,
-      position: { x: "500px", y: "450px" }, // Middle-left section
+      position: savedPositions["utilities-setup"] || { x: "500px", y: "450px" }, // Middle-left section
       icon: Zap
     },
     "address-change": {
@@ -145,7 +153,7 @@ export default function MovingJourney() {
       week: "Week 3",
       category: "Administrative",
       completed: false,
-      position: { x: "700px", y: "300px" }, // Middle-right section
+      position: savedPositions["address-change"] || { x: "700px", y: "300px" }, // Middle-right section
       icon: FileText
     },
     "local-services": {
@@ -156,7 +164,7 @@ export default function MovingJourney() {
       week: "Week 4",
       category: "Community",
       completed: false,
-      position: { x: "900px", y: "200px" }, // End position on the right
+      position: savedPositions["local-services"] || { x: "900px", y: "200px" }, // End position on the right
       icon: Building
     }
   };
@@ -229,13 +237,33 @@ export default function MovingJourney() {
   // Handle drag end
   const handleDragEnd = () => {
     if (draggedTask) {
-      // Save updated positions to localStorage
-      const updatedTasks = dynamicTasks.map(task => 
-        task.id === draggedTask 
-          ? { ...task, position: task.position }
-          : task
-      );
-      localStorage.setItem('dynamicTasks', JSON.stringify(updatedTasks));
+      // Find the dragged task
+      const draggedTaskData = dynamicTasks.find(task => task.id === draggedTask);
+      
+      if (draggedTaskData) {
+        // Update the permanent template position
+        if (availableTaskTemplates[draggedTask]) {
+          availableTaskTemplates[draggedTask].position = draggedTaskData.position;
+        }
+        
+        // Save updated template positions to localStorage
+        localStorage.setItem('taskTemplatePositions', JSON.stringify(
+          Object.fromEntries(
+            Object.entries(availableTaskTemplates).map(([key, template]) => [
+              key, 
+              template.position
+            ])
+          )
+        ));
+        
+        // Save updated dynamic tasks to localStorage
+        const updatedTasks = dynamicTasks.map(task => 
+          task.id === draggedTask 
+            ? { ...task, position: task.position }
+            : task
+        );
+        localStorage.setItem('dynamicTasks', JSON.stringify(updatedTasks));
+      }
     }
     setDraggedTask(null);
     setDragOffset({ x: 0, y: 0 });
