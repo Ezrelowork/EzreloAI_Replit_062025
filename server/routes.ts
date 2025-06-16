@@ -1720,6 +1720,108 @@ Only include real providers that actually serve this location.`;
     }
   });
 
+  // AI Conversation endpoint for intelligent task assistance
+  app.post("/api/ai-conversation", async (req, res) => {
+    try {
+      const { message, context } = req.body;
+
+      if (!process.env.OPENAI_API_KEY) {
+        return res.status(503).json({ 
+          error: "AI service temporarily unavailable",
+          message: "I'm sorry, but I'm currently unavailable. Please try the traditional interface for now.",
+          suggestions: ["Use traditional view", "Try again later"]
+        });
+      }
+
+      const OpenAI = (await import('openai')).default;
+      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+
+      // Build context-aware prompt
+      let systemPrompt = `You are an expert AI moving and relocation assistant for Ezrelo. You help users with all aspects of their move in a conversational, personalized way.
+
+Your personality: Helpful, knowledgeable, and encouraging. You make complex moving decisions feel manageable.
+
+Current context:
+- Task: ${context.taskTitle}
+- Moving from: ${context.moveData?.from || 'Not specified'}
+- Moving to: ${context.moveData?.to || 'Not specified'}
+- Move date: ${context.moveData?.date || 'Not specified'}
+
+Guidelines:
+1. Be conversational and personal - ask follow-up questions
+2. Provide specific, actionable advice
+3. If discussing moving companies, reference the ${context.currentCompanies?.length || 0} providers we found
+4. Always include 2-3 relevant suggestions for the user's next question
+5. Keep responses concise but comprehensive
+6. Suggest specific actions when appropriate (search, questionnaire, contact providers)
+7. Use the user's specific move details to personalize advice
+
+Response format: JSON with 'message', 'suggestions' array, and optional 'actionData' for triggering app actions.`;
+
+      // Add task-specific context
+      if (context.taskType === 'moving') {
+        systemPrompt += `\n\nMoving Company Context:
+- ${context.currentCompanies?.length || 0} companies found
+- Selected mover: ${context.selectedMover ? context.selectedMover.provider : 'None yet'}
+- Available companies: ${context.currentCompanies?.map(c => c.provider).join(', ') || 'None loaded'}
+
+You can suggest actions like:
+- "search_movers" to find companies
+- "show_questionnaire" to help with estimates
+- "recommend_mover" with specific company name`;
+      }
+
+      // Include conversation history for context
+      let conversationContext = '';
+      if (context.conversationHistory && context.conversationHistory.length > 0) {
+        conversationContext = '\n\nRecent conversation:\n' + 
+          context.conversationHistory.map(msg => `${msg.role}: ${msg.message}`).join('\n');
+      }
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          { role: "system", content: systemPrompt + conversationContext },
+          { role: "user", content: message }
+        ],
+        response_format: { type: "json_object" },
+        temperature: 0.7,
+        max_tokens: 500
+      });
+
+      const aiResponse = JSON.parse(completion.choices[0].message.content || '{}');
+
+      // Ensure proper response structure
+      const response = {
+        message: aiResponse.message || "I understand you're working on your move. How can I help you with that?",
+        suggestions: aiResponse.suggestions || [
+          "Tell me more about your move",
+          "What are your biggest concerns?",
+          "Help me find providers"
+        ],
+        actionData: aiResponse.actionData || null
+      };
+
+      res.json(response);
+
+    } catch (error) {
+      console.error("AI Conversation error:", error);
+      
+      // Provide helpful fallback responses
+      const fallbackResponse = {
+        message: "I'm having a bit of trouble processing that right now. Let me help you with some common moving questions instead.",
+        suggestions: [
+          "Find moving companies",
+          "Compare pricing options", 
+          "What should I ask movers?",
+          "Help with moving timeline"
+        ]
+      };
+
+      res.json(fallbackResponse);
+    }
+  });
+
   // AI-powered mover outreach
   app.post("/api/share-with-movers", async (req, res) => {
     try {

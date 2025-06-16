@@ -23,7 +23,10 @@ import {
   Info,
   MessageSquare,
   User,
-  Loader2
+  Loader2,
+  Send,
+  Bot,
+  Sparkles
 } from 'lucide-react';
 
 interface MovingCompany {
@@ -103,15 +106,75 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
   const [isSharing, setIsSharing] = useState(false);
   const [savedQuestionnaires, setSavedQuestionnaires] = useState<any[]>([]);
   const [hasCompletedActions, setHasCompletedActions] = useState(false);
+  
+  // Conversational AI State
+  const [conversationMode, setConversationMode] = useState(false);
+  const [conversation, setConversation] = useState<Array<{
+    id: string;
+    role: 'user' | 'assistant';
+    message: string;
+    timestamp: Date;
+    suggestions?: string[];
+    data?: any;
+  }>>([]);
+  const [userInput, setUserInput] = useState('');
+  const [isAIThinking, setIsAIThinking] = useState(false);
+  const [aiPersonality, setAIPersonality] = useState('helpful'); // helpful, expert, friendly
 
   // Determine if task can be marked complete based on user actions
   const canCompleteTask = () => {
     if (searchType === 'moving') {
       return selectedMover !== null || hasCompletedActions || 
-             (currentQuestionnaire && Object.keys((currentQuestionnaire as any)?.majorItems || {}).length > 0);
+             (currentQuestionnaire && Object.keys((currentQuestionnaire as any)?.majorItems || {}).length > 0) ||
+             (conversationMode && conversation.length > 0);
     }
     return showResults; // For other task types, showing results indicates engagement
   };
+
+  // AI Conversation Mutation
+  const aiConversationMutation = useMutation({
+    mutationFn: async (message: string) => {
+      const response = await apiRequest("POST", "/api/ai-conversation", {
+        message,
+        context: {
+          taskType: task.category,
+          taskTitle: task.title,
+          moveData,
+          currentCompanies: movingCompanies,
+          selectedMover,
+          conversationHistory: conversation.slice(-5) // Last 5 messages for context
+        }
+      });
+      return await response.json();
+    },
+    onSuccess: (data) => {
+      const aiMessage = {
+        id: Date.now().toString(),
+        role: 'assistant' as const,
+        message: data.message,
+        timestamp: new Date(),
+        suggestions: data.suggestions,
+        data: data.actionData
+      };
+      
+      setConversation(prev => [...prev, aiMessage]);
+      
+      // Execute any AI-suggested actions
+      if (data.actionData) {
+        handleAIActions(data.actionData);
+      }
+    },
+    onError: (error) => {
+      console.error('AI conversation error:', error);
+      const errorMessage = {
+        id: Date.now().toString(),
+        role: 'assistant' as const,
+        message: "I'm having trouble processing that. Could you try rephrasing your question?",
+        timestamp: new Date()
+      };
+      setConversation(prev => [...prev, errorMessage]);
+    }
+  });
   const [questionnaireData, setQuestionnaireData] = useState({
     currentAddress: '',
     destinationAddress: '',
@@ -805,6 +868,100 @@ export const TaskPage: React.FC<TaskPageProps> = ({ task, onComplete, onBack, on
     ];
   };
 
+  // Handle AI-suggested actions
+  const handleAIActions = (actionData: any) => {
+    if (actionData.type === 'search_movers') {
+      movingCompanyMutation.mutate();
+    } else if (actionData.type === 'show_questionnaire') {
+      setShowQuestionnaireForm(true);
+    } else if (actionData.type === 'recommend_mover' && actionData.mover) {
+      // Highlight recommended mover
+      const recommendedMover = movingCompanies.find(m => 
+        m.provider.toLowerCase().includes(actionData.mover.toLowerCase())
+      );
+      if (recommendedMover) {
+        document.getElementById(`mover-${actionData.mover}`)?.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  };
+
+  // Start AI conversation
+  const startConversation = () => {
+    setConversationMode(true);
+    const welcomeMessage = {
+      id: Date.now().toString(),
+      role: 'assistant' as const,
+      message: getAIWelcomeMessage(),
+      timestamp: new Date(),
+      suggestions: getInitialSuggestions()
+    };
+    setConversation([welcomeMessage]);
+  };
+
+  // Get AI welcome message based on task
+  const getAIWelcomeMessage = () => {
+    const taskTitle = task.title.toLowerCase();
+    if (taskTitle.includes('moving') || taskTitle.includes('mover')) {
+      return `Hi! I'm your AI moving assistant. I see you're moving from ${moveData.from} to ${moveData.to}. I can help you find the perfect moving company, understand pricing, and make this process much easier. What specific help do you need with your move?`;
+    } else if (taskTitle.includes('utilities')) {
+      return `Hello! I'm here to help you set up utilities for your new home in ${moveData.to}. I can guide you through choosing providers, understanding rates, and scheduling connections. What utilities are you most concerned about?`;
+    }
+    return `Hi! I'm your AI relocation assistant. I'm here to help you with ${task.title}. What questions do you have?`;
+  };
+
+  // Get initial conversation suggestions
+  const getInitialSuggestions = () => {
+    const taskTitle = task.title.toLowerCase();
+    if (taskTitle.includes('moving') || taskTitle.includes('mover')) {
+      return [
+        "Find affordable moving companies",
+        "What should I look for in a mover?",
+        "Help me compare moving quotes",
+        "Show me highly rated movers"
+      ];
+    } else if (taskTitle.includes('utilities')) {
+      return [
+        "What utilities do I need to set up?",
+        "Find the best internet providers",
+        "Compare electricity rates",
+        "When should I schedule connections?"
+      ];
+    }
+    return [
+      "Get started with this task",
+      "What are my options?",
+      "Show me recommendations"
+    ];
+  };
+
+  // Send message to AI
+  const sendMessage = async () => {
+    if (!userInput.trim()) return;
+
+    const userMessage = {
+      id: Date.now().toString(),
+      role: 'user' as const,
+      message: userInput,
+      timestamp: new Date()
+    };
+
+    setConversation(prev => [...prev, userMessage]);
+    setUserInput('');
+    setIsAIThinking(true);
+
+    try {
+      await aiConversationMutation.mutateAsync(userInput);
+    } finally {
+      setIsAIThinking(false);
+    }
+  };
+
+  // Use suggestion
+  const useSuggestion = (suggestion: string) => {
+    setUserInput(suggestion);
+    setTimeout(() => sendMessage(), 100);
+  };
+
   const config = getTaskConfig();
   const IconComponent = config.icon;
 
@@ -1228,37 +1385,59 @@ Data({...questionnaireData, destinationAddress: e.target.value})}
             Journey
           </Button>
 
-          {/* Stage-based primary action button */}
-          {!currentQuestionnaire ? (
+          {/* AI Conversation Toggle */}
+          {!conversationMode ? (
             <Button
-              onClick={() => setShowQuestionnaireForm(true)}
-              className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-6 rounded-lg text-sm shadow-sm transition-all"
+              onClick={startConversation}
+              className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-medium py-2 px-6 rounded-lg text-sm shadow-sm transition-all flex items-center gap-2"
             >
-              Fill Out Questionnaire
-            </Button>
-          ) : !selectedMover ? (
-            <Button
-              onClick={() => movingCompanyMutation.mutate()}
-              disabled={movingCompanyMutation.isPending}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg text-sm shadow-sm transition-all"
-            >
-              {movingCompanyMutation.isPending ? 'Searching...' : 'Get Quotes'}
+              <Sparkles className="w-4 h-4" />
+              Talk to AI Assistant
             </Button>
           ) : (
             <Button
-              onClick={() => {
-                toast({
-                  title: "Ready to Book",
-                  description: "Contact your selected mover to finalize booking details.",
-                });
-              }}
-              className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-6 rounded-lg text-sm shadow-sm transition-all"
+              onClick={() => setConversationMode(false)}
+              variant="outline"
+              className="border border-purple-600 hover:border-purple-700 text-purple-700 hover:text-purple-800 font-medium py-2 px-4 rounded-lg text-sm shadow-sm"
             >
-              Book Mover
+              <Info className="w-3 h-3 mr-1" />
+              Traditional View
             </Button>
           )}
 
-
+          {/* Stage-based primary action button - only show if not in conversation mode */}
+          {!conversationMode && (
+            <>
+              {!currentQuestionnaire ? (
+                <Button
+                  onClick={() => setShowQuestionnaireForm(true)}
+                  className="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-6 rounded-lg text-sm shadow-sm transition-all"
+                >
+                  Fill Out Questionnaire
+                </Button>
+              ) : !selectedMover ? (
+                <Button
+                  onClick={() => movingCompanyMutation.mutate()}
+                  disabled={movingCompanyMutation.isPending}
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg text-sm shadow-sm transition-all"
+                >
+                  {movingCompanyMutation.isPending ? 'Searching...' : 'Get Quotes'}
+                </Button>
+              ) : (
+                <Button
+                  onClick={() => {
+                    toast({
+                      title: "Ready to Book",
+                      description: "Contact your selected mover to finalize booking details.",
+                    });
+                  }}
+                  className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-6 rounded-lg text-sm shadow-sm transition-all"
+                >
+                  Book Mover
+                </Button>
+              )}
+            </>
+          )}
 
           <Button
             onClick={() => {
@@ -1298,16 +1477,108 @@ Data({...questionnaireData, destinationAddress: e.target.value})}
             <CheckCircle className="w-3 h-3 mr-1" />
             {canCompleteTask() ? "Complete" : "Complete Task First"}
           </Button>
-
-
         </div>
 
 
 
         {/* Main Content Layout */}
         <div className="flex gap-6">
-          {/* Service Results (55% width) */}
-          <div className="w-full max-w-[55%]">
+          {/* Conversational AI Interface */}
+          {conversationMode && (
+            <div className="w-full max-w-[60%]">
+              <div className="bg-white rounded-lg shadow-md border border-purple-100 p-6 h-[600px] flex flex-col">
+                <div className="flex items-center gap-3 mb-4 pb-4 border-b">
+                  <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
+                    <Bot className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-gray-900">AI Moving Assistant</h3>
+                    <p className="text-sm text-gray-600">Powered by advanced AI • Always learning</p>
+                  </div>
+                </div>
+
+                {/* Conversation Area */}
+                <div className="flex-1 overflow-y-auto space-y-4 mb-4">
+                  {conversation.map((msg) => (
+                    <div
+                      key={msg.id}
+                      className={`flex gap-3 ${
+                        msg.role === 'user' ? 'justify-end' : 'justify-start'
+                      }`}
+                    >
+                      {msg.role === 'assistant' && (
+                        <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+                          <Bot className="w-4 h-4 text-white" />
+                        </div>
+                      )}
+                      <div
+                        className={`max-w-[80%] p-3 rounded-lg ${
+                          msg.role === 'user'
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-gray-100 text-gray-900'
+                        }`}
+                      >
+                        <p className="text-sm">{msg.message}</p>
+                        {msg.suggestions && msg.role === 'assistant' && (
+                          <div className="mt-3 space-y-2">
+                            {msg.suggestions.map((suggestion, idx) => (
+                              <button
+                                key={idx}
+                                onClick={() => useSuggestion(suggestion)}
+                                className="block w-full text-left px-3 py-2 bg-white border border-gray-200 rounded-lg text-xs hover:bg-gray-50 transition-colors"
+                              >
+                                {suggestion}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      {msg.role === 'user' && (
+                        <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                          <User className="w-4 h-4 text-white" />
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                  
+                  {isAIThinking && (
+                    <div className="flex gap-3 justify-start">
+                      <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+                        <Bot className="w-4 h-4 text-white" />
+                      </div>
+                      <div className="bg-gray-100 text-gray-900 max-w-[80%] p-3 rounded-lg">
+                        <div className="flex items-center gap-2">
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <span className="text-sm">AI is thinking...</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Input Area */}
+                <div className="flex gap-2 pt-4 border-t">
+                  <Input
+                    value={userInput}
+                    onChange={(e) => setUserInput(e.target.value)}
+                    placeholder="Ask me anything about your move..."
+                    onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                    className="flex-1"
+                  />
+                  <Button
+                    onClick={sendMessage}
+                    disabled={!userInput.trim() || isAIThinking}
+                    className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                  >
+                    <Send className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Service Results (55% width when not in conversation mode, 40% when in conversation mode) */}
+          <div className={`w-full ${conversationMode ? 'max-w-[40%]' : 'max-w-[55%]'}`}></div>
             {showResults && (
             <div className="mb-6">
               <div className="bg-white rounded-lg shadow-md border border-blue-100 p-4">
