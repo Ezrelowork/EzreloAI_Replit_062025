@@ -293,9 +293,7 @@ What would you like help with today?`,
               </Link>
               <div className="border-l border-gray-300 pl-4">
                 <h1 className="text-2xl font-bold text-gray-900">Your Moving Journey</h1>
-                <p className="text-sm text-gray-600">
-                  Click signs to explore tasks and track progress
-                </p>
+               
                 {moveData.from && moveData.to && (
                   <div className="mt-2 p-2 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg border border-blue-200">
                     <div className="flex items-start gap-2">
