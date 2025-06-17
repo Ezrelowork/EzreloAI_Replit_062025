@@ -254,6 +254,22 @@ export default function MovingCompanies() {
     };
 
     loadAndParseAddresses();
+
+    // Auto-show questionnaire modal if user came from AI assistant
+    const aiData = localStorage.getItem('aiFromLocation');
+    const existingQuestionnaire = localStorage.getItem('ezrelo_questionnaire');
+    
+    if (aiData && !existingQuestionnaire) {
+      // Show questionnaire modal after a brief delay to let the page load
+      setTimeout(() => {
+        setShowQuestionnaireForm(true);
+        toast({
+          title: "Complete Your Profile",
+          description: "Fill out the questionnaire to enable AI-powered quotes from movers",
+          duration: 5000,
+        });
+      }, 1500);
+    }
   }, []);
 
   // Search for moving companies
@@ -849,6 +865,19 @@ export default function MovingCompanies() {
                             </div>
                           )}
 
+                          {/* AI Quote Ready Status */}
+                          {questionnaireData.homeSize && questionnaireData.packingServices && (
+                            <div className="bg-green-50 p-3 rounded-lg border border-green-200 mb-3">
+                              <div className="flex items-center gap-2">
+                                <CheckCircle className="w-4 h-4 text-green-600" />
+                                <span className="text-sm font-medium text-green-800">🤖 AI Quote Ready</span>
+                              </div>
+                              <p className="text-xs text-green-700 mt-1">
+                                Your questionnaire is complete - ready for instant AI quote request
+                              </p>
+                            </div>
+                          )}
+
                           {/* Action Buttons */}
                           <div className="flex gap-2 pt-2">
                             <div className="flex flex-col gap-2 flex-1">
@@ -859,7 +888,9 @@ export default function MovingCompanies() {
                                     ? "bg-green-600 hover:bg-green-700" 
                                     : isGeneratingEmail === company.provider
                                     ? "bg-purple-400"
-                                    : "bg-purple-600 hover:bg-purple-700"
+                                    : questionnaireData.homeSize && questionnaireData.packingServices
+                                    ? "bg-purple-600 hover:bg-purple-700"
+                                    : "bg-gray-400 hover:bg-gray-500"
                                 }`}
                                 disabled={isGeneratingEmail === company.provider || quotesRequested.has(company.provider)}
                               >
@@ -873,10 +904,15 @@ export default function MovingCompanies() {
                                     <CheckCircle className="w-4 h-4 mr-2" />
                                     ✅ AI Quote Sent
                                   </>
-                                ) : (
+                                ) : questionnaireData.homeSize && questionnaireData.packingServices ? (
                                   <>
                                     <Package className="w-4 h-4 mr-2" />
                                     🤖 Get AI Quote
+                                  </>
+                                ) : (
+                                  <>
+                                    <Package className="w-4 h-4 mr-2" />
+                                    Complete Questionnaire First
                                   </>
                                 )}
                               </Button>
@@ -926,11 +962,17 @@ export default function MovingCompanies() {
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg flex items-center gap-2">
-                  <div className="w-1 h-6 bg-purple-500 rounded-full"></div>
+                  <div className={`w-1 h-6 ${questionnaireData.homeSize && questionnaireData.packingServices ? 'bg-green-500' : 'bg-purple-500'} rounded-full`}></div>
                   Estimate Questionnaire
+                  {questionnaireData.homeSize && questionnaireData.packingServices && (
+                    <CheckCircle className="w-5 h-5 text-green-600 ml-auto" />
+                  )}
                 </CardTitle>
                 <CardDescription>
-                  Fill this out to send AI-generated professional emails to movers for instant quote requests.
+                  {questionnaireData.homeSize && questionnaireData.packingServices 
+                    ? "✅ Complete! You can now send AI-generated quotes to all movers."
+                    : "Fill this out to send AI-generated professional emails to movers for instant quote requests."
+                  }
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -944,22 +986,34 @@ export default function MovingCompanies() {
                 >
                   <Package className="w-4 h-4 mr-2" />
                   {questionnaireData.homeSize && questionnaireData.packingServices 
-                    ? "✅ AI Quotes Ready" 
-                    : "Enable AI Quotes"
+                    ? "✅ Edit Questionnaire" 
+                    : "Complete Questionnaire"
                   }
                 </Button>
 
-                <div className="mt-4 p-3 bg-purple-50 rounded-lg border border-purple-200">
-                  <p className="text-sm font-medium text-purple-900 mb-2">🤖 AI Quote Benefits:</p>
-                  <ul className="text-xs text-purple-800 space-y-1">
-                    <li>• Professional emails sent instantly</li>
-                    <li>• Complete move details included</li>
-                    <li>• Inventory automatically formatted</li>
-                    <li>• No phone calls or forms needed</li>
-                    <li>• Faster response from movers</li>
-                    <li>• Higher quality quotes received</li>
-                  </ul>
-                </div>
+                {questionnaireData.homeSize && questionnaireData.packingServices ? (
+                  <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
+                    <p className="text-sm font-medium text-green-900 mb-2">🎉 Ready for AI Quotes!</p>
+                    <ul className="text-xs text-green-800 space-y-1">
+                      <li>• ✅ Home size: {questionnaireData.homeSize}</li>
+                      <li>• ✅ Packing needs: {questionnaireData.packingServices}</li>
+                      <li>• ✅ Move details: {moveData.fromCity} → {moveData.toCity}</li>
+                      <li>• 🤖 All movers can receive instant AI quotes</li>
+                    </ul>
+                  </div>
+                ) : (
+                  <div className="mt-4 p-3 bg-purple-50 rounded-lg border border-purple-200">
+                    <p className="text-sm font-medium text-purple-900 mb-2">🤖 AI Quote Benefits:</p>
+                    <ul className="text-xs text-purple-800 space-y-1">
+                      <li>• Professional emails sent instantly</li>
+                      <li>• Complete move details included</li>
+                      <li>• Inventory automatically formatted</li>
+                      <li>• No phone calls or forms needed</li>
+                      <li>• Faster response from movers</li>
+                      <li>• Higher quality quotes received</li>
+                    </ul>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -1154,7 +1208,12 @@ export default function MovingCompanies() {
             <div className="bg-white rounded-lg shadow-lg max-w-3xl w-full max-h-[90vh] overflow-y-auto">
               <div className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-bold text-gray-900">Moving Estimate Questionnaire</h2>
+                  <div className="flex items-center gap-3">
+                    <h2 className="text-xl font-bold text-gray-900">Moving Estimate Questionnaire</h2>
+                    {questionnaireData.homeSize && questionnaireData.packingServices && (
+                      <Badge className="bg-green-100 text-green-800">Completed</Badge>
+                    )}
+                  </div>
                   <button
                     onClick={() => setShowQuestionnaireForm(false)}
                     className="text-gray-400 hover:text-gray-600"
@@ -1165,9 +1224,21 @@ export default function MovingCompanies() {
                   </button>
                 </div>
 
-                <p className="text-gray-600 mb-6">
-                  Fill out this questionnaire to get more accurate quotes from moving companies.
-                </p>
+                {questionnaireData.homeSize && questionnaireData.packingServices ? (
+                  <div className="bg-green-50 p-4 rounded-lg border border-green-200 mb-6">
+                    <div className="flex items-center gap-2 mb-2">
+                      <CheckCircle className="w-5 h-5 text-green-600" />
+                      <p className="font-medium text-green-900">Questionnaire Complete!</p>
+                    </div>
+                    <p className="text-sm text-green-800">
+                      You can now send AI-generated quotes to all moving companies. Edit any details below if needed.
+                    </p>
+                  </div>
+                ) : (
+                  <p className="text-gray-600 mb-6">
+                    Fill out this questionnaire to enable AI-generated quote requests from moving companies.
+                  </p>
+                )}
 
                 <form className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
