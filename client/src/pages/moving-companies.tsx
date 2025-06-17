@@ -815,7 +815,7 @@ export default function MovingCompanies() {
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="local">Local Movers</TabsTrigger>
             <TabsTrigger value="longDistance">Long Distance</TabsTrigger>
-            <TabsTrigger value="specialty">Specialty</TabsTrigger>
+            <TabsTrigger value="specialty">Specialty Movers</TabsTrigger>
           </TabsList>
         </Tabs>
 
@@ -870,7 +870,7 @@ export default function MovingCompanies() {
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                             <div className="flex items-center gap-2">
                               <Phone className="w-4 h-4 text-gray-500" />
-                              <span>{company.phone}</span>
+                                                            <span>{company.phone}</span>
                             </div>
                             <div className="flex items-center gap-2">
                               <Clock className="w-4 h-4 text-gray-500" />
@@ -1613,8 +1613,8 @@ export default function MovingCompanies() {
                           <Input 
                             type="number" 
                             min="0" 
-                            ```text
-max="20" 
+                            max="```text
+20" 
                             className="w-12 h-6 text-xs flex-shrink-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" 
                             placeholder="#"
                             value={questionnaireData.livingRoomItems[item] || ""}
