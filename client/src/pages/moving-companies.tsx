@@ -62,7 +62,17 @@ export default function MovingCompanies() {
   const [location] = useLocation();
   const { toast } = useToast();
   const [selectedTab, setSelectedTab] = useState("local");
-  const [companies, setCompanies] = useState<MovingCompany[]>([]);
+  const [companies, setCompanies] = useState<MovingCompany[]>(() => {
+    const saved = localStorage.getItem('movingCompaniesResults');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (error) {
+        console.error('Error parsing saved companies:', error);
+      }
+    }
+    return [];
+  });
   const [moveDetails, setMoveDetails] = useState({
     fromAddress: "",
     fromCity: "",
@@ -75,7 +85,10 @@ export default function MovingCompanies() {
     moveDate: ""
   });
   const [hasCompletedActions, setHasCompletedActions] = useState(false);
-  const [quotesRequested, setQuotesRequested] = useState<Set<string>>(new Set());
+  const [quotesRequested, setQuotesRequested] = useState<Set<string>>(() => {
+    const saved = localStorage.getItem('quotesRequested');
+    return saved ? new Set(JSON.parse(saved)) : new Set();
+  });
   const [showQuestionnaireForm, setShowQuestionnaireForm] = useState(false);
   const [isGeneratingEmail, setIsGeneratingEmail] = useState<string | null>(null);
   const [questionnaireData, setQuestionnaireData] = useState({
@@ -252,6 +265,7 @@ export default function MovingCompanies() {
     onSuccess: (data) => {
       const companyList = data?.companies || [];
       setCompanies(companyList);
+      localStorage.setItem('movingCompaniesResults', JSON.stringify(companyList));
       toast({
         title: "Moving Companies Found",
         description: `Found ${companyList.length} qualified movers for your route`,
@@ -333,13 +347,16 @@ export default function MovingCompanies() {
       return response.json();
     },
     onSuccess: (data, company) => {
-      setQuotesRequested(prev => new Set(prev).add(company.provider));
+      const newQuotesRequested = new Set(quotesRequested).add(company.provider);
+      setQuotesRequested(newQuotesRequested);
+      localStorage.setItem('quotesRequested', JSON.stringify([...newQuotesRequested]));
       setHasCompletedActions(true);
       setIsGeneratingEmail(null);
       
       toast({
-        title: "AI Quote Request Sent!",
-        description: `Professional email sent to ${company.provider} with your detailed requirements`,
+        title: "🤖 AI Quote Request Sent!",
+        description: `Professional email sent to ${company.provider} with your detailed requirements. You should receive a quote within 24-48 hours.`,
+        duration: 5000,
       });
     },
     onError: (error: any, company) => {
@@ -696,20 +713,36 @@ export default function MovingCompanies() {
                   Move Date: {moveDetails.moveDate ? new Date(moveDetails.moveDate).toLocaleDateString() : 'July 27, 2025'}
                 </div>
               </div>
-              <Button 
-                onClick={handleSearch}
-                disabled={searchMutation.isPending || !moveDetails.fromCity || !moveDetails.toCity}
-                className="bg-blue-600 hover:bg-blue-700 ml-4"
-              >
-                {searchMutation.isPending ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Searching...
-                  </>
-                ) : (
-                  'Find Movers'
+              <div className="flex gap-2 ml-4">
+                <Button 
+                  onClick={handleSearch}
+                  disabled={searchMutation.isPending || !moveDetails.fromCity || !moveDetails.toCity}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  {searchMutation.isPending ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Searching...
+                    </>
+                  ) : (
+                    'Find Movers'
+                  )}
+                </Button>
+                {companies.length > 0 && (
+                  <Button 
+                    onClick={() => {
+                      setCompanies([]);
+                      setQuotesRequested(new Set());
+                      localStorage.removeItem('movingCompaniesResults');
+                      localStorage.removeItem('quotesRequested');
+                    }}
+                    variant="outline"
+                    className="text-gray-600"
+                  >
+                    Clear Results
+                  </Button>
                 )}
-              </Button>
+              </div>
             </div>
           </div>
         </div>
@@ -821,23 +854,29 @@ export default function MovingCompanies() {
                             <div className="flex flex-col gap-2 flex-1">
                               <Button 
                                 onClick={() => handleAIQuoteRequest(company)}
-                                className="w-full bg-purple-600 hover:bg-purple-700"
+                                className={`w-full ${
+                                  quotesRequested.has(company.provider) 
+                                    ? "bg-green-600 hover:bg-green-700" 
+                                    : isGeneratingEmail === company.provider
+                                    ? "bg-purple-400"
+                                    : "bg-purple-600 hover:bg-purple-700"
+                                }`}
                                 disabled={isGeneratingEmail === company.provider || quotesRequested.has(company.provider)}
                               >
                                 {isGeneratingEmail === company.provider ? (
                                   <>
                                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                                    Generating...
+                                    🤖 AI Crafting Email...
                                   </>
                                 ) : quotesRequested.has(company.provider) ? (
                                   <>
                                     <CheckCircle className="w-4 h-4 mr-2" />
-                                    AI Quote Sent
+                                    ✅ AI Quote Sent
                                   </>
                                 ) : (
                                   <>
                                     <Package className="w-4 h-4 mr-2" />
-                                    Get AI Quote
+                                    🤖 Get AI Quote
                                   </>
                                 )}
                               </Button>
@@ -897,10 +936,17 @@ export default function MovingCompanies() {
               <CardContent>
                 <Button 
                   onClick={() => setShowQuestionnaireForm(true)}
-                  className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+                  className={`w-full ${
+                    questionnaireData.homeSize && questionnaireData.packingServices
+                      ? "bg-green-600 hover:bg-green-700"
+                      : "bg-purple-600 hover:bg-purple-700"
+                  } text-white`}
                 >
                   <Package className="w-4 h-4 mr-2" />
-                  Enable AI Quotes
+                  {questionnaireData.homeSize && questionnaireData.packingServices 
+                    ? "✅ AI Quotes Ready" 
+                    : "Enable AI Quotes"
+                  }
                 </Button>
 
                 <div className="mt-4 p-3 bg-purple-50 rounded-lg border border-purple-200">
