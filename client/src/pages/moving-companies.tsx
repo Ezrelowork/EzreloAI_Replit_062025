@@ -338,11 +338,16 @@ export default function MovingCompanies() {
     }
   };
 
+  // Check if questionnaire is completed
+  const isQuestionnaireComplete = () => {
+    return questionnaireData.homeSize && questionnaireData.packingServices;
+  };
+
   // AI-powered quote request
   const requestAIQuote = useMutation({
     mutationFn: async (company: MovingCompany) => {
       // Check if questionnaire is filled out
-      const hasBasicInfo = questionnaireData.homeSize && questionnaireData.packingServices;
+      const hasBasicInfo = isQuestionnaireComplete();
       
       if (!hasBasicInfo) {
         throw new Error('questionnaire_required');
@@ -585,6 +590,7 @@ export default function MovingCompanies() {
     });
 
     setHasCompletedActions(true);
+    setShowQuestionnaireForm(false); // Close the modal after saving
   };
 
   const handleSendPDFToEmail = async () => {
@@ -866,7 +872,7 @@ export default function MovingCompanies() {
                           )}
 
                           {/* AI Quote Ready Status */}
-                          {questionnaireData.homeSize && questionnaireData.packingServices && (
+                          {isQuestionnaireComplete() && (
                             <div className="bg-green-50 p-3 rounded-lg border border-green-200 mb-3">
                               <div className="flex items-center gap-2">
                                 <CheckCircle className="w-4 h-4 text-green-600" />
@@ -888,7 +894,7 @@ export default function MovingCompanies() {
                                     ? "bg-green-600 hover:bg-green-700" 
                                     : isGeneratingEmail === company.provider
                                     ? "bg-purple-400"
-                                    : questionnaireData.homeSize && questionnaireData.packingServices
+                                    : isQuestionnaireComplete()
                                     ? "bg-purple-600 hover:bg-purple-700"
                                     : "bg-gray-400 hover:bg-gray-500"
                                 }`}
@@ -904,10 +910,10 @@ export default function MovingCompanies() {
                                     <CheckCircle className="w-4 h-4 mr-2" />
                                     ✅ AI Quote Sent
                                   </>
-                                ) : questionnaireData.homeSize && questionnaireData.packingServices ? (
+                                ) : isQuestionnaireComplete() ? (
                                   <>
                                     <Package className="w-4 h-4 mr-2" />
-                                    🤖 Get AI Quote
+                                    🤖 Have AI Submit Quote Request
                                   </>
                                 ) : (
                                   <>
@@ -962,14 +968,14 @@ export default function MovingCompanies() {
             <Card>
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg flex items-center gap-2">
-                  <div className={`w-1 h-6 ${questionnaireData.homeSize && questionnaireData.packingServices ? 'bg-green-500' : 'bg-purple-500'} rounded-full`}></div>
+                  <div className={`w-1 h-6 ${isQuestionnaireComplete() ? 'bg-green-500' : 'bg-purple-500'} rounded-full`}></div>
                   Estimate Questionnaire
-                  {questionnaireData.homeSize && questionnaireData.packingServices && (
+                  {isQuestionnaireComplete() && (
                     <CheckCircle className="w-5 h-5 text-green-600 ml-auto" />
                   )}
                 </CardTitle>
                 <CardDescription>
-                  {questionnaireData.homeSize && questionnaireData.packingServices 
+                  {isQuestionnaireComplete() 
                     ? "✅ Complete! You can now send AI-generated quotes to all movers."
                     : "Fill this out to send AI-generated professional emails to movers for instant quote requests."
                   }
@@ -979,25 +985,25 @@ export default function MovingCompanies() {
                 <Button 
                   onClick={() => setShowQuestionnaireForm(true)}
                   className={`w-full ${
-                    questionnaireData.homeSize && questionnaireData.packingServices
+                    isQuestionnaireComplete()
                       ? "bg-green-600 hover:bg-green-700"
                       : "bg-purple-600 hover:bg-purple-700"
                   } text-white`}
                 >
                   <Package className="w-4 h-4 mr-2" />
-                  {questionnaireData.homeSize && questionnaireData.packingServices 
+                  {isQuestionnaireComplete() 
                     ? "✅ Edit Questionnaire" 
                     : "Complete Questionnaire"
                   }
                 </Button>
 
-                {questionnaireData.homeSize && questionnaireData.packingServices ? (
+                {isQuestionnaireComplete() ? (
                   <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
                     <p className="text-sm font-medium text-green-900 mb-2">🎉 Ready for AI Quotes!</p>
                     <ul className="text-xs text-green-800 space-y-1">
                       <li>• ✅ Home size: {questionnaireData.homeSize}</li>
                       <li>• ✅ Packing needs: {questionnaireData.packingServices}</li>
-                      <li>• ✅ Move details: {moveData.fromCity} → {moveData.toCity}</li>
+                      <li>• ✅ Move details: {moveDetails.fromCity} → {moveDetails.toCity}</li>
                       <li>• 🤖 All movers can receive instant AI quotes</li>
                     </ul>
                   </div>
@@ -1210,7 +1216,7 @@ export default function MovingCompanies() {
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
                     <h2 className="text-xl font-bold text-gray-900">Moving Estimate Questionnaire</h2>
-                    {questionnaireData.homeSize && questionnaireData.packingServices && (
+                    {isQuestionnaireComplete() && (
                       <Badge className="bg-green-100 text-green-800">Completed</Badge>
                     )}
                   </div>
@@ -1224,7 +1230,7 @@ export default function MovingCompanies() {
                   </button>
                 </div>
 
-                {questionnaireData.homeSize && questionnaireData.packingServices ? (
+                {isQuestionnaireComplete() ? (
                   <div className="bg-green-50 p-4 rounded-lg border border-green-200 mb-6">
                     <div className="flex items-center gap-2 mb-2">
                       <CheckCircle className="w-5 h-5 text-green-600" />
