@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback, memo } from "react";
 import { useLocation } from "wouter";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -258,7 +258,7 @@ export default function MovingCompanies() {
     // Auto-show questionnaire modal if user came from AI assistant
     const aiData = localStorage.getItem('aiFromLocation');
     const existingQuestionnaire = localStorage.getItem('ezrelo_questionnaire');
-    
+
     if (aiData && !existingQuestionnaire) {
       // Show questionnaire modal after a brief delay to let the page load
       setTimeout(() => {
@@ -359,7 +359,7 @@ export default function MovingCompanies() {
     mutationFn: async (company: MovingCompany) => {
       // Check if questionnaire is filled out
       const hasBasicInfo = isQuestionnaireComplete();
-      
+
       if (!hasBasicInfo) {
         throw new Error('questionnaire_required');
       }
@@ -375,7 +375,7 @@ export default function MovingCompanies() {
         userId: 1, // In production, get from auth context
         projectId: 1 // In production, get from current project
       });
-      
+
       return response.json();
     },
     onSuccess: (data, company) => {
@@ -384,7 +384,7 @@ export default function MovingCompanies() {
       localStorage.setItem('quotesRequested', JSON.stringify([...newQuotesRequested]));
       setHasCompletedActions(true);
       setIsGeneratingEmail(null);
-      
+
       toast({
         title: "🤖 AI Quote Request Sent!",
         description: `Professional email sent to ${company.provider} with your detailed requirements. All responses will appear in your Ezrelo dashboard within 24-48 hours.`,
@@ -393,7 +393,7 @@ export default function MovingCompanies() {
     },
     onError: (error: any, company) => {
       setIsGeneratingEmail(null);
-      
+
       if (error.message === 'questionnaire_required') {
         toast({
           title: "Questionnaire Required",
@@ -690,6 +690,30 @@ export default function MovingCompanies() {
 
   const currentType = movingTypes[selectedTab as keyof typeof movingTypes];
 
+  const [searchTerm, setSearchTerm] = useState('');
+  const [locationFilter, setLocationFilter] = useState('');
+  const [ratingFilter, setRatingFilter] = useState(0);
+  const [priceRange, setPriceRange] = useState<{ min: number; max: number } | null>(null);
+
+  const filteredCompanies = useMemo(() => {
+    return companies.filter(company => {
+      const matchesSearch = company.provider.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           company.description.toLowerCase().includes(searchTerm.toLowerCase());
+
+      // Assuming serviceAreas is a property of MovingCompany
+      // const matchesLocation = !locationFilter || company.serviceAreas.includes(locationFilter);
+      const matchesLocation = true;
+
+      const matchesRating = company.rating >= ratingFilter;
+
+      const matchesPrice = !priceRange || 
+                          (parseFloat(company.estimatedCost.replace('$', '')) >= priceRange.min && 
+                           parseFloat(company.estimatedCost.replace('$', '')) <= priceRange.max);
+
+      return matchesSearch && matchesLocation && matchesRating && matchesPrice;
+    });
+  }, [companies, searchTerm, locationFilter, ratingFilter, priceRange]);
+
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-6">
       <div className="max-w-6xl mx-auto">
@@ -702,7 +726,7 @@ export default function MovingCompanies() {
               const from = urlParams.get('from');
               const to = urlParams.get('to');
               const date = urlParams.get('date');
-              
+
               let journeyUrl = '/moving-journey';
               if (from || to || date) {
                 const params = new URLSearchParams();
@@ -711,7 +735,7 @@ export default function MovingCompanies() {
                 if (date) params.set('date', date);
                 journeyUrl += `?${params.toString()}`;
               }
-              
+
               window.location.href = journeyUrl;
             }}
             className="mb-6"
@@ -811,7 +835,7 @@ export default function MovingCompanies() {
                 </div>
 
             <div className="grid gap-4">
-                  {companies.map((company, index) => (
+                  {filteredCompanies.map((company, index) => (
                     <Card key={index} className="hover:shadow-md transition-shadow">
                       <CardHeader className="pb-3">
                         <div className="flex items-start justify-between">
@@ -845,7 +869,7 @@ export default function MovingCompanies() {
                           {/* Company Details */}
                           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                             <div className="flex items-center gap-2">
-                              <Phone className="w-4 h-4 text-gray-500" />
+                              <Phone className="w-4 h-4 text-gray-500"/
                               <span>{company.phone}</span>
                             </div>
                             <div className="flex items-center gap-2">
@@ -1143,7 +1167,7 @@ export default function MovingCompanies() {
         </div>
 
         {/* Empty State */}
-        {companies.length === 0 && !searchMutation.isPending && moveDetails.fromCity && moveDetails.toCity && (
+        {filteredCompanies.length === 0 && !searchMutation.isPending && moveDetails.fromCity && moveDetails.toCity && (
           <div className="text-center py-12">
             <AlertCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">No moving companies found</h3>
@@ -1187,7 +1211,7 @@ export default function MovingCompanies() {
                     : "Request quotes from at least one moving company to complete this task."}
                 </p>
               </div>
-              
+
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Button
                   onClick={() => {
@@ -1589,7 +1613,8 @@ export default function MovingCompanies() {
                           <Input 
                             type="number" 
                             min="0" 
-                            max="20" 
+                            ```text
+max="20" 
                             className="w-12 h-6 text-xs flex-shrink-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" 
                             placeholder="#"
                             value={questionnaireData.livingRoomItems[item] || ""}
