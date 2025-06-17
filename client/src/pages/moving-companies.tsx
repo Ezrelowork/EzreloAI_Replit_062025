@@ -1613,8 +1613,7 @@ export default function MovingCompanies() {
                             type="number" 
                             min="0" 
                             max="20" 
-                            Removes the "```text" string from the max attribute of an Input component.```text
-className="w-12 h-6 text-xs flex-shrink-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" 
+                            className="w-12 h-6 text-xs flex-shrink-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" 
                             placeholder="#"
                             value={questionnaireData.livingRoomItems[item] || ""}
                             onChange={(e) => {
