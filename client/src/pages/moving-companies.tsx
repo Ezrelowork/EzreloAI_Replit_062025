@@ -372,8 +372,8 @@ export default function MovingCompanies() {
           date: moveDetails.moveDate
         },
         selectedMovers: [company],
-        customerEmail: questionnaireData.email,
-        customerName: "Ezrelo Customer"
+        userId: 1, // In production, get from auth context
+        projectId: 1 // In production, get from current project
       });
       
       return response.json();
@@ -387,7 +387,7 @@ export default function MovingCompanies() {
       
       toast({
         title: "🤖 AI Quote Request Sent!",
-        description: `Professional email sent to ${company.provider} with your detailed requirements. You should receive a quote within 24-48 hours.`,
+        description: `Professional email sent to ${company.provider} with your detailed requirements. All responses will appear in your Ezrelo dashboard within 24-48 hours.`,
         duration: 5000,
       });
     },

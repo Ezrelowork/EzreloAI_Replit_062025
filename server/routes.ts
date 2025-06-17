@@ -2019,16 +2019,83 @@ Be encouraging and helpful. When users mention specific needs, suggest creating 
     }
   });
 
-  // AI-powered mover outreach with actual email sending
+  // Generate proxy email for user
+  app.post("/api/generate-proxy-email", async (req, res) => {
+    try {
+      const { userId, projectId } = req.body;
+      
+      // Generate a unique proxy email for this user/project
+      const proxyId = `user-${userId}-${projectId}-${Date.now()}`;
+      const proxyEmail = `${proxyId}@ezrelo.com`;
+      
+      // In production, you'd store this mapping in your database
+      // For now, we'll return the proxy email
+      
+      res.json({
+        success: true,
+        proxyEmail,
+        message: "Proxy email generated successfully"
+      });
+    } catch (error) {
+      console.error("Error generating proxy email:", error);
+      res.status(500).json({ error: "Failed to generate proxy email" });
+    }
+  });
+
+  // Handle incoming emails to proxy addresses
+  app.post("/api/proxy-email-webhook", async (req, res) => {
+    try {
+      const { to, from, subject, body, attachments } = req.body;
+      
+      // Extract user/project info from proxy email
+      const proxyMatch = to.match(/user-(\d+)-(\d+)-(\d+)@ezrelo\.com/);
+      if (!proxyMatch) {
+        return res.status(400).json({ error: "Invalid proxy email format" });
+      }
+      
+      const [, userId, projectId] = proxyMatch;
+      
+      // Store the communication in the database
+      await storage.createCommunication({
+        projectId: parseInt(projectId),
+        communicationType: "vendor_email",
+        subject: `Email from ${from}: ${subject}`,
+        notes: JSON.stringify({
+          from,
+          to,
+          subject,
+          body,
+          attachments: attachments?.length || 0,
+          receivedAt: new Date().toISOString()
+        }),
+        contactPerson: from
+      });
+      
+      // Send notification to user through the platform
+      // This could trigger a real-time notification or email to user's actual email
+      
+      res.json({ success: true, message: "Email processed and stored" });
+    } catch (error) {
+      console.error("Error processing proxy email:", error);
+      res.status(500).json({ error: "Failed to process email" });
+    }
+  });
+
+  // AI-powered mover outreach with proxy email system
   app.post("/api/share-with-movers", async (req, res) => {
     try {
-      const { projectId, questionnaire, moveDetails, selectedMovers, customerEmail, customerName } = req.body;
+      const { projectId, questionnaire, moveDetails, selectedMovers, userId } = req.body;
+
+      // Generate proxy email for this communication
+      const proxyId = `user-${userId || 1}-${projectId || 1}-${Date.now()}`;
+      const proxyEmail = `${proxyId}@ezrelo.com`;
 
       console.log("Ezrelo AI initiating professional mover outreach...");
       console.log(`Move: ${moveDetails.from} → ${moveDetails.to}`);
       console.log(`Date: ${moveDetails.date}`);
-      console.log(`Inventory items: ${Object.keys(questionnaire.majorItems).length}`);
+      console.log(`Inventory items: ${Object.keys(questionnaire.majorItems || {}).length}`);
       console.log(`Contacting ${selectedMovers.length} premium moving companies`);
+      console.log(`Using proxy email: ${proxyEmail}`);
 
       const results = [];
 
@@ -2043,11 +2110,11 @@ Be encouraging and helpful. When users mention specific needs, suggest creating 
             const emailPrompt = `Generate a professional email to ${mover.provider} requesting a moving quote. 
 
 Customer Details:
-- Name: ${customerName || 'Customer'}
+- Contact Email: ${proxyEmail} (Ezrelo secure communication channel)
 - Move Route: ${moveDetails.from} → ${moveDetails.to}
 - Move Date: ${moveDetails.date}
 - Home Size: ${questionnaire.homeSize}
-- Major Items: ${Object.entries(questionnaire.majorItems).map(([item, qty]) => `${qty}x ${item}`).join(', ')}
+- Major Items: ${Object.entries(questionnaire.majorItems || {}).map(([item, qty]) => `${qty}x ${item}`).join(', ')}
 - Special Services: ${questionnaire.packingServices}
 - Additional Notes: ${questionnaire.additionalNotes}
 
@@ -2057,11 +2124,14 @@ Mover Details:
 - Estimated Cost Range: ${mover.estimatedCost}
 
 Create a professional, detailed email that:
-1. Introduces the customer and Ezrelo partnership
+1. Introduces the customer through Ezrelo's platform
 2. Provides comprehensive move details
 3. Requests a detailed quote
-4. Emphasizes the customer is pre-qualified and ready to book
-5. Includes clear next steps
+4. Emphasizes responses should go to the provided Ezrelo email address
+5. Mentions this is a verified, pre-qualified customer
+6. Includes clear next steps
+
+IMPORTANT: The email should instruct the mover to reply to ${proxyEmail} for all communication.
 
 Return JSON format:
 {
@@ -2143,11 +2213,13 @@ Return JSON format:
           subject: "Ezrelo AI Mover Outreach Completed",
           notes: JSON.stringify({
             results,
+            proxyEmail,
             moversContacted: selectedMovers.map(m => m.provider),
-            automationLevel: "AI-Generated Professional Outreach with Email Automation",
-            expectedOutcome: "3-5 competitive quotes within 24-48 hours",
+            automationLevel: "AI-Generated Professional Outreach with Proxy Email System",
+            expectedOutcome: "3-5 competitive quotes within 24-48 hours via proxy email",
             emailsSent: results.filter(r => r.status === 'sent').length,
-            emailsGenerated: results.filter(r => r.status === 'generated').length
+            emailsGenerated: results.filter(r => r.status === 'generated').length,
+            communicationChannel: "Ezrelo Proxy Email System"
           }),
           contactPerson: "Ezrelo AI Assistant"
         });
@@ -2157,12 +2229,14 @@ Return JSON format:
         success: true, 
         message: "AI outreach completed",
         results,
+        proxyEmail,
         details: {
           moversContacted: selectedMovers.length,
           emailsSent: results.filter(r => r.status === 'sent').length,
           emailsGenerated: results.filter(r => r.status === 'generated').length,
-          expectedQuotes: "24-48 hours",
-          ezreloAdvantage: "AI-crafted professional outreach with comprehensive move data"
+          expectedQuotes: "24-48 hours via Ezrelo platform",
+          ezreloAdvantage: "AI-crafted professional outreach with secure proxy email system",
+          communicationMethod: "All responses will be delivered through your Ezrelo dashboard"
         }
       });
     } catch (error) {

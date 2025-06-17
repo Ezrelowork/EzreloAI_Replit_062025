@@ -69,6 +69,134 @@ interface ConversationMessage {
   data?: any;
 }
 
+// New Component for Vendor Communications
+function VendorCommunications({ projectId }: { projectId: number }) {
+  const [messages, setMessages] = useState<ConversationMessage[]>([]);
+  const [newMessage, setNewMessage] = useState('');
+  const chatContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Mocked Data: Replace with actual API call to fetch messages
+    const initialMessages: ConversationMessage[] = [
+      {
+        id: "1",
+        role: "assistant",
+        message: "Welcome to Ezrelo! How can I assist you with your move?",
+        timestamp: new Date(),
+        suggestions: ["Find movers", "Pack my belongings", "Store items"]
+      },
+      {
+        id: "2",
+        role: "user",
+        message: "I need help finding a reliable moving company.",
+        timestamp: new Date(),
+        data: { query: "Find a reliable moving company" }
+      },
+      {
+        id: "3",
+        role: "assistant",
+        message: "Okay, I'm searching for top-rated movers in your area...",
+        timestamp: new Date(),
+        data: { results: 5 }
+      }
+    ];
+    setMessages(initialMessages);
+
+    // Scroll to bottom on initial load
+    scrollToBottom();
+  }, []);
+
+  useEffect(() => {
+    // Scroll to bottom on new messages
+    scrollToBottom();
+  }, [messages]);
+
+  const scrollToBottom = () => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  };
+
+  const handleSendMessage = () => {
+    if (newMessage.trim()) {
+      const userMessage: ConversationMessage = {
+        id: String(messages.length + 1),
+        role: "user",
+        message: newMessage,
+        timestamp: new Date()
+      };
+
+      setMessages(prevMessages => [...prevMessages, userMessage]);
+      setNewMessage('');
+
+      // Mocked Response: Simulate AI response after a delay
+      setTimeout(() => {
+        const aiResponse: ConversationMessage = {
+          id: String(messages.length + 2),
+          role: "assistant",
+          message: `Thanks for your message: ${newMessage}. I'll get back to you soon!`,
+          timestamp: new Date()
+        };
+        setMessages(prevMessages => [...prevMessages, aiResponse]);
+      }, 1000);
+    }
+  };
+
+  return (
+    <Card className="shadow-md">
+      <CardHeader>
+        <CardTitle>Vendor Communications</CardTitle>
+        <CardDescription>
+          Communicate with movers and vendors directly through Ezrelo.
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="p-4">
+        <div
+          ref={chatContainerRef}
+          className="space-y-4 h-64 overflow-y-auto px-2"
+        >
+          {messages.map(msg => (
+            <div
+              key={msg.id}
+              className={`flex flex-col ${
+                msg.role === "user" ? "items-end" : "items-start"
+              }`}
+            >
+              <div
+                className={`rounded-xl px-4 py-2 text-sm ${
+                  msg.role === "user"
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-100 text-gray-800"
+                }`}
+              >
+                {msg.message}
+              </div>
+              <span className="text-xs text-gray-500 mt-1">
+                {msg.role === "user" ? "You" : "Ezrelo"} -{" "}
+                {msg.timestamp.toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit"
+                })}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-4 flex items-center space-x-2">
+          <Input
+            type="text"
+            placeholder="Enter your message..."
+            value={newMessage}
+            onChange={e => setNewMessage(e.target.value)}
+            className="flex-1"
+          />
+          <Button onClick={handleSendMessage}><Send className="w-4 h-4 mr-2" /> Send</Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function MovingJourney() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
@@ -97,7 +225,7 @@ export default function MovingJourney() {
     suggestions: [] as string[]
   });
 
-  
+
 
   // Layout is now locked and finalized
 
@@ -120,11 +248,11 @@ export default function MovingJourney() {
   // Calculate days until task is due based on move date
   const calculateTaskDueDate = (taskId: string, moveDate: string) => {
     if (!moveDate) return "Set move date";
-    
+
     const moveDateObj = new Date(moveDate);
     const today = new Date();
     const daysUntilMove = Math.ceil((moveDateObj.getTime() - today.getTime()) / (1000 * 3600 * 24));
-    
+
     // Define when each task should be completed (days before move)
     const taskTimelines: Record<string, number> = {
       "moving-company": 42, // 6 weeks before
@@ -132,10 +260,10 @@ export default function MovingJourney() {
       "address-change": 14,   // 2 weeks before
       "local-services": 7     // 1 week before
     };
-    
+
     const daysBeforeMove = taskTimelines[taskId] || 7;
     const dueDate = daysUntilMove - daysBeforeMove;
-    
+
     if (dueDate > 0) {
       return `Due in ${dueDate} days`;
     } else if (dueDate === 0) {
@@ -217,7 +345,7 @@ export default function MovingJourney() {
     setDynamicTasks(prev => {
       if (prev.find(t => t.id === taskId)) return prev; // Don't duplicate
       const newTasks = [...prev, newTask];
-      
+
       // Save to localStorage
       localStorage.setItem('dynamicTasks', JSON.stringify(newTasks));
       return newTasks;
@@ -249,7 +377,7 @@ export default function MovingJourney() {
     }
   };
 
-  
+
 
   const toggleTaskCompletion = (taskId: string) => {
     setCompletedTasks(prev => {
@@ -258,7 +386,7 @@ export default function MovingJourney() {
         newSet.delete(taskId);
       } else {
         newSet.add(taskId);
-        
+
         // Trigger AI guidance based on completed task
         if (taskId === 'moving-company' && !dynamicTasks.find(t => t.id === 'utilities-setup')) {
           // Add utilities task and show AI guidance
@@ -292,7 +420,7 @@ export default function MovingJourney() {
           }, 1000);
         }
       }
-      
+
       // Save to localStorage
       localStorage.setItem('completedTasks', JSON.stringify(Array.from(newSet)));
       return newSet;
@@ -318,7 +446,7 @@ export default function MovingJourney() {
   const handleAISuggestion = (suggestion: string) => {
     // Close the current modal
     setShowAIModal(false);
-    
+
     // Process the suggestion and show appropriate response
     setTimeout(() => {
       if (suggestion.toLowerCase().includes("tell me more about the process")) {
@@ -456,7 +584,7 @@ Would you like to customize your approach?`,
         });
 
         let priorityMessage = "Here's your task priority breakdown:\n\n";
-        
+
         if (overdueTasks.length > 0) {
           priorityMessage += `🚨 **URGENT - Overdue Tasks:**\n`;
           overdueTasks.forEach(task => {
@@ -648,7 +776,7 @@ To begin your moving journey, click the "Hire Moving Company" sign below. This i
                               month: 'long', 
                               day: 'numeric' 
                             });
-                            
+
                             if (daysDiff > 0) {
                               return `${daysDiff} days until move date: ${formattedDate}`;
                             } else if (daysDiff === 0) {
@@ -658,7 +786,7 @@ To begin your moving journey, click the "Hire Moving Company" sign below. This i
                             }
                           })()}
                         </p>
-                        
+
                         {/* Task urgency indicators */}
                         {(() => {
                           const urgentTasks = dynamicTasks.filter(task => {
@@ -672,7 +800,7 @@ To begin your moving journey, click the "Hire Moving Company" sign below. This i
                             const overdueCount = urgentTasks.filter(task => 
                               calculateTaskDueDate(task.id, moveData.date).includes("Overdue")
                             ).length;
-                            
+
                             const dueSoonCount = urgentTasks.length - overdueCount;
 
                             return (
@@ -704,11 +832,11 @@ To begin your moving journey, click the "Hire Moving Company" sign below. This i
                   // Clear all saved progress
                   localStorage.removeItem('completedTasks');
                   localStorage.removeItem('dynamicTasks');
-                  
+
                   // Reset state
                   setCompletedTasks(new Set());
                   setDynamicTasks([]);
-                  
+
                   // Add the initial task back with proper positioning
                   setTimeout(() => {
                     // Reload saved positions to get the most current template position
@@ -718,16 +846,16 @@ To begin your moving journey, click the "Hire Moving Company" sign below. This i
                       // Use saved template position if available, otherwise use template default
                       position: currentSavedPositions["moving-company"] || availableTaskTemplates["moving-company"].position
                     };
-                    
+
                     setDynamicTasks([initialTask]);
                     localStorage.setItem('dynamicTasks', JSON.stringify([initialTask]));
-                    
+
                     // Show welcome modal after reset
                     setTimeout(() => {
                       initializeAIModal();
                     }, 500);
                   }, 100);
-                  
+
                   toast({
                     title: "Journey Reset",
                     description: "Your moving journey has been reset. Welcome back!",
@@ -753,7 +881,7 @@ To begin your moving journey, click the "Hire Moving Company" sign below. This i
 
       {/* Main Journey Container */}
       <div className="relative bg-gray-100" style={{ height: 'calc(100vh - 80px)', overflow: 'hidden' }}>
-        
+
 
         {/* Highway Background - Fixed 1200x800 */}
         <div 
@@ -789,7 +917,7 @@ To begin your moving journey, click the "Hire Moving Company" sign below. This i
                   // Find the next incomplete task
                   const incompleteTasks = dynamicTasks.filter(t => !completedTasks.has(t.id));
                   const nextTask = incompleteTasks.length > 0 ? incompleteTasks[0] : null;
-                  
+
                   // Show indicator on the next task to complete
                   if (nextTask && task.id === nextTask.id) {
                     const isFirstTask = task.id === 'moving-company';
@@ -814,9 +942,9 @@ To begin your moving journey, click the "Hire Moving Company" sign below. This i
                 />
               </div>
 
-              
 
-              
+
+
             </div>
           ))}
 
@@ -834,11 +962,15 @@ To begin your moving journey, click the "Hire Moving Company" sign below. This i
             </div>
           )}
 
-         
+
         </div>
       </div>
 
-     
+          {/* Vendor Communications Section */}
+          <div className="mt-12 max-w-4xl mx-auto">
+            <VendorCommunications projectId={1} />
+          </div>
+
 
       {/* Task Modal */}
       {currentTask && (
@@ -898,7 +1030,7 @@ To begin your moving journey, click the "Hire Moving Company" sign below. This i
                 <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
                   {aiModalContent.message}
                 </p>
-                
+
                 {aiModalContent.suggestions.length > 0 && (
                   <div className="flex flex-wrap gap-2 pt-4 border-t">
                     {aiModalContent.suggestions.map((suggestion, idx) => (
@@ -915,7 +1047,7 @@ To begin your moving journey, click the "Hire Moving Company" sign below. This i
                   </div>
                 )}
               </div>
-              
+
               <div className="flex justify-end pt-4 border-t mt-4 flex-shrink-0">
                 <Button
                   onClick={() => setShowAIModal(false)}
