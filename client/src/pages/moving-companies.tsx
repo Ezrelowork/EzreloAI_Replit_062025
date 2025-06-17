@@ -345,12 +345,13 @@ export default function MovingCompanies() {
     if (savedQuestionnaire) {
       try {
         const parsedData = JSON.parse(savedQuestionnaire);
-        return parsedData.homeSize && parsedData.packingServices;
+        // More lenient check - just need home size to be considered complete
+        return parsedData.homeSize && parsedData.homeSize !== '';
       } catch (error) {
         console.log('Failed to parse saved questionnaire');
       }
     }
-    return questionnaireData.homeSize && questionnaireData.packingServices;
+    return questionnaireData.homeSize && questionnaireData.homeSize !== '';
   };
 
   // AI-powered quote request
@@ -914,7 +915,7 @@ export default function MovingCompanies() {
                                     ? "bg-purple-600 hover:bg-purple-700"
                                     : "bg-gray-400 hover:bg-gray-500"
                                 }`}
-                                disabled={isGeneratingEmail === company.provider || quotesRequested.has(company.provider)}
+                                disabled={isGeneratingEmail === company.provider || quotesRequested.has(company.provider) || !isQuestionnaireComplete()}
                               >
                                 {isGeneratingEmail === company.provider ? (
                                   <>
@@ -924,12 +925,12 @@ export default function MovingCompanies() {
                                 ) : quotesRequested.has(company.provider) ? (
                                   <>
                                     <CheckCircle className="w-4 h-4 mr-2" />
-                                    ✅ AI Quote Sent
+                                    ✅ AI Quote Request Sent
                                   </>
                                 ) : isQuestionnaireComplete() ? (
                                   <>
                                     <Package className="w-4 h-4 mr-2" />
-                                    🤖 Have AI Submit Quote Request
+                                    🤖 Send AI Quote Request
                                   </>
                                 ) : (
                                   <>
