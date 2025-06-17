@@ -340,6 +340,16 @@ export default function MovingCompanies() {
 
   // Check if questionnaire is completed
   const isQuestionnaireComplete = () => {
+    // Check both current state and saved data
+    const savedQuestionnaire = localStorage.getItem('ezrelo_questionnaire');
+    if (savedQuestionnaire) {
+      try {
+        const parsedData = JSON.parse(savedQuestionnaire);
+        return parsedData.homeSize && parsedData.packingServices;
+      } catch (error) {
+        console.log('Failed to parse saved questionnaire');
+      }
+    }
     return questionnaireData.homeSize && questionnaireData.packingServices;
   };
 
@@ -647,11 +657,17 @@ export default function MovingCompanies() {
       try {
         const parsedData = JSON.parse(savedQuestionnaire);
         setQuestionnaireData(parsedData);
+        console.log('Loaded saved questionnaire:', parsedData);
       } catch (error) {
         console.log('Failed to load saved questionnaire');
       }
     }
   }, []);
+
+  // Force re-render when questionnaire data changes
+  useEffect(() => {
+    console.log('Questionnaire completion status:', isQuestionnaireComplete());
+  }, [questionnaireData]);
 
   const movingTypes = {
     local: {
