@@ -1,3 +1,4 @@
+import React, { Suspense } from "react";
 import { Route, Switch } from "wouter";
 import { Toaster } from "@/components/ui/toaster";
 
@@ -15,7 +16,6 @@ import RelocationHub from "./pages/relocation-hub";
 import Landing from "./pages/landing";
 import LogoShowcase from "./pages/logo-showcase";
 import NotFound from "./pages/not-found";
-import { Suspense } from "react";
 
 function App() {
   return (
