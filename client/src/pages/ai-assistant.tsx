@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -52,6 +52,24 @@ interface AIResponse {
     priority: "high" | "medium" | "low";
     timeframe: string;
     status: "pending" | "in_progress" | "completed";
+  }>;
+  recommendations?: Array<{
+    title: string;
+    category: string;
+    description: string;
+    estimatedCost: string;
+    priority: "high" | "medium" | "low";
+    timeframe: string;
+    reasoning: string;
+    nextSteps: string[];
+    providers?: Array<{
+      name: string;
+      description: string;
+      rating: number;
+      contact: string;
+      website: string;
+      services: string[];
+    }>;
   }>;
 }
 
@@ -337,10 +355,11 @@ export default function AIAssistant() {
             </Card>
 
             {/* Recommendations */}
-            <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Personalized Recommendations</h2>
-              <div className="grid gap-4">
-                {aiResponse.recommendations.map((rec, index) => (
+            {aiResponse.recommendations && aiResponse.recommendations.length > 0 && (
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">Personalized Recommendations</h2>
+                <div className="grid gap-4">
+                  {aiResponse.recommendations.map((rec, index) => (
                   <Card key={index}>
                     <CardHeader className="pb-3">
                       <div className="flex items-start justify-between">
@@ -480,9 +499,10 @@ export default function AIAssistant() {
                       </div>
                     </CardContent>
                   </Card>
-                ))}
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Personalized Action Plan */}
             {aiResponse.actionPlan && aiResponse.actionPlan.length > 0 && (
