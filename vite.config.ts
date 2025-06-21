@@ -35,6 +35,7 @@ export default defineConfig({
     hmr: {
       host: "0.0.0.0", // ⬅️ Bind HMR to all interfaces
       port: 5000, // ⬅️ Fix WebSocket HMR by binding it to port 5000
+      clientPort: 5000
     },
     fs: {
       strict: true,
