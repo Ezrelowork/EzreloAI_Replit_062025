@@ -29,12 +29,12 @@ export default defineConfig({
     emptyOutDir: true,
   },
   server: {
-    host: "0.0.0.0", // ⬅️ Bind to all interfaces for Replit
-    port: 5000, // ⬅️ Force Vite to run on port 5000
-    strictPort: true, // ⬅️ Prevent Vite from falling back to 5173
-    hmr: {
-      host: "0.0.0.0", // ⬅️ Bind HMR to all interfaces
-      port: 5000, // ⬅️ Fix WebSocket HMR by binding it to port 5000
+    host: "0.0.0.0",
+      port: 5000,
+      strictPort: true,
+      hmr: {
+        port: 5000,
+        host: "0.0.0.0",
       clientPort: 5000
     },
     fs: {
