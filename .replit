@@ -12,7 +12,9 @@ run = ["npm", "run", "start"]
 
 [[ports]]
 localPort = 5000
-externalPort = 5000
+
+[env]
+Port = "5000"
 
 [workflows]
 runButton = "Clean Start"

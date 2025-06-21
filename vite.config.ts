@@ -29,6 +29,11 @@ export default defineConfig({
     emptyOutDir: true,
   },
   server: {
+    port: 5000, // ⬅️ Force Vite to run on port 5000
+    strictPort: true, // ⬅️ Prevent Vite from falling back to 5173
+    hmr: {
+      port: 5000, // ⬅️ Fix WebSocket HMR by binding it to port 5000
+    },
     fs: {
       strict: true,
       deny: ["**/.*"],
