@@ -204,51 +204,7 @@ export default function Home() {
       </section>
 
 
-      {/* AI Features Highlight */}
-      <section className="bg-gradient-to-r from-emerald-50 to-white text-gray-900 py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl mb-4">
-              Powered by Advanced AI
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Experience the future of moving with our AI-driven platform
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-emerald-600" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold mb-2 text-gray-900">AI Planning</h3>
-              <p className="text-gray-600">Personalized moving strategies based on your specific needs</p>
-            </div>
-
-            <div className="text-center">
-              <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-emerald-600" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold mb-2 text-gray-900">Smart Recommendations</h3>
-              <p className="text-gray-600">AI-curated service providers and cost optimization</p>
-            </div>
-
-            <div className="text-center">
-              <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-emerald-600" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M20 6h-2.18c.11-.31.18-.65.18-1a2.996 2.996 0 0 0-5.5-1.65l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-5-2c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM9 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1z"/>
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold mb-2 text-gray-900">Conversational Assistant</h3>
-              <p className="text-gray-600">Chat with AI throughout your moving journey for instant help</p>
-            </div>
-          </div>
-        </div>
-      </section>
+    
 
       {/* Call to Action */}
       <section className="bg-gradient-to-r from-green-600 to-green-800 text-white py-16">
