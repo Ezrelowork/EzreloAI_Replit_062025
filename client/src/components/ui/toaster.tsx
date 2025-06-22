@@ -8,9 +8,10 @@ import {
   ToastViewport,
 } from "@/components/ui/toast";
 import { useToast } from "@/hooks/use-toast";
+import type { ToasterToast } from "@/hooks/use-toast";
 
 export function Toaster() {
-  let toasts = [];
+  let toasts: ToasterToast[] = [];
 
   try {
     const toastData = useToast();

@@ -1,32 +1,43 @@
 import React, { useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { 
-  Bot, 
-  MessageCircle, 
-  Lightbulb, 
-  MapPin, 
-  Calendar,
-  CheckCircle,
-  Clock,
-  ArrowRight,
-  Sparkles,
-  Zap,
-  Target,
-  Users,
-  Globe,
-  Phone,
-  Star,
-  ExternalLink
-} from "lucide-react";
-import { useMutation } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
+import {
+  Brain,
+  Calendar,
+  MapPin,
+  DollarSign,
+  ArrowRight,
+  ArrowLeft,
+  CheckCircle2,
+  Home,
+  Truck,
+  Wifi,
+  Zap,
+  Phone,
+  CreditCard,
+  FileText,
+  Package,
+  Users,
+  Clock,
+  Search,
+  Building,
+} from "lucide-react";
+import { Link } from "wouter";
+import { DynamicHighwaySign } from "@/components/dynamic-highway-sign";
 
 interface RelocationQuery {
   query: string;
@@ -53,566 +64,690 @@ interface AIResponse {
     timeframe: string;
     status: "pending" | "in_progress" | "completed";
   }>;
-  recommendations?: Array<{
-    title: string;
-    category: string;
-    description: string;
-    estimatedCost: string;
-    priority: "high" | "medium" | "low";
-    timeframe: string;
-    reasoning: string;
-    nextSteps: string[];
-    providers?: Array<{
-      name: string;
-      description: string;
-      rating: number;
-      contact: string;
-      website: string;
-      services: string[];
-    }>;
-  }>;
 }
 
 export default function AIAssistant() {
   const { toast } = useToast();
   const [query, setQuery] = useState("");
-  const [relocationDetails, setRelocationDetails] = useState<RelocationQuery>({
-    query: "",
+  const [relocationDetails, setRelocationDetails] = useState({
     fromLocation: "",
     toLocation: "",
     moveDate: "",
-    familySize: "1-2 people",
-    budget: "$5,000-$10,000",
-    priorities: []
+    familySize: "",
+    budget: "",
+    priorities: [] as string[],
   });
   const [aiResponse, setAiResponse] = useState<AIResponse | null>(null);
-  const [selectedPriorities, setSelectedPriorities] = useState<string[]>([]);
+  const [showJourneyButton, setShowJourneyButton] = useState(false);
+  const [addressSuggestions, setAddressSuggestions] = useState<{
+    from?: string;
+    to?: string;
+  }>({});
+  const [showAddressPicker, setShowAddressPicker] = useState<{
+    from: boolean;
+    to: boolean;
+  }>({ from: false, to: false });
 
   const priorityOptions = [
-    "Cost-effective solutions",
-    "Premium service quality",
-    "Speed and efficiency",
-    "Eco-friendly options",
-    "Family-friendly services",
+    "Cost savings",
+    "Speed of move",
+    "Professional handling",
     "Minimal disruption",
-    "Technology integration",
-    "Local expertise"
+    "Full-service experience",
+    "DIY approach",
   ];
 
-  const budgetOptions = [
-    "Under $2,500",
-    "$2,500-$5,000",
-    "$5,000-$10,000",
-    "$10,000-$20,000",
-    "$20,000+"
-  ];
-
-  const familySizeOptions = [
-    "Just me",
-    "1-2 people", 
-    "3-4 people",
-    "5+ people",
-    "Business relocation"
-  ];
-
-  // AI Assistant mutation
-  const aiMutation = useMutation({
+  const generatePlan = useMutation({
     mutationFn: async (queryData: RelocationQuery) => {
-      const response = await apiRequest("POST", "/api/ai-recommendations", queryData);
+      const response = await apiRequest(
+        "POST",
+        "/api/ai-recommendations",
+        queryData,
+      );
       return await response.json();
     },
-    onSuccess: (data) => {
+    onSuccess: async (data: AIResponse) => {
       setAiResponse(data);
-      toast({
-        title: "AI Analysis Complete",
-        description: "Your personalized relocation plan is ready",
-      });
+
+      // Create moving project with AI data
+      try {
+        const projectData = {
+          userId: 1, // Default user ID for now
+          fromAddress: relocationDetails.fromLocation,
+          toAddress: relocationDetails.toLocation,
+          moveDate: relocationDetails.moveDate,
+          homeSize: relocationDetails.familySize,
+          budget: relocationDetails.budget,
+          priorities: relocationDetails.priorities.join(", "),
+          aiGenerated: true,
+          aiSummary: data.summary,
+          aiTimeline: JSON.stringify(data.timeline),
+          aiActionPlan: JSON.stringify(data.actionPlan),
+        };
+
+        const projectResponse = await apiRequest(
+          "POST",
+          "/api/moving-project",
+          projectData,
+        );
+        const project = await projectResponse.json();
+
+        // Create project tasks from AI action plan
+        for (const action of data.actionPlan) {
+          await apiRequest("POST", "/api/project-task", {
+            projectId: project.project.id,
+            title: action.title,
+            description: action.description,
+            priority: action.priority,
+            status: action.status,
+            timeframe: action.timeframe,
+            taskType: action.route.replace("/", "") || "general",
+          });
+        }
+
+        // Save data for journey integration
+        localStorage.setItem("currentProjectId", project.project.id.toString());
+        localStorage.setItem("aiTimeline", JSON.stringify(data.timeline));
+        localStorage.setItem("aiActionPlan", JSON.stringify(data.actionPlan));
+        localStorage.setItem("aiFromLocation", relocationDetails.fromLocation);
+        localStorage.setItem("aiToLocation", relocationDetails.toLocation);
+        localStorage.setItem("aiMoveDate", relocationDetails.moveDate);
+
+        toast({
+          title: "Moving Project Created",
+          description:
+            "Your AI-powered relocation plan is now active in your journey!",
+        });
+
+        // Show success message with journey link
+        setShowJourneyButton(true);
+      } catch (error) {
+        console.error("Failed to create moving project:", error);
+        // Fallback to localStorage only
+        localStorage.setItem("aiTimeline", JSON.stringify(data.timeline));
+        localStorage.setItem("aiActionPlan", JSON.stringify(data.actionPlan));
+        localStorage.setItem("aiFromLocation", relocationDetails.fromLocation);
+        localStorage.setItem("aiToLocation", relocationDetails.toLocation);
+        localStorage.setItem("aiMoveDate", relocationDetails.moveDate);
+
+        toast({
+          title: "Plan Generated",
+          description: "Your personalized relocation strategy is ready!",
+        });
+      }
     },
     onError: (error) => {
+      console.error("Error generating plan:", error);
       toast({
-        title: "AI Service Temporarily Unavailable",
-        description: "Please try again or contact support for assistance",
+        title: "Error",
+        description: "Failed to generate relocation plan. Please try again.",
         variant: "destructive",
       });
     },
   });
 
-  const handlePriorityToggle = (priority: string) => {
-    const updated = selectedPriorities.includes(priority)
-      ? selectedPriorities.filter(p => p !== priority)
-      : [...selectedPriorities, priority];
-    
-    setSelectedPriorities(updated);
-    setRelocationDetails(prev => ({ ...prev, priorities: updated }));
+  const handlePriorityChange = (priority: string, checked: boolean) => {
+    setRelocationDetails((prev) => ({
+      ...prev,
+      priorities: checked
+        ? [...prev.priorities, priority]
+        : prev.priorities.filter((p) => p !== priority),
+    }));
   };
 
-  const handleSubmit = () => {
-    if (!relocationDetails.fromLocation || !relocationDetails.toLocation) {
-      toast({
-        title: "Missing Information",
-        description: "Please enter both your current and destination locations",
-        variant: "destructive",
-      });
-      return;
-    }
+  const verifyAddress = async (address: string, type: "from" | "to") => {
+    if (!address.trim()) return;
 
-    const fullQuery = query || `Help me plan my relocation from ${relocationDetails.fromLocation} to ${relocationDetails.toLocation}`;
-    
-    aiMutation.mutate({
+    try {
+      const response = await apiRequest("POST", "/api/verify-address", {
+        address,
+      });
+      const data = await response.json();
+
+      if (data.verifiedAddress && data.verifiedAddress !== address) {
+        setAddressSuggestions((prev) => ({
+          ...prev,
+          [type]: data.verifiedAddress,
+        }));
+        setShowAddressPicker((prev) => ({
+          ...prev,
+          [type]: true,
+        }));
+      }
+    } catch (error) {
+      console.error("Address verification failed:", error);
+    }
+  };
+
+  const handleAddressBlur = (address: string, type: "from" | "to") => {
+    if (address.length > 10) {
+      // Only verify if address has substance
+      verifyAddress(address, type);
+    }
+  };
+
+  const acceptSuggestion = (type: "from" | "to") => {
+    const suggestion = addressSuggestions[type];
+    if (suggestion) {
+      setRelocationDetails((prev) => ({
+        ...prev,
+        [`${type}Location`]: suggestion,
+      }));
+      setShowAddressPicker((prev) => ({
+        ...prev,
+        [type]: false,
+      }));
+      setAddressSuggestions((prev) => ({
+        ...prev,
+        [type]: undefined,
+      }));
+    }
+  };
+
+  const rejectSuggestion = (type: "from" | "to") => {
+    setShowAddressPicker((prev) => ({
+      ...prev,
+      [type]: false,
+    }));
+    setAddressSuggestions((prev) => ({
+      ...prev,
+      [type]: undefined,
+    }));
+  };
+
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const queryData = {
+      query,
       ...relocationDetails,
-      query: fullQuery
-    });
+    };
+    generatePlan.mutate(queryData);
+  };
+
+  const getPriorityColor = (priority: "high" | "medium" | "low") => {
+    switch (priority) {
+      case "high":
+        return "bg-red-100 text-red-800 border-red-200";
+      case "medium":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      case "low":
+        return "bg-green-100 text-green-800 border-green-200";
+    }
+  };
+
+  const getTaskIcon = (task: string) => {
+    const taskLower = task.toLowerCase();
+    if (
+      taskLower.includes("mover") ||
+      taskLower.includes("moving") ||
+      taskLower.includes("truck")
+    )
+      return Truck;
+    if (
+      taskLower.includes("internet") ||
+      taskLower.includes("wifi") ||
+      taskLower.includes("cable")
+    )
+      return Wifi;
+    if (
+      taskLower.includes("electric") ||
+      taskLower.includes("power") ||
+      taskLower.includes("utility")
+    )
+      return Zap;
+    if (
+      taskLower.includes("phone") ||
+      taskLower.includes("mobile") ||
+      taskLower.includes("cellular")
+    )
+      return Phone;
+    if (
+      taskLower.includes("bank") ||
+      taskLower.includes("credit") ||
+      taskLower.includes("financial")
+    )
+      return CreditCard;
+    if (
+      taskLower.includes("document") ||
+      taskLower.includes("paperwork") ||
+      taskLower.includes("form")
+    )
+      return FileText;
+    if (
+      taskLower.includes("pack") ||
+      taskLower.includes("box") ||
+      taskLower.includes("storage")
+    )
+      return Package;
+    if (
+      taskLower.includes("school") ||
+      taskLower.includes("family") ||
+      taskLower.includes("children")
+    )
+      return Users;
+    if (
+      taskLower.includes("schedule") ||
+      taskLower.includes("timing") ||
+      taskLower.includes("calendar")
+    )
+      return Clock;
+    if (
+      taskLower.includes("research") ||
+      taskLower.includes("find") ||
+      taskLower.includes("search")
+    )
+      return Search;
+    if (
+      taskLower.includes("home") ||
+      taskLower.includes("house") ||
+      taskLower.includes("property")
+    )
+      return Home;
+    if (
+      taskLower.includes("office") ||
+      taskLower.includes("work") ||
+      taskLower.includes("business")
+    )
+      return Building;
+    return CheckCircle2; // Default icon
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-6">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-              <Bot className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">AI Relocation Concierge</h1>
-              <p className="text-gray-600">Create your personalized moving plan, then execute it step-by-step</p>
-            </div>
-          </div>
-          
-          <div className="flex items-center justify-center gap-6 text-sm text-gray-600">
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-blue-500" />
-              <span>Personalized Plans</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Target className="w-4 h-4 text-green-500" />
-              <span>Smart Recommendations</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Zap className="w-4 h-4 text-purple-500" />
-              <span>Instant Insights</span>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header Navigation */}
+      <div className="bg-white shadow-sm border-b sticky top-0 z-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center gap-4">
+              <Link href="/">
+                <Button variant="ghost" size="sm" className="gap-2">
+                  <ArrowLeft className="w-4 h-4" />
+                  Back to Home
+                </Button>
+              </Link>
+              <span className="text-gray-300">|</span>
+              <Link href="/moving-journey">
+                
+              </Link>
+              <div className="flex items-center gap-4">
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900">
+                    AI Relocation Concierge
+                  </h1>
+                  <p className="text-sm text-gray-600">
+                    Create your personalized moving plan with our AI engine
+                  </p>
+                </div>
+                <svg
+                  className="w-12 h-12"
+                  viewBox="0 0 48 48"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  {/* AI Brain Core */}
+                  <circle
+                    cx="24"
+                    cy="24"
+                    r="20"
+                    fill="url(#brainGradient)"
+                    stroke="#1e40af"
+                    strokeWidth="1"
+                  />
+
+                  {/* Neural Network Connections */}
+                  <g stroke="#3b82f6" strokeWidth="1.5" opacity="0.8">
+                    <path
+                      d="M12 18 L20 14 L28 18 L36 14"
+                      fill="none"
+                      strokeLinecap="round"
+                    />
+                    <path
+                      d="M12 30 L20 34 L28 30 L36 34"
+                      fill="none"
+                      strokeLinecap="round"
+                    />
+                    <path d="M16 24 L32 24" fill="none" strokeLinecap="round" />
+                  </g>
+
+                  {/* Neural Nodes */}
+                  <circle cx="12" cy="18" r="2" fill="#1e40af" />
+                  <circle cx="20" cy="14" r="2" fill="#3b82f6" />
+                  <circle cx="28" cy="18" r="2" fill="#1e40af" />
+                  <circle cx="36" cy="14" r="2" fill="#3b82f6" />
+                  <circle cx="16" cy="24" r="2" fill="#60a5fa" />
+                  <circle cx="32" cy="24" r="2" fill="#60a5fa" />
+                  <circle cx="12" cy="30" r="2" fill="#1e40af" />
+                  <circle cx="20" cy="34" r="2" fill="#3b82f6" />
+                  <circle cx="28" cy="30" r="2" fill="#1e40af" />
+                  <circle cx="36" cy="34" r="2" fill="#3b82f6" />
+
+                  {/* Central Processing Unit */}
+                  <rect
+                    x="20"
+                    y="20"
+                    width="8"
+                    height="8"
+                    rx="2"
+                    fill="#ffffff"
+                    stroke="#1e40af"
+                    strokeWidth="1.5"
+                  />
+                  <circle cx="22" cy="22" r="1" fill="#1e40af" />
+                  <circle cx="26" cy="22" r="1" fill="#1e40af" />
+                  <circle cx="22" cy="26" r="1" fill="#3b82f6" />
+                  <circle cx="26" cy="26" r="1" fill="#3b82f6" />
+
+                  {/* Gradient Definition */}
+                  <defs>
+                    <radialGradient id="brainGradient" cx="0.3" cy="0.3">
+                      <stop offset="0%" stopColor="#dbeafe" />
+                      <stop offset="100%" stopColor="#bfdbfe" />
+                    </radialGradient>
+                  </defs>
+                </svg>
+              </div>
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="max-w-4xl mx-auto p-6">
+        
 
         {!aiResponse ? (
-          // Input Form
-          <Card className="max-w-4xl mx-auto">
+          <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MessageCircle className="w-5 h-5 text-blue-600" />
-                Tell Me About Your Move
-              </CardTitle>
+              <CardTitle>Tell us about your move</CardTitle>
               <CardDescription>
-                I'll analyze your move and create a custom action plan that guides you through our specialized tools for movers, utilities, and checklists
+                The more details you provide, the better we can plan your
+                relocation
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Custom Query */}
-              <div>
-                <Label htmlFor="query">Specific Questions or Concerns (Optional)</Label>
-                <Textarea
-                  id="query"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="e.g., I need help finding pet-friendly movers and setting up utilities quickly..."
-                  className="min-h-[80px]"
-                />
-              </div>
-
-              <Separator />
-
-              {/* Location Details */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <CardContent>
+              <form onSubmit={onSubmit} className="space-y-6">
                 <div>
-                  <Label htmlFor="fromLocation">Current Location *</Label>
-                  <Input
-                    id="fromLocation"
-                    value={relocationDetails.fromLocation}
-                    onChange={(e) => setRelocationDetails(prev => ({ ...prev, fromLocation: e.target.value }))}
-                    placeholder="123 Main St, Dallas, TX 75201"
+                  <Label htmlFor="query">
+                    What specific help do you need with your move?
+                  </Label>
+                  <Textarea
+                    id="query"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="I'm moving for a new job and need help with timing, finding movers, and setting up utilities..."
+                    className="mt-1"
                     required
                   />
                 </div>
-                <div>
-                  <Label htmlFor="toLocation">Moving To *</Label>
-                  <Input
-                    id="toLocation"
-                    value={relocationDetails.toLocation}
-                    onChange={(e) => setRelocationDetails(prev => ({ ...prev, toLocation: e.target.value }))}
-                    placeholder="456 Oak Ave, Austin, TX 78701"
-                    required
-                  />
-                </div>
-              </div>
 
-              {/* Move Details */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div>
-                  <Label htmlFor="moveDate">Target Move Date</Label>
-                  <Input
-                    id="moveDate"
-                    type="date"
-                    value={relocationDetails.moveDate}
-                    onChange={(e) => setRelocationDetails(prev => ({ ...prev, moveDate: e.target.value }))}
-                  />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="fromLocation">Current Address *</Label>
+                    <Input
+                      id="fromLocation"
+                      value={relocationDetails.fromLocation}
+                      onChange={(e) =>
+                        setRelocationDetails((prev) => ({
+                          ...prev,
+                          fromLocation: e.target.value,
+                        }))
+                      }
+                      onBlur={(e) => handleAddressBlur(e.target.value, "from")}
+                      placeholder="123 Main St, Dallas, TX 75201"
+                      required
+                    />
+                    {showAddressPicker.from && addressSuggestions.from && (
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 space-y-2">
+                        <div className="flex items-start gap-2">
+                          <CheckCircle2 className="w-4 h-4 text-blue-600 mt-0.5" />
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-blue-900">
+                              USPS Verified Address
+                            </p>
+                            <p className="text-sm text-blue-800">
+                              {addressSuggestions.from}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            onClick={() => acceptSuggestion("from")}
+                            className="text-xs"
+                          >
+                            Use USPS Format
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => rejectSuggestion("from")}
+                            className="text-xs"
+                          >
+                            Keep Original
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="toLocation">Moving To *</Label>
+                    <Input
+                      id="toLocation"
+                      value={relocationDetails.toLocation}
+                      onChange={(e) =>
+                        setRelocationDetails((prev) => ({
+                          ...prev,
+                          toLocation: e.target.value,
+                        }))
+                      }
+                      onBlur={(e) => handleAddressBlur(e.target.value, "to")}
+                      placeholder="456 Oak Ave, Austin, TX 78701"
+                      required
+                    />
+                    {showAddressPicker.to && addressSuggestions.to && (
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 space-y-2">
+                        <div className="flex items-start gap-2">
+                          <CheckCircle2 className="w-4 h-4 text-blue-600 mt-0.5" />
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-blue-900">
+                              USPS Verified Address
+                            </p>
+                            <p className="text-sm text-blue-800">
+                              {addressSuggestions.to}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            onClick={() => acceptSuggestion("to")}
+                            className="text-xs"
+                          >
+                            Use USPS Format
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => rejectSuggestion("to")}
+                            className="text-xs"
+                          >
+                            Keep Original
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="moveDate">Target Move Date</Label>
+                    <Input
+                      id="moveDate"
+                      type="date"
+                      value={relocationDetails.moveDate}
+                      onChange={(e) =>
+                        setRelocationDetails((prev) => ({
+                          ...prev,
+                          moveDate: e.target.value,
+                        }))
+                      }
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="familySize">Household Size</Label>
+                    <Input
+                      id="familySize"
+                      value={relocationDetails.familySize}
+                      onChange={(e) =>
+                        setRelocationDetails((prev) => ({
+                          ...prev,
+                          familySize: e.target.value,
+                        }))
+                      }
+                      placeholder="2 adults, 1 child"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="budget">Moving Budget</Label>
+                    <Input
+                      id="budget"
+                      value={relocationDetails.budget}
+                      onChange={(e) =>
+                        setRelocationDetails((prev) => ({
+                          ...prev,
+                          budget: e.target.value,
+                        }))
+                      }
+                      placeholder="$3,000 - $5,000"
+                    />
+                  </div>
+                </div>
+
                 <div>
-                  <Label htmlFor="familySize">Household Size</Label>
-                  <select
-                    id="familySize"
-                    value={relocationDetails.familySize}
-                    onChange={(e) => setRelocationDetails(prev => ({ ...prev, familySize: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    {familySizeOptions.map(option => (
-                      <option key={option} value={option}>{option}</option>
+                  <Label>
+                    What's most important to you? (Select all that apply)
+                  </Label>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-2">
+                    {priorityOptions.map((priority) => (
+                      <div
+                        key={priority}
+                        className="flex items-center space-x-2"
+                      >
+                        <Checkbox
+                          id={priority}
+                          checked={relocationDetails.priorities.includes(
+                            priority,
+                          )}
+                          onCheckedChange={(checked) =>
+                            handlePriorityChange(priority, checked as boolean)
+                          }
+                        />
+                        <Label htmlFor={priority} className="text-sm">
+                          {priority}
+                        </Label>
+                      </div>
                     ))}
-                  </select>
+                  </div>
                 </div>
-                <div>
-                  <Label htmlFor="budget">Moving Budget</Label>
-                  <select
-                    id="budget"
-                    value={relocationDetails.budget}
-                    onChange={(e) => setRelocationDetails(prev => ({ ...prev, budget: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    {budgetOptions.map(option => (
-                      <option key={option} value={option}>{option}</option>
-                    ))}
-                  </select>
-                </div>
-              </div>
 
-              {/* Priorities */}
-              <div>
-                <Label>Your Priorities (Select all that apply)</Label>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-2">
-                  {priorityOptions.map(priority => (
-                    <Button
-                      key={priority}
-                      variant={selectedPriorities.includes(priority) ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => handlePriorityToggle(priority)}
-                      className="justify-start h-auto py-2 px-3"
-                    >
-                      <span className="text-xs">{priority}</span>
-                    </Button>
-                  ))}
-                </div>
-              </div>
-
-              <div className="pt-4">
-                <Button 
-                  onClick={handleSubmit}
-                  disabled={aiMutation.isPending || !relocationDetails.fromLocation || !relocationDetails.toLocation}
-                  className="w-full"
+                <Button
+                  type="submit"
+                  disabled={generatePlan.isPending}
+                  className="w-full bg-green-600 hover:bg-green-700"
                   size="lg"
                 >
-                  {aiMutation.isPending ? (
-                    <>
-                      <Bot className="w-5 h-5 mr-2 animate-spin" />
-                      AI is analyzing your move...
-                    </>
-                  ) : (
-                    <>
-                      Get My AI-Powered Plan
-                      <ArrowRight className="w-5 h-5 ml-2" />
-                    </>
-                  )}
+                  {generatePlan.isPending
+                    ? "Creating Your Plan..."
+                    : "Generate My Relocation Plan"}
                 </Button>
-              </div>
+              </form>
             </CardContent>
           </Card>
         ) : (
-          // AI Response Display
           <div className="space-y-6">
-            {/* Summary */}
+            {/* Plan Overview */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Lightbulb className="w-5 h-5 text-yellow-500" />
-                  AI Summary & Insights
+                  <Brain className="w-5 h-5 text-blue-600" />
+                  Your Strategic AI Relocation Plan
                 </CardTitle>
+                <CardDescription>
+                  Your personalized moving strategy and roadmap
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-700 leading-relaxed">{aiResponse.summary}</p>
-                <div className="mt-4 flex items-center gap-4 text-sm">
-                  <Badge variant="outline" className="flex items-center gap-1">
-                    <MapPin className="w-3 h-3" />
-                    {relocationDetails.fromLocation} → {relocationDetails.toLocation}
-                  </Badge>
-                  <Badge variant="outline" className="flex items-center gap-1">
-                    <Users className="w-3 h-3" />
-                    {relocationDetails.familySize}
-                  </Badge>
-                  <Badge variant="outline">
-                    Est. Total: {aiResponse.estimatedTotalCost}
-                  </Badge>
+                <div className="bg-blue-50 p-6 rounded-lg mb-6">
+                  <h4 className="font-semibold text-blue-900 mb-3">
+                    Strategic Overview
+                  </h4>
+                  <p className="text-blue-900 leading-relaxed mb-4">
+                    {aiResponse.summary}
+                  </p>
+
+                  {/* Move Details Grid */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                    <div className="text-center">
+                      <MapPin className="w-5 h-5 text-blue-600 mx-auto mb-1" />
+                      <div className="text-xs text-blue-700 font-medium">
+                        From
+                      </div>
+                      <div className="text-sm text-blue-900 truncate">
+                        {relocationDetails.fromLocation}
+                      </div>
+                    </div>
+                    <div className="text-center">
+                      <MapPin className="w-5 h-5 text-green-600 mx-auto mb-1" />
+                      <div className="text-xs text-blue-700 font-medium">
+                        To
+                      </div>
+                      <div className="text-sm text-blue-900 truncate">
+                        {relocationDetails.toLocation}
+                      </div>
+                    </div>
+                    <div className="text-center">
+                      <Calendar className="w-5 h-5 text-purple-600 mx-auto mb-1" />
+                      <div className="text-xs text-blue-700 font-medium">
+                        Move Date
+                      </div>
+                      <div className="text-sm text-blue-900">
+                        {relocationDetails.moveDate || "Flexible"}
+                      </div>
+                    </div>
+                    <div className="text-center">
+                      <DollarSign className="w-5 h-5 text-green-600 mx-auto mb-1" />
+                      <div className="text-xs text-blue-700 font-medium">
+                        Budget
+                      </div>
+                      <div className="text-sm text-blue-900">
+                        {relocationDetails.budget || "Not specified"}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-lg font-bold text-blue-800">
+                    <DollarSign className="w-5 h-5" />
+                    Estimated Total Cost: {aiResponse.estimatedTotalCost}
+                  </div>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Recommendations */}
-            {aiResponse.recommendations && aiResponse.recommendations.length > 0 && (
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">Personalized Recommendations</h2>
-                <div className="grid gap-4">
-                  {aiResponse.recommendations.map((rec, index) => (
-                  <Card key={index}>
-                    <CardHeader className="pb-3">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <CardTitle className="text-lg flex items-center gap-2">
-                            {rec.title}
-                            <Badge variant={rec.priority === "high" ? "destructive" : rec.priority === "medium" ? "default" : "secondary"}>
-                              {rec.priority} priority
-                            </Badge>
-                          </CardTitle>
-                          <CardDescription className="mt-1">
-                            {rec.category}
-                          </CardDescription>
-                        </div>
-                        <Badge variant="outline">
-                          {rec.estimatedCost}
-                        </Badge>
-                      </div>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <p className="text-gray-700">{rec.description}</p>
-                      
-                      <div className="bg-blue-50 p-3 rounded-lg">
-                        <p className="text-sm text-blue-800">
-                          <strong>AI Reasoning:</strong> {rec.reasoning}
-                        </p>
-                      </div>
-
-                      {rec.providers && rec.providers.length > 0 && (
-                        <div>
-                          <h4 className="font-medium text-gray-900 mb-2">Additional Resources:</h4>
-                          <div className="space-y-3">
-                            {rec.providers.map((provider, idx) => (
-                              <div key={idx} className="bg-gray-50 p-4 rounded-lg border">
-                                <div className="flex items-start justify-between mb-2">
-                                  <div className="flex-1">
-                                    <h5 className="font-medium text-lg flex items-center gap-2">
-                                      {provider.name}
-                                      {provider.rating && provider.rating > 0 && (
-                                        <div className="flex items-center gap-1">
-                                          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                                          <span className="text-sm font-normal text-gray-600">
-                                            {provider.rating.toFixed(1)}
-                                          </span>
-                                        </div>
-                                      )}
-                                    </h5>
-                                    <p className="text-sm text-gray-600 mt-1">{provider.description}</p>
-                                  </div>
-                                </div>
-                                
-                                {provider.services && provider.services.length > 0 && (
-                                  <div className="mb-3">
-                                    <div className="flex flex-wrap gap-1">
-                                      {provider.services.slice(0, 3).map((service, serviceIdx) => (
-                                        <Badge key={serviceIdx} variant="secondary" className="text-xs">
-                                          {service}
-                                        </Badge>
-                                      ))}
-                                      {provider.services.length > 3 && (
-                                        <Badge variant="secondary" className="text-xs">
-                                          +{provider.services.length - 3} more
-                                        </Badge>
-                                      )}
-                                    </div>
-                                  </div>
-                                )}
-                                
-                                <div className="flex items-center justify-between">
-                                  <div className="flex flex-col gap-1 text-sm text-gray-600">
-                                    {provider.contact && (
-                                      <div className="flex items-center gap-1">
-                                        <Phone className="w-4 h-4" />
-                                        <span>{provider.contact}</span>
-                                      </div>
-                                    )}
-                                    {provider.website && (
-                                      <div className="flex items-center gap-1">
-                                        <Globe className="w-4 h-4" />
-                                        <a 
-                                          href={provider.website} 
-                                          target="_blank" 
-                                          rel="noopener noreferrer"
-                                          className="text-blue-600 hover:text-blue-800 underline"
-                                        >
-                                          {provider.website.replace(/^https?:\/\//, '').replace(/\/$/, '')}
-                                        </a>
-                                      </div>
-                                    )}
-                                  </div>
-                                  
-                                  <div className="flex gap-2">
-                                    {provider.contact && (
-                                      <Button 
-                                        variant="outline" 
-                                        size="sm"
-                                        onClick={() => window.open(`tel:${provider.contact}`, '_self')}
-                                      >
-                                        Call
-                                      </Button>
-                                    )}
-                                    {provider.website && (
-                                      <Button 
-                                        size="sm"
-                                        onClick={() => window.open(provider.website, '_blank')}
-                                        className="flex items-center gap-1"
-                                      >
-                                        Visit
-                                        <ExternalLink className="w-3 h-3" />
-                                      </Button>
-                                    )}
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      <div>
-                        <h4 className="font-medium text-gray-900 mb-2">Next Steps:</h4>
-                        <ul className="space-y-1">
-                          {rec.nextSteps.map((step, idx) => (
-                            <li key={idx} className="flex items-start gap-2 text-sm text-gray-700">
-                              <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
-                              {step}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-
-                      <div className="flex items-center justify-between text-sm text-gray-600">
-                        <div className="flex items-center gap-1">
-                          <Clock className="w-4 h-4" />
-                          <span>Timeline: {rec.timeframe}</span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                  ))}
+            <div className="text-center mt-6">
+              <Link href="/moving-journey">
+                <div className="w-full max-w-md mx-auto p-6 bg-gradient-to-r from-blue-50 to-green-50 rounded-xl border-2 border-dashed border-blue-200 hover:border-blue-400 transition-colors cursor-pointer">
+                  <div className="flex items-center justify-center gap-3 mb-3">
+                    <MapPin className="w-8 h-8 text-blue-600" />
+                    <div className="text-xl font-semibold text-gray-800">
+                      Your Moving Journey Awaits
+                    </div>
+                  </div>
+                  <p className="text-gray-600 text-sm">
+                    Click any road sign to execute tasks → Find movers → Set up
+                    utilities → Complete your move
+                  </p>
                 </div>
-              </div>
-            )}
-
-            {/* Personalized Action Plan */}
-            {aiResponse.actionPlan && aiResponse.actionPlan.length > 0 && (
-              <Card className="border-blue-200">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Target className="w-5 h-5 text-blue-600" />
-                    Your Personalized Action Plan
-                  </CardTitle>
-                  <CardDescription>
-                    AI-generated steps tailored to your relocation from {relocationDetails.fromLocation} to {relocationDetails.toLocation}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid gap-4">
-                    {aiResponse.actionPlan.map((action, index) => (
-                      <div key={index} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
-                        <div className="flex items-start justify-between mb-3">
-                          <div className="flex-1">
-                            <h4 className="font-medium text-lg flex items-center gap-2">
-                              {action.title}
-                              <Badge variant={action.priority === "high" ? "destructive" : action.priority === "medium" ? "default" : "secondary"}>
-                                {action.priority} priority
-                              </Badge>
-                            </h4>
-                            <p className="text-sm text-gray-600 mt-1">{action.description}</p>
-                          </div>
-                          <Badge variant="outline" className="ml-4">
-                            {action.timeframe}
-                          </Badge>
-                        </div>
-                        
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div className="flex items-center gap-1 text-sm text-gray-500">
-                              <Clock className="w-4 h-4" />
-                              <span>Status: {action.status.replace('_', ' ')}</span>
-                            </div>
-                            <div className="w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>
-                          </div>
-                          
-                          <Button 
-                            size="sm"
-                            onClick={() => window.location.href = action.route}
-                            className="flex items-center gap-1 bg-blue-600 hover:bg-blue-700"
-                          >
-                            Start Task
-                            <ArrowRight className="w-3 h-3" />
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Timeline */}
-            {aiResponse.timeline && aiResponse.timeline.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Calendar className="w-5 h-5 text-blue-600" />
-                    Suggested Timeline
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {aiResponse.timeline.map((week, index) => (
-                      <div key={index} className="border-l-2 border-blue-200 pl-4">
-                        <h4 className="font-medium text-gray-900">{week.week}</h4>
-                        <ul className="mt-2 space-y-1">
-                          {week.tasks.map((task, idx) => (
-                            <li key={idx} className="text-sm text-gray-600 flex items-center gap-2">
-                              <div className="w-1.5 h-1.5 bg-blue-400 rounded-full" />
-                              {task}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Action Buttons */}
-            <div className="flex items-center justify-center gap-4 pt-6">
-              <Button
-                onClick={() => {
-                  setAiResponse(null);
-                  setQuery("");
-                  setSelectedPriorities([]);
-                }}
-                variant="outline"
-                size="lg"
-              >
-                Create New Plan
-              </Button>
-              
-              {aiResponse.actionPlan && aiResponse.actionPlan.length > 0 && (
-                <Button
-                  onClick={() => window.location.href = aiResponse.actionPlan![0].route}
-                  size="lg"
-                  className="bg-blue-600 hover:bg-blue-700"
-                >
-                  Start First Task
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
-              )}
+              </Link>
             </div>
           </div>
         )}
