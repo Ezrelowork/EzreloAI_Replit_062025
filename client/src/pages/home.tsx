@@ -64,7 +64,7 @@ export default function Home() {
   {/* Blurred background image */}
   <div
     className="absolute inset-0 z-0 bg-center bg-cover opacity-15 filter blur-[2px]"
-    style={{ backgroundImage: "url('/highway-background.png')" }}
+    style={{ backgroundImage: "url('/highway-bg.png')" }}
     aria-hidden="true"
   />
 
