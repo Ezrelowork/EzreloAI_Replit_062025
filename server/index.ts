@@ -4,8 +4,11 @@ dotenv.config();
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
-
+import path from "path";
 const app = express();
+
+// ✅ Serve static files from /public (like background images)
+app.use(express.static(path.join(process.cwd(), "public")));
 
 // Enable compression for better performance
 app.use((req, res, next) => {

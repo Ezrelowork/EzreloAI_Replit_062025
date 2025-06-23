@@ -29,130 +29,85 @@ export default function Home() {
       <section className="bg-gradient-to-br from-green-50 via-emerald-10 to-green-300 py-16 md:py-24 relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="text-center">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6">
+            <h1 className="text-4xl md:text-5xl lg:text-6l font-bold text-gray-900 mb-6">
               Relocate <span className="text-green-600">Intelligently</span>
             </h1>
-            <p className="text-xl text-gray-700 max-w-3xl mx-auto mb-12">
-              Enter your new address and let Ezrelo find and set up all the essential services you need for a seamless move.
+            <p className="text-xl text-gray-700 max-w-4l mx-auto mb-10">
+              Ezrelo transforms your move into a guided, stress-free journey — helping you discover, set up, and track every essential service with the power of AI.
             </p>
 
             {/* Service Highlights */}
             <div className="flex flex-wrap justify-center gap-6 text-green-800">
               <div className="flex items-center space-x-2 bg-white/60 px-4 py-2 rounded-full shadow-sm">
                 <i className="fas fa-check-circle text-green-500"></i>
+                <span className="font-medium">Movers</span>
+              </div>
+              <div className="flex items-center space-x-2 bg-white/60 px-4 py-2 rounded-full shadow-sm">
+                <i className="fas fa-check-circle text-green-500"></i>
                 <span className="font-medium">Utilities</span>
               </div>
               <div className="flex items-center space-x-2 bg-white/60 px-4 py-2 rounded-full shadow-sm">
                 <i className="fas fa-check-circle text-green-500"></i>
-                <span className="font-medium">Internet</span>
+                <span className="font-medium">Address Change</span>
               </div>
               <div className="flex items-center space-x-2 bg-white/60 px-4 py-2 rounded-full shadow-sm">
                 <i className="fas fa-check-circle text-green-500"></i>
-                <span className="font-medium">Healthcare</span>
+                <span className="font-medium">Lifestyle</span>
               </div>
-              <div className="flex items-center space-x-2 bg-white/60 px-4 py-2 rounded-full shadow-sm">
-                <i className="fas fa-check-circle text-green-500"></i>
-                <span className="font-medium">Home Services</span>
               </div>
-            </div>
           </div>
         </div>
       </section>
-
-      {/* How It Works Section */}
-      <section id="how-it-works" className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              How Ezrelo Works
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Setting up services in your new home has never been easier. Our AI-powered platform simplifies the entire process.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <Card className="text-center hover:shadow-md transition-shadow duration-200">
-              <CardContent className="p-8">
-                <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-primary/4 text-emerald-600">
-                  <i className="fas fa-comments text-2xl"></i>
-                </div>
-
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">Tell Us About Your Move</h3>
-                <p className="text-gray-600">
-                  Share your moving details with our AI assistant - where you're going, family size, timeline, and priorities.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="text-center hover:shadow-md transition-shadow duration-200">
-              <CardContent className="p-8">
-                <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-primary/4 text-emerald-600">
-                  <i className="fas fa-route text-2xl"></i>
-                </div>
-
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">Get Your Visual Journey</h3>
-                <p className="text-gray-600">
-                  Watch as your personalized moving plan transforms into an interactive highway with clickable signs for each task.
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card className="text-center hover:shadow-md transition-shadow duration-200">
-              <CardContent className="p-8">
-                <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-primary/4 text-emerald-600">
-                  <i className="fas fa-check-circle text-2xl"></i>
-                </div>
-
-                <h3 className="text-xl font-semibold text-gray-900 mb-3">Complete Your Tasks</h3>
-                <p className="text-gray-600">
-                  Click on highway signs to find services, compare providers, and track your progress as you prepare for your move.
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
+  
       {/* Features Section */}
-      <section id="features" className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
-              Why Choose Ezrelo
-            </h2>
-            <p className="mt-4 text-xl text-gray-600 max-w-3xl mx-auto">
-              Ezrelo offers intelligent, personalized moving assistance.
-            </p>
-          </div>
+   <section id="features" className="relative py-16 bg-white overflow-hidden">
+  {/* Blurred background image */}
+  <div
+    className="absolute inset-0 z-0 bg-center bg-cover opacity-15 filter blur-[2px]"
+    style={{ backgroundImage: "url('/attached-assets/highway-background.png')" }}
+    aria-hidden="true"
+  />
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+  {/* Main content on top */}
+  <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="text-center mb-12">
+      <h2 className="text-3xl font-extrabold text-gray-900 sm:text-3xl">
+        Why Choose Ezrelo
+      </h2>
+      <p className="mt-4 text-xl text-gray-600 max-w-3xl mx-auto">
+        Ezrelo is your intelligent moving assistant — planning your entire move, contacting vendors, organizing critical tasks, and storing everything securely in one place.
+      </p>
+    </div>
+
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+
             {/* AI Assistant Feature - Prominent */}
-            <Card className="border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50">
+            <Card className="bg-gradient-to-br from-blue-100 to-emerald-50 border-0">
               <CardContent className="p-8">
-                <div className="text-blue-600 mb-4">
+                <div className="text-emerald-600 mb-4">
                   <i className="fas fa-brain text-4xl"></i>
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-3">AI-Powered Planning</h3>
-                <p className="text-gray-700 mb-4">Get a personalized moving timeline and task list based on your specific situation and needs.</p>
+                <p className="text-gray-700 mb-4">Let AI build your custom moving plan, complete with reminders, budget tracking, and priority tasks tailored to your needs.</p>
                 <ul className="text-gray-700 space-y-2">
                   <li className="flex items-center">
                     <i className="fas fa-check text-green-600 mr-2"></i>
-                    <span>Custom timeline</span>
+                    <span>Personalized timelines</span>
                   </li>
                   <li className="flex items-center">
                     <i className="fas fa-check text-green-600 mr-2"></i>
-                    <span>Task prioritization</span>
+                    <span>Smart notifications</span>
                   </li>
                   <li className="flex items-center">
                     <i className="fas fa-check text-green-600 mr-2"></i>
-                    <span>Budget guidance</span>
+                    <span>Budget aware recommendations</span>
                   </li>
                 </ul>
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-green-50 to-emerald-100 border-0 shadow-md hover:shadow-lg transition-shadow duration-200">
+            <Card className="bg-gradient-to-br from-green-50 to-blue-100 border-0 shadow-md hover:shadow-lg transition-shadow duration-200">
               <CardContent className="p-8">
                 <div className="text-green-600 mb-4">
                   <i className="fas fa-map-marked-alt text-4xl"></i>
@@ -162,39 +117,39 @@ export default function Home() {
                 <ul className="text-gray-700 space-y-2">
                   <li className="flex items-center">
                     <i className="fas fa-check text-green-600 mr-2"></i>
-                    <span>Interactive map</span>
+                    <span>Map-based task layout</span>
                   </li>
                   <li className="flex items-center">
                     <i className="fas fa-check text-green-600 mr-2"></i>
-                    <span>Progress tracking</span>
+                    <span>Clear progress indicators</span>
                   </li>
                   <li className="flex items-center">
                     <i className="fas fa-check text-green-600 mr-2"></i>
-                    <span>Visual milestones</span>
+                    <span>Milestone-based organization</span>
                   </li>
                 </ul>
               </CardContent>
             </Card>
 
-            <Card className="bg-gradient-to-br from-teal-50 to-green-100 border-0 shadow-md hover:shadow-lg transition-shadow duration-200">
+            <Card className="bg-gradient-to-br from-blue-50 to-green-100 border-0 shadow-md hover:shadow-lg transition-shadow duration-200">
               <CardContent className="p-8">
-                <div className="text-teal-600 mb-4">
+                <div className="text-green-600 mb-4">
                   <i className="fas fa-network-wired text-4xl"></i>
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-3">Service Connections</h3>
-                <p className="text-gray-700 mb-4">Find and connect with local service providers for all your moving needs.</p>
+                <p className="text-gray-700 mb-4">Ezrelo’s AI agent handles vendor outreach on your behalf — no calls, no stress.</p>
                 <ul className="text-gray-700 space-y-2">
                   <li className="flex items-center">
                     <i className="fas fa-check text-green-600 mr-2"></i>
-                    <span>Local providers</span>
+                    <span>Movers, utilities, and local services</span>
                   </li>
                   <li className="flex items-center">
                     <i className="fas fa-check text-green-600 mr-2"></i>
-                    <span>Price comparison</span>
+                    <span>Quote comparison</span>
                   </li>
                   <li className="flex items-center">
                     <i className="fas fa-check text-green-600 mr-2"></i>
-                    <span>Direct booking</span>
+                    <span>Direct booking from your dashboard</span>
                   </li>
                 </ul>
               </CardContent>
@@ -205,14 +160,14 @@ export default function Home() {
 
 
       {/* AI Features Highlight */}
-      <section className="bg-gradient-to-r from-emerald-50 to-white text-gray-900 py-16">
+      <section className="bg-gradient-to-r from-emerald-200 to-white text-gray-900 py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-extrabold text-gray-900 sm:text-4xl mb-4">
+            <h2 className="text-3xl font-extrabold text-gray-900 sm:text-3xl mb-4">
               Powered by Advanced AI
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Experience the future of moving with our AI-driven platform
+              Experience the future of moving with an intelligent, full-service platform designed to think ahead for you.
             </p>
           </div>
 
@@ -223,8 +178,8 @@ export default function Home() {
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.94-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold mb-2 text-gray-900">AI Planning</h3>
-              <p className="text-gray-600">Personalized moving strategies based on your specific needs</p>
+              <h3 className="text-xl font-semibold mb-2 text-gray-900">Smart Contact</h3>
+              <p className="text-gray-600">Securely store all your move info — addresses, dates, service preferences — in one place, automatically accessible for each step.</p>
             </div>
 
             <div className="text-center">
@@ -233,8 +188,8 @@ export default function Home() {
                   <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold mb-2 text-gray-900">Smart Recommendations</h3>
-              <p className="text-gray-600">AI-curated service providers and cost optimization</p>
+              <h3 className="text-xl font-semibold mb-2 text-gray-900">Intelligent Outreach</h3>
+              <p className="text-gray-600">Let AI act for you: requesting quotes, confirming vendors, even filling out service forms — so nothing is missed.</p>
             </div>
 
             <div className="text-center">
@@ -243,15 +198,15 @@ export default function Home() {
                   <path d="M20 6h-2.18c.11-.31.18-.65.18-1a2.996 2.996 0 0 0-5.5-1.65l-.5.67-.5-.68C10.96 2.54 10.05 2 9 2 7.34 2 6 3.34 6 5c0 .35.07.69.18 1H4c-1.11 0-1.99.89-1.99 2L2 19c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zm-5-2c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM9 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1z"/>
                 </svg>
               </div>
-              <h3 className="text-xl font-semibold mb-2 text-gray-900">Conversational Assistant</h3>
-              <p className="text-gray-600">Chat with AI throughout your moving journey for instant help</p>
+              <h3 className="text-xl font-semibold mb-2 text-gray-900">Real-time Support</h3>
+              <p className="text-gray-600">From day one to move-in day, get live, conversational help for any task along your journey.</p>
             </div>
           </div>
         </div>
       </section>
 
       {/* Call to Action */}
-      <section className="bg-gradient-to-r from-green-600 to-green-800 text-white py-16">
+      <section className="bg-gradient-to-r from-green-800 to-emerald-900 text-white py-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative">
           <h2 className="text-3xl font-extrabold text-white sm:text-4xl mb-6">
             Ready to simplify your move?
