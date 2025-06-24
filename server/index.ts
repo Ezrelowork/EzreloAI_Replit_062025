@@ -72,10 +72,12 @@ app.use((req, res, next) => {
   // ALWAYS serve the app on port 5000
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
+  if (process.env.NODE_ENV !== 'production') {
   const port = 5050;
-  server.listen(5050, () => {
-  console.log(`🟢 Server running at http://localhost:5050`);
-});
+  server.listen(port, () => {
+    console.log(`🟢 Server running at http://localhost:${port}`);
+  });
+}
 })();
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 
