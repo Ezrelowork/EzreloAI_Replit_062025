@@ -77,3 +77,10 @@ app.use((req, res, next) => {
   console.log(`🟢 Server running at http://localhost:5050`);
 });
 })();
+import type { VercelRequest, VercelResponse } from '@vercel/node';
+
+const handler = (req: VercelRequest, res: VercelResponse) => {
+  app(req, res);
+};
+
+export default handler;
