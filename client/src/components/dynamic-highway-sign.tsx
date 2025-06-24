@@ -55,7 +55,7 @@ export const DynamicHighwaySign: React.FC<DynamicSignProps> = ({
             left: '15%',
             top: '14%', 
             width: '70%',
-            height: '50%'
+            height: '30%'
           }}
         />
 

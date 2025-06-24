@@ -283,7 +283,7 @@ export default function MovingJourney() {
       week: calculateTaskDueDate("moving-company", moveData.date),
       category: "Core Moving",
       completed: false,
-      position: savedPositions["moving-company"] || { x: "300px", y: "650px" }, // Starting position on the left
+      position: savedPositions["moving-company"] || { x: "300px", y: "550px" }, // Starting position on the left
       icon: Truck
     },
     "utilities-setup": {
@@ -294,7 +294,7 @@ export default function MovingJourney() {
       week: calculateTaskDueDate("utilities-setup", moveData.date),
       category: "Essential Services",
       completed: false,
-      position: savedPositions["utilities-setup"] || { x: "500px", y: "450px" }, // Middle-left section
+      position: savedPositions["utilities-setup"] || { x: "925px", y: "450px" }, // Middle-left section
       icon: Zap
     },
     "address-change": {
@@ -305,7 +305,7 @@ export default function MovingJourney() {
       week: calculateTaskDueDate("address-change", moveData.date),
       category: "Administrative",
       completed: false,
-      position: savedPositions["address-change"] || { x: "700px", y: "300px" }, // Middle-right section
+      position: savedPositions["address-change"] || { x: "450px", y: "250px" }, // Middle-right section
       icon: FileText
     },
     "local-services": {
@@ -316,7 +316,7 @@ export default function MovingJourney() {
       week: calculateTaskDueDate("local-services", moveData.date),
       category: "Community",
       completed: false,
-      position: savedPositions["local-services"] || { x: "900px", y: "200px" }, // End position on the right
+      position: savedPositions["local-services"] || { x: "1000px", y: "200px" }, // End position on the right
       icon: Building
     }
   };
