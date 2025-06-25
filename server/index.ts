@@ -1,10 +1,16 @@
-
+import path from 'path';
 import dotenv from 'dotenv';
-dotenv.config();
+
+// ✅ Load .env from the root of the project no matter where this file is run
+dotenv.config({ path: path.resolve(process.cwd(), '.env') });
+
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
-import path from "path";
+
+import verifyAddressRouter from "./api/verify-address";
+import aiRecommendationsRouter from "./api/ai-recommendations";
+
 const app = express();
 
 // ✅ Serve static files from /public (like background images)
@@ -18,6 +24,9 @@ app.use((req, res, next) => {
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));
+
+app.use('/api/verify-address', verifyAddressRouter);
+app.use('/api/ai-recommendations', aiRecommendationsRouter);
 
 app.use((req, res, next) => {
   const start = Date.now();
