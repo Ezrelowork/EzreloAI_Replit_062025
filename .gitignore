@@ -5,3 +5,18 @@ server/public
 vite.config.ts.*
 *.tar.gz
 .env
+# Mac system files
+.DS_Store
+.CFUserTextEncoding
+
+# VS Code settings
+.vscode/
+*.code-workspace
+
+# npm and OS junk
+.npmrc
+.hushlogin
+.cache/
+*.jpg
+*.png
+*.log
